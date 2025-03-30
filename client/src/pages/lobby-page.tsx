@@ -72,6 +72,64 @@ export default function LobbyPage() {
       
       {/* Main Content */}
       <main className="relative z-10 container mx-auto flex-1 p-6">
+        {/* Game Categories */}
+        <div className="rounded-xl bg-black/60 border border-[#D4AF37]/20 p-6 backdrop-blur-sm mb-8">
+          <div className="text-center mb-6">
+            <h2 className="text-2xl font-bold text-[#D4AF37]">اختر نوع اللعبة</h2>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-4xl mx-auto">
+            {/* بوكر عرباوي */}
+            <div className="flex flex-col h-48 rounded-lg overflow-hidden border-2 border-[#D4AF37]/80 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+              <div className="bg-gradient-to-br from-[#1B4D3E] to-[#0A3A2A] flex-1 flex items-center justify-center">
+                <span className="text-[#D4AF37] text-4xl font-bold">♠️ ♥️</span>
+              </div>
+              <button 
+                className="py-3 px-4 bg-[#D4AF37] text-[#0A0A0A] font-bold text-lg hover:bg-[#E5C04B] transition-colors"
+              >
+                بوكر عرباوي
+              </button>
+            </div>
+            
+            {/* نارتو */}
+            <div className="flex flex-col h-48 rounded-lg overflow-hidden border-2 border-orange-500/80 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+              <div className="bg-gradient-to-br from-[#FF8C00] to-[#FF4500] flex-1 flex items-center justify-center">
+                <span className="text-white text-4xl font-bold">忍</span>
+              </div>
+              <button 
+                className="py-3 px-4 bg-orange-500 text-white font-bold text-lg hover:bg-orange-400 transition-colors"
+              >
+                نارتو
+              </button>
+            </div>
+            
+            {/* تيكن */}
+            <div className="flex flex-col h-48 rounded-lg overflow-hidden border-2 border-red-600/80 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+              <div className="bg-gradient-to-br from-[#9A1212] to-[#5F0000] flex-1 flex items-center justify-center">
+                <span className="text-white text-4xl font-bold">鉄</span>
+              </div>
+              <button 
+                className="py-3 px-4 bg-red-700 text-white font-bold text-lg hover:bg-red-600 transition-colors"
+              >
+                تيكن
+              </button>
+            </div>
+            
+            {/* دومينو */}
+            <div className="flex flex-col h-48 rounded-lg overflow-hidden border-2 border-blue-600/80 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+              <div className="bg-gradient-to-br from-[#0047AB] to-[#00008B] flex-1 flex items-center justify-center">
+                <span className="text-white text-4xl font-bold">🎲</span>
+              </div>
+              <button 
+                className="py-3 px-4 bg-blue-600 text-white font-bold text-lg hover:bg-blue-500 transition-colors"
+              >
+                دومينو
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        {/* Poker Tables */}
         <div className="rounded-xl bg-black/60 border border-[#D4AF37]/20 p-6 backdrop-blur-sm">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-[#D4AF37]">طاولات اللعب المتاحة</h2>
