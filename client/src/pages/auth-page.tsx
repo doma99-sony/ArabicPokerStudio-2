@@ -23,13 +23,19 @@ export default function AuthPage() {
   // اعادة التوجيه إلى اللوبي اذا كان المستخدم مسجل دخوله بالفعل
   useEffect(() => {
     if (user) {
-      // الحصول على الوجهة المخزنة مسبقاً أو الانتقال إلى اللوبي بشكل افتراضي
-      const redirectPath = localStorage.getItem("redirectAfterLogin") || "/";
-      localStorage.removeItem("redirectAfterLogin"); // حذف المسار بعد التوجيه
+      // تأخير قصير قبل إعادة التوجيه لضمان اكتمال تخزين الجلسة
+      const timer = setTimeout(() => {
+        // الحصول على الوجهة المخزنة مسبقاً أو الانتقال إلى اللوبي بشكل افتراضي
+        const redirectPath = localStorage.getItem("redirectAfterLogin") || "/";
+        localStorage.removeItem("redirectAfterLogin"); // حذف المسار بعد التوجيه
+        
+        // استخدام window.location بدلاً من navigate لضمان إعادة تحميل كاملة
+        window.location.href = redirectPath;
+      }, 100);
       
-      navigate(redirectPath);
+      return () => clearTimeout(timer);
     }
-  }, [user, navigate]);
+  }, [user]);
   
   if (isLoading) {
     return (
