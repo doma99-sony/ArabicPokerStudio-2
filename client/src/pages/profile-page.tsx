@@ -6,8 +6,19 @@ import { StatsPanel } from "@/components/profile/stats-panel";
 import { Achievements } from "@/components/profile/achievements";
 import { GameHistory } from "@/components/profile/game-history";
 import { Button } from "@/components/ui/button";
-import { Loader2, User, ChevronRight } from "lucide-react";
+import { Loader2, User, ChevronRight, Phone } from "lucide-react";
 import { Image } from "@/components/ui/image";
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
 
 export default function ProfilePage() {
   const { user } = useAuth();
@@ -75,9 +86,48 @@ export default function ProfilePage() {
                       <span className="text-gold font-bold font-roboto">{profile.chips?.toLocaleString() || 0}</span>
                     </div>
                     
-                    <Button className="w-full bg-gold hover:bg-darkGold text-deepBlack font-bold py-2 rounded-md transition-colors font-cairo">
-                      شراء رقائق
-                    </Button>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button className="w-full bg-gold hover:bg-darkGold text-deepBlack font-bold py-2 rounded-md transition-colors font-cairo">
+                          شراء رقائق
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="bg-deepBlack border-gold/30 text-white">
+                        <DialogHeader>
+                          <DialogTitle className="text-gold text-2xl font-cairo text-center mb-2">شراء رقائق إضافية</DialogTitle>
+                          <DialogDescription className="text-white/80 text-center font-tajawal">
+                            للشحن والحصول على رقائق إضافية، يرجى التواصل مع فريق الدعم الخاص بنا
+                          </DialogDescription>
+                        </DialogHeader>
+                        
+                        <div className="py-4">
+                          <div className="bg-pokerGreen/30 p-4 rounded-lg border border-gold/20 mb-4">
+                            <h3 className="text-gold text-lg font-cairo mb-2">للتواصل مع عرباوي:</h3>
+                            <div className="flex items-center p-3 bg-black/40 rounded">
+                              <div className="bg-green-600 p-2 rounded-full ml-3">
+                                <i className="fab fa-whatsapp text-white text-xl"></i>
+                              </div>
+                              <div>
+                                <p className="text-white font-tajawal">واتساب</p>
+                                <p className="text-white font-roboto text-lg">01008508826</p>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <p className="text-white/60 text-sm text-center font-tajawal">
+                            سيتم إضافة الرقائق إلى حسابك فورًا بعد تأكيد عملية الدفع
+                          </p>
+                        </div>
+                        
+                        <DialogFooter>
+                          <DialogClose asChild>
+                            <Button className="w-full bg-gold hover:bg-darkGold text-deepBlack font-bold py-2 rounded-md transition-colors font-cairo">
+                              العودة
+                            </Button>
+                          </DialogClose>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
                   </div>
                   
                   <Achievements achievements={profile.stats.achievements} />

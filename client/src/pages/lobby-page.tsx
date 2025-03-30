@@ -159,7 +159,7 @@ export default function LobbyPage() {
       {/* Footer */}
       <footer className="relative z-10 bg-black/80 text-white/60 text-center p-4 mt-8 border-t border-[#D4AF37]/20">
         <div className="container mx-auto">
-          <p>&copy; {new Date().getFullYear()} بوكر تكساس هولدم - جميع الحقوق محفوظة</p>
+          <p>&copy; {new Date().getFullYear()} بوكر تكساس عرباوي - جميع الحقوق محفوظة</p>
         </div>
       </footer>
     </div>

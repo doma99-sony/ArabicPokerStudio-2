@@ -47,7 +47,7 @@ export interface IStorage {
   ): Promise<void>;
   
   // Session store
-  sessionStore: session.SessionStore;
+  sessionStore: any; // Express session store
 }
 
 export class MemStorage implements IStorage {
@@ -55,7 +55,7 @@ export class MemStorage implements IStorage {
   private tables: Map<number, GameTable>;
   private gameRooms: Map<number, GameRoom>;
   private playerProfiles: Map<number, PlayerProfile>;
-  sessionStore: session.SessionStore;
+  sessionStore: any; // Express session store
   currentId: number;
   currentTableId: number;
   currentGameHistoryId: number;
@@ -133,8 +133,8 @@ export class MemStorage implements IStorage {
     const user: User = { 
       ...insertUser, 
       id,
-      chips: 5000, // Initial chips for new users
-      avatar: undefined
+      chips: 1000000, // مليون رقاقة ترحيبية للمستخدمين الجدد
+      avatar: null // استخدام null بدلاً من undefined
     };
     this.users.set(id, user);
     
@@ -182,7 +182,7 @@ export class MemStorage implements IStorage {
         name: "ملك البوكر",
         icon: "fa-gem",
         unlocked: false,
-        description: "جمع أكثر من 50,000 رقاقة"
+        description: "جمع أكثر من 2,000,000 رقاقة"
       }
     ];
     
@@ -392,7 +392,7 @@ export class MemStorage implements IStorage {
     }
     
     // 2. Poker king achievement
-    if (profile.chips >= 50000) {
+    if (profile.chips >= 2000000) { // مليونان رقاقة للحصول على إنجاز ملك البوكر
       const kingAchievement = profile.stats.achievements.find(a => a.id === "poker_king");
       if (kingAchievement && !kingAchievement.unlocked) {
         kingAchievement.unlocked = true;
