@@ -1,0 +1,199 @@
+/* Import Arabic fonts */
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Roboto:wght@400;500;700&family=Tajawal:wght@400;500;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Game colors */
+  --gold: #D4AF37;
+  --dark-gold: #BF9B30;
+  --light-gold: #E8C662;
+  --poker-green: #1B4D3E;
+  --casino-red: #C41E3A;
+  --deep-black: #0A0A0A;
+  --slate: #2C3E50;
+}
+
+@layer base {
+  :root {
+    /* Default theme */
+    --background: 0 0% 4%;
+    --foreground: 0 0% 98%;
+
+    --card: 215 22% 25%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 215 22% 25%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 46 70% 52%;
+    --primary-foreground: 0 0% 4%;
+
+    --secondary: 160 48% 21%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 215 16% 47%;
+    --muted-foreground: 215 16% 87%;
+
+    --accent: 46 70% 52%;
+    --accent-foreground: 0 0% 4%;
+
+    --destructive: 346 83% 51%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 215 16% 32%;
+    --input: 215 16% 32%;
+    --ring: 46 70% 52%;
+
+    --radius: 0.5rem;
+
+    /* Chart colors */
+    --chart-1: 346 83% 51%;
+    --chart-2: 46 70% 52%;
+    --chart-3: 160 48% 21%;
+    --chart-4: 215 16% 47%;
+    --chart-5: 0 0% 67%;
+
+    /* Sidebar */
+    --sidebar-background: 215 22% 25%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 46 70% 52%;
+    --sidebar-primary-foreground: 0 0% 4%;
+    --sidebar-accent: 160 48% 21%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 215 16% 32%;
+    --sidebar-ring: 46 70% 52%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-tajawal antialiased bg-deepBlack text-foreground;
+    direction: rtl;
+  }
+
+  /* Arabic fonts */
+  .font-cairo {
+    font-family: 'Cairo', sans-serif;
+  }
+
+  .font-tajawal {
+    font-family: 'Tajawal', sans-serif;
+  }
+
+  .font-roboto {
+    font-family: 'Roboto', sans-serif;
+  }
+
+  /* Poker table styling */
+  .poker-table {
+    background: radial-gradient(ellipse at center, #1B4D3E 0%, #0e2920 100%);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
+  }
+
+  /* Card styling */
+  .card {
+    transition: transform 0.3s ease-out;
+  }
+
+  .card:hover {
+    transform: translateY(-10px) rotate(2deg);
+  }
+
+  /* Chip styling */
+  .chip {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+  }
+
+  /* Gold button styling */
+  .btn-gold {
+    background: linear-gradient(145deg, #D4AF37, #BF9B30);
+    transition: all 0.3s;
+  }
+
+  .btn-gold:hover {
+    background: linear-gradient(145deg, #E8C662, #D4AF37);
+  }
+
+  .gold-border {
+    box-shadow: 0 0 10px #D4AF37;
+  }
+
+  /* Pulse animation */
+  @keyframes pulse-gold {
+    0% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(212, 175, 55, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); }
+  }
+
+  .pulse-animation {
+    animation: pulse-gold 2s infinite;
+  }
+
+  /* Color utility classes */
+  .bg-gold {
+    background-color: var(--gold);
+  }
+
+  .bg-darkGold {
+    background-color: var(--dark-gold);
+  }
+
+  .bg-lightGold {
+    background-color: var(--light-gold);
+  }
+
+  .bg-pokerGreen {
+    background-color: var(--poker-green);
+  }
+
+  .bg-casinoRed {
+    background-color: var(--casino-red);
+  }
+
+  .bg-deepBlack {
+    background-color: var(--deep-black);
+  }
+
+  .bg-slate {
+    background-color: var(--slate);
+  }
+
+  .text-gold {
+    color: var(--gold);
+  }
+
+  .text-darkGold {
+    color: var(--dark-gold);
+  }
+
+  .text-lightGold {
+    color: var(--light-gold);
+  }
+
+  .text-pokerGreen {
+    color: var(--poker-green);
+  }
+
+  .text-casinoRed {
+    color: var(--casino-red);
+  }
+
+  .text-deepBlack {
+    color: var(--deep-black);
+  }
+
+  .text-slate {
+    color: var(--slate);
+  }
+
+  .border-gold {
+    border-color: var(--gold);
+  }
+}
