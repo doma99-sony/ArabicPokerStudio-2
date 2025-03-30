@@ -37,12 +37,11 @@ export function setupAuth(app: Express) {
     secret: sessionSecret,
     resave: false,
     saveUninitialized: false,
-    store: new MemoryStore({
-      checkPeriod: 86400000 // prune expired entries every 24h
-    }),
+    store: storage.sessionStore, // استخدام مخزن الجلسات من storage
     cookie: { 
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 1 week
+      secure: false, // تعطيل secure لبيئة التطوير
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
+      sameSite: 'lax'
     }
   };
 

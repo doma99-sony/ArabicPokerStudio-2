@@ -27,6 +27,9 @@ export default function ProfilePage() {
   // Fetch player profile with stats
   const { data: profile, isLoading } = useQuery<PlayerProfile>({
     queryKey: ["/api/profile"],
+    // منع الاستعلامات المتكررة عند عدم تسجيل الدخول
+    enabled: !!user,
+    retry: false,
   });
   
   // Navigate back to lobby

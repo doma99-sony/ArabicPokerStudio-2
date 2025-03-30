@@ -1,9 +1,17 @@
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { setupPokerGame } from "./poker";
 import { z } from "zod";
+
+// ميدلوير للتحقق من المصادقة
+function ensureAuthenticated(req: Request, res: Response, next: NextFunction) {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  res.status(401).json({ message: "يجب تسجيل الدخول للوصول إلى هذا المورد" });
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication routes
@@ -16,10 +24,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // API endpoints
   
   // Get user profile with stats and game history
-  app.get("/api/profile", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
-    
+  app.get("/api/profile", ensureAuthenticated, async (req, res) => {
     try {
+      if (!req.user) {
+        return res.status(401).json({ message: "غير مصرح" });
+      }
+      
       const profile = await storage.getPlayerProfile(req.user.id);
       if (!profile) {
         return res.status(404).json({ message: "لم يتم العثور على الملف الشخصي" });
@@ -31,9 +41,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Get all available game tables
-  app.get("/api/tables", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
-    
+  app.get("/api/tables", ensureAuthenticated, async (req, res) => {
     try {
       const tables = await storage.getGameTables();
       res.json(tables);
@@ -43,8 +51,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Get tables by game type
-  app.get("/api/tables/:gameType", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+  app.get("/api/tables/:gameType", ensureAuthenticated, async (req, res) => {
     
     const gameType = req.params.gameType;
     
@@ -63,12 +70,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Join a table
-  app.post("/api/game/:tableId/join", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
-    
+  app.post("/api/game/:tableId/join", ensureAuthenticated, async (req, res) => {
     const tableId = parseInt(req.params.tableId);
     
     try {
+      if (!req.user) {
+        return res.status(401).json({ message: "غير مصرح" });
+      }
+      
       const result = await storage.joinTable(tableId, req.user.id);
       if (!result.success) {
         return res.status(400).json({ message: result.message });
@@ -81,12 +90,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Get game state
-  app.get("/api/game/:tableId", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
-    
+  app.get("/api/game/:tableId", ensureAuthenticated, async (req, res) => {
     const tableId = parseInt(req.params.tableId);
     
     try {
+      if (!req.user) {
+        return res.status(401).json({ message: "غير مصرح" });
+      }
+      
       const gameState = await storage.getGameState(tableId, req.user.id);
       if (!gameState) {
         return res.status(404).json({ message: "لم يتم العثور على اللعبة" });
@@ -99,18 +110,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Perform a game action (fold, check, call, raise, all-in)
-  app.post("/api/game/:tableId/action", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
-    
+  app.post("/api/game/:tableId/action", ensureAuthenticated, async (req, res) => {
     const tableId = parseInt(req.params.tableId);
     
-    // Validate the action
-    const actionSchema = z.object({
-      action: z.enum(["fold", "check", "call", "raise", "allIn"]),
-      amount: z.number().optional(),
-    });
-    
     try {
+      if (!req.user) {
+        return res.status(401).json({ message: "غير مصرح" });
+      }
+      
+      // Validate the action
+      const actionSchema = z.object({
+        action: z.enum(["fold", "check", "call", "raise", "allIn"]),
+        amount: z.number().optional(),
+      });
+      
       const validatedData = actionSchema.parse(req.body);
       const result = await storage.performGameAction(
         tableId,
@@ -130,12 +143,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Leave a table
-  app.post("/api/game/:tableId/leave", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
-    
+  app.post("/api/game/:tableId/leave", ensureAuthenticated, async (req, res) => {
     const tableId = parseInt(req.params.tableId);
     
     try {
+      if (!req.user) {
+        return res.status(401).json({ message: "غير مصرح" });
+      }
+      
       const result = await storage.leaveTable(tableId, req.user.id);
       if (!result.success) {
         return res.status(400).json({ message: result.message });

@@ -6,6 +6,8 @@ import LobbyPage from "@/pages/lobby-page";
 import GamePage from "@/pages/game-page";
 import ProfilePage from "@/pages/profile-page";
 import { ProtectedRoute } from "./lib/protected-route";
+import { useAuth } from "@/hooks/use-auth";
+import { Loader2 } from "lucide-react";
 
 function Router() {
   return (
@@ -20,6 +22,20 @@ function Router() {
 }
 
 function App() {
+  const { isLoading } = useAuth();
+  
+  // عرض شاشة التحميل العامة أثناء التحقق من حالة المصادقة
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-black">
+        <div className="text-center">
+          <Loader2 className="h-16 w-16 animate-spin text-[#D4AF37] mx-auto mb-4" />
+          <h2 className="text-[#D4AF37] text-xl font-bold">جاري تحميل بوكر تكساس عرباوي...</h2>
+        </div>
+      </div>
+    );
+  }
+  
   return (
     <>
       <Router />

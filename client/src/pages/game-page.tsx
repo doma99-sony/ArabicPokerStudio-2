@@ -19,6 +19,8 @@ export default function GamePage({ params }: { params: { tableId: string } }) {
   const { data: gameState, isLoading, error } = useQuery<GameState>({
     queryKey: [`/api/game/${tableId}`],
     refetchInterval: 2000, // Poll every 2 seconds for updates
+    enabled: !!user, // تمكين الاستعلام فقط عند وجود مستخدم مسجل الدخول
+    retry: false,
   });
   
   // Handle errors and redirect if needed

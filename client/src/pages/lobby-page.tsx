@@ -17,17 +17,36 @@ export default function LobbyPage() {
   const { data: tables, isLoading: tablesLoading, refetch } = useQuery<GameTable[]>({
     queryKey: ["/api/tables", activeGameCategory],
     queryFn: async () => {
-      const res = await fetch(`/api/tables/${activeGameCategory}`);
-      if (!res.ok) throw new Error("فشل في جلب الطاولات");
-      return res.json();
+      try {
+        const res = await fetch(`/api/tables/${activeGameCategory}`, {
+          credentials: "include" // إضافة بيانات الاعتماد لجلب الكوكيز
+        });
+        
+        if (res.status === 401) {
+          // إعادة التوجيه إلى صفحة تسجيل الدخول في حالة انتهاء الجلسة
+          navigate("/auth");
+          return [];
+        }
+        
+        if (!res.ok) throw new Error("فشل في جلب الطاولات");
+        return res.json();
+      } catch (error) {
+        console.error("Error fetching tables:", error);
+        return [];
+      }
     },
-    retry: false,
+    // تحسين إعدادات الاستعلام
+    enabled: !!user, // تمكين الاستعلام فقط عند وجود مستخدم مسجل الدخول
+    retry: false, // عدم إعادة المحاولة تلقائيًا عند الفشل
+    staleTime: 5000, // تحديد وقت صلاحية البيانات إلى 5 ثوانٍ
   });
   
   // تحديث الطاولات عند تغيير نوع اللعبة
   useEffect(() => {
-    refetch();
-  }, [activeGameCategory, refetch]);
+    if (user) {
+      refetch();
+    }
+  }, [activeGameCategory, refetch, user]);
   
   const handleLogout = () => {
     logoutMutation.mutate(undefined, {
