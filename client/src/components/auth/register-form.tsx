@@ -44,9 +44,14 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
     // Strip email as it's not in our schema but we want to collect it for UX
     const { email, ...registerData } = data;
     registerMutation.mutate(registerData, {
-      onSuccess: () => {
-        // force refresh to ensure user state is updated and redirect to home
-        window.location.href = '/';
+      onSuccess: (user) => {
+        // تأكيد بأننا حصلنا على معلومات المستخدم بشكل صحيح
+        if (user && user.id) {
+          // تخزين معلومات آخر دخول في التخزين المحلي
+          localStorage.setItem("lastAuthTimestamp", Date.now().toString());
+          // إعادة تحميل الصفحة والتوجيه إلى اللوبي
+          window.location.href = '/';
+        }
       }
     });
   };

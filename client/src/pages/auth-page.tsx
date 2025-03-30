@@ -14,10 +14,20 @@ export default function AuthPage() {
   const [, navigate] = useLocation();
   const { user, isLoading } = useAuth();
   
-  // Redirect to lobby if already logged in
+  // أضف متغير تخزين محلي لمنع الاستعلامات المتكررة
+  useEffect(() => {
+    // حذف أي توجيه سابق من التخزين المحلي
+    localStorage.removeItem("redirectAfterLogin");
+  }, []);
+  
+  // اعادة التوجيه إلى اللوبي اذا كان المستخدم مسجل دخوله بالفعل
   useEffect(() => {
     if (user) {
-      navigate("/");
+      // الحصول على الوجهة المخزنة مسبقاً أو الانتقال إلى اللوبي بشكل افتراضي
+      const redirectPath = localStorage.getItem("redirectAfterLogin") || "/";
+      localStorage.removeItem("redirectAfterLogin"); // حذف المسار بعد التوجيه
+      
+      navigate(redirectPath);
     }
   }, [user, navigate]);
   

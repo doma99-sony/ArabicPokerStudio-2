@@ -60,9 +60,15 @@ export function setupAuth(app: Express) {
     cookie: { 
       secure: false, // تعطيل secure لبيئة التطوير
       maxAge: 7 * 24 * 60 * 60 * 1000, // 1 أسبوع
-      sameSite: 'lax',
+      sameSite: 'lax', // الإعداد الأساسي
       httpOnly: true,
       path: '/'
+    },
+    // التأكد من أن session ID ثابت
+    genid: function() {
+      return Math.random().toString(36).substring(2) + 
+        Date.now().toString(36) + 
+        Math.random().toString(36).substring(2);
     }
   };
 
@@ -113,6 +119,17 @@ export function setupAuth(app: Express) {
       // Login the new user
       req.login(user, (err) => {
         if (err) return next(err);
+        
+        // Set cookie for the session
+        const oneWeek = 7 * 24 * 60 * 60 * 1000;
+        res.cookie('connect.sid', req.sessionID, {
+          path: '/',
+          httpOnly: true,
+          sameSite: 'lax',
+          maxAge: oneWeek,
+          secure: false
+        });
+        
         res.status(201).json(user);
       });
     } catch (err) {
@@ -135,10 +152,15 @@ export function setupAuth(app: Express) {
           return next(err);
         }
         
-        // تأكيد للمتصفح بأن ملفات تعريف الارتباط يجب تخزينها
-        res.setHeader('Set-Cookie', [
-          `connect.sid=${req.sessionID}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${7 * 24 * 60 * 60}`
-        ]);
+        // تأكيد للمتصفح بأن ملفات تعريف الارتباط يجب تخزينها - استخدام cookie parser
+        const oneWeek = 7 * 24 * 60 * 60 * 1000;
+        res.cookie('connect.sid', req.sessionID, {
+          path: '/',
+          httpOnly: true,
+          sameSite: 'lax',
+          maxAge: oneWeek,
+          secure: false
+        });
         
         // استجابة ناجحة مع بيانات المستخدم
         return res.status(200).json(user);
@@ -186,9 +208,14 @@ export function setupAuth(app: Express) {
         if (err) return next(err);
         
         // تأكيد على المتصفح بحفظ جلسة المستخدم
-        res.setHeader('Set-Cookie', [
-          `connect.sid=${req.sessionID}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${7 * 24 * 60 * 60}`
-        ]);
+        const oneWeek = 7 * 24 * 60 * 60 * 1000;
+        res.cookie('connect.sid', req.sessionID, {
+          path: '/',
+          httpOnly: true,
+          sameSite: 'lax',
+          maxAge: oneWeek,
+          secure: false
+        });
         
         // إرجاع معلومات المستخدم الضيف
         res.status(200).json(guestUser);
@@ -220,9 +247,14 @@ export function setupAuth(app: Express) {
         if (err) return next(err);
         
         // تأكيد على المتصفح بحفظ جلسة المستخدم
-        res.setHeader('Set-Cookie', [
-          `connect.sid=${req.sessionID}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${7 * 24 * 60 * 60}`
-        ]);
+        const oneWeek = 7 * 24 * 60 * 60 * 1000;
+        res.cookie('connect.sid', req.sessionID, {
+          path: '/',
+          httpOnly: true,
+          sameSite: 'lax',
+          maxAge: oneWeek,
+          secure: false
+        });
         
         // إرجاع معلومات المستخدم
         res.status(200).json(fbUser);
@@ -233,7 +265,51 @@ export function setupAuth(app: Express) {
   });
 
   app.get("/api/user", (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
-    res.json(req.user);
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ 
+        error: "Unauthorized",
+        message: "المستخدم غير مسجل دخوله",
+        status: 401 
+      });
+    }
+    
+    // جلب بيانات المستخدم المحدثة من قاعدة البيانات 
+    // للتأكد من أن البيانات حديثة، وخاصة الرقائق
+    storage.getUser(req.user.id)
+      .then(updatedUser => {
+        if (!updatedUser) {
+          return res.status(404).json({ 
+            error: "NotFound", 
+            message: "المستخدم غير موجود",
+            status: 404 
+          });
+        }
+        
+        // تحديث بيانات المستخدم في الجلسة
+        req.login(updatedUser, (err) => {
+          if (err) {
+            console.error("خطأ في تحديث جلسة المستخدم:", err);
+            // عند حدوث خطأ، نستمر في إرجاع بيانات المستخدم الحالية
+          }
+          
+          // إعادة إرسال كوكيز بجلسة محدثة
+          const oneWeek = 7 * 24 * 60 * 60 * 1000;
+          res.cookie('connect.sid', req.sessionID, {
+            path: '/',
+            httpOnly: true,
+            sameSite: 'lax',
+            maxAge: oneWeek,
+            secure: false
+          });
+          
+          // إرجاع بيانات المستخدم المحدثة
+          res.json(updatedUser);
+        });
+      })
+      .catch(err => {
+        console.error("خطأ في جلب بيانات المستخدم:", err);
+        // في حالة حدوث خطأ، نقوم بإرجاع بيانات المستخدم من الجلسة
+        res.json(req.user);
+      });
   });
 }

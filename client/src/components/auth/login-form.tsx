@@ -34,27 +34,42 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
   
   const onSubmit = (data: LoginFormValues) => {
     loginMutation.mutate(data, {
-      onSuccess: () => {
-        // force refresh to ensure user state is updated
-        window.location.href = '/';
+      onSuccess: (user) => {
+        // تأكيد بأننا حصلنا على معلومات المستخدم بشكل صحيح
+        if (user && user.id) {
+          // تخزين معلومات آخر دخول في التخزين المحلي
+          localStorage.setItem("lastAuthTimestamp", Date.now().toString());
+          // استخدام window.location.href لتجنب مشاكل التوجيه مع wouter
+          window.location.href = "/";
+        }
       }
     });
   };
   
   const handleGuestLogin = () => {
     loginGuestMutation.mutate(undefined, {
-      onSuccess: () => {
-        // force refresh to ensure user state is updated
-        window.location.href = '/';
+      onSuccess: (user) => {
+        // تأكيد بأننا حصلنا على معلومات المستخدم بشكل صحيح
+        if (user && user.id) {
+          // تخزين معلومات آخر دخول
+          localStorage.setItem("lastAuthTimestamp", Date.now().toString());
+          // استخدام window.location.href لتجنب مشاكل التوجيه
+          window.location.href = "/";
+        }
       }
     });
   };
   
   const handleFacebookLogin = () => {
     loginFacebookMutation.mutate(undefined, {
-      onSuccess: () => {
-        // force refresh to ensure user state is updated
-        window.location.href = '/';
+      onSuccess: (user) => {
+        // تأكيد بأننا حصلنا على معلومات المستخدم بشكل صحيح
+        if (user && user.id) {
+          // تخزين معلومات آخر دخول
+          localStorage.setItem("lastAuthTimestamp", Date.now().toString());
+          // استخدام window.location.href لتجنب مشاكل التوجيه
+          window.location.href = "/";
+        }
       }
     });
   };
