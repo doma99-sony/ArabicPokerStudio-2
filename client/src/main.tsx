@@ -21,13 +21,10 @@ const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
     event.reason.status === 401 ||
     event.reason.message?.includes("Unauthorized")
   )) {
-    console.log("خطأ في المصادقة، إعادة توجيه إلى صفحة تسجيل الدخول...");
-    localStorage.removeItem("lastAuthTimestamp"); // مسح أي معلومات تخزين محلية متعلقة بالمصادقة
+    console.log("خطأ في المصادقة:", event.reason.message);
     
-    // إعادة تحميل الصفحة فقط إذا لم نكن بالفعل في صفحة المصادقة
-    if (!window.location.pathname.includes("/auth")) {
-      window.location.href = "/auth";
-    }
+    // تعطيل إعادة التوجيه التلقائي لمنع الحلقات اللانهائية
+    // سيتم التعامل مع ذلك في مكونات المصادقة
   }
   
   event.preventDefault();
