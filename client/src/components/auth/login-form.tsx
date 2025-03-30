@@ -33,15 +33,30 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
   });
   
   const onSubmit = (data: LoginFormValues) => {
-    loginMutation.mutate(data);
+    loginMutation.mutate(data, {
+      onSuccess: () => {
+        // force refresh to ensure user state is updated
+        window.location.href = '/';
+      }
+    });
   };
   
   const handleGuestLogin = () => {
-    loginGuestMutation.mutate();
+    loginGuestMutation.mutate(undefined, {
+      onSuccess: () => {
+        // force refresh to ensure user state is updated
+        window.location.href = '/';
+      }
+    });
   };
   
   const handleFacebookLogin = () => {
-    loginFacebookMutation.mutate();
+    loginFacebookMutation.mutate(undefined, {
+      onSuccess: () => {
+        // force refresh to ensure user state is updated
+        window.location.href = '/';
+      }
+    });
   };
   
   return (

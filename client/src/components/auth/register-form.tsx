@@ -43,7 +43,12 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
   const onSubmit = (data: RegisterFormValues) => {
     // Strip email as it's not in our schema but we want to collect it for UX
     const { email, ...registerData } = data;
-    registerMutation.mutate(registerData);
+    registerMutation.mutate(registerData, {
+      onSuccess: () => {
+        // force refresh to ensure user state is updated and redirect to home
+        window.location.href = '/';
+      }
+    });
   };
 
   return (
