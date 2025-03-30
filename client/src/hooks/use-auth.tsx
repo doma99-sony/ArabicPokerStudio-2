@@ -13,6 +13,8 @@ type AuthContextType = {
   isLoading: boolean;
   error: Error | null;
   loginMutation: UseMutationResult<SelectUser, Error, LoginData>;
+  loginGuestMutation: UseMutationResult<SelectUser, Error, void>; // تسجيل الدخول كضيف
+  loginFacebookMutation: UseMutationResult<SelectUser, Error, void>; // تسجيل الدخول بالفيسبوك
   logoutMutation: UseMutationResult<void, Error, void>;
   registerMutation: UseMutationResult<SelectUser, Error, InsertUser>;
 };
@@ -75,6 +77,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
+  // تسجيل الدخول كضيف
+  const loginGuestMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", "/api/login/guest");
+      return await res.json();
+    },
+    onSuccess: (user: SelectUser) => {
+      queryClient.setQueryData(["/api/user"], user);
+      toast({
+        title: "تم تسجيل الدخول كضيف",
+        description: `مرحباً، ${user.username}!`,
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "فشل تسجيل الدخول كضيف",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // تسجيل الدخول بالفيسبوك
+  const loginFacebookMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", "/api/login/facebook");
+      return await res.json();
+    },
+    onSuccess: (user: SelectUser) => {
+      queryClient.setQueryData(["/api/user"], user);
+      toast({
+        title: "تم تسجيل الدخول بواسطة فيسبوك",
+        description: `مرحباً، ${user.username}!`,
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "فشل تسجيل الدخول بواسطة فيسبوك",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const logoutMutation = useMutation({
     mutationFn: async () => {
       await apiRequest("POST", "/api/logout");
@@ -101,6 +147,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoading,
         error,
         loginMutation,
+        loginGuestMutation,
+        loginFacebookMutation,
         logoutMutation,
         registerMutation,
       }}

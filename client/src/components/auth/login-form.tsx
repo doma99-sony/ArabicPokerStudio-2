@@ -6,7 +6,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Loader2, Eye, EyeOff } from "lucide-react";
+import { Loader2, Eye, EyeOff, User } from "lucide-react";
+import { FaFacebook } from "react-icons/fa";
 
 const loginSchema = z.object({
   username: z.string().min(3, { message: "اسم المستخدم يجب أن يحتوي على 3 أحرف على الأقل" }),
@@ -20,7 +21,7 @@ interface LoginFormProps {
 }
 
 export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
-  const { loginMutation } = useAuth();
+  const { loginMutation, loginGuestMutation, loginFacebookMutation } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   
   const form = useForm<LoginFormValues>({
@@ -33,6 +34,14 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
   
   const onSubmit = (data: LoginFormValues) => {
     loginMutation.mutate(data);
+  };
+  
+  const handleGuestLogin = () => {
+    loginGuestMutation.mutate();
+  };
+  
+  const handleFacebookLogin = () => {
+    loginFacebookMutation.mutate();
   };
   
   return (
@@ -112,6 +121,50 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
               إنشاء حساب
             </button>
           </div>
+          
+          <div className="relative flex items-center py-2">
+            <div className="flex-grow border-t border-[#D4AF37]/20"></div>
+            <span className="flex-shrink mx-3 text-[#D4AF37]/60 text-xs">أو</span>
+            <div className="flex-grow border-t border-[#D4AF37]/20"></div>
+          </div>
+          
+          {/* أزرار تسجيل الدخول البديلة */}
+          <div className="grid grid-cols-2 gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleGuestLogin}
+              disabled={loginGuestMutation.isPending}
+              className="flex items-center justify-center py-2 px-4 border border-[#D4AF37]/30 hover:border-[#D4AF37] hover:bg-[#D4AF37]/10 rounded-md transition-all"
+            >
+              {loginGuestMutation.isPending ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <>
+                  <User className="h-4 w-4 mr-2" />
+                  <span>دخول كضيف</span>
+                </>
+              )}
+            </Button>
+            
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleFacebookLogin}
+              disabled={loginFacebookMutation.isPending}
+              className="flex items-center justify-center py-2 px-4 border border-[#1877F2]/30 hover:border-[#1877F2] hover:bg-[#1877F2]/10 text-white rounded-md transition-all"
+            >
+              {loginFacebookMutation.isPending ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <>
+                  <FaFacebook className="h-4 w-4 mr-2 text-[#1877F2]" />
+                  <span>فيسبوك</span>
+                </>
+              )}
+            </Button>
+          </div>
+          
         </form>
       </Form>
     </div>

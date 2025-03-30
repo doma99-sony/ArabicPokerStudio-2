@@ -39,6 +39,12 @@ async function comparePasswords(supplied: string, stored: string) {
   return timingSafeEqual(hashedBuf, suppliedBuf);
 }
 
+// وظيفة لإنشاء اسم مستخدم عشوائي للضيوف
+function generateGuestUsername(): string {
+  const guestId = Math.floor(100000 + Math.random() * 900000); // 6 أرقام عشوائية
+  return `ضيف_${guestId}`;
+}
+
 export function setupAuth(app: Express) {
   const sessionSecret = process.env.SESSION_SECRET || "poker-game-secret-key";
   
@@ -159,6 +165,71 @@ export function setupAuth(app: Express) {
         return res.status(200).json({ message: "تم تسجيل الخروج بنجاح" });
       });
     });
+  });
+
+  // تسجيل الدخول كضيف
+  app.post("/api/login/guest", async (req, res, next) => {
+    try {
+      // إنشاء مستخدم ضيف جديد مع اسم مستخدم عشوائي
+      const guestUsername = generateGuestUsername();
+      const guestPassword = Math.random().toString(36).slice(-10); // كلمة مرور عشوائية
+      
+      // إنشاء المستخدم الضيف مع رصيد أولي 50,000 رقاقة
+      const guestUser = await storage.createUser({
+        username: guestUsername,
+        password: await hashPassword(guestPassword),
+        chips: 50000
+      });
+      
+      // تسجيل دخول الضيف تلقائياً
+      req.login(guestUser, (err) => {
+        if (err) return next(err);
+        
+        // تأكيد على المتصفح بحفظ جلسة المستخدم
+        res.setHeader('Set-Cookie', [
+          `connect.sid=${req.sessionID}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${7 * 24 * 60 * 60}`
+        ]);
+        
+        // إرجاع معلومات المستخدم الضيف
+        res.status(200).json(guestUser);
+      });
+    } catch (err) {
+      next(err);
+    }
+  });
+  
+  // واجهة وهمية لتسجيل الدخول بالفيسبوك (بدون تكامل حقيقي)
+  app.post("/api/login/facebook", async (req, res, next) => {
+    try {
+      // في حالة التكامل الحقيقي، سيتم التحقق من معلومات المستخدم مع Facebook
+      // ولكن حالياً سنقوم بإنشاء مستخدم جديد بمجرد أن المستخدم يضغط على زر الفيسبوك
+      
+      // إنشاء اسم مستخدم عشوائي لمستخدم الفيسبوك
+      const fbUsername = `fb_${Math.floor(1000 + Math.random() * 9000)}`;
+      const fbPassword = Math.random().toString(36).slice(-10);
+      
+      // إنشاء مستخدم جديد مع رصيد 100,000 رقاقة
+      const fbUser = await storage.createUser({
+        username: fbUsername,
+        password: await hashPassword(fbPassword),
+        chips: 100000
+      });
+      
+      // تسجيل دخول مستخدم الفيسبوك تلقائياً
+      req.login(fbUser, (err) => {
+        if (err) return next(err);
+        
+        // تأكيد على المتصفح بحفظ جلسة المستخدم
+        res.setHeader('Set-Cookie', [
+          `connect.sid=${req.sessionID}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${7 * 24 * 60 * 60}`
+        ]);
+        
+        // إرجاع معلومات المستخدم
+        res.status(200).json(fbUser);
+      });
+    } catch (err) {
+      next(err);
+    }
   });
 
   app.get("/api/user", (req, res) => {
