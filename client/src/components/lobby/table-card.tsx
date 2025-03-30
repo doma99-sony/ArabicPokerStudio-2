@@ -1,8 +1,12 @@
+import { useState } from "react";
 import { useLocation } from "wouter";
+import { useMutation } from "@tanstack/react-query";
 import { GameTable } from "@/types";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/use-auth";
-import { Image } from "@/components/ui/image";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Loader2, Users, DollarSign, PlayCircle } from "lucide-react";
+import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 interface TableCardProps {
@@ -11,111 +15,98 @@ interface TableCardProps {
 
 export function TableCard({ table }: TableCardProps) {
   const [, navigate] = useLocation();
-  const { user } = useAuth();
   const { toast } = useToast();
   
-  const tableImages = [
-    "https://images.unsplash.com/photo-1609743522653-52354461eb27",
-    "https://images.unsplash.com/photo-1606167668584-78701c57f13d",
-    "https://images.unsplash.com/photo-1511193311914-0346f16efe90"
-  ];
-  
-  // Get a consistent image for the table based on ID
-  const tableImage = tableImages[table.id % tableImages.length];
-  
-  // Calculate remaining seats
-  const remainingSeats = table.maxPlayers - table.currentPlayers;
-  
-  // Determine status colors and text
-  const statusConfig = {
-    available: {
-      bgColor: "bg-green-600",
-      text: `متاحة ${table.currentPlayers}/${table.maxPlayers}`
+  const joinMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", `/api/game/${table.id}/join`);
+      return await res.json();
     },
-    busy: {
-      bgColor: "bg-casinoRed",
-      text: `مشغولة ${table.currentPlayers}/${table.maxPlayers}`
+    onSuccess: () => {
+      navigate(`/game/${table.id}`);
     },
-    full: {
-      bgColor: "bg-casinoRed",
-      text: `طاولة ممتلئة ${table.maxPlayers}/${table.maxPlayers}`
+    onError: (error: Error) => {
+      toast({
+        title: "فشل الانضمام إلى الطاولة",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Get status color based on table status
+  const getStatusColor = () => {
+    switch (table.status) {
+      case "available":
+        return "bg-green-500/70 hover:bg-green-500/60";
+      case "busy":
+        return "bg-amber-500/70 hover:bg-amber-500/60";
+      case "full":
+        return "bg-red-500/70 hover:bg-red-500/60";
+      default:
+        return "bg-gray-500/70 hover:bg-gray-500/60";
     }
   };
-  
-  const tableStatus = statusConfig[table.status];
-  
-  // Check if user has enough chips to join
-  const hasEnoughChips = user?.chips && user.chips >= table.minBuyIn;
-  
-  // Join table handler
-  const handleJoinTable = () => {
-    if (!hasEnoughChips) {
-      toast({
-        title: "رصيد غير كافي",
-        description: `تحتاج إلى ${table.minBuyIn} رقائق على الأقل للانضمام إلى هذه الطاولة.`,
-        variant: "destructive"
-      });
-      return;
+
+  // Get status text in Arabic
+  const getStatusText = () => {
+    switch (table.status) {
+      case "available":
+        return "متاحة";
+      case "busy":
+        return "مشغولة";
+      case "full":
+        return "ممتلئة";
+      default:
+        return "غير معروف";
     }
-    
-    if (table.status === "full") {
-      toast({
-        title: "الطاولة ممتلئة",
-        description: "يرجى اختيار طاولة أخرى.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    navigate(`/game/${table.id}`);
   };
 
   return (
-    <div className="bg-pokerGreen rounded-lg overflow-hidden shadow-lg transition-transform hover:scale-105">
-      <div className="relative h-40 bg-slate">
-        <Image
-          src={tableImage}
-          alt={table.name}
-          className="w-full h-full object-cover opacity-80"
-        />
-        <div className={`absolute top-0 right-0 ${tableStatus.bgColor} text-white px-3 py-1 rounded-bl-lg font-roboto`}>
-          {tableStatus.text}
+    <Card className="bg-black/70 border border-[#D4AF37]/30 shadow-xl hover:shadow-2xl transition-all duration-300 hover:border-[#D4AF37]/50">
+      <CardHeader className="pb-2">
+        <div className="flex justify-between items-start">
+          <CardTitle className="text-[#D4AF37] text-xl">{table.name}</CardTitle>
+          <Badge className={`${getStatusColor()} text-white`}>
+            {getStatusText()}
+          </Badge>
         </div>
-      </div>
-      
-      <div className="p-4">
-        <h3 className="text-xl font-bold text-white mb-2 font-cairo">{table.name}</h3>
-        
-        <div className="flex justify-between items-center mb-3">
+      </CardHeader>
+      <CardContent className="text-white/80 space-y-4">
+        <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <div className="h-6 w-6 bg-gold rounded-full flex items-center justify-center mr-2">
-              <i className="fas fa-coins text-deepBlack text-xs"></i>
-            </div>
-            <span className="text-white font-roboto">{table.smallBlind}/{table.bigBlind}</span>
+            <Users size={16} className="text-[#D4AF37] ml-2" />
+            <span>اللاعبين: {table.currentPlayers}/{table.maxPlayers}</span>
           </div>
-          
-          <div className="bg-slate/50 rounded px-2 py-1 text-sm">
-            <span className="text-white font-roboto">الحد الأدنى: {table.minBuyIn.toLocaleString()}</span>
+          <div className="flex items-center">
+            <DollarSign size={16} className="text-[#D4AF37] ml-2" />
+            <span>العمى: {table.smallBlind} / {table.bigBlind}</span>
           </div>
         </div>
         
-        {table.status === "full" ? (
-          <Button
-            disabled
-            className="w-full bg-gray-500 text-white font-bold py-2 rounded cursor-not-allowed font-cairo"
-          >
-            طاولة ممتلئة
-          </Button>
-        ) : (
-          <Button
-            onClick={handleJoinTable}
-            disabled={!hasEnoughChips}
-            className={`w-full ${hasEnoughChips ? "bg-gold hover:bg-darkGold" : "bg-gray-500 cursor-not-allowed"} text-deepBlack font-bold py-2 rounded transition-colors font-cairo`}
-          >
-            انضم للطاولة
-          </Button>
-        )}
-      </div>
-    </div>
+        <div className="border-t border-[#D4AF37]/20 pt-3 text-sm">
+          <div className="flex justify-between mb-1">
+            <span>الحد الأدنى للدخول:</span>
+            <span className="font-bold text-[#D4AF37]">{table.minBuyIn} رقاقة</span>
+          </div>
+        </div>
+      </CardContent>
+      <CardFooter>
+        <Button 
+          className="w-full bg-gradient-to-br from-[#D4AF37] to-[#AA8C2C] hover:from-[#E5C04B] hover:to-[#D4AF37] text-[#0A0A0A] font-bold"
+          disabled={table.status === "full" || joinMutation.isPending}
+          onClick={() => joinMutation.mutate()}
+        >
+          {joinMutation.isPending ? (
+            <Loader2 className="h-5 w-5 animate-spin mx-auto" />
+          ) : (
+            <>
+              <PlayCircle size={18} className="ml-2" />
+              انضم للعب
+            </>
+          )}
+        </Button>
+      </CardFooter>
+    </Card>
   );
 }
