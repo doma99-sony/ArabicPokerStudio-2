@@ -26,7 +26,8 @@ export function TableCard({ table }: TableCardProps) {
       return await res.json();
     },
     onSuccess: () => {
-      navigate(`/game/${table.id}`);
+      // استخدام window.location بدلاً من navigate مباشرة لضمان تحديث الحالة
+      window.location.href = `/game/${table.id}`;
     },
     onError: (error: Error) => {
       toast({

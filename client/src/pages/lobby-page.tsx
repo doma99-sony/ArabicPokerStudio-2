@@ -18,13 +18,26 @@ export default function LobbyPage() {
     queryKey: ["/api/tables", activeGameCategory],
     queryFn: async () => {
       try {
+        // استخدام window.location.href للتحقق من وجود session cookies
+        if (!document.cookie.includes('connect.sid')) {
+          console.log("لا توجد جلسة، إعادة تحميل الصفحة...");
+          // إعادة تحميل الصفحة للتأكد من تحميل الكوكيز
+          window.location.reload();
+          return [];
+        }
+        
         const res = await fetch(`/api/tables/${activeGameCategory}`, {
-          credentials: "include" // إضافة بيانات الاعتماد لجلب الكوكيز
+          credentials: "include", // إضافة بيانات الاعتماد لجلب الكوكيز
+          headers: {
+            'Cache-Control': 'no-cache', // منع التخزين المؤقت
+            'Pragma': 'no-cache'
+          }
         });
         
         if (res.status === 401) {
+          console.log("انتهت صلاحية الجلسة، إعادة التوجيه إلى صفحة تسجيل الدخول");
           // إعادة التوجيه إلى صفحة تسجيل الدخول في حالة انتهاء الجلسة
-          navigate("/auth");
+          window.location.href = '/auth';
           return [];
         }
         
@@ -51,7 +64,8 @@ export default function LobbyPage() {
   const handleLogout = () => {
     logoutMutation.mutate(undefined, {
       onSuccess: () => {
-        navigate("/auth");
+        // استخدام window.location بدلاً من navigate مباشرة لضمان تحديث الحالة
+        window.location.href = '/auth';
       }
     });
   };
