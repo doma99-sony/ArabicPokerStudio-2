@@ -1,16 +1,25 @@
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
-import { Express } from "express";
+import { Express, Request, Response, NextFunction } from "express";
 import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
-import { User as SelectUser } from "@shared/schema";
 import createMemoryStore from "memorystore";
 
+// تعريف واجهة المستخدم في النظام
+interface UserType {
+  id: number;
+  username: string;
+  password: string;
+  chips: number;
+  avatar?: string | null;
+}
+
+// تعريف واجهة المستخدم لجواز السفر
 declare global {
   namespace Express {
-    interface User extends SelectUser {}
+    interface User extends UserType {}
   }
 }
 
@@ -35,13 +44,19 @@ export function setupAuth(app: Express) {
   
   const sessionSettings: session.SessionOptions = {
     secret: sessionSecret,
-    resave: false,
-    saveUninitialized: false,
-    store: storage.sessionStore, // استخدام مخزن الجلسات من storage
+    // تمكين حفظ الجلسة حتى لو لم تتغير
+    resave: true,
+    // حفظ الجلسة غير المهيأة لمنع إعادة تأهيل المستخدم
+    saveUninitialized: true,
+    store: new MemoryStore({
+      checkPeriod: 86400000 // 24 ساعة
+    }),
     cookie: { 
       secure: false, // تعطيل secure لبيئة التطوير
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
-      sameSite: 'lax'
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 1 أسبوع
+      sameSite: 'lax',
+      httpOnly: true,
+      path: '/'
     }
   };
 
@@ -99,14 +114,50 @@ export function setupAuth(app: Express) {
     }
   });
 
-  app.post("/api/login", passport.authenticate("local"), (req, res) => {
-    res.status(200).json(req.user);
+  app.post("/api/login", (req, res, next) => {
+    passport.authenticate("local", (err: Error | null, user: UserType | false, info: any) => {
+      if (err) {
+        return next(err);
+      }
+      
+      if (!user) {
+        return res.status(401).json({ message: "خطأ في اسم المستخدم أو كلمة المرور" });
+      }
+      
+      req.login(user, (err: Error | null) => {
+        if (err) {
+          return next(err);
+        }
+        
+        // تأكيد للمتصفح بأن ملفات تعريف الارتباط يجب تخزينها
+        res.setHeader('Set-Cookie', [
+          `connect.sid=${req.sessionID}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${7 * 24 * 60 * 60}`
+        ]);
+        
+        // استجابة ناجحة مع بيانات المستخدم
+        return res.status(200).json(user);
+      });
+    })(req, res, next);
   });
 
   app.post("/api/logout", (req, res, next) => {
+    const sessionID = req.sessionID;
+    
     req.logout((err) => {
       if (err) return next(err);
-      res.sendStatus(200);
+      
+      // مسح الجلسة بالكامل
+      req.session.destroy((err) => {
+        if (err) return next(err);
+        
+        // مسح كوكيز الجلسة من المتصفح
+        res.clearCookie('connect.sid');
+        
+        // إعادة تأكيد على المتصفح أن الجلسة قد تم مسحها
+        res.setHeader('Set-Cookie', ['connect.sid=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT']);
+        
+        return res.status(200).json({ message: "تم تسجيل الخروج بنجاح" });
+      });
     });
   });
 
