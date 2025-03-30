@@ -18,11 +18,9 @@ export default function LobbyPage() {
     queryKey: ["/api/tables", activeGameCategory],
     queryFn: async () => {
       try {
-        // استخدام window.location.href للتحقق من وجود session cookies
-        if (!document.cookie.includes('connect.sid')) {
-          console.log("لا توجد جلسة، إعادة تحميل الصفحة...");
-          // إعادة تحميل الصفحة للتأكد من تحميل الكوكيز
-          window.location.reload();
+        // التحقق من المستخدم مباشرة بدلاً من الاعتماد على الكوكيز
+        if (!user) {
+          // إذا لم يكن هناك مستخدم، نعيد مصفوفة فارغة
           return [];
         }
         
