@@ -78,7 +78,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "غير مصرح" });
       }
       
-      const result = await storage.joinTable(tableId, req.user.id);
+      // Validate position if provided
+      const positionSchema = z.object({
+        position: z.number().optional(),
+      });
+      
+      let position: number | undefined = undefined;
+      
+      try {
+        const data = positionSchema.parse(req.body);
+        position = data.position;
+      } catch (error) {
+        // No position or invalid position provided, will use default assignment
+      }
+      
+      const result = await storage.joinTable(tableId, req.user.id, position);
       if (!result.success) {
         return res.status(400).json({ message: result.message });
       }

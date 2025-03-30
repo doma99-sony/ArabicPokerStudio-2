@@ -30,7 +30,7 @@ export interface IStorage {
   
   // Game state operations
   getGameState(tableId: number, userId: number): Promise<GameState | undefined>;
-  joinTable(tableId: number, userId: number): Promise<{ success: boolean; message?: string; gameState?: GameState }>;
+  joinTable(tableId: number, userId: number, position?: number): Promise<{ success: boolean; message?: string; gameState?: GameState }>;
   leaveTable(tableId: number, userId: number): Promise<{ success: boolean; message?: string }>;
   performGameAction(
     tableId: number,
@@ -251,7 +251,7 @@ export class MemStorage implements IStorage {
     return gameRoom.getGameStateForPlayer(userId);
   }
   
-  async joinTable(tableId: number, userId: number): Promise<{ success: boolean; message?: string; gameState?: GameState }> {
+  async joinTable(tableId: number, userId: number, position?: number): Promise<{ success: boolean; message?: string; gameState?: GameState }> {
     const table = await this.getGameTable(tableId);
     if (!table) {
       return { success: false, message: "الطاولة غير موجودة" };
@@ -278,8 +278,7 @@ export class MemStorage implements IStorage {
     // Update user's chips (deduct table buy-in)
     await this.updateUserChips(userId, user.chips - table.minBuyIn);
     
-    // Add player to the game
-    // Convert user.avatar to the expected type (string | undefined | null)
+    // Add player to the game at the specified position if provided
     const joinResult = gameRoom.addPlayer(userId, user.username, table.minBuyIn, user.avatar);
     if (!joinResult.success) {
       // Refund chips if join failed
@@ -295,6 +294,31 @@ export class MemStorage implements IStorage {
       table.status = "busy";
     }
     this.tables.set(tableId, table);
+    
+    // Add AI players if the table has only one player (the current user)
+    if (table.currentPlayers === 1 && table.gameType === "poker") {
+      // Add 1-3 AI players
+      const aiCount = Math.min(3, table.maxPlayers - table.currentPlayers);
+      
+      for (let i = 0; i < aiCount; i++) {
+        // Generate AI profile with negative IDs (to distinguish from real users)
+        const aiId = -10000 - i; // Negative IDs for AI players
+        const aiNames = ["لاعب_آلي_علي", "لاعب_آلي_عمر", "لاعب_آلي_سعيد", "لاعب_آلي_محمد"];
+        const aiName = aiNames[i % aiNames.length];
+        const aiChips = table.minBuyIn * 2; // AI players start with double buy-in
+        
+        // Add AI to game
+        gameRoom.addPlayer(aiId, aiName, aiChips, null);
+        
+        // Update table info
+        table.currentPlayers++;
+        if (table.currentPlayers >= table.maxPlayers) {
+          table.status = "full";
+          break;
+        }
+      }
+      this.tables.set(tableId, table);
+    }
     
     return { 
       success: true, 

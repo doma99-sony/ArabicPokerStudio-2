@@ -45,7 +45,7 @@ interface ActionResult {
 export interface GameRoom {
   // Methods
   getGameStateForPlayer(playerId: number): GameState;
-  addPlayer(playerId: number, username: string, chips: number, avatar?: string | null): { success: boolean; message?: string };
+  addPlayer(playerId: number, username: string, chips: number, avatar?: string | null, position?: number, isAI?: boolean): { success: boolean; message?: string };
   removePlayer(playerId: number): { success: boolean; message?: string; chips?: number };
   performAction(playerId: number, action: GameAction, amount?: number): ActionResult;
 }
@@ -351,7 +351,9 @@ export function createGameRoom(table: GameTable): GameRoom {
     playerId: number, 
     username: string, 
     chips: number, 
-    avatar?: string | null
+    avatar?: string | null,
+    requestedPosition?: number,
+    isAI?: boolean
   ): { success: boolean; message?: string } => {
     if (players.has(playerId)) {
       return { success: false, message: "اللاعب موجود بالفعل في اللعبة" };
@@ -365,8 +367,23 @@ export function createGameRoom(table: GameTable): GameRoom {
       return { success: false, message: "رقاقات غير كافية للانضمام" };
     }
     
-    // Get an available position
-    const position = getAvailablePosition();
+    // If a specific position is requested, check if it's available
+    let position = -1;
+    
+    if (requestedPosition !== undefined) {
+      // Check if the requested position is valid and available
+      const positions = Array.from(players.values()).map(p => p.position);
+      if (requestedPosition >= 0 && requestedPosition < table.maxPlayers && !positions.includes(requestedPosition)) {
+        position = requestedPosition;
+      } else {
+        // If requested position is taken, fall back to any available position
+        position = getAvailablePosition();
+      }
+    } else {
+      // Get any available position
+      position = getAvailablePosition();
+    }
+    
     if (position === -1) {
       return { success: false, message: "لا توجد مواضع متاحة" };
     }
@@ -394,6 +411,56 @@ export function createGameRoom(table: GameTable): GameRoom {
     // If we have enough players and game isn't started yet, start the game
     if (players.size >= 2 && round.gameStatus === "waiting") {
       startNewRound();
+    }
+    
+    // If this player is an AI, automatically take actions when it's their turn
+    if (isAI && playerId < 0) {
+      // Setup a timer to simulate AI decision making for AI players
+      setInterval(() => {
+        // Only take action if it's this AI's turn
+        if (round.currentTurn === playerId && players.has(playerId)) {
+          const aiPlayer = players.get(playerId);
+          if (!aiPlayer) return;
+          
+          // AI decision making logic (simplified)
+          setTimeout(() => {
+            let aiAction: GameAction;
+            let aiAmount: number | undefined;
+            
+            // Random decision with bias toward safer plays
+            const rand = Math.random();
+            
+            // If no current bet, check most of the time (70%) otherwise raise (30%)
+            if (round.currentBet === 0 || round.currentBet === aiPlayer.betAmount) {
+              if (rand < 0.7) {
+                aiAction = "check";
+              } else {
+                aiAction = "raise";
+                aiAmount = round.currentBet + Math.min(
+                  Math.floor(aiPlayer.chips * 0.2), // Bet up to 20% of chips
+                  round.bigBlind * 2 // Or double the big blind
+                );
+              }
+            } else {
+              // If there's a bet, fold 30%, call 50%, raise 20%
+              if (rand < 0.3) {
+                aiAction = "fold";
+              } else if (rand < 0.8) {
+                aiAction = "call";
+              } else {
+                aiAction = "raise";
+                aiAmount = round.currentBet + Math.min(
+                  Math.floor(aiPlayer.chips * 0.2),
+                  round.bigBlind * 2
+                );
+              }
+            }
+            
+            // Execute the AI's action
+            performAction(playerId, aiAction, aiAmount);
+          }, 1000); // Slight delay to make it feel more natural
+        }
+      }, 2000); // Check every 2 seconds if it's AI's turn
     }
     
     return { success: true };
