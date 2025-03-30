@@ -6,7 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Loader2 } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 
 const loginSchema = z.object({
   username: z.string().min(3, { message: "اسم المستخدم يجب أن يحتوي على 3 أحرف على الأقل" }),
@@ -22,7 +22,7 @@ interface LoginFormProps {
 export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
   const { loginMutation } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
-
+  
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -30,13 +30,13 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
       password: "",
     },
   });
-
+  
   const onSubmit = (data: LoginFormValues) => {
     loginMutation.mutate(data);
   };
-
+  
   return (
-    <div className="bg-slate/30 rounded-lg p-6 backdrop-blur-sm border border-gold/20">
+    <div className="bg-black/30 rounded-lg p-6 backdrop-blur-sm border border-[#D4AF37]/20">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
@@ -44,39 +44,39 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
             name="username"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-white font-tajawal">اسم المستخدم</FormLabel>
+                <FormLabel className="text-white">اسم المستخدم</FormLabel>
                 <FormControl>
                   <Input
                     {...field}
-                    className="w-full bg-deepBlack/70 border border-gold/30 rounded py-2 px-3 text-white focus:outline-none focus:border-gold"
+                    className="w-full bg-[#0A0A0A]/70 border border-[#D4AF37]/30 rounded py-2 px-3 text-white focus:outline-none focus:border-[#D4AF37]"
                   />
                 </FormControl>
               </FormItem>
             )}
           />
-
+          
           <FormField
             control={form.control}
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-white font-tajawal">كلمة المرور</FormLabel>
+                <FormLabel className="text-white">كلمة المرور</FormLabel>
                 <FormControl>
                   <div className="relative">
                     <Input
                       {...field}
                       type={showPassword ? "text" : "password"}
-                      className="w-full bg-deepBlack/70 border border-gold/30 rounded py-2 px-3 text-white focus:outline-none focus:border-gold"
+                      className="w-full bg-[#0A0A0A]/70 border border-[#D4AF37]/30 rounded py-2 px-3 text-white focus:outline-none focus:border-[#D4AF37]"
                     />
                     <button
                       type="button"
-                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gold/70"
+                      className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 hover:text-white"
                       onClick={() => setShowPassword(!showPassword)}
                     >
                       {showPassword ? (
-                        <i className="fas fa-eye-slash"></i>
+                        <EyeOff className="h-5 w-5" />
                       ) : (
-                        <i className="fas fa-eye"></i>
+                        <Eye className="h-5 w-5" />
                       )}
                     </button>
                   </div>
@@ -84,11 +84,11 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
               </FormItem>
             )}
           />
-
+          
           <Button
             type="submit"
             disabled={loginMutation.isPending}
-            className="w-full bg-gradient-to-br from-gold to-darkGold hover:from-lightGold hover:to-gold text-deepBlack font-bold py-3 px-4 rounded-md transition-all font-cairo"
+            className="w-full bg-gradient-to-br from-[#D4AF37] to-[#AA8C2C] hover:from-[#E5C04B] hover:to-[#D4AF37] text-[#0A0A0A] font-bold py-3 px-4 rounded-md transition-all"
           >
             {loginMutation.isPending ? (
               <Loader2 className="h-5 w-5 animate-spin mx-auto" />
@@ -96,20 +96,20 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
               "دخول"
             )}
           </Button>
-
+          
           <div className="flex justify-between text-sm">
-            <button 
-              type="button" 
-              className="text-gold/90 hover:text-gold"
+            <button
+              type="button"
+              className="text-[#D4AF37]/90 hover:text-[#D4AF37]"
             >
               نسيت كلمة المرور؟
             </button>
             <button
               type="button"
-              className="text-gold/90 hover:text-gold"
+              className="text-[#D4AF37]/90 hover:text-[#D4AF37]"
               onClick={onSwitchToRegister}
             >
-              تسجيل جديد
+              إنشاء حساب
             </button>
           </div>
         </form>

@@ -4,7 +4,7 @@ import {
   useMutation,
   UseMutationResult,
 } from "@tanstack/react-query";
-import { insertUserSchema, User as SelectUser, InsertUser } from "@shared/schema";
+import { User as SelectUser, InsertUser } from "@shared/schema";
 import { getQueryFn, apiRequest, queryClient } from "../lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
@@ -20,15 +20,17 @@ type AuthContextType = {
 type LoginData = Pick<InsertUser, "username" | "password">;
 
 export const AuthContext = createContext<AuthContextType | null>(null);
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
   const {
     data: user,
     error,
     isLoading,
-  } = useQuery<SelectUser | null, Error>({
+  } = useQuery<SelectUser | undefined, Error>({
     queryKey: ["/api/user"],
     queryFn: getQueryFn({ on401: "returnNull" }),
+    retry: false,
   });
 
   const loginMutation = useMutation({
@@ -46,7 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     onError: (error: Error) => {
       toast({
         title: "فشل تسجيل الدخول",
-        description: error.message,
+        description: error.message || "يرجى التحقق من اسم المستخدم وكلمة المرور",
         variant: "destructive",
       });
     },
@@ -60,14 +62,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     onSuccess: (user: SelectUser) => {
       queryClient.setQueryData(["/api/user"], user);
       toast({
-        title: "تم التسجيل بنجاح",
+        title: "تم إنشاء الحساب بنجاح",
         description: `مرحباً، ${user.username}!`,
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "فشل التسجيل",
-        description: error.message,
+        title: "فشل في إنشاء الحساب",
+        description: error.message || "يرجى المحاولة باستخدام اسم مستخدم آخر",
         variant: "destructive",
       });
     },
@@ -80,8 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     onSuccess: () => {
       queryClient.setQueryData(["/api/user"], null);
       toast({
-        title: "تم تسجيل الخروج",
-        description: "نراك قريباً!",
+        title: "تم تسجيل الخروج بنجاح",
       });
     },
     onError: (error: Error) => {
@@ -112,7 +113,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
+    throw new Error("يجب استخدام useAuth داخل AuthProvider");
   }
   return context;
 }
