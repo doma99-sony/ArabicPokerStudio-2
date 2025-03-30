@@ -10,7 +10,8 @@ import {
   PlayerStats,
   Achievement,
   GameHistoryItem,
-  PlayerProfile
+  PlayerProfile,
+  GameType
 } from "../client/src/types";
 import { createDeck, shuffleDeck, dealCards, remainingCards } from "../client/src/lib/card-utils";
 import { GameRoom, createGameRoom } from "./game-room";
@@ -24,6 +25,7 @@ export interface IStorage {
   
   // Game table operations
   getGameTables(): Promise<GameTable[]>;
+  getGameTablesByType(gameType: GameType): Promise<GameTable[]>;
   getGameTable(tableId: number): Promise<GameTable | undefined>;
   
   // Game state operations
@@ -78,40 +80,63 @@ export class MemStorage implements IStorage {
 
   // Initialize some default game tables
   private initializeGameTables() {
-    const tables: GameTable[] = [
-      {
-        id: this.currentTableId++,
-        name: "طاولة المبتدئين",
-        smallBlind: 10,
-        bigBlind: 20,
-        minBuyIn: 500,
-        maxPlayers: 9,
-        currentPlayers: 2,
-        status: "available"
-      },
-      {
-        id: this.currentTableId++,
-        name: "الطاولة الذهبية",
-        smallBlind: 100,
-        bigBlind: 200,
-        minBuyIn: 2000,
-        maxPlayers: 9,
-        currentPlayers: 5,
-        status: "busy"
-      },
-      {
-        id: this.currentTableId++,
-        name: "طاولة المحترفين",
-        smallBlind: 500,
-        bigBlind: 1000,
-        minBuyIn: 10000,
-        maxPlayers: 9,
-        currentPlayers: 9,
-        status: "full"
-      }
-    ];
+    // إنشاء فئات الطاولات المختلفة لكل نوع من أنواع الألعاب
     
-    for (const table of tables) {
+    // طاولات لعبة البوكر العربي
+    this.createTableCategory("نوب", 10, 20, 20000, 5, 10, "poker");
+    this.createTableCategory("لسه بتعلم", 50, 100, 100000, 5, 10, "poker");
+    this.createTableCategory("محترف", 250, 500, 500000, 5, 10, "poker");
+    this.createTableCategory("الفاجر", 2000, 4000, 10000000, 5, 10, "poker");
+    
+    // طاولات لعبة ناروتو
+    this.createTableCategory("سهل", 10, 20, 10000, 2, 5, "naruto");
+    this.createTableCategory("متوسط", 50, 100, 50000, 2, 5, "naruto");
+    this.createTableCategory("صعب", 500, 1000, 500000, 2, 5, "naruto");
+    
+    // طاولات لعبة تيكين
+    this.createTableCategory("مبتدئ", 10, 20, 10000, 2, 5, "tekken");
+    this.createTableCategory("متمرس", 100, 200, 100000, 2, 5, "tekken");
+    this.createTableCategory("محترف", 1000, 2000, 1000000, 2, 5, "tekken");
+    
+    // طاولات لعبة دومينو
+    this.createTableCategory("عادي", 50, 100, 10000, 4, 5, "domino");
+    this.createTableCategory("VIP", 500, 1000, 100000, 4, 5, "domino");
+  }
+  
+  // إنشاء فئة من الطاولات
+  private createTableCategory(
+    categoryName: string,
+    smallBlind: number,
+    bigBlind: number,
+    minBuyIn: number,
+    maxPlayers: number,
+    tableCount: number,
+    gameType: GameType // إضافة نوع اللعبة
+  ) {
+    for (let i = 1; i <= tableCount; i++) {
+      // توزيع عشوائي لعدد اللاعبين في كل طاولة ليبدو واقعياً
+      const currentPlayers = Math.floor(Math.random() * maxPlayers);
+      let status: TableStatus = "available";
+      
+      if (currentPlayers === maxPlayers) {
+        status = "full";
+      } else if (currentPlayers > 0) {
+        status = "busy";
+      }
+      
+      const table: GameTable = {
+        id: this.currentTableId++,
+        name: `${categoryName} ${i}`,
+        smallBlind,
+        bigBlind,
+        minBuyIn,
+        maxPlayers,
+        currentPlayers,
+        status,
+        category: categoryName, // إضافة فئة الطاولة
+        gameType // إضافة نوع اللعبة
+      };
+      
       this.tables.set(table.id, table);
       this.gameRooms.set(table.id, createGameRoom(table));
     }
@@ -209,6 +234,11 @@ export class MemStorage implements IStorage {
     return Array.from(this.tables.values());
   }
   
+  // Get game tables by type
+  async getGameTablesByType(gameType: GameType): Promise<GameTable[]> {
+    return Array.from(this.tables.values()).filter(table => table.gameType === gameType);
+  }
+  
   async getGameTable(tableId: number): Promise<GameTable | undefined> {
     return this.tables.get(tableId);
   }
@@ -249,6 +279,7 @@ export class MemStorage implements IStorage {
     await this.updateUserChips(userId, user.chips - table.minBuyIn);
     
     // Add player to the game
+    // Convert user.avatar to the expected type (string | undefined | null)
     const joinResult = gameRoom.addPlayer(userId, user.username, table.minBuyIn, user.avatar);
     if (!joinResult.success) {
       // Refund chips if join failed

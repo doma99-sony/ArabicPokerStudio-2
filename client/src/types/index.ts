@@ -2,6 +2,8 @@ import { User } from "@shared/schema";
 
 export type TableStatus = "available" | "busy" | "full";
 
+export type GameType = "poker" | "naruto" | "tekken" | "domino";
+
 export interface GameTable {
   id: number;
   name: string;
@@ -11,6 +13,8 @@ export interface GameTable {
   maxPlayers: number;
   currentPlayers: number;
   status: TableStatus;
+  category?: string; // فئة الطاولة: نوب، لسه بتعلم، محترف، الفاجر
+  gameType: GameType; // نوع اللعبة: بوكر، ناروتو، تيكين، دومينو
 }
 
 export interface PlayerPosition {

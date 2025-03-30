@@ -42,6 +42,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Get tables by game type
+  app.get("/api/tables/:gameType", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    const gameType = req.params.gameType;
+    
+    // Validate game type
+    const validGameTypes = ["poker", "naruto", "tekken", "domino"];
+    if (!validGameTypes.includes(gameType)) {
+      return res.status(400).json({ message: "نوع اللعبة غير صالح" });
+    }
+    
+    try {
+      const tables = await storage.getGameTablesByType(gameType as any);
+      res.json(tables);
+    } catch (error) {
+      res.status(500).json({ message: "حدث خطأ أثناء جلب الطاولات" });
+    }
+  });
+  
   // Join a table
   app.post("/api/game/:tableId/join", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);

@@ -6,7 +6,7 @@ interface GamePlayer {
   id: number;
   username: string;
   chips: number;
-  avatar?: string;
+  avatar?: string | null;
   position: number;
   cards: Card[];
   folded: boolean;
@@ -45,7 +45,7 @@ interface ActionResult {
 export interface GameRoom {
   // Methods
   getGameStateForPlayer(playerId: number): GameState;
-  addPlayer(playerId: number, username: string, chips: number, avatar?: string): { success: boolean; message?: string };
+  addPlayer(playerId: number, username: string, chips: number, avatar?: string | null): { success: boolean; message?: string };
   removePlayer(playerId: number): { success: boolean; message?: string; chips?: number };
   performAction(playerId: number, action: GameAction, amount?: number): ActionResult;
 }
@@ -351,7 +351,7 @@ export function createGameRoom(table: GameTable): GameRoom {
     playerId: number, 
     username: string, 
     chips: number, 
-    avatar?: string
+    avatar?: string | null
   ): { success: boolean; message?: string } => {
     if (players.has(playerId)) {
       return { success: false, message: "اللاعب موجود بالفعل في اللعبة" };
