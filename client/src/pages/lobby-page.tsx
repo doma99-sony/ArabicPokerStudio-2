@@ -306,12 +306,22 @@ export default function LobbyPage() {
                 <br />
                 يرجى المحاولة لاحقاً
               </p>
-              <Button 
-                onClick={() => setActiveGameCategory('poker')}
-                className="bg-[#D4AF37] text-black hover:bg-[#E5C04B]"
-              >
-                العودة إلى بوكر عرباوي
-              </Button>
+              <div className="flex gap-4">
+                <Button 
+                  onClick={() => setActiveGameCategory('poker')}
+                  className="bg-[#D4AF37] text-black hover:bg-[#E5C04B]"
+                >
+                  العودة إلى بوكر عرباوي
+                </Button>
+                <Button 
+                  onClick={() => navigate("/")}
+                  variant="outline"
+                  className="border-red-500/50 text-red-400 hover:bg-red-500/10"
+                >
+                  <LogOut size={18} className="ml-2" />
+                  الخروج إلى اللوبي
+                </Button>
+              </div>
             </div>
           </div>
         )}
