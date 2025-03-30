@@ -22,12 +22,22 @@ export function TableCard({ table }: TableCardProps) {
   
   const joinMutation = useMutation({
     mutationFn: async () => {
+      // إذا كانت لعبة ناروتو، فلا حاجة للانضمام إلى طاولة
+      if (table.gameType === "naruto") {
+        return { success: true };
+      }
+      
       const res = await apiRequest("POST", `/api/game/${table.id}/join`);
       return await res.json();
     },
     onSuccess: () => {
-      // استخدام window.location بدلاً من navigate مباشرة لضمان تحديث الحالة
-      window.location.href = `/game/${table.id}`;
+      // توجيه إلى الصفحة المناسبة بناءً على نوع اللعبة
+      if (table.gameType === "naruto") {
+        window.location.href = `/naruto/${table.id}`;
+      } else {
+        // استخدام window.location بدلاً من navigate مباشرة لضمان تحديث الحالة
+        window.location.href = `/game/${table.id}`;
+      }
     },
     onError: (error: Error) => {
       toast({

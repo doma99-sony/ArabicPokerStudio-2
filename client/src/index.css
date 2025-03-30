@@ -196,4 +196,24 @@
   .border-gold {
     border-color: var(--gold);
   }
+  
+  /* ناروتو صفحة أنماط */
+  .naruto-bg {
+    background: linear-gradient(to bottom, #1a1a2e, #16213e);
+  }
+  
+  @keyframes glow {
+    0% { box-shadow: 0 0 5px #ff9d00; }
+    50% { box-shadow: 0 0 20px #ff9d00, 0 0 30px #ff9d00; }
+    100% { box-shadow: 0 0 5px #ff9d00; }
+  }
+  
+  .naruto-glow {
+    animation: glow 2s infinite;
+  }
+  
+  .naruto-container video {
+    border: 4px solid #ff9d00;
+    box-shadow: 0 10px 30px rgba(255, 157, 0, 0.3);
+  }
 }
