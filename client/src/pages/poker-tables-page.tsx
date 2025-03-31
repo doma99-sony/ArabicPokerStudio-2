@@ -70,9 +70,10 @@ export default function PokerTablesPage() {
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
 
       {/* Header Bar */}
-      <header className="relative z-10 bg-black/80 text-white p-16 shadow-xl border-b border-[#D4AF37]/30">
+      <header className="relative z-10 bg-black/80 text-white py-32 px-16 shadow-xl border-b border-[#D4AF37]/30 min-h-[50vh] flex items-start pt-12">
         <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-8xl font-bold text-[#D4AF37]">طاولات بوكر تكساس</h1>
+          <h1 className="text-9xl font-bold text-[#D4AF37] leading-none">طاولات بوكر تكساس</h1>
+
           <Button 
             variant="outline" 
             className="border-[#D4AF37]/50 text-[#D4AF37] hover:bg-[#D4AF37]/10"
@@ -295,7 +296,7 @@ export default function PokerTablesPage() {
       {/* Footer */}
       <footer className="relative z-10 bg-black/80 text-white/60 text-center p-4 mt-8 border-t border-[#D4AF37]/20">
         <div className="container mx-auto">
-          <p>&copy; {new Date().getFullYear()} بوكر تكساس عرباوي - جميع الحقوق محفوظة</p>
+          <p className="border-b border-[#D4AF37]/20 pb-4 mb-4">&copy; {new Date().getFullYear()} بوكر تكساس عرباوي - جميع الحقوق محفوظة</p>
         </div>
       </footer>
     </div>
