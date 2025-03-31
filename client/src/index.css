@@ -168,12 +168,12 @@
   
   .assistant-container.desktop {
     right: 0;
-    bottom: 30px;
+    bottom: 140px;
   }
   
   .assistant-container.mobile {
     right: 0;
-    bottom: 20px;
+    bottom: 130px;
   }
   
   .assistant-button {
