@@ -54,7 +54,7 @@ export function ChatBox() {
   };
 
   return (
-    <div className={`fixed ${isMinimized ? 'top-4 h-12' : 'top-20 h-[400px]'} right-4 z-50 w-80 flex flex-col rounded-lg border border-gold/10 overflow-hidden bg-[url('/gradient-poker-table-background_23-2151085419.jpg')] bg-cover bg-center shadow-lg transition-all duration-300`}>
+    <div className={`w-full h-full flex flex-col rounded-lg border border-gold/10 overflow-hidden bg-[url('/gradient-poker-table-background_23-2151085419.jpg')] bg-cover bg-center shadow-lg`}>
       <div className="px-4 py-2 border-b border-gold/10 bg-black/50 flex justify-between items-center">
         <h3 className="text-gold font-bold">الدردشة</h3>
         <button
