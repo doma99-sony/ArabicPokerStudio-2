@@ -34,6 +34,11 @@ export function ChatBox() {
     };
 
     registerHandler("chat_message", handler);
+    
+    // تنظيف الرسائل عند إغلاق المكون
+    return () => {
+      setMessages([]);
+    };
   }, [registerHandler, user]);
 
   const sendChatMessage = () => {
@@ -55,13 +60,13 @@ export function ChatBox() {
   };
 
   return (
-    <div className="w-full bg-black/50 rounded-lg border border-gold/10 overflow-hidden">
-      <div className="bg-[#1B4D3E] p-4">
-        <h3 className="text-white font-bold">الدردشة العامة</h3>
+    <div className="w-full h-[400px] bg-black/50 rounded-lg border border-gold/10 overflow-hidden flex flex-col">
+      <div className="bg-[#1B4D3E] p-3 flex items-center">
+        <h3 className="text-white font-bold text-sm">الدردشة العامة</h3>
       </div>
       
-      <ScrollArea ref={scrollAreaRef} className="h-[300px] p-4">
-        <div className="space-y-4">
+      <ScrollArea ref={scrollAreaRef} className="flex-1 p-4">
+        <div className="space-y-3">
           {messages.map((msg) => (
             <div key={msg.id} className="flex flex-col">
               <span className="text-xs text-gold/60 mb-1">{msg.username}</span>
@@ -77,18 +82,18 @@ export function ChatBox() {
         </div>
       </ScrollArea>
 
-      <div className="p-4 border-t border-gold/10">
+      <div className="p-3 border-t border-gold/10 bg-black/30">
         <div className="flex gap-2">
           <Input
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="اكتب رسالتك..."
-            className="flex-1"
+            className="flex-1 text-sm"
           />
           <Button
             onClick={sendChatMessage}
-            className="bg-gold hover:bg-gold/80 text-black"
+            className="bg-gold hover:bg-gold/80 text-black px-3"
           >
             <Send className="h-4 w-4" />
           </Button>
