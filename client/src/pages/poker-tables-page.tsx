@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { GameTable } from "@/types";
 import { TableCard } from "@/components/lobby/table-card";
 import { Button } from "@/components/ui/button";
+import { TopPlayers } from "@/components/leaderboard/top-players";
 import { Loader2, ArrowRight, Coins } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -67,6 +68,9 @@ export default function PokerTablesPage() {
     <div className="min-h-screen bg-cover bg-center flex flex-col"
          style={{ backgroundImage: "url('/images/egyptian-background.jpg')" }}>
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+      
+      {/* Top Players Leaderboard */}
+      <TopPlayers />
 
       {/* Header Bar */}
       <header className="relative z-10 bg-black/80 text-white p-12 shadow-xl border-b border-[#D4AF37]/30">
