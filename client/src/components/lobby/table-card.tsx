@@ -73,11 +73,20 @@ export function TableCard({ table }: TableCardProps) {
           });
         }
         
-        // تأخير قصير ثم الانتقال (لإعطاء بيانات الانضمام وقتًا للمعالجة)
-        console.log("تم الانضمام بنجاح، جارٍ الانتقال إلى صفحة اللعبة", table.id);
-        setTimeout(() => {
+        // تأكد من أن هناك معرّف طاولة صالح قبل الانتقال
+        if (table && table.id) {
+          console.log("تم الانضمام بنجاح، جارٍ الانتقال إلى صفحة اللعبة", table.id);
+          
+          // استخدم history.pushState بدلاً من setTimeout لتجنب مشاكل التوقيت
           navigate(`/game/${table.id}`);
-        }, 100);
+        } else {
+          console.error("معرّف الطاولة غير موجود أو غير صالح:", table);
+          toast({
+            title: "خطأ في الانتقال",
+            description: "حدث خطأ أثناء محاولة الانتقال إلى صفحة اللعبة. يرجى المحاولة مرة أخرى.",
+            variant: "destructive",
+          });
+        }
       } else {
         // في حالة الإخفاق مع وجود رسالة
         toast({

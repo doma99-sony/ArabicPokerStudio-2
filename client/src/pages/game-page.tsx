@@ -20,8 +20,21 @@ export default function GamePage({ params }: { params?: { tableId?: string } }) 
   
   // التأكد من وجود معرف الطاولة
   useEffect(() => {
-    if (!params || !params.tableId || isNaN(parseInt(params.tableId))) {
-      console.error("معرّف الطاولة غير صالح أو غير موجود:", params?.tableId);
+    if (!params || !params.tableId) {
+      console.error("معرّف الطاولة غير موجود:", params);
+      toast({
+        title: "خطأ",
+        description: "معرف الطاولة غير موجود",
+        variant: "destructive",
+      });
+      navigate("/");
+      return;
+    }
+    
+    // التحقق من أن معرف الطاولة قيمة رقمية صالحة
+    const tableIdValue = parseInt(params.tableId);
+    if (isNaN(tableIdValue) || tableIdValue <= 0) {
+      console.error("معرّف الطاولة غير صالح:", params.tableId);
       toast({
         title: "خطأ",
         description: "معرف الطاولة غير صالح",
