@@ -47,7 +47,7 @@ import { useMutation } from "@tanstack/react-query";
 
 export default function SettingsPage() {
   const [, navigate] = useLocation();
-  const { user, loginMutation } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
   
   // إعدادات الصوت
