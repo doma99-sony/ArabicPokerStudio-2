@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { LogOut, User, ChevronRight, Loader2, ChevronLeft, ChevronUp } from "lucide-react";
 
 export default function LobbyPage() {
-  const [, navigate] = useLocation();
+  const [location, navigate] = useLocation();
   const { user, logoutMutation } = useAuth();
   const [activeGameCategory, setActiveGameCategory] = useState<GameType>("poker");
   const [isChatHidden, setIsChatHidden] = useState(false);
