@@ -191,20 +191,19 @@ export default function LobbyPage() {
               </button>
             </div>
 
-            {/* الدردشة */}
+            {/* دومينو */}
             <div 
-              className="flex flex-col h-48 rounded-lg overflow-hidden border-2 border-emerald-600/80 shadow-lg"
+              className={`flex flex-col h-48 rounded-lg overflow-hidden border-2 ${activeGameCategory === 'domino' ? 'ring-4 ring-blue-600' : ''} border-blue-600/80 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer`}
+              onClick={() => setActiveGameCategory('domino')}
             >
-              <div className="bg-gradient-to-br from-emerald-700 to-emerald-900 flex-1 flex items-center justify-center p-4">
-                <div className="w-full h-full bg-black/30 rounded-lg overflow-y-auto">
-                  <ChatBox />
-                </div>
+              <div className="bg-gradient-to-br from-[#0047AB] to-[#00008B] flex-1 flex items-center justify-center">
+                <span className="text-white text-4xl font-bold">🎲</span>
               </div>
-              <div 
-                className="py-3 px-4 bg-emerald-600 text-white font-bold text-lg"
+              <button 
+                className="py-3 px-4 bg-blue-600 text-white font-bold text-lg hover:bg-blue-500 transition-colors"
               >
-                الدردشة العامة
-              </div>
+                دومينو
+              </button>
             </div>
           </div>
         </div>
