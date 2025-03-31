@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
@@ -6,7 +7,7 @@ import { StatsPanel } from "@/components/profile/stats-panel";
 import { Achievements } from "@/components/profile/achievements";
 import { GameHistory } from "@/components/profile/game-history";
 import { Button } from "@/components/ui/button";
-import { Loader2, User, ChevronRight, Phone } from "lucide-react";
+import { Loader2, User, ChevronRight, Eye, EyeOff } from "lucide-react";
 import { Image } from "@/components/ui/image";
 import { useState } from "react";
 import {
@@ -24,20 +25,100 @@ export default function ProfilePage() {
   const { user } = useAuth();
   const [, navigate] = useLocation();
   
-  // Fetch player profile with stats
-  const { data: profile, isLoading } = useQuery<PlayerProfile>({
+  const { data: profile, isLoading, refetch } = useQuery<PlayerProfile>({
     queryKey: ["/api/profile"],
-    // منع الاستعلامات المتكررة عند عدم تسجيل الدخول
     enabled: !!user,
     retry: false,
   });
   
-  // Navigate back to lobby
   const navigateToLobby = () => {
     navigate("/");
   };
   
-  // If loading, show loading indicator
+  const handleUsernameChange = async () => {
+    const newUsername = prompt('أدخل اسم المستخدم الجديد');
+    if (newUsername && newUsername.length >= 3) {
+      try {
+        const response = await fetch('/api/profile/username', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ username: newUsername })
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+          alert('تم تغيير اسم المستخدم بنجاح!');
+          refetch();
+        } else {
+          alert(data.message || 'حدث خطأ أثناء تغيير اسم المستخدم');
+        }
+      } catch (error) {
+        alert('حدث خطأ في الاتصال');
+      }
+    } else if (newUsername) {
+      alert('يجب أن يكون اسم المستخدم 3 أحرف على الأقل');
+    }
+  };
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const formData = new FormData();
+      formData.append('avatar', file);
+      
+      try {
+        const response = await fetch('/api/profile/avatar', {
+          method: 'POST',
+          body: formData
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+          alert('تم تغيير الصورة بنجاح!');
+          refetch();
+        } else {
+          alert(data.message || 'حدث خطأ أثناء تغيير الصورة');
+        }
+      } catch (error) {
+        alert('حدث خطأ في الاتصال');
+      }
+    }
+  };
+
+  const handleGuestConversion = async () => {
+    const username = prompt('أدخل اسم المستخدم الجديد (3 أحرف على الأقل)');
+    if (username && username.length >= 3) {
+      const password = prompt('أدخل كلمة المرور (6 أحرف على الأقل)');
+      if (password && password.length >= 6) {
+        try {
+          const response = await fetch('/api/profile/convert', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username, password })
+          });
+          
+          const data = await response.json();
+          if (data.success) {
+            alert('تم تحويل حسابك بنجاح!');
+            window.location.reload();
+          } else {
+            alert(data.message || 'حدث خطأ أثناء تحويل الحساب');
+          }
+        } catch (error) {
+          alert('حدث خطأ في الاتصال');
+        }
+      } else {
+        alert('يجب أن تكون كلمة المرور 6 أحرف على الأقل');
+      }
+    } else if (username) {
+      alert('يجب أن يكون اسم المستخدم 3 أحرف على الأقل');
+    }
+  };
+  
   if (isLoading || !profile) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-deepBlack">
@@ -86,19 +167,7 @@ export default function ProfilePage() {
                               type="file" 
                               accept="image/*"
                               className="hidden"
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) {
-                                  const formData = new FormData();
-                                  formData.append('avatar', file);
-                                  fetch('/api/profile/avatar', {
-                                    method: 'POST',
-                                    body: formData
-                                  }).then(() => {
-                                    window.location.reload();
-                                  });
-                                }
-                              }}
+                              onChange={handleAvatarChange}
                             />
                             <span className="text-white text-sm">تغيير الصورة</span>
                           </label>
@@ -109,25 +178,22 @@ export default function ProfilePage() {
                     <div className="flex items-center gap-2 mb-1">
                       <h3 className="text-xl font-bold text-white font-cairo">{profile.username}</h3>
                       <button 
-                        onClick={() => {
-                          const newUsername = prompt('أدخل اسم المستخدم الجديد');
-                          if (newUsername) {
-                            fetch('/api/profile/username', {
-                              method: 'POST',
-                              headers: {
-                                'Content-Type': 'application/json'
-                              },
-                              body: JSON.stringify({ username: newUsername })
-                            }).then(() => {
-                              window.location.reload();
-                            });
-                          }
-                        }}
+                        onClick={handleUsernameChange}
                         className="text-gold/70 hover:text-gold"
                       >
                         <i className="fas fa-edit text-sm"></i>
                       </button>
                     </div>
+                    
+                    {profile.username.startsWith('ضيف_') && (
+                      <button
+                        onClick={handleGuestConversion}
+                        className="bg-gradient-to-br from-gold to-darkGold text-deepBlack font-bold py-2 px-4 rounded-md hover:from-lightGold hover:to-gold transition-all mt-2"
+                      >
+                        تحويل إلى حساب دائم
+                      </button>
+                    )}
+                    
                     <p className="text-gold/80 text-sm mb-3 font-tajawal">عضو منذ {profile.stats.joinDate}</p>
                     
                     <div className="w-full bg-pokerGreen rounded-full px-4 py-2 flex items-center justify-center mb-4">
@@ -141,50 +207,25 @@ export default function ProfilePage() {
                           شراء رقائق
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="bg-deepBlack border-gold/30 text-white">
+                      <DialogContent>
                         <DialogHeader>
-                          <DialogTitle className="text-gold text-2xl font-cairo text-center mb-2">شراء رقائق إضافية</DialogTitle>
-                          <DialogDescription className="text-white/80 text-center font-tajawal">
-                            للشحن والحصول على رقائق إضافية، يرجى التواصل مع فريق الدعم الخاص بنا
+                          <DialogTitle>شراء رقائق</DialogTitle>
+                          <DialogDescription>
+                            قريباً...
                           </DialogDescription>
                         </DialogHeader>
-                        
-                        <div className="py-4">
-                          <div className="bg-pokerGreen/30 p-4 rounded-lg border border-gold/20 mb-4">
-                            <h3 className="text-gold text-lg font-cairo mb-2">للتواصل مع عرباوي:</h3>
-                            <div className="flex items-center p-3 bg-black/40 rounded">
-                              <div className="bg-green-600 p-2 rounded-full ml-3">
-                                <i className="fab fa-whatsapp text-white text-xl"></i>
-                              </div>
-                              <div>
-                                <p className="text-white font-tajawal">واتساب</p>
-                                <p className="text-white font-roboto text-lg">01008508826</p>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <p className="text-white/60 text-sm text-center font-tajawal">
-                            سيتم إضافة الرقائق إلى حسابك فورًا بعد تأكيد عملية الدفع
-                          </p>
-                        </div>
-                        
-                        <DialogFooter>
-                          <DialogClose asChild>
-                            <Button className="w-full bg-gold hover:bg-darkGold text-deepBlack font-bold py-2 rounded-md transition-colors font-cairo">
-                              العودة
-                            </Button>
-                          </DialogClose>
-                        </DialogFooter>
                       </DialogContent>
                     </Dialog>
                   </div>
-                  
-                  <Achievements achievements={profile.stats.achievements} />
+                </div>
+                
+                <div className="mt-6">
+                  <StatsPanel stats={profile.stats} />
                 </div>
               </div>
               
-              <div className="md:w-2/3 md:pr-8">
-                <StatsPanel stats={profile.stats} />
+              <div className="md:w-2/3 md:pl-6">
+                <Achievements achievements={profile.stats.achievements} />
                 <GameHistory history={profile.gameHistory} />
               </div>
             </div>
