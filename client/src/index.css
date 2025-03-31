@@ -168,12 +168,12 @@
   
   .assistant-container.desktop {
     right: 20px;
-    bottom: 40px;
+    bottom: 100px;
   }
   
   .assistant-container.mobile {
     right: 15px;
-    bottom: 30px;
+    bottom: 90px;
   }
   
   .assistant-button {
@@ -217,18 +217,20 @@
   }
   
   .assistant-image {
-    width: 650px;
-    height: 650px;
+    width: 220px; 
+    height: 220px;
     object-fit: contain;
-    filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.9));
+    filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.7));
     transform-style: preserve-3d;
-    transition: transform 0.3s ease;
-    transform: scale(1.1);
+    transition: all 0.3s ease;
     position: relative;
+    animation: float 3s ease-in-out infinite;
   }
   
-  .assistant-button:hover .assistant-image {
-    transform: scale(1.1) perspective(600px) rotateY(-5deg) rotateX(3deg);
+  @keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
   }
   
   .assistant-head-clickable {
@@ -271,8 +273,8 @@
   
   .assistant-wrapper {
     position: relative;
-    width: 650px;
-    height: 650px;
+    width: 220px;
+    height: 220px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -280,20 +282,13 @@
   
   @media (max-width: 640px) {
     .assistant-image {
-      width: 500px;
-      height: 500px;
-      transform: scale(1.05);
+      width: 180px;
+      height: 180px;
     }
     
     .assistant-wrapper {
-      width: 500px;
-      height: 500px;
-    }
-    
-    .assistant-head-clickable {
-      width: 120px;
-      height: 120px;
-      top: 60px;
+      width: 180px;
+      height: 180px;
     }
   }
   
