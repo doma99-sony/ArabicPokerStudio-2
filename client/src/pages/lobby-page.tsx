@@ -103,6 +103,8 @@ export default function LobbyPage() {
 
       {/* Main Content */}
       <main className="relative z-10 flex-1 overflow-hidden">
+        {/*Added Image Here*/}
+        <img src="/images/lobby_image.jpg" alt="Lobby Image" className="w-full h-64 object-cover mb-4"/> {/* Adjust w-full and h-64 as needed */}
         {/* Chat Section - Fixed to left */}
         <div 
           className="fixed top-16 left-0 h-[calc(100%-8rem)] z-20 transition-all duration-300" 
