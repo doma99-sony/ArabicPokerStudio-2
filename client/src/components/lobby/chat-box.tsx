@@ -19,6 +19,7 @@ export function ChatBox() {
   const { sendMessage, registerHandler } = useWebSocket();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
+  const [isMinimized, setIsMinimized] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -53,10 +54,17 @@ export function ChatBox() {
   };
 
   return (
-    <div className="flex flex-col h-[400px] rounded-lg border border-gold/10 overflow-hidden bg-[url('/gradient-poker-table-background_23-2151085419.jpg')] bg-cover bg-center">
-      <div className="px-4 py-2 border-b border-gold/10 bg-black/50">
+    <div className="fixed top-20 right-4 z-50 w-80 flex flex-col h-[400px] rounded-lg border border-gold/10 overflow-hidden bg-[url('/gradient-poker-table-background_23-2151085419.jpg')] bg-cover bg-center shadow-lg">
+      <div className="px-4 py-2 border-b border-gold/10 bg-black/50 flex justify-between items-center">
         <h3 className="text-gold font-bold">الدردشة</h3>
+        <button
+          onClick={() => setIsMinimized(!isMinimized)}
+          className="text-gold hover:text-gold/80 transition-colors"
+        >
+          {isMinimized ? 'تكبير' : 'تصغير'}
+        </button>
       </div>
+      {!isMinimized && (
       
       <ScrollArea ref={scrollAreaRef} className="flex-1 p-4">
         <div className="space-y-4">
@@ -102,6 +110,7 @@ export function ChatBox() {
           </Button>
         </div>
       </div>
+      )}
     </div>
   );
 }
