@@ -142,14 +142,14 @@ export default function LobbyPage() {
             {/* Game Categories */}
             <div className="w-full">
               <div className="rounded-xl bg-black/60 border border-[#D4AF37]/20 p-3 backdrop-blur-sm mb-4">
-                <div className="text-center mb-3">
-                  <h2 className="text-lg font-bold text-[#D4AF37]">اختر نوع اللعبة</h2>
+                <div className="text-center mb-6">
+                  <h2 className="text-2xl font-bold text-[#D4AF37]">اختر نوع اللعبة</h2>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mx-auto">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mx-auto">
                   {/* بوكر عرباوي */}
                   <div 
-                    className={`flex flex-col h-32 rounded-lg overflow-hidden border-2 ${activeGameCategory === 'poker' ? 'ring-2 ring-[#D4AF37]' : ''} border-[#D4AF37]/80 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer`}
+                    className={`flex flex-col h-40 rounded-lg overflow-hidden border-2 ${activeGameCategory === 'poker' ? 'ring-2 ring-[#D4AF37]' : ''} border-[#D4AF37]/80 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer`}
                     onClick={() => {
                       setActiveGameCategory('poker');
                       navigateToGameTables('poker');
