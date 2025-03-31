@@ -16,28 +16,6 @@ export default function GamePageSimplified({ params }: { params?: { tableId?: st
   // استخراج معرف الطاولة من الباراميترات
   const tableId = params && params.tableId ? parseInt(params.tableId) : null;
 
-  // التحقق من وجود معرف الطاولة
-  useEffect(() => {
-    if (!tableId) {
-      // محاولة استعادة المعرف من التخزين المحلي
-      const savedTableId = localStorage.getItem('lastTableId');
-      if (savedTableId) {
-        console.log("تم استعادة معرف الطاولة من التخزين المحلي:", savedTableId);
-        window.location.href = `/game-simple/${savedTableId}`;
-      } else {
-        setError("معرف الطاولة غير موجود");
-        setIsLoading(false);
-      }
-    } else {
-      // تخزين معرف الطاولة في التخزين المحلي
-      localStorage.setItem('lastTableId', tableId.toString());
-      console.log("تم تحديث معرف الطاولة في التخزين المحلي:", tableId);
-      
-      // محاولة الانضمام للطاولة والحصول على بيانات اللعبة
-      fetchGameState(tableId);
-    }
-  }, [tableId]);
-  
   // دالة لجلب بيانات اللعبة
   const fetchGameState = async (id: number) => {
     try {
@@ -91,6 +69,21 @@ export default function GamePageSimplified({ params }: { params?: { tableId?: st
       setIsLoading(false);
     }
   };
+
+  // التحقق من وجود معرف الطاولة وبدء اللعبة
+  useEffect(() => {
+    // إذا كان لدينا معرّف طاولة صالح، نستخدمه مباشرة
+    if (tableId) {
+      console.log("تم العثور على معرّف طاولة في عنوان URL:", tableId);
+      
+      // جلب بيانات اللعبة
+      fetchGameState(tableId);
+    } else {
+      // إذا لم يكن هناك معرّف طاولة في عنوان URL
+      setError("معرف الطاولة غير موجود. يرجى العودة واختيار طاولة.");
+      setIsLoading(false);
+    }
+  }, []);
   
   // دالة للعودة إلى قائمة الطاولات
   const handleBackToLobby = () => {
