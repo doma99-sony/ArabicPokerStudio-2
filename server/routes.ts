@@ -81,6 +81,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "حدث خطأ أثناء تحديث الصورة" });
     }
   });
+
+  // تحويل حساب الضيف إلى حساب دائم
+  app.post("/api/profile/convert", ensureAuthenticated, async (req, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "غير مصرح" });
+      }
+
+      const { username, password } = req.body;
+      
+      // التحقق من صحة البيانات
+      if (!username || username.length < 3) {
+        return res.status(400).json({ message: "اسم المستخدم يجب أن يكون 3 أحرف على الأقل" });
+      }
+      
+      if (!password || password.length < 6) {
+        return res.status(400).json({ message: "كلمة المرور يجب أن تكون 6 أحرف على الأقل" });
+      }
+
+      // التحقق من أن اسم المستخدم غير مستخدم
+      const existingUser = await storage.getUserByUsername(username);
+      if (existingUser) {
+        return res.status(400).json({ message: "اسم المستخدم مستخدم بالفعل" });
+      }
+
+      // تحويل الحساب
+      const hashedPassword = await hashPassword(password);
+      const updatedUser = await storage.convertGuestToRegistered(req.user.id, username, hashedPassword);
+      
+      if (!updatedUser) {
+        return res.status(500).json({ message: "حدث خطأ أثناء تحويل الحساب" });
+      }
+
+      res.json({ success: true, user: updatedUser });
+    } catch (error) {
+      res.status(500).json({ message: "حدث خطأ أثناء تحويل الحساب" });
+    }
+  });
   
   // Get all available game tables
   app.get("/api/tables", ensureAuthenticated, async (req, res) => {

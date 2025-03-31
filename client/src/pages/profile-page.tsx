@@ -94,8 +94,13 @@ export default function ProfilePage() {
                                   fetch('/api/profile/avatar', {
                                     method: 'POST',
                                     body: formData
-                                  }).then(() => {
-                                    window.location.reload();
+                                  }).then((response) => response.json())
+                                  .then((data) => {
+                                    if (data.success) {
+                                      window.location.reload();
+                                    } else {
+                                      alert('حدث خطأ أثناء تحميل الصورة');
+                                    }
                                   });
                                 }
                               }}
@@ -106,27 +111,71 @@ export default function ProfilePage() {
                       </div>
                     </div>
                     
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="text-xl font-bold text-white font-cairo">{profile.username}</h3>
-                      <button 
-                        onClick={() => {
-                          const newUsername = prompt('أدخل اسم المستخدم الجديد');
-                          if (newUsername) {
-                            fetch('/api/profile/username', {
-                              method: 'POST',
-                              headers: {
-                                'Content-Type': 'application/json'
-                              },
-                              body: JSON.stringify({ username: newUsername })
-                            }).then(() => {
-                              window.location.reload();
-                            });
-                          }
-                        }}
-                        className="text-gold/70 hover:text-gold"
-                      >
-                        <i className="fas fa-edit text-sm"></i>
-                      </button>
+                    <div className="flex flex-col items-center gap-4">
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-xl font-bold text-white font-cairo">{profile.username}</h3>
+                        <button 
+                          onClick={() => {
+                            const newUsername = prompt('أدخل اسم المستخدم الجديد');
+                            if (newUsername && newUsername.length >= 3) {
+                              fetch('/api/profile/username', {
+                                method: 'POST',
+                                headers: {
+                                  'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({ username: newUsername })
+                              })
+                              .then((response) => response.json())
+                              .then((data) => {
+                                if (data.success) {
+                                  window.location.reload();
+                                } else {
+                                  alert('حدث خطأ أثناء تحديث اسم المستخدم');
+                                }
+                              });
+                            } else {
+                              alert('يجب أن يكون اسم المستخدم 3 أحرف على الأقل');
+                            }
+                          }}
+                          className="text-gold/70 hover:text-gold"
+                        >
+                          <i className="fas fa-edit text-sm"></i>
+                        </button>
+                      </div>
+
+                      {profile.username.startsWith('ضيف_') && (
+                        <button
+                          onClick={() => {
+                            const username = prompt('أدخل اسم المستخدم الجديد (3 أحرف على الأقل)');
+                            if (username && username.length >= 3) {
+                              const password = prompt('أدخل كلمة المرور (6 أحرف على الأقل)');
+                              if (password && password.length >= 6) {
+                                fetch('/api/profile/convert', {
+                                  method: 'POST',
+                                  headers: {
+                                    'Content-Type': 'application/json'
+                                  },
+                                  body: JSON.stringify({ username, password })
+                                })
+                                .then((response) => response.json())
+                                .then((data) => {
+                                  if (data.success) {
+                                    alert('تم تحويل حسابك بنجاح!');
+                                    window.location.reload();
+                                  } else {
+                                    alert(data.message || 'حدث خطأ أثناء تحويل الحساب');
+                                  }
+                                });
+                              } else {
+                                alert('يجب أن تكون كلمة المرور 6 أحرف على الأقل');
+                              }
+                            }
+                          }}
+                          className="bg-gradient-to-br from-gold to-darkGold text-deepBlack font-bold py-2 px-4 rounded-md hover:from-lightGold hover:to-gold transition-all"
+                        >
+                          تحويل إلى حساب دائم
+                        </button>
+                      )}
                     </div>
                     <p className="text-gold/80 text-sm mb-3 font-tajawal">عضو منذ {profile.stats.joinDate}</p>
                     
