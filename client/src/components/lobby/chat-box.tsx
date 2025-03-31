@@ -53,7 +53,7 @@ export function ChatBox() {
   };
 
   return (
-    <div className="flex flex-col h-[400px] rounded-lg border border-gold/10 overflow-hidden bg-[url('/attached_assets/gradient-poker-table-background_23-2151085419 (1).jpg')] bg-cover bg-center">
+    <div className="flex flex-col h-[400px] bg-slate/20 rounded-lg border border-gold/10 overflow-hidden">
       <div className="px-4 py-2 border-b border-gold/10">
         <h3 className="text-gold font-bold">الدردشة</h3>
       </div>
@@ -73,10 +73,10 @@ export function ChatBox() {
                 </div>
                 <span className="text-sm text-gold/60">{msg.username}</span>
               </div>
-              <div className={`max-w-[80%] px-3 py-2 ${
+              <div className={`max-w-[80%] rounded-lg px-3 py-2 ${
                 msg.username === user?.username
-                ? "bg-white/90 text-black rounded-t-2xl rounded-l-2xl rounded-br-sm border-2 border-gold/30"
-                : "bg-white/90 text-black rounded-t-2xl rounded-r-2xl rounded-bl-sm border-2 border-gold/30"
+                ? "bg-gold/10 text-white"
+                : "bg-slate text-white"
               }`}>
                 {msg.message}
               </div>
