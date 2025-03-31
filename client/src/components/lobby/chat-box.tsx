@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useWebSocket } from "@/hooks/use-websocket";
@@ -22,17 +23,19 @@ export function ChatBox() {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (!user) return;
+
     const handler = (message: ChatMessage) => {
       setMessages(prev => [...prev, message]);
-      setTimeout(() => {
+      requestAnimationFrame(() => {
         if (scrollAreaRef.current) {
           scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
         }
-      }, 100);
+      });
     };
 
     registerHandler("chat_message", handler);
-  }, [registerHandler]);
+  }, [registerHandler, user]);
 
   const sendChatMessage = () => {
     if (!newMessage.trim() || !user) return;
