@@ -95,9 +95,9 @@ export default function LobbyPage() {
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <img 
-                src="/assets/poker-icon.jpg" 
+                src="/assets/poker-logo.jpeg" 
                 alt="بوكر عرباوي" 
-                className="w-8 h-8 rounded-full border border-[#D4AF37]" 
+                className="w-10 h-10 rounded-full border-2 border-[#D4AF37] object-cover shadow-md shadow-[#D4AF37]/30" 
               />
               <h1 className="text-xl font-bold text-[#D4AF37]">بوكر تكساس عرباوي</h1>
             </div>
@@ -204,8 +204,15 @@ export default function LobbyPage() {
             {/* Game Categories */}
             <div className="w-full">
               <div className="rounded-xl bg-black/60 border border-[#D4AF37]/20 p-3 backdrop-blur-sm mb-4">
-                <div className="text-center mb-6">
-                  <h2 className="text-2xl font-bold text-[#D4AF37]">اختر نوع اللعبة</h2>
+                <div className="text-center mb-6 flex flex-col items-center">
+                  <div className="flex items-center gap-3 mb-2">
+                    <img 
+                      src="/assets/poker-logo-alt.jpeg" 
+                      alt="بوكر عرباوي" 
+                      className="w-12 h-12 rounded-full border-2 border-[#D4AF37] object-cover shadow-md shadow-[#D4AF37]/30"
+                    />
+                    <h2 className="text-2xl font-bold text-[#D4AF37]">اختر نوع اللعبة</h2>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mx-auto">
