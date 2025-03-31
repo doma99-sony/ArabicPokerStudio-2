@@ -12,6 +12,108 @@ interface ChatMessage {
   id: string;
   username: string;
   message: string;
+  timestamp: number;
+}
+
+export function ChatBox() {
+  const { user } = useAuth();
+  const { sendMessage, registerHandler } = useWebSocket();
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [newMessage, setNewMessage] = useState("");
+  const [showEmoji, setShowEmoji] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    const unregister = registerHandler("chat_message", (message: ChatMessage) => {
+      setMessages(prev => [...prev, message]);
+    });
+    
+    return () => unregister();
+  }, [registerHandler]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const handleSendMessage = () => {
+    if (!newMessage.trim() || !user) return;
+    
+    sendMessage({
+      type: "chat_message",
+      message: newMessage.trim()
+    });
+    
+    setNewMessage("");
+    setShowEmoji(false);
+  };
+
+  const onEmojiClick = (emojiData: EmojiClickData) => {
+    setNewMessage(prev => prev + emojiData.emoji);
+  };
+
+  return (
+    <div className="bg-black/80 rounded-lg border border-gold/20 flex flex-col h-full">
+      <div className="p-4 border-b border-gold/20">
+        <h2 className="text-xl font-bold text-gold">الدردشة العامة</h2>
+      </div>
+      
+      <ScrollArea className="flex-1 p-4">
+        <div className="space-y-4">
+          {messages.map((msg) => (
+            <div 
+              key={msg.id}
+              className={`flex flex-col ${msg.username === user?.username ? 'items-end' : 'items-start'}`}
+            >
+              <span className="text-sm text-gold/60">{msg.username}</span>
+              <div className={`mt-1 px-3 py-2 rounded-lg max-w-[80%] ${
+                msg.username === user?.username ? 'bg-gold/20 text-white' : 'bg-black/40 text-white/90'
+              }`}>
+                {msg.message}
+              </div>
+            </div>
+          ))}
+          <div ref={messagesEndRef} />
+        </div>
+      </ScrollArea>
+      
+      <div className="p-4 border-t border-gold/20">
+        <div className="flex gap-2">
+          <div className="relative">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowEmoji(!showEmoji)}
+            >
+              <Smile className="h-5 w-5" />
+            </Button>
+            {showEmoji && (
+              <div className="absolute bottom-full right-0 mb-2">
+                <EmojiPicker onEmojiClick={onEmojiClick} />
+              </div>
+            )}
+          </div>
+          
+          <Input
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+            placeholder="اكتب رسالتك هنا..."
+            className="flex-1"
+          />
+          
+          <Button onClick={handleSendMessage}>
+            <Send className="h-5 w-5" />
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+interface ChatMessage {
+  id: string;
+  username: string;
+  message: string;
   avatar?: string;
   timestamp?: number; // إضافة طابع زمني لتتبع متى تم إرسال الرسالة
 }
