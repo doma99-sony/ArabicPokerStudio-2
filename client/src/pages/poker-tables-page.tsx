@@ -12,6 +12,7 @@ export default function PokerTablesPage() {
   const [, navigate] = useLocation();
   const { user } = useAuth();
   const [activePokerLevel, setActivePokerLevel] = useState("نوب");
+  const [showRankPopup, setShowRankPopup] = useState(false); // Added state for popup
 
   const { data: tables, isLoading: tablesLoading, refetch } = useQuery<GameTable[]>({
     queryKey: ["/api/tables", "poker"],
@@ -72,7 +73,7 @@ export default function PokerTablesPage() {
       <header className="relative z-10 bg-black/80 text-white p-12 shadow-xl border-b border-[#D4AF37]/30">
         <div className="container mx-auto flex justify-between items-center">
           <h1 className="text-7xl font-bold text-[#D4AF37]">طاولات بوكر تكساس</h1>
-          
+
           <Button 
             variant="outline" 
             className="border-[#D4AF37]/50 text-[#D4AF37] hover:bg-[#D4AF37]/10"
@@ -87,6 +88,48 @@ export default function PokerTablesPage() {
       {/* Main Content */}
       <main className="relative z-10 container mx-auto flex-1 p-6 mt-8">
         <div className="space-y-8">
+          {/* Ranking Section */}
+          <div className="relative mb-8">
+            <div className="absolute top-4 right-4 w-64">
+              <div className="text-center">
+                <h3 className="text-2xl font-bold text-[#D4AF37] mb-2">RANK</h3>
+                <img 
+                  src="/your-uploaded-games-image.png" 
+                  alt="Ranking" 
+                  className="w-full h-auto"
+                />
+              </div>
+            </div>
+
+            {/* Popup Button */}
+            <button
+              onClick={() => setShowRankPopup(true)}
+              className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#D4AF37] text-black px-6 py-3 rounded-lg font-bold hover:bg-[#E5C04B] transition-colors z-20"
+            >
+              عرض التفاصيل
+            </button>
+
+            {/* Popup Dialog */}
+            {showRankPopup && (
+              <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-30">
+                <div className="bg-deepBlack border-2 border-[#D4AF37] rounded-xl p-8 max-w-2xl w-full mx-4">
+                  <h2 className="text-2xl font-bold text-[#D4AF37] mb-4">تفاصيل التصنيف</h2>
+                  <div className="text-white space-y-4">
+                    {/* Add your ranking details here */}
+                    <p>سيتم إضافة تفاصيل التصنيف هنا...</p>
+                  </div>
+                  <button
+                    onClick={() => setShowRankPopup(false)}
+                    className="mt-6 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition-colors"
+                  >
+                    إغلاق
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+
           {/* مستويات البوكر */}
           <div className="rounded-xl bg-black/60 border border-[#D4AF37]/20 p-6 backdrop-blur-sm">
             <div className="flex justify-between items-center mb-6">
