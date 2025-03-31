@@ -62,6 +62,8 @@ export default function LobbyPage() {
       navigate("/poker-tables");
     } else if (gameType === "naruto") {
       navigate("/naruto");
+    } else if (gameType === "domino") {
+      navigate("/domino");
     }
     // ستتم إضافة المزيد من الألعاب لاحقًا
   };
@@ -244,7 +246,10 @@ export default function LobbyPage() {
                   {/* دومينو */}
                   <div 
                     className={`flex flex-col h-32 rounded-lg overflow-hidden border-2 ${activeGameCategory === 'domino' ? 'ring-2 ring-blue-600' : ''} border-blue-600/80 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer`}
-                    onClick={() => setActiveGameCategory('domino')}
+                    onClick={() => {
+                      setActiveGameCategory('domino');
+                      navigateToGameTables('domino');
+                    }}
                   >
                     <div className="bg-gradient-to-br from-[#1E3A8A] to-[#0F172A] flex-1 flex items-center justify-center">
                       <span className="text-white text-3xl font-bold">🎲</span>
@@ -252,9 +257,16 @@ export default function LobbyPage() {
                     <div className="p-1 bg-blue-500/10 border-t border-blue-500/30">
                       <h3 className="text-blue-400 font-bold text-sm">دومينو</h3>
                     </div>
-                    <div className="py-1 px-2 bg-gray-700/50 text-white/50 font-bold text-xs flex items-center justify-center">
-                      قريباً...
-                    </div>
+                    <button 
+                      className="py-1 px-2 bg-blue-500 text-white font-bold text-xs hover:bg-blue-400 transition-colors flex items-center justify-center"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigateToGameTables('domino');
+                      }}
+                    >
+                      العب الدومينو الآن
+                      <ChevronRight className="mr-1 h-3 w-3" />
+                    </button>
                   </div>
                 </div>
               </div>
@@ -294,6 +306,29 @@ export default function LobbyPage() {
       {/* Bottom Navigation Bar */}
       <div className="fixed bottom-0 left-0 right-0 z-30 w-full mx-auto">
         <div className="bg-gradient-to-t from-black via-[#0A3A2A] to-[#0A3A2A]/90 border-t-2 border-[#D4AF37] px-1 py-1 shadow-xl backdrop-blur-md flex items-center justify-between">
+          {/* الرانك */}
+          <div className="relative group">
+            <button 
+              className="relative flex flex-col items-center justify-center p-2 min-w-[60px]"
+              onClick={() => {
+                navigate("/rankings");
+              }}
+            >
+              <div className="bg-gradient-to-br from-[#FFD700]/80 to-[#ffa500]/80 rounded-full w-14 h-14 border-2 border-[#D4AF37] flex items-center justify-center relative shadow-lg hover:shadow-[#D4AF37]/20 transition-all duration-300 overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-[#D4AF37]/0 via-[#D4AF37]/30 to-[#D4AF37]/0 animate-pulse-slow"></div>
+                <div className="relative w-11 h-11 overflow-hidden">
+                  <img 
+                    src="/assets/rankings/rank-trophy.png" 
+                    alt="Rank" 
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border border-white shadow-md animate-pulse"></span>
+              </div>
+              <span className="text-[11px] text-white mt-1 font-bold text-[#D4AF37]">الرانك</span>
+            </button>
+          </div>
+          
           {/* الأحداث */}
           <div className="relative group">
             <button 
@@ -458,6 +493,16 @@ export default function LobbyPage() {
           @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
+          }
+          .animate-pulse-slow {
+            animation: pulse 3s infinite;
+          }
+          @keyframes glow {
+            0%, 100% { box-shadow: 0 0 5px #D4AF37, 0 0 10px #D4AF37; }
+            50% { box-shadow: 0 0 15px #D4AF37, 0 0 20px #D4AF37; }
+          }
+          .animate-glow {
+            animation: glow 2s infinite;
           }
         `
       }} />

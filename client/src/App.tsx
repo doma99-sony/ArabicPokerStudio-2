@@ -8,6 +8,8 @@ import ProfilePage from "@/pages/profile-page";
 import NarutoPage from "@/pages/naruto-page";
 import LevelSelectPage from "@/pages/level-select-page";
 import PokerTablesPage from "@/pages/poker-tables-page";
+import RankingsPage from "@/pages/rankings-page";
+import DominoPage from "@/pages/domino-page";
 import { ProtectedRoute } from "./lib/protected-route";
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
@@ -23,6 +25,8 @@ function Router() {
       <ProtectedRoute path="/poker/levels" component={LevelSelectPage} />
       <ProtectedRoute path="/poker/:level" component={GamePage} />
       <ProtectedRoute path="/naruto" component={NarutoPage} />
+      <ProtectedRoute path="/rankings" component={RankingsPage} />
+      <ProtectedRoute path="/domino" component={DominoPage} />
       <Route component={NotFound} />
     </Switch>
   );
