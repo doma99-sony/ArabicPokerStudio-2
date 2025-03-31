@@ -50,12 +50,11 @@ export function setupAuth(app: Express) {
   
   const sessionSettings: session.SessionOptions = {
     secret: sessionSecret,
-    // تمكين حفظ الجلسة حتى لو لم تتغير
-    resave: true,
-    // حفظ الجلسة غير المهيأة لمنع إعادة تأهيل المستخدم
-    saveUninitialized: true,
+    resave: false,
+    saveUninitialized: false,
     store: new MemoryStore({
-      checkPeriod: 86400000 // 24 ساعة
+      checkPeriod: 86400000, // 24 ساعة
+      stale: false
     }),
     cookie: { 
       secure: false, // تعطيل secure لبيئة التطوير

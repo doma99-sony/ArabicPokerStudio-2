@@ -7,10 +7,16 @@ import { z } from "zod";
 
 // ميدلوير للتحقق من المصادقة
 function ensureAuthenticated(req: Request, res: Response, next: NextFunction) {
-  if (req.isAuthenticated()) {
+  if (req.isAuthenticated() && req.user) {
+    // Refresh session
+    req.session.touch();
     return next();
   }
-  res.status(401).json({ message: "يجب تسجيل الدخول للوصول إلى هذا المورد" });
+  // Clear any invalid session
+  req.session.destroy((err) => {
+    if (err) console.error("Session destruction error:", err);
+    res.status(401).json({ message: "يجب تسجيل الدخول للوصول إلى هذا المورد" });
+  });
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {

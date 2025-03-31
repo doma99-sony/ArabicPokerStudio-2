@@ -52,6 +52,9 @@ export function setupPokerGame(app: Express, httpServer: Server) {
           userId = user.id;
           clients.set(userId, ws);
           
+          // Send authentication success response
+          ws.send(JSON.stringify({ type: "auth", success: true }));
+          
         } else if (data.type === "chat_message" && userId) {
           // Handle chat messages
           const messageId = Date.now().toString();
@@ -68,7 +71,7 @@ export function setupPokerGame(app: Express, httpServer: Server) {
             
             // Broadcast to all connected clients
             broadcast(chatMessage);
-          }et(userId, ws);
+          }
           
           ws.send(JSON.stringify({ type: "auth", success: true }));
         } else if (data.type === "join_table") {
