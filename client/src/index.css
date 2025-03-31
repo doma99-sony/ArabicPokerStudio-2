@@ -76,6 +76,38 @@
   body {
     @apply font-tajawal antialiased bg-deepBlack text-foreground;
     direction: rtl;
+    
+    /* توجيه أفقي للموبايل */
+    @media screen and (max-width: 767px) and (orientation: portrait) {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+  }
+  
+  /* التوجيه الأفقي على الموبايل */
+  .mobile-landscape-notice {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.9);
+    z-index: 9999;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+  }
+  
+  @media screen and (max-width: 767px) and (orientation: portrait) {
+    .mobile-landscape-notice {
+      display: flex;
+    }
   }
 
   /* Arabic fonts */

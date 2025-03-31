@@ -6,7 +6,7 @@ import { GameType } from "@/types";
 import { ChatBox } from "@/components/lobby/chat-box";
 import { Button } from "@/components/ui/button";
 import { OnlineUsersCounter } from "@/components/ui/online-users-badge";
-import { LogOut, User, ChevronRight, Loader2, ChevronLeft, ChevronUp, Bell, ShoppingBag, ShoppingCart } from "lucide-react";
+import { LogOut, User, ChevronRight, Loader2, ChevronLeft, ChevronUp, Bell, ShoppingBag, ShoppingCart, Download, Smartphone } from "lucide-react";
 
 export default function LobbyPage() {
   const [location, navigate] = useLocation();
@@ -122,6 +122,18 @@ export default function LobbyPage() {
               الملف
             </Button>
 
+            <Button 
+              variant="outline" 
+              className="border-green-500/50 text-green-400 hover:bg-green-500/10 h-8 py-0 px-2 text-xs"
+              onClick={() => {
+                // رابط تحميل التطبيق للأندرويد (ستقوم بتغييره لاحقا بالرابط الفعلي)
+                alert("سيتم تحميل تطبيق الأندرويد");
+              }}
+            >
+              <Smartphone size={14} className="ml-1" />
+              تحميل التطبيق
+            </Button>
+            
             <Button 
               variant="outline" 
               className="border-red-500/50 text-red-400 hover:bg-red-500/10 h-8 py-0 px-2 text-xs"

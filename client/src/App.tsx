@@ -20,6 +20,7 @@ import { ProtectedRoute } from "./lib/protected-route";
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
 import { WelcomeMessageNotification } from "@/components/ui/welcome-message";
+import { LandscapeNotice } from "@/components/ui/landscape-notice";
 
 function Router() {
   return (
@@ -65,6 +66,7 @@ function App() {
     <>
       <Router />
       <WelcomeMessageNotification />
+      <LandscapeNotice />
       <Toaster />
     </>
   );
