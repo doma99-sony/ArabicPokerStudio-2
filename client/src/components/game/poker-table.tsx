@@ -144,6 +144,52 @@ export function PokerTable({ gameState }: PokerTableProps) {
           </div>
         </div>
 
+        {/* Dealer (Card distributor) in center of table - موزعة الورق */}
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-25">
+          {/* Only show dealer/distributor if game has started */}
+          {gameState.gameStatus !== "waiting" && (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
+              className="relative"
+            >
+              {/* الموزعة - صورة امرأة بزي كازينو كما في الصورة */}
+              <div className="dealer-avatar absolute w-20 h-32 -top-16 -left-10 z-10">
+                <div className="w-full h-full rounded-lg overflow-hidden border-2 border-gold/30 shadow-lg">
+                  <div className="w-full h-full bg-gradient-to-b from-pink-500/70 to-purple-800/70 flex items-center justify-center">
+                    <div className="w-16 h-16 rounded-full bg-white/20 overflow-hidden flex items-center justify-center">
+                      <div className="text-red-500 font-bold text-xs transform rotate-45">
+                        DEALER
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Card stack - deck of cards in front of the dealer */}
+              <div className="deck-cards relative w-14 h-20 bg-white rounded-md shadow-xl border border-gray-300">
+                {/* Card layers to show stack */}
+                {[...Array(3)].map((_, i) => (
+                  <div 
+                    key={`card-layer-${i}`} 
+                    className="absolute w-14 h-20 bg-white rounded-md border border-gray-300 shadow-md" 
+                    style={{ 
+                      top: `${-2 - i * 1}px`, 
+                      left: `${-2 - i * 1}px` 
+                    }}
+                  />
+                ))}
+                
+                {/* Card back design */}
+                <div className="absolute inset-1 bg-slate-800 rounded-sm flex items-center justify-center">
+                  <div className="text-gold text-2xl">♦</div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </div>
+
         {/* Dealer button */}
         {gameState.gameStatus !== "waiting" && (
           <div className="absolute z-10 w-10 h-10 bg-white rounded-full flex items-center justify-center text-sm font-bold border-2 border-gold shadow-lg" 
@@ -157,7 +203,7 @@ export function PokerTable({ gameState }: PokerTableProps) {
       
         {/* Center pot indicator */}
         {gameState.pot > 0 && (
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30">
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 translate-y-14 z-30">
             <div className="flex flex-col items-center">
               {/* Current bet amount */}
               <div className="bg-black/60 rounded-full px-3 py-1 mb-2 text-center">
@@ -177,7 +223,7 @@ export function PokerTable({ gameState }: PokerTableProps) {
         )}
 
         {/* Community Cards */}
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex space-x-1 rtl:space-x-reverse z-20">
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 mt-20 flex space-x-1 rtl:space-x-reverse z-20">
           {gameState.communityCards.map((card, index) => (
             <motion.div
               key={`community-card-${index}`}

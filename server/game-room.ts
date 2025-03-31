@@ -1,5 +1,5 @@
-import { GameTable, GameState, PlayerPosition, Card, GameAction } from "../client/src/types";
-import { createDeck, shuffleDeck, dealCards, remainingCards } from "../client/src/lib/card-utils";
+import { GameTable, GameState, Card, GameAction } from "../shared/types";
+import { createDeck, shuffleDeck, dealCards, remainingCards } from "./card-utils";
 
 // Interface for game room player
 interface GamePlayer {

@@ -9,7 +9,7 @@ interface PlayerComponentProps {
 
 export function PlayerComponent({ player, isTurn }: PlayerComponentProps) {
   // Position classes based on player position - adjusted for the new table layout
-  const positionClasses = {
+  const positionClasses: Record<string, string> = {
     bottom: "absolute bottom-4 left-1/2 transform -translate-x-1/2 flex-col items-center",
     bottomRight: "absolute bottom-12 right-16 flex-col items-end",
     topRight: "absolute top-12 right-20 flex-col items-end",
@@ -18,7 +18,7 @@ export function PlayerComponent({ player, isTurn }: PlayerComponentProps) {
   };
 
   // Calculate rotation for cards based on position
-  const cardRotations = {
+  const cardRotations: Record<string, number[]> = {
     bottom: [10, -10],
     bottomRight: [5, -5],
     topRight: [5, -5],
@@ -75,16 +75,16 @@ export function PlayerComponent({ player, isTurn }: PlayerComponentProps) {
           </div>
           
           {/* Player's bet amount if any - shown below cards */}
-          {player.betAmount > 0 && (
+          {player.betAmount && player.betAmount > 0 && (
             <div className="mt-2 relative">
               {/* Chip visualization */}
               <div className="w-10 h-10 bg-red-600 rounded-full border-4 border-white shadow-xl flex items-center justify-center text-white font-bold text-xs z-20">
-                {Math.floor(player.betAmount / 1000)}K
+                {Math.floor((player.betAmount || 0) / 1000)}K
               </div>
               
               {/* Exact bet amount */}
               <div className="absolute -bottom-5 left-1/2 transform -translate-x-1/2 bg-black/60 rounded-full px-2 py-0.5 text-white text-xs min-w-[40px] text-center">
-                {player.betAmount.toLocaleString()}
+                {(player.betAmount || 0).toLocaleString()}
               </div>
             </div>
           )}

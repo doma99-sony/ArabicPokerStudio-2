@@ -1,43 +1,9 @@
-import { Card } from '@/types';
-
-export function getSuitColor(suit: string): string {
-  return suit === 'hearts' || suit === 'diamonds' ? 'text-red-600' : 'text-black';
-}
-
-export function getCardDisplayValue(card: Card): { suit: string, value: string } {
-  const suitMap: Record<string, string> = {
-    hearts: '♥',
-    diamonds: '♦',
-    clubs: '♣',
-    spades: '♠'
-  };
-
-  const valueMap: Record<string, string> = {
-    'A': 'A',
-    'K': 'K',
-    'Q': 'Q',
-    'J': 'J',
-    '10': '10',
-    '9': '9',
-    '8': '8',
-    '7': '7',
-    '6': '6',
-    '5': '5',
-    '4': '4',
-    '3': '3',
-    '2': '2'
-  };
-
-  return {
-    suit: suitMap[card.suit] || '?',
-    value: valueMap[card.value] || '?'
-  };
-}
+import { Card } from "../shared/types";
 
 // إنشاء مجموعة كاملة من الورق (52 ورقة)
 export function createDeck(): Card[] {
-  const suits: Card['suit'][] = ['hearts', 'diamonds', 'clubs', 'spades'];
-  const values: Card['value'][] = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+  const suits: Array<"hearts" | "diamonds" | "clubs" | "spades"> = ['hearts', 'diamonds', 'clubs', 'spades'];
+  const values: Array<"2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | "J" | "Q" | "K" | "A"> = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
   const deck: Card[] = [];
 
   for (const suit of suits) {
