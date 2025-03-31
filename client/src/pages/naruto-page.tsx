@@ -77,11 +77,11 @@ export default function NarutoPage({ params }: { params?: { tableId?: string } }
           <div 
             className="p-8 rounded-lg max-w-4xl w-full border border-[#ff9d00]/30"
             style={{
-              backgroundImage: 'url("/assets/images/th (17).jfif")',
+              backgroundImage: 'url("/assets/images/naruto-bg.jpg")',
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               backgroundBlendMode: 'overlay',
-              backgroundColor: 'rgba(26, 26, 46, 0.9)'
+              backgroundColor: 'rgba(26, 26, 46, 0.95)'
             }}
           >
             <h2 className="text-2xl font-bold text-[#ff9d00] mb-6 font-cairo">لعبة ناروتو - قريباً</h2>
