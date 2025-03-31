@@ -93,6 +93,10 @@ export class MemStorage implements IStorage {
     this.createTableCategory("محترف", 250, 500, 500000, 5, 10, "poker");
     this.createTableCategory("الفاجر", 2000, 4000, 10000000, 5, 10, "poker");
     
+    // طاولات بوكر عرباوي VIP
+    this.createTableCategoryWithNames(["المصريين", "السعوديين", "الإماراتيين", "الكويتيين", "اللبنانيين", "الأردنيين", "المغاربة"], 
+      100000, 200000, 1000000, 5, "poker");
+    
     // طاولات لعبة ناروتو
     this.createTableCategory("سهل", 10, 20, 10000, 2, 5, "naruto");
     this.createTableCategory("متوسط", 50, 100, 50000, 2, 5, "naruto");
@@ -140,6 +144,47 @@ export class MemStorage implements IStorage {
         status,
         category: categoryName, // إضافة فئة الطاولة
         gameType // إضافة نوع اللعبة
+      };
+      
+      this.tables.set(table.id, table);
+      this.gameRooms.set(table.id, createGameRoom(table));
+    }
+  }
+  
+  // إنشاء فئة من الطاولات بأسماء محددة
+  private createTableCategoryWithNames(
+    tableNames: string[],
+    smallBlind: number,
+    bigBlind: number,
+    minBuyIn: number,
+    maxPlayers: number,
+    gameType: GameType
+  ) {
+    for (let i = 0; i < tableNames.length; i++) {
+      const tableName = tableNames[i];
+      // توزيع عشوائي لعدد اللاعبين في كل طاولة ليبدو واقعياً
+      const currentPlayers = Math.floor(Math.random() * maxPlayers);
+      let status: TableStatus = "available";
+      
+      if (currentPlayers === maxPlayers) {
+        status = "full";
+      } else if (currentPlayers > 0) {
+        status = "busy";
+      }
+      
+      const table: GameTable = {
+        id: this.currentTableId++,
+        name: tableName,
+        smallBlind,
+        bigBlind,
+        minBuyIn,
+        maxPlayers,
+        currentPlayers,
+        status,
+        category: "بوكر عرباوي VIP", // فئة الطاولة
+        gameType,
+        isVip: true,
+        requiredVipLevel: 1
       };
       
       this.tables.set(table.id, table);
