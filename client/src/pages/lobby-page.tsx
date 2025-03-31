@@ -113,7 +113,7 @@ export default function LobbyPage() {
                 </div>
                 
                 {/* منطقة الدردشة */}
-                <div className="h-[calc(100%-50px)] bg-gradient-to-b from-[#1B4D3E]/80 to-black/60 w-80">
+                <div className="h-[calc(80%-50px)] bg-gradient-to-b from-[#1B4D3E]/80 to-black/60 w-80">
                   <div className="h-full w-full">
                     <ChatBox />
                   </div>

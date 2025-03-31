@@ -222,7 +222,7 @@ export function ChatBox() {
       </div>
 
       <div className="flex-1 flex flex-col">
-        <ScrollArea ref={scrollAreaRef} className="flex-1 p-3 h-[400px]"> {/* Reduced height */}
+        <ScrollArea ref={scrollAreaRef} className="flex-1 p-3 h-[300px]"> {/* Reduced height */}
           <div className="space-y-3">
             {messages.map((msg) => (
               <div key={msg.id} className="flex flex-col mb-2">
