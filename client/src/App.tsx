@@ -15,6 +15,7 @@ import InventoryPage from "@/pages/inventory-page";
 import ShopPage from "@/pages/shop-page";
 import MissionsPage from "@/pages/missions-page";
 import VIPPage from "@/pages/vip-page";
+import SettingsPage from "@/pages/settings-page";
 import { ProtectedRoute } from "./lib/protected-route";
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
@@ -39,6 +40,7 @@ function Router() {
       <ProtectedRoute path="/shop" component={ShopPage} />
       <ProtectedRoute path="/missions" component={MissionsPage} />
       <ProtectedRoute path="/vip" component={VIPPage} />
+      <ProtectedRoute path="/settings" component={SettingsPage} />
       <Route component={NotFound} />
     </Switch>
   );
