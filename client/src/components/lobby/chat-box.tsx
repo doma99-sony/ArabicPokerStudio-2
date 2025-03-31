@@ -4,8 +4,9 @@ import { useWebSocket } from "@/hooks/use-websocket";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send } from "lucide-react";
+import { Send, Smile } from "lucide-react";
 import { Image } from "@/components/ui/image";
+import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
 
 interface ChatMessage {
   id: string;
@@ -18,6 +19,24 @@ interface ChatMessage {
 export function ChatBox() {
   const { user } = useAuth();
   const { registerHandler, sendMessage, socket } = useWebSocket();
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [messageCount, setMessageCount] = useState(() => {
+    // استرجاع عدد الرسائل اليومية من التخزين المحلي
+    try {
+      const today = new Date().toDateString();
+      const storedData = localStorage.getItem('messageCount');
+      if (storedData) {
+        const parsedData = JSON.parse(storedData);
+        if (parsedData.date === today) {
+          return parsedData.count;
+        }
+      }
+      return 0; // بداية يوم جديد
+    } catch (e) {
+      return 0;
+    }
+  });
+  
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
     // استرجاع الرسائل المخزنة من التخزين المحلي
     const savedMessages = localStorage.getItem('chatMessages');
@@ -39,6 +58,7 @@ export function ChatBox() {
   });
   const [newMessage, setNewMessage] = useState("");
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const emojiPickerRef = useRef<HTMLDivElement>(null);
 
   // تحديث الرسائل عند استلام رسالة جديدة
   useEffect(() => {
@@ -75,9 +95,62 @@ export function ChatBox() {
       }
     }
   }, [messages]);
+  
+  // إغلاق منتقي الإيموجي عند النقر خارجه
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        emojiPickerRef.current && 
+        !emojiPickerRef.current.contains(event.target as Node) &&
+        !(event.target as Element).closest('.emoji-toggle-button')
+      ) {
+        setShowEmojiPicker(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
+  // إضافة إيموجي إلى الرسالة
+  const onEmojiClick = (emojiData: EmojiClickData) => {
+    setNewMessage(prev => prev + emojiData.emoji);
+    setShowEmojiPicker(false);
+  };
+  
+  // حفظ عدد الرسائل المرسلة
+  const updateMessageCount = () => {
+    const today = new Date().toDateString();
+    const newCount = messageCount + 1;
+    localStorage.setItem('messageCount', JSON.stringify({
+      date: today,
+      count: newCount
+    }));
+    setMessageCount(newCount);
+  };
+  
   const sendChatMessage = () => {
     if (newMessage.trim() && user) {
+      // التحقق من عدد الرسائل المرسلة
+      if (messageCount >= 100) {
+        // إضافة رسالة نظام للمستخدم فقط
+        setMessages(prev => {
+          const systemMessage: ChatMessage = {
+            id: Date.now().toString(),
+            username: "system",
+            message: "لقد وصلت إلى الحد الأقصى للرسائل اليومية (100 رسالة)",
+            timestamp: Date.now()
+          };
+          
+          const updatedMessages = [...prev, systemMessage];
+          localStorage.setItem('chatMessages', JSON.stringify(updatedMessages));
+          return updatedMessages;
+        });
+        return;
+      }
+      
       const timestamp = Date.now();
       const messageData = {
         type: "chat_message",
@@ -89,6 +162,9 @@ export function ChatBox() {
       };
       sendMessage(messageData);
       setNewMessage("");
+      
+      // تحديث عدد الرسائل
+      updateMessageCount();
     }
   };
 
@@ -182,7 +258,30 @@ export function ChatBox() {
       </ScrollArea>
 
       <div className="p-3 border-t border-gold/10 bg-black/30">
+        {showEmojiPicker && (
+          <div 
+            ref={emojiPickerRef} 
+            className="absolute bottom-16 right-3 z-50 shadow-lg rounded-lg overflow-hidden"
+          >
+            <EmojiPicker onEmojiClick={onEmojiClick} searchDisabled lazyLoadEmojis />
+          </div>
+        )}
+        
+        <div className="flex items-center justify-between mb-2">
+          <div className="text-xs text-white">
+            <span className="text-gold font-bold">{100 - messageCount}</span> رسالة متبقية اليوم
+          </div>
+        </div>
+        
         <div className="flex gap-2">
+          <Button
+            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+            className="bg-black/30 hover:bg-black/50 text-gold border border-gold/30 p-2 emoji-toggle-button"
+            type="button"
+          >
+            <Smile className="h-4 w-4" />
+          </Button>
+          
           <Input
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
@@ -190,6 +289,7 @@ export function ChatBox() {
             placeholder="اكتب رسالتك..."
             className="flex-1 text-base h-10"
           />
+          
           <Button
             onClick={sendChatMessage}
             className="bg-gold hover:bg-gold/80 text-black px-3"
