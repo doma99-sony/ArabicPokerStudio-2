@@ -71,40 +71,55 @@ export function setupPokerGame(app: Express, httpServer: Server) {
         } else if (data.type === "chat_message") {
           // Handle chat messages - تفعيل الرسائل حتى للمستخدمين غير المصادق عليهم مسبقاً
           // استخدام معرف الرسالة المرسل من العميل، أو إنشاء واحد جديد
-          const messageId = data.id || Date.now().toString();
+          const messageId = data.id || `msg_${Date.now()}`;
           
           // استخدام معلومات المستخدم المرسلة في الرسالة أو الحصول عليها من تخزين الجلسة
           let username = data.username;
           let avatar = data.avatar;
           let timestamp = data.timestamp || Date.now();
           
+          // إذا كان هناك معرف مستخدم، نستخدم معلوماته المخزنة
           if (userId) {
             try {
               const user = await storage.getUser(userId);
               if (user) {
+                // استخدام اسم المستخدم والأفاتار من قاعدة البيانات إذا لم يتم توفيرهما
                 username = username || user.username;
                 avatar = avatar || user.avatar;
+                console.log(`معالجة رسالة من المستخدم ${username}`);
               }
             } catch (e) {
               console.error("خطأ في الحصول على معلومات المستخدم:", e);
             }
           }
           
-          if (username && data.message) {
+          // التحقق من وجود رسالة واسم مستخدم
+          if (username && data.message && data.message.trim().length > 0) {
+            // تنسيق رسالة الشات
             const chatMessage = {
               type: "chat_message",
               id: messageId,
               username: username,
-              message: data.message,
-              avatar: avatar, // إضافة الصورة الرمزية للمستخدم
+              message: data.message.trim(),
+              avatar: avatar,
               timestamp: timestamp
             };
             
-            // إرسال الرسالة للمرسل أولاً لتأكيد الاستلام
-            ws.send(JSON.stringify(chatMessage));
+            console.log(`رسالة جديدة من ${username}: ${data.message.substring(0, 30)}${data.message.length > 30 ? '...' : ''}`);
+            
+            // إرسال الرسالة للمرسل أولاً لتأكيد الاستلام (إذا لم يتم معالجتها بالفعل في العميل)
+            if (!data.clientHandled) {
+              ws.send(JSON.stringify(chatMessage));
+            }
             
             // ثم بث إلى جميع العملاء المتصلين الآخرين
             broadcast(chatMessage, userId);
+          } else {
+            // إرسال رسالة خطأ إذا كانت البيانات غير مكتملة
+            ws.send(JSON.stringify({ 
+              type: "error", 
+              message: "الرسالة غير صالحة، يرجى التأكد من إرسال اسم مستخدم ومحتوى رسالة" 
+            }));
           }
         } else if (data.type === "join_table") {
           // User joining a table

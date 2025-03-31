@@ -87,13 +87,26 @@ export function useWebSocket() {
   // Send message via WebSocket
   const sendMessage = useCallback((message: any) => {
     if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-      // إذا كان نوع الرسالة هو رسالة دردشة، وتم إرسالها من العميل، نقوم بمعالجتها محلياً أيضاً
+      // إذا كان نوع الرسالة هو رسالة دردشة، نقوم بإضافة بيانات المستخدم وإنشاء معرف فريد
       if (message.type === "chat_message" && user) {
+        // إضافة معرف الرسالة واسم المستخدم والصورة الرمزية إذا لم يكونوا موجودين
+        const chatMessage = {
+          ...message,
+          id: message.id || `msg_${Date.now()}`,
+          username: user.username,
+          avatar: user.avatar,
+          timestamp: Date.now(),
+          clientHandled: true // إعلام الخادم بأننا قمنا بمعالجة الرسالة في العميل
+        };
+        
         // إشارة للمعالج المحلي بالرسالة (لضمان ظهور الرسائل المرسلة حتى لو لم ترجع من الخادم)
         const handler = messageHandlersRef.current.get("chat_message");
         if (handler) {
-          handler(message);
+          handler(chatMessage);
         }
+        
+        socketRef.current.send(JSON.stringify(chatMessage));
+        return true;
       }
       
       socketRef.current.send(JSON.stringify(message));
