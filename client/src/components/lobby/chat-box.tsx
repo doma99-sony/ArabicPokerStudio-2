@@ -5,7 +5,7 @@ import { useWebSocket } from "@/hooks/use-websocket";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Send } from "lucide-react";
+import { Send, User } from "lucide-react";
 
 interface ChatMessage {
   id: string;
@@ -67,7 +67,12 @@ export function ChatBox() {
                 msg.username === user?.username ? "items-end" : "items-start"
               }`}
             >
-              <span className="text-sm text-gold/60">{msg.username}</span>
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-6 h-6 rounded-full bg-gold/20 flex items-center justify-center">
+                  <User className="w-4 h-4 text-gold/60" />
+                </div>
+                <span className="text-sm text-gold/60">{msg.username}</span>
+              </div>
               <div className={`max-w-[80%] rounded-lg px-3 py-2 ${
                 msg.username === user?.username
                 ? "bg-gold/10 text-white"
