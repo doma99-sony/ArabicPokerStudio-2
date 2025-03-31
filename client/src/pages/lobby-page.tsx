@@ -391,7 +391,7 @@ export default function LobbyPage() {
             >
               <div className="bg-white rounded-full w-12 h-12 border-2 border-[#D4AF37] flex items-center justify-center relative overflow-hidden">
                 <span className="text-sm font-bold text-[#0A3A2A]">العبها</span>
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-400/20 to-transparent animate-shine"></div>
+                <<div className="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-400/20 to-transparent animate-shine"></div>
               </div>
               <span className="text-[11px] text-white mt-1">العبها الآن</span>
             </button>
