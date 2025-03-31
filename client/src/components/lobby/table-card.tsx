@@ -5,7 +5,7 @@ import { GameTable } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Users, DollarSign, PlayCircle, Plus, Eye as EyeIcon } from "lucide-react";
+import { Loader2, Users, DollarSign, PlayCircle, Plus, Eye as EyeIcon, ExternalLink } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -126,10 +126,12 @@ export function TableCard({ table }: TableCardProps) {
     switch (table.status) {
       case "available":
         return "bg-green-500/70 hover:bg-green-500/60";
-      case "busy":
+      case "in_progress":
         return "bg-amber-500/70 hover:bg-amber-500/60";
       case "full":
         return "bg-red-500/70 hover:bg-red-500/60";
+      case "maintenance":
+        return "bg-purple-500/70 hover:bg-purple-500/60";
       default:
         return "bg-gray-500/70 hover:bg-gray-500/60";
     }
@@ -139,10 +141,12 @@ export function TableCard({ table }: TableCardProps) {
     switch (table.status) {
       case "available":
         return "متاحة";
-      case "busy":
-        return "مشغولة";
+      case "in_progress":
+        return "جارية";
       case "full":
         return "ممتلئة";
+      case "maintenance":
+        return "صيانة";
       default:
         return "غير معروف";
     }
@@ -237,7 +241,7 @@ export function TableCard({ table }: TableCardProps) {
           </div>
         </div>
       </CardContent>
-      <CardFooter>
+      <CardFooter className="flex flex-col gap-2">
         <Button className={`w-full font-bold ${
           table.status === "full" 
             ? "bg-gradient-to-br from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black" 
@@ -254,6 +258,18 @@ export function TableCard({ table }: TableCardProps) {
               <> <PlayCircle size={18} className="ml-2" /> انضم للعب </>
             )
           )}
+        </Button>
+        
+        {/* زر الانتقال المباشر إلى الطاولة */}
+        <Button 
+          variant="outline" 
+          size="sm"
+          className="w-full mt-1 border-[#D4AF37]/40 text-[#D4AF37] hover:bg-[#D4AF37]/10"
+          onClick={() => {
+            window.location.href = `/direct-table/${table.id}`;
+          }}
+        >
+          <ExternalLink size={14} className="ml-2" /> الانتقال المباشر للطاولة
         </Button>
       </CardFooter>
     </Card>

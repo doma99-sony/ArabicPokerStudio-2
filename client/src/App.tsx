@@ -5,6 +5,7 @@ import AuthPage from "@/pages/auth-page";
 import LobbyPage from "@/pages/lobby-page";
 import GamePage from "@/pages/game-page";
 import GamePageSimplified from "@/pages/game-page-simplified";
+import DirectTablePage from "@/pages/direct-table-page";
 import ProfilePage from "@/pages/profile-page";
 import NarutoPage from "@/pages/naruto-page";
 import LevelSelectPage from "@/pages/level-select-page";
@@ -32,6 +33,7 @@ function Router() {
       <ProtectedRoute path="/" component={LobbyPage} />
       <ProtectedRoute path="/game/:tableId" component={GamePage} />
       <ProtectedRoute path="/game-simple/:tableId" component={GamePageSimplified} />
+      <ProtectedRoute path="/direct-table/:tableId" component={DirectTablePage} />
       <ProtectedRoute path="/profile" component={ProfilePage} />
       <ProtectedRoute path="/poker-tables" component={PokerTablesPage} />
       <ProtectedRoute path="/poker/levels" component={LevelSelectPage} />

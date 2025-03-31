@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { OnlineUsersCounter } from "@/components/ui/online-users-badge";
 import { ResetChipsButton } from "@/components/reset-chips-button";
 import { RemoveVirtualPlayersButton } from "@/components/remove-virtual-players-button";
-import { LogOut, User, ChevronRight, Loader2, ChevronLeft, ChevronUp, Bell, ShoppingBag, ShoppingCart, Download, Smartphone } from "lucide-react";
+import { LogOut, User, ChevronRight, Loader2, ChevronLeft, ChevronUp, Bell, ShoppingBag, ShoppingCart, Download, Smartphone, ExternalLink } from "lucide-react";
 
 export default function LobbyPage() {
   const [location, navigate] = useLocation();
@@ -16,6 +16,7 @@ export default function LobbyPage() {
   const [activeGameCategory, setActiveGameCategory] = useState<GameType>("poker");
   const [isChatHidden, setIsChatHidden] = useState(false);
   const [videoMuted, setVideoMuted] = useState(true);
+  const [directTableId, setDirectTableId] = useState<string>("");
   const videoRef = useRef<HTMLVideoElement>(null);
 
   // التحكم في كتم/تشغيل الصوت
@@ -120,6 +121,30 @@ export default function LobbyPage() {
               </div>
             </div>
 
+            {/* زر الانتقال المباشر للطاولة */}
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                placeholder="رقم الطاولة"
+                value={directTableId}
+                onChange={(e) => setDirectTableId(e.target.value)}
+                className="bg-black/50 text-[#D4AF37] border border-[#D4AF37]/40 rounded-md h-8 w-24 text-xs px-2 focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/40"
+              />
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="h-8 py-0 px-2 text-xs border-[#D4AF37]/40 text-[#D4AF37] hover:bg-[#D4AF37]/10"
+                onClick={() => {
+                  if (directTableId && !isNaN(parseInt(directTableId))) {
+                    navigate(`/direct-table/${directTableId}`);
+                  }
+                }}
+              >
+                <ExternalLink size={14} className="ml-1" />
+                انتقال مباشر
+              </Button>
+            </div>
+            
             <Button 
               variant="outline" 
               className="border-[#D4AF37]/50 text-[#D4AF37] hover:bg-[#D4AF37]/10 h-8 py-0 px-2 text-xs"

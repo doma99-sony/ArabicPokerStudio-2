@@ -5,6 +5,28 @@ export interface Card {
   hidden?: boolean;
 }
 
+// تعريف نوع طاولة اللعب
+export interface GameTable {
+  id: number;
+  name: string;
+  gameType: "poker" | "naruto" | "domino" | "tekken";
+  smallBlind: number;
+  bigBlind: number;
+  minBuyIn: number;
+  maxBuyIn?: number;
+  maxPlayers: number;
+  currentPlayers: number;
+  status: "available" | "busy" | "full" | "in_progress" | "maintenance";
+  createdAt: Date;
+  updatedAt: Date;
+  tableImage?: string;
+  isVip: boolean;
+  requiredVipLevel: number;
+  password?: string;
+  ownerId?: number;
+  tableSettings?: Record<string, any>;
+}
+
 export interface PlayerPosition {
   id: number;
   username: string;
