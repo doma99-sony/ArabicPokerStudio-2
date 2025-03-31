@@ -6,6 +6,7 @@ import { GameType } from "@/types";
 import { ChatBox } from "@/components/lobby/chat-box";
 import { Button } from "@/components/ui/button";
 import { OnlineUsersCounter } from "@/components/ui/online-users-badge";
+import { ResetChipsButton } from "@/components/reset-chips-button";
 import { LogOut, User, ChevronRight, Loader2, ChevronLeft, ChevronUp, Bell, ShoppingBag, ShoppingCart, Download, Smartphone } from "lucide-react";
 
 export default function LobbyPage() {
@@ -108,7 +109,13 @@ export default function LobbyPage() {
           <div className="flex items-center gap-2">
             <div className="text-right">
               <p className="text-[#D4AF37] text-sm">مرحباً، {user?.username}</p>
-              <p className="text-white/80 text-xs">الرصيد: <span className="text-[#D4AF37] font-bold">{user?.chips?.toLocaleString()}</span></p>
+              <div className="flex items-center gap-2">
+                <p className="text-white/80 text-xs">الرصيد: <span className="text-[#D4AF37] font-bold">{user?.chips?.toLocaleString()}</span></p>
+                {/* زر إعادة تعيين الرصيد - وضع للاختبار فقط */}
+                <div className="scale-75 origin-right">
+                  <ResetChipsButton />
+                </div>
+              </div>
             </div>
 
             <Button 

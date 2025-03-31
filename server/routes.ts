@@ -286,6 +286,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // نقطة نهاية مؤقتة لإعادة تعيين رصيد المستخدم - للاختبار فقط
+  app.post("/api/debug/reset-chips", ensureAuthenticated, async (req, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "غير مصرح" });
+      }
+      
+      const chipsAmount = req.body.amount || 1000000;
+      const updatedUser = await storage.updateUserChips(req.user.id, chipsAmount);
+      
+      if (!updatedUser) {
+        return res.status(500).json({ success: false, message: "فشل تحديث الرصيد" });
+      }
+      
+      console.log(`تم إعادة تعيين رصيد المستخدم ${req.user.id} إلى ${chipsAmount}`);
+      
+      res.json({ 
+        success: true, 
+        message: `تم إعادة تعيين رصيدك إلى ${chipsAmount} رقاقة`,
+        user: updatedUser
+      });
+    } catch (error) {
+      console.error("خطأ في إعادة تعيين الرصيد:", error);
+      res.status(500).json({ success: false, message: "حدث خطأ أثناء إعادة تعيين الرصيد" });
+    }
+  });
+  
   // Perform a game action (fold, check, call, raise, all-in)
   app.post("/api/game/:tableId/action", ensureAuthenticated, async (req, res) => {
     const tableId = parseInt(req.params.tableId);

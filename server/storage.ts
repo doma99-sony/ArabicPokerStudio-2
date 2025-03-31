@@ -520,9 +520,9 @@ export class MemStorage implements IStorage {
         return joinResult;
       }
       
-      // بعد التأكد من نجاح إضافة اللاعب، نقوم بخصم الرقاقات
-      console.log(`تحديث رصيد المستخدم ${userId} من ${user.chips} إلى ${user.chips - table.minBuyIn}`);
-      const updatedUser = await this.updateUserChips(userId, user.chips - table.minBuyIn);
+      // بعد التأكد من نجاح إضافة اللاعب، نقوم بخصم الرقاقات (فقط قيمة الدخول بالضبط)
+      console.log(`تحديث رصيد المستخدم ${userId} من ${user.chips} إلى ${user.chips - table.minBuyIn} (خصم ${table.minBuyIn} رقاقة للدخول)`);
+      const updatedUser = await this.updateUserChips(userId, Math.max(0, user.chips - table.minBuyIn));
       
       if (!updatedUser) {
         throw new Error("فشل تحديث رصيد المستخدم");
