@@ -154,19 +154,14 @@
   body {
     @apply font-tajawal antialiased bg-deepBlack text-foreground;
     direction: rtl;
-    
-    /* توجيه أفقي للموبايل */
-    @media screen and (max-width: 767px) and (orientation: portrait) {
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-    }
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
+    /* تحسين أداء التمرير على الموبايل */
+    -webkit-overflow-scrolling: touch;
   }
   
-  /* التوجيه الأفقي على الموبايل */
-  .mobile-landscape-notice {
+  /* تم عكس التوجيه - نريد أن نعمل في الوضع الأفقي على الموبايل */
+  .mobile-portrait-notice {
     display: none;
     position: fixed;
     top: 0;
@@ -182,9 +177,113 @@
     padding: 20px;
   }
   
+  /* إظهار إشعار للمستخدم في وضع البورتريه */
   @media screen and (max-width: 767px) and (orientation: portrait) {
-    .mobile-landscape-notice {
+    .mobile-portrait-notice {
       display: flex;
+    }
+  }
+  
+  /* تخصيص الموقع للوضع الأفقي في الموبايل */
+  @media (max-width: 767px) {
+    /* تقليل الحجم للعناصر لتناسب الشاشات الصغيرة */
+    h1, h2, h3 {
+      font-size: 90%;
+    }
+    
+    /* تكبير أزرار اللمس للموبايل */
+    button, .btn, .clickable {
+      min-height: 44px;
+      min-width: 44px;
+    }
+    
+    /* تحسين حجم الخط في الهواتف الصغيرة */
+    body {
+      font-size: 14px;
+    }
+    
+    /* تحسين الأداء: تقليل استخدام الظلال والتأثيرات في الهواتف */
+    .card, .chip, .btn-gold, .gold-border, .naruto-glow {
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2) !important;
+    }
+    
+    /* تحسين أوقات استجابة النقر */
+    [role="button"], 
+    button, 
+    a, 
+    input[type="submit"], 
+    input[type="reset"], 
+    input[type="button"] {
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+    
+    /* تقليل المساحات الفارغة */
+    .container, .wrapper, .content-area {
+      padding: 10px !important;
+    }
+    
+    /* تحسين عرض الصور */
+    img, video {
+      max-width: 100%;
+      height: auto !important;
+    }
+    
+    /* تحسين أداء التمرير */
+    .scroll-container, .scrollable {
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+    }
+  }
+  
+  /* تحسينات لأداء أفضل على الموبايل */
+  img, video {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    will-change: transform, opacity;
+  }
+  
+  /* تحسينات لأجهزة اللمس */
+  .touch-optimization {
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  
+  /* تحسين التحميل الكسول للصور */
+  .lazy-loading {
+    transition: opacity 0.3s ease-in-out;
+    opacity: 0;
+  }
+  
+  .lazy-loaded {
+    opacity: 1;
+  }
+  
+  /* تحسين لأداء الرسوم المتحركة والتحولات */
+  @media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+  
+  /* تحسين أداء التطبيق على الهواتف القديمة */
+  @media screen and (max-width: 480px) {
+    .performance-critical {
+      will-change: auto !important;
+      animation: none !important;
+      transform: none !important;
+      box-shadow: none !important;
+      text-shadow: none !important;
+    }
+    
+    .reduce-animation {
+      transition: none !important;
     }
   }
 
