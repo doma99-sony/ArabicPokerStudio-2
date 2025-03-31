@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
@@ -6,7 +7,8 @@ import { StatsPanel } from "@/components/profile/stats-panel";
 import { Achievements } from "@/components/profile/achievements";
 import { GameHistory } from "@/components/profile/game-history";
 import { Button } from "@/components/ui/button";
-import { Loader2, ChevronRight, User } from "lucide-react";
+import { Loader2, User, ChevronRight, Eye, EyeOff } from "lucide-react";
+import { Image } from "@/components/ui/image";
 import { useState } from "react";
 import {
   Dialog,
@@ -22,17 +24,17 @@ import {
 export default function ProfilePage() {
   const { user } = useAuth();
   const [, navigate] = useLocation();
-
+  
   const { data: profile, isLoading, refetch } = useQuery<PlayerProfile>({
     queryKey: ["/api/profile"],
     enabled: !!user,
     retry: false,
   });
-
+  
   const navigateToLobby = () => {
     navigate("/");
   };
-
+  
   const handleUsernameChange = async () => {
     const newUsername = prompt('أدخل اسم المستخدم الجديد');
     if (newUsername && newUsername.length >= 3) {
@@ -44,7 +46,7 @@ export default function ProfilePage() {
           },
           body: JSON.stringify({ username: newUsername })
         });
-
+        
         const data = await response.json();
         if (data.success) {
           alert('تم تغيير اسم المستخدم بنجاح!');
@@ -56,6 +58,33 @@ export default function ProfilePage() {
         alert('حدث خطأ في الاتصال');
       }
     } else {
+      alert('اسم المستخدم يجب أن يكون 3 أحرف على الأقل');
+    }
+  };
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const formData = new FormData();
+      formData.append('avatar', file);
+      try {
+        const response = await fetch('/api/profile/avatar', {
+          method: 'POST',
+          body: formData
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+          alert('تم تحديث الصورة بنجاح!');
+          refetch();
+        } else {
+          alert(data.message || 'حدث خطأ أثناء تحديث الصورة');
+        }
+      } catch (error) {
+        alert('حدث خطأ في الاتصال');
+      }
+    }
+  };f (newUsername) {
       alert('يجب أن يكون اسم المستخدم 3 أحرف على الأقل');
     }
   };
@@ -65,19 +94,19 @@ export default function ProfilePage() {
     if (file) {
       const formData = new FormData();
       formData.append('avatar', file);
-
+      
       try {
         const response = await fetch('/api/profile/avatar', {
           method: 'POST',
           body: formData
         });
-
+        
         const data = await response.json();
         if (data.success) {
-          alert('تم تحديث الصورة بنجاح!');
+          alert('تم تغيير الصورة بنجاح!');
           refetch();
         } else {
-          alert(data.message || 'حدث خطأ أثناء تحديث الصورة');
+          alert(data.message || 'حدث خطأ أثناء تغيير الصورة');
         }
       } catch (error) {
         alert('حدث خطأ في الاتصال');
@@ -98,7 +127,7 @@ export default function ProfilePage() {
             },
             body: JSON.stringify({ username, password })
           });
-
+          
           const data = await response.json();
           if (data.success) {
             alert('تم تحويل حسابك بنجاح!');
@@ -116,7 +145,7 @@ export default function ProfilePage() {
       alert('يجب أن يكون اسم المستخدم 3 أحرف على الأقل');
     }
   };
-
+  
   if (isLoading || !profile) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-deepBlack">
@@ -140,18 +169,19 @@ export default function ProfilePage() {
               </Button>
               <h2 className="text-3xl font-bold text-gold font-cairo">الملف الشخصي</h2>
             </div>
-
+            
             <div className="flex flex-col md:flex-row">
               <div className="md:w-1/3 mb-6 md:mb-0">
                 <div className="bg-deepBlack p-4 rounded-lg border border-gold/20">
                   <div className="flex flex-col items-center">
                     <div className="relative group">
-                      <div className="w-24 h-24 bg-gold/20 rounded-full overflow-hidden border border-gold/30 mb-4">
+                      <div className="w-24 h-24 bg-gold/20 rounded-full overflow-hidden border-4 border-gold/30 mb-4">
                         {profile.avatar ? (
-                          <img
-                            src={profile.avatar}
-                            alt={profile.username}
+                          <Image 
+                            src={profile.avatar} 
+                            alt={profile.username} 
                             className="w-full h-full object-cover"
+                            fallback="https://via.placeholder.com/150?text=User"
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center bg-slate-800">
@@ -160,8 +190,8 @@ export default function ProfilePage() {
                         )}
                         <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                           <label className="cursor-pointer">
-                            <input
-                              type="file"
+                            <input 
+                              type="file" 
                               accept="image/*"
                               className="hidden"
                               onChange={handleAvatarChange}
@@ -171,34 +201,33 @@ export default function ProfilePage() {
                         </div>
                       </div>
                     </div>
-
-                    <div className="text-center">
-                      <div className="flex items-center justify-center gap-2">
-                        <h3 className="text-xl font-bold text-white">{profile.username}</h3>
-                        <button
-                          onClick={handleUsernameChange}
-                          className="text-gold/70 hover:text-gold"
-                        >
-                          <i className="fas fa-edit text-sm"></i>
-                        </button>
-                      </div>
-
-                      {profile.isGuest && (
-                        <button
-                          onClick={handleGuestConversion}
-                          className="mt-4 px-4 py-2 bg-gold/20 hover:bg-gold/30 text-gold rounded-md text-sm transition-colors"
-                        >
-                          تحويل إلى حساب دائم
-                        </button>
-                      )}
+                    
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="text-xl font-bold text-white font-cairo">{profile.username}</h3>
+                      <button 
+                        onClick={handleUsernameChange}
+                        className="text-gold/70 hover:text-gold"
+                      >
+                        <i className="fas fa-edit text-sm"></i>
+                      </button>
                     </div>
+                    
+                    {profile.username.startsWith('ضيف_') && (
+                      <button
+                        onClick={handleGuestConversion}
+                        className="bg-gradient-to-br from-gold to-darkGold text-deepBlack font-bold py-2 px-4 rounded-md hover:from-lightGold hover:to-gold transition-all mt-2"
+                      >
+                        تحويل إلى حساب دائم
+                      </button>
+                    )}
+                    
                     <p className="text-gold/80 text-sm mb-3 font-tajawal">عضو منذ {profile.stats.joinDate}</p>
-
+                    
                     <div className="w-full bg-pokerGreen rounded-full px-4 py-2 flex items-center justify-center mb-4">
                       <i className="fas fa-coins text-gold ml-2"></i>
                       <span className="text-gold font-bold font-roboto">{profile.chips?.toLocaleString() || 0}</span>
                     </div>
-
+                    
                     <Dialog>
                       <DialogTrigger asChild>
                         <Button className="w-full bg-gold hover:bg-darkGold text-deepBlack font-bold py-2 rounded-md transition-colors font-cairo">
@@ -216,12 +245,12 @@ export default function ProfilePage() {
                     </Dialog>
                   </div>
                 </div>
-
+                
                 <div className="mt-6">
                   <StatsPanel stats={profile.stats} />
                 </div>
               </div>
-
+              
               <div className="md:w-2/3 md:pl-6">
                 <Achievements achievements={profile.stats.achievements} />
                 <GameHistory history={profile.gameHistory} />
