@@ -74,7 +74,16 @@ export default function NarutoPage({ params }: { params?: { tableId?: string } }
             </video>
           </div>
           
-          <div className="bg-[#1a1a2e]/90 p-8 rounded-lg max-w-4xl w-full border border-[#ff9d00]/30">
+          <div 
+            className="p-8 rounded-lg max-w-4xl w-full border border-[#ff9d00]/30"
+            style={{
+              backgroundImage: 'url("/assets/images/naruto-box-bg.jpg")',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundBlendMode: 'overlay',
+              backgroundColor: 'rgba(26, 26, 46, 0.9)'
+            }}
+          >
             <h2 className="text-2xl font-bold text-[#ff9d00] mb-6 font-cairo">لعبة ناروتو - قريباً</h2>
             <p className="text-white mb-6 font-cairo leading-relaxed text-lg">
               استعد لتجربة مثيرة في عالم ناروتو! قريباً ستتمكن من خوض معارك حماسية واستخدام قدرات النينجا الخاصة بك.
