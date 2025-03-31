@@ -16,8 +16,7 @@ export default function LevelSelectPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gradient-to-b from-black to-deepBlack">
-  <div className="w-full max-w-4xl p-8">
+      <div className="flex items-center justify-center h-screen">
         <div className="w-16 h-16 border-4 border-gold border-solid rounded-full border-t-transparent animate-spin"></div>
       </div>
     );

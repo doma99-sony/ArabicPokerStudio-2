@@ -37,14 +37,14 @@ export function ChatBox() {
       return 0;
     }
   });
-
+  
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
     // استرجاع الرسائل المخزنة من التخزين المحلي
     const savedMessages = localStorage.getItem('chatMessages');
     if (savedMessages) {
       try {
         const parsedMessages = JSON.parse(savedMessages);
-
+        
         // التحقق من صلاحية الرسائل (لا تزال خلال 24 ساعة)
         const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
         return parsedMessages.filter((msg: ChatMessage & { timestamp?: number }) => 
@@ -72,14 +72,14 @@ export function ChatBox() {
         avatar: data.avatar,
         timestamp: data.timestamp || Date.now() // إضافة طابع زمني للرسالة
       };
-
+      
       setMessages(prev => {
         // التحقق مما إذا كانت الرسالة موجودة بالفعل (لتجنب التكرار)
         const messageExists = prev.some(msg => msg.id === newMessage.id);
         if (messageExists) {
           return prev; // عدم إضافة رسالة مكررة
         }
-
+        
         const updatedMessages = [...prev, newMessage];
         // حفظ الرسائل في التخزين المحلي
         localStorage.setItem('chatMessages', JSON.stringify(updatedMessages));
@@ -102,7 +102,7 @@ export function ChatBox() {
       }
     }
   }, [messages]);
-
+  
   // إغلاق منتقي الإيموجي عند النقر خارجه
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -114,7 +114,7 @@ export function ChatBox() {
         setShowEmojiPicker(false);
       }
     };
-
+    
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
@@ -126,7 +126,7 @@ export function ChatBox() {
     setNewMessage(prev => prev + emojiData.emoji);
     setShowEmojiPicker(false);
   };
-
+  
   // حفظ عدد الرسائل المرسلة
   const updateMessageCount = () => {
     const today = new Date().toDateString();
@@ -137,7 +137,7 @@ export function ChatBox() {
     }));
     setMessageCount(newCount);
   };
-
+  
   const sendChatMessage = () => {
     if (newMessage.trim() && user) {
       // التحقق من عدد الرسائل المرسلة
@@ -150,14 +150,14 @@ export function ChatBox() {
             message: "لقد وصلت إلى الحد الأقصى للرسائل اليومية (100 رسالة)",
             timestamp: Date.now()
           };
-
+          
           const updatedMessages = [...prev, systemMessage];
           localStorage.setItem('chatMessages', JSON.stringify(updatedMessages));
           return updatedMessages;
         });
         return;
       }
-
+      
       const timestamp = Date.now();
       const messageData = {
         type: "chat_message",
@@ -169,7 +169,7 @@ export function ChatBox() {
       };
       sendMessage(messageData);
       setNewMessage("");
-
+      
       // تحديث عدد الرسائل
       updateMessageCount();
     }
@@ -181,19 +181,19 @@ export function ChatBox() {
       sendChatMessage();
     }
   };
-
+  
   // دالة لعرض الوقت المناسب للرسالة
   const getMessageTime = (timestamp?: number): string => {
     if (!timestamp) return "";
-
+    
     const messageDate = new Date(timestamp);
     const now = new Date();
-
+    
     // إذا كانت الرسالة من نفس اليوم، نعرض الساعة فقط
     if (messageDate.toDateString() === now.toDateString()) {
       return messageDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
-
+    
     // وإلا نعرض التاريخ والوقت
     return messageDate.toLocaleString([], { 
       month: 'short', 
@@ -214,7 +214,7 @@ export function ChatBox() {
         <div className="flex items-center gap-2">
           <MessageSquare className="h-4 w-4 text-[#D4AF37]" />
           <h3 className="text-[#D4AF37] font-bold text-sm">الدردشة العامة</h3>
-
+          
           <div className="flex items-center mr-2 text-xs text-white">
             <span>({messages.length} رسالة)</span>
           </div>
@@ -222,7 +222,7 @@ export function ChatBox() {
       </div>
 
       <div className="flex-1 flex flex-col">
-        <ScrollArea ref={scrollAreaRef} className="flex-1 p-3 h-[400px]"> {/* Reduced height */}
+        <ScrollArea ref={scrollAreaRef} className="flex-1 p-3">
           <div className="space-y-3">
             {messages.map((msg) => (
               <div key={msg.id} className="flex flex-col mb-2">
@@ -291,13 +291,13 @@ export function ChatBox() {
               <EmojiPicker onEmojiClick={onEmojiClick} searchDisabled lazyLoadEmojis height={250} width={260} />
             </div>
           )}
-
+          
           <div className="flex items-center justify-between mb-1">
             <div className="text-[10px] text-white px-1">
               <span className="text-[#D4AF37] font-bold">{100 - messageCount}</span> رسالة متبقية اليوم
             </div>
           </div>
-
+          
           <div className="flex gap-1">
             <Button
               onClick={() => setShowEmojiPicker(!showEmojiPicker)}
@@ -306,7 +306,7 @@ export function ChatBox() {
             >
               <Smile className="h-4 w-4" />
             </Button>
-
+            
             <div className="flex-1 relative">
               <Input
                 value={newMessage}
