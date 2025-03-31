@@ -330,16 +330,7 @@ export default function LobbyPage() {
           </div>
         )}
 
-        {activeGameCategory === 'poker' && (
-          <div className="mt-6">
-            <div className="rounded-xl bg-black/60 border border-[#D4AF37]/20 p-6 backdrop-blur-sm">
-              <h3 className="text-xl font-bold text-[#D4AF37] mb-4">الدردشة العامة</h3>
-              <div className="h-[400px]">
-                <ChatBox />
-              </div>
-            </div>
-          </div>
-        )}
+        
         
         {activeGameCategory && activeGameCategory !== 'poker' && (
           <div className="rounded-xl bg-black/60 border border-[#D4AF37]/20 p-6 backdrop-blur-sm">
