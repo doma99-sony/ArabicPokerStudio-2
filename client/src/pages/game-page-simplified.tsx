@@ -72,18 +72,37 @@ export default function GamePageSimplified({ params }: { params?: { tableId?: st
 
   // التحقق من وجود معرف الطاولة وبدء اللعبة
   useEffect(() => {
-    // إذا كان لدينا معرّف طاولة صالح، نستخدمه مباشرة
-    if (tableId) {
-      console.log("تم العثور على معرّف طاولة في عنوان URL:", tableId);
-      
-      // جلب بيانات اللعبة
-      fetchGameState(tableId);
-    } else {
-      // إذا لم يكن هناك معرّف طاولة في عنوان URL
-      setError("معرف الطاولة غير موجود. يرجى العودة واختيار طاولة.");
-      setIsLoading(false);
-    }
-  }, []);
+    // دالة لجلب بيانات اللعبة داخل الـ useEffect لتجنب مشاكل التبعيات
+    const initializeGame = async () => {
+      try {
+        // إذا كان لدينا معرّف طاولة صالح، نستخدمه مباشرة
+        if (tableId) {
+          console.log("تم العثور على معرّف طاولة في عنوان URL:", tableId);
+          await fetchGameState(tableId);
+        } else {
+          // إذا لم يكن هناك معرّف طاولة في عنوان URL، نحاول استعادته من التخزين المحلي
+          const savedTableId = localStorage.getItem('lastTableId');
+          if (savedTableId) {
+            console.log("تم استعادة معرف الطاولة من التخزين المحلي:", savedTableId);
+            const tableIdAsNumber = parseInt(savedTableId);
+            await fetchGameState(tableIdAsNumber);
+          } else {
+            setError("معرف الطاولة غير موجود. يرجى العودة واختيار طاولة.");
+            setIsLoading(false);
+          }
+        }
+      } catch (error) {
+        console.error("خطأ في تهيئة اللعبة:", error);
+        setError("حدث خطأ أثناء محاولة جلب بيانات اللعبة. يرجى المحاولة مرة أخرى.");
+        setIsLoading(false);
+      }
+    };
+    
+    // بدء تهيئة اللعبة
+    initializeGame();
+    
+    // لا حاجة لإضافة fetchGameState إلى مصفوفة التبعيات لأننا ننشئ دالة جديدة في كل مرة
+  }, [tableId]);
   
   // دالة للعودة إلى قائمة الطاولات
   const handleBackToLobby = () => {
