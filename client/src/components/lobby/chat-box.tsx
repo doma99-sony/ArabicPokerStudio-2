@@ -4,10 +4,9 @@ import { useWebSocket } from "@/hooks/use-websocket";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Smile, ChevronDown, ChevronUp, User, MessageSquare, Settings, Bell } from "lucide-react";
+import { Send, Smile, ChevronDown, ChevronUp, MessageSquare } from "lucide-react";
 import { Image } from "@/components/ui/image";
 import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface ChatMessage {
   id: string;
@@ -22,7 +21,6 @@ export function ChatBox() {
   const { registerHandler, sendMessage, socket } = useWebSocket();
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [isExpanded, setIsExpanded] = useState(true);
-  const [activeTab, setActiveTab] = useState("chat");
   const [messageCount, setMessageCount] = useState(() => {
     // استرجاع عدد الرسائل اليومية من التخزين المحلي
     try {
@@ -214,7 +212,7 @@ export function ChatBox() {
     <div className={`w-full bg-black/50 rounded-lg border border-gold/10 overflow-hidden flex flex-col transition-all duration-300 ${isExpanded ? 'h-[400px]' : 'h-[60px]'}`}>
       <div className="bg-[#1B4D3E] p-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <h3 className="text-white font-bold text-sm">الدردشة العامة + واجهة المستخدم</h3>
+          <h3 className="text-white font-bold text-sm">الدردشة العامة</h3>
           
           {!isExpanded && (
             <div className="flex items-center mr-2 text-xs text-gold/60">
@@ -235,176 +233,104 @@ export function ChatBox() {
       </div>
 
       {isExpanded && (
-        <>
-          <Tabs defaultValue="chat" className="flex-1 flex flex-col" onValueChange={setActiveTab}>
-            <TabsList className="bg-black/30 border-b border-gold/10 w-full justify-start rounded-none px-2">
-              <TabsTrigger className="data-[state=active]:bg-gold/20 text-sm px-3" value="chat">
-                <MessageSquare className="h-4 w-4 ml-1" />
-                الدردشة
-              </TabsTrigger>
-              <TabsTrigger className="data-[state=active]:bg-gold/20 text-sm px-3" value="user">
-                <User className="h-4 w-4 ml-1" />
-                واجهة المستخدم
-              </TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="chat" className="flex-1 flex flex-col p-0 m-0 data-[state=inactive]:hidden">
-              <ScrollArea ref={scrollAreaRef} className="flex-1 p-4">
-                <div className="space-y-3">
-                  {messages.map((msg) => (
-                    <div key={msg.id} className="flex flex-col">
-                      {msg.username === "system" ? (
-                        // رسالة النظام (مثل الأخبار)
-                        <div className="flex justify-center my-1">
-                          <div className="bg-black/30 text-gold/80 text-sm px-4 py-1 rounded-full border border-gold/20">
-                            {msg.message}
-                            {msg.timestamp && (
-                              <span className="text-xs text-gold/40 mr-2">
-                                {getMessageTime(msg.timestamp)}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      ) : (
-                        // رسالة مستخدم عادية
-                        <>
-                          <div className="flex items-center gap-2 mb-1">
-                            <div className="w-6 h-6 rounded-full overflow-hidden bg-gold/20 border border-gold/30">
-                              {msg.avatar ? (
-                                <Image 
-                                  src={msg.avatar} 
-                                  alt={msg.username} 
-                                  className="w-full h-full object-cover"
-                                  fallback="https://via.placeholder.com/24?text=?"
-                                />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center text-gold/70 text-xs">
-                                  {msg.username[0]?.toUpperCase()}
-                                </div>
-                              )}
+        <div className="flex-1 flex flex-col">
+          <ScrollArea ref={scrollAreaRef} className="flex-1 p-4">
+            <div className="space-y-3">
+              {messages.map((msg) => (
+                <div key={msg.id} className="flex flex-col">
+                  {msg.username === "system" ? (
+                    // رسالة النظام (مثل الأخبار)
+                    <div className="flex justify-center my-1">
+                      <div className="bg-black/30 text-gold/80 text-sm px-4 py-1 rounded-full border border-gold/20">
+                        {msg.message}
+                        {msg.timestamp && (
+                          <span className="text-xs text-gold/40 mr-2">
+                            {getMessageTime(msg.timestamp)}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    // رسالة مستخدم عادية
+                    <>
+                      <div className="flex items-center gap-2 mb-1">
+                        <div className="w-6 h-6 rounded-full overflow-hidden bg-gold/20 border border-gold/30">
+                          {msg.avatar ? (
+                            <Image 
+                              src={msg.avatar} 
+                              alt={msg.username} 
+                              className="w-full h-full object-cover"
+                              fallback="https://via.placeholder.com/24?text=?"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-gold/70 text-xs">
+                              {msg.username[0]?.toUpperCase()}
                             </div>
-                            <span className="text-xs text-gold/60">{msg.username}</span>
-                            {msg.timestamp && (
-                              <span className="text-xs text-gold/40">
-                                {getMessageTime(msg.timestamp)}
-                              </span>
-                            )}
-                          </div>
-                          <div className={`p-3 max-w-[80%] text-base ${
-                            msg.username === user?.username
-                              ? "bg-gold/90 text-black rounded-t-2xl rounded-l-2xl rounded-br-sm mr-auto border-2 border-[#D4AF37]"
-                              : "bg-white/90 text-black rounded-t-2xl rounded-r-2xl rounded-bl-sm border-2 border-gold/60"
-                          }`}>
-                            {msg.message}
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </ScrollArea>
-
-              <div className="p-3 border-t border-gold/10 bg-black/30">
-                {showEmojiPicker && (
-                  <div 
-                    ref={emojiPickerRef} 
-                    className="absolute bottom-16 right-3 z-50 shadow-lg rounded-lg overflow-hidden"
-                  >
-                    <EmojiPicker onEmojiClick={onEmojiClick} searchDisabled lazyLoadEmojis />
-                  </div>
-                )}
-                
-                <div className="flex items-center justify-between mb-2">
-                  <div className="text-xs text-white">
-                    <span className="text-gold font-bold">{100 - messageCount}</span> رسالة متبقية اليوم
-                  </div>
-                </div>
-                
-                <div className="flex gap-2">
-                  <Button
-                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                    className="bg-black/30 hover:bg-black/50 text-gold border border-gold/30 p-2 emoji-toggle-button"
-                    type="button"
-                  >
-                    <Smile className="h-4 w-4" />
-                  </Button>
-                  
-                  <Input
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    placeholder="اكتب رسالتك..."
-                    className="flex-1 text-base h-10"
-                  />
-                  
-                  <Button
-                    onClick={sendChatMessage}
-                    className="bg-gold hover:bg-gold/80 text-black px-3"
-                  >
-                    <Send className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="user" className="flex-1 flex flex-col p-4 m-0 data-[state=inactive]:hidden">
-              <div className="bg-black/30 p-4 rounded-lg border border-gold/10 mb-3">
-                {user && (
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-12 h-12 rounded-full overflow-hidden bg-gold/20 border-2 border-gold/30">
-                      {user.avatar ? (
-                        <Image 
-                          src={user.avatar} 
-                          alt={user.username} 
-                          className="w-full h-full object-cover"
-                          fallback="https://via.placeholder.com/48?text=?"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gold/70 text-xl">
-                          {user.username[0]?.toUpperCase()}
+                          )}
                         </div>
-                      )}
-                    </div>
-                    <div>
-                      <h3 className="text-white font-bold">{user.username}</h3>
-                      <p className="text-gold text-sm">{user.chips.toLocaleString()} رقاقة</p>
-                    </div>
-                  </div>
-                )}
-                
-                <div className="grid grid-cols-2 gap-3">
-                  <Button className="bg-gold/20 hover:bg-gold/30 text-gold border border-gold/40 flex items-center justify-center gap-2">
-                    <User className="h-4 w-4" />
-                    <span>الملف الشخصي</span>
-                  </Button>
-                  <Button className="bg-gold/20 hover:bg-gold/30 text-gold border border-gold/40 flex items-center justify-center gap-2">
-                    <Settings className="h-4 w-4" />
-                    <span>الإعدادات</span>
-                  </Button>
+                        <span className="text-xs text-gold/60">{msg.username}</span>
+                        {msg.timestamp && (
+                          <span className="text-xs text-gold/40">
+                            {getMessageTime(msg.timestamp)}
+                          </span>
+                        )}
+                      </div>
+                      <div className={`p-3 max-w-[80%] text-base ${
+                        msg.username === user?.username
+                          ? "bg-gold/90 text-black rounded-t-2xl rounded-l-2xl rounded-br-sm mr-auto border-2 border-[#D4AF37]"
+                          : "bg-white/90 text-black rounded-t-2xl rounded-r-2xl rounded-bl-sm border-2 border-gold/60"
+                      }`}>
+                        {msg.message}
+                      </div>
+                    </>
+                  )}
                 </div>
+              ))}
+            </div>
+          </ScrollArea>
+
+          <div className="p-3 border-t border-gold/10 bg-black/30">
+            {showEmojiPicker && (
+              <div 
+                ref={emojiPickerRef} 
+                className="absolute bottom-16 right-3 z-50 shadow-lg rounded-lg overflow-hidden"
+              >
+                <EmojiPicker onEmojiClick={onEmojiClick} searchDisabled lazyLoadEmojis />
               </div>
+            )}
+            
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-xs text-white">
+                <span className="text-gold font-bold">{100 - messageCount}</span> رسالة متبقية اليوم
+              </div>
+            </div>
+            
+            <div className="flex gap-2">
+              <Button
+                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                className="bg-black/30 hover:bg-black/50 text-gold border border-gold/30 p-2 emoji-toggle-button"
+                type="button"
+              >
+                <Smile className="h-4 w-4" />
+              </Button>
               
-              <div className="bg-black/30 p-4 rounded-lg border border-gold/10">
-                <h3 className="text-gold font-bold mb-3 flex items-center">
-                  <Bell className="h-4 w-4 ml-2" />
-                  الإشعارات
-                </h3>
-                
-                <div className="space-y-2">
-                  <div className="p-2 bg-black/40 rounded border border-gold/20">
-                    <p className="text-white text-sm">مرحباً بك في بوكر عرباوي</p>
-                    <span className="text-xs text-gold/50">قبل 3 دقائق</span>
-                  </div>
-                  
-                  <div className="p-2 bg-black/40 rounded border border-gold/20">
-                    <p className="text-white text-sm">تم إضافة لعبة ناروتو - تحقق منها الآن!</p>
-                    <span className="text-xs text-gold/50">قبل 5 دقائق</span>
-                  </div>
-                </div>
-              </div>
-            </TabsContent>
-          </Tabs>
-        </>
+              <Input
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="اكتب رسالتك..."
+                className="flex-1 text-base h-10"
+              />
+              
+              <Button
+                onClick={sendChatMessage}
+                className="bg-gold hover:bg-gold/80 text-black px-3"
+              >
+                <Send className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
       
       {/* المساحة السفلية المتوفرة عند تصغير مربع الدردشة */}
