@@ -32,15 +32,7 @@ export default function NarutoPage({ params }: { params?: { tableId?: string } }
   };
 
   return (
-    <div 
-  className="min-h-screen text-white py-4 px-6"
-  style={{
-    backgroundImage: 'url("/assets/images/naruto-bg.jpg")',
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    backgroundRepeat: 'no-repeat'
-  }}
->
+    <div className="min-h-screen naruto-bg text-white py-4 px-6">
       <div className="container mx-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
