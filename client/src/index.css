@@ -561,8 +561,8 @@
   /* مكون مبنى الكازينو */
   .casino-building-container {
     position: fixed;
-    left: 20px;
-    top: 20px;
+    left: 670px;
+    bottom: 140px;
     z-index: 50;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -580,7 +580,7 @@
   }
 
   .casino-image {
-    width: 300px;
+    width: 250px;
     height: auto;
     display: block;
   }
