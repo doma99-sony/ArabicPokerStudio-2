@@ -70,7 +70,7 @@ export default function PokerTablesPage() {
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
 
       {/* Header Bar */}
-      <header className="relative z-10 bg-black/80 text-white py-32 px-16 shadow-xl border-b border-[#D4AF37]/30 min-h-[50vh] flex items-start pt-12">
+      <header className="relative z-10 bg-black/80 text-white py-24 px-16 shadow-xl border-b border-[#D4AF37]/30 min-h-[40vh] flex items-center">
         <div className="container mx-auto flex justify-between items-center">
           <h1 className="text-9xl font-bold text-[#D4AF37] leading-none">طاولات بوكر تكساس</h1>
 
