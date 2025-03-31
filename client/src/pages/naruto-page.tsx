@@ -4,8 +4,6 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Volume2, VolumeX } from "lucide-react";
 import { Image } from "@/components/ui/image";
-import { ChatBox } from "@/components/lobby/chat-box";
-
 export default function NarutoPage({ params }: { params?: { tableId?: string } }) {
   const { user } = useAuth();
   const [, navigate] = useLocation();
