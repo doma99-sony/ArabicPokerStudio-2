@@ -410,8 +410,5 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Setup poker game events
-  setupPokerGame(app, httpServer);
-
   return httpServer;
 }
