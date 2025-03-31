@@ -184,10 +184,21 @@ export default function LobbyPage() {
           </div>
           
           {/* Chat Section */}
-          <div className="w-full md:w-64 order-1 md:order-2">
-            <div className="rounded-xl bg-black/60 border border-[#D4AF37]/20 p-2 backdrop-blur-sm h-[400px]">
-              <h2 className="text-sm font-bold text-[#D4AF37] mb-1 text-center">الدردشة العامة</h2>
-              <div className="h-full">
+          <div className="w-full md:w-80 order-1 md:order-2">
+            <div className="relative bg-gradient-to-br from-[#1B4D3E] to-[#0A3A2A] p-3 h-[500px] overflow-hidden" 
+                style={{
+                  borderRadius: '70% 30% 70% 30% / 30% 30% 70% 70%',
+                  border: '3px solid #D4AF37',
+                  boxShadow: '0 0 20px rgba(212, 175, 55, 0.4)'
+                }}>
+              <div className="bg-black/40 p-2 absolute top-3 left-1/2 transform -translate-x-1/2 rounded-full backdrop-blur-sm">
+                <h2 className="text-sm font-bold text-[#D4AF37] text-center px-3">الدردشة العامة</h2>
+              </div>
+              <div className="h-full mt-6 bg-white/10 backdrop-blur-sm rounded-xl p-2" 
+                   style={{ 
+                     borderRadius: '40% 60% 70% 30% / 40% 50% 60% 50%',
+                     border: '1px dashed #D4AF37'
+                   }}>
                 <ChatBox />
               </div>
             </div>

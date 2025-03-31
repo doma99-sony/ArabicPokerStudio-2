@@ -241,10 +241,10 @@ export function ChatBox() {
                   {msg.username === "system" ? (
                     // رسالة النظام (مثل الأخبار)
                     <div className="flex justify-center my-1">
-                      <div className="bg-black/30 text-gold/80 text-sm px-4 py-1 rounded-full border border-gold/20">
+                      <div className="bg-white/80 text-black text-sm px-4 py-1 rounded-full border border-gold/40">
                         {msg.message}
                         {msg.timestamp && (
-                          <span className="text-xs text-gold/40 mr-2">
+                          <span className="text-xs text-gray-500 mr-2">
                             {getMessageTime(msg.timestamp)}
                           </span>
                         )}
@@ -277,8 +277,8 @@ export function ChatBox() {
                       </div>
                       <div className={`p-3 max-w-[80%] text-base ${
                         msg.username === user?.username
-                          ? "bg-gold/90 text-black rounded-t-2xl rounded-l-2xl rounded-br-sm mr-auto border-2 border-[#D4AF37]"
-                          : "bg-white/90 text-black rounded-t-2xl rounded-r-2xl rounded-bl-sm border-2 border-gold/60"
+                          ? "bg-white text-black rounded-t-2xl rounded-l-2xl rounded-br-sm mr-auto border-2 border-[#D4AF37]"
+                          : "bg-white text-black rounded-t-2xl rounded-r-2xl rounded-bl-sm border-2 border-gold/60"
                       }`}>
                         {msg.message}
                       </div>
