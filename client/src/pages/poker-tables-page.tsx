@@ -89,8 +89,8 @@ export default function PokerTablesPage() {
       <main className="relative z-10 container mx-auto flex-1 p-6 mt-8">
         <div className="space-y-8">
           {/* Ranking Section */}
-          <div className="relative mb-8">
-            <div className="absolute top-4 right-4 w-64">
+          <div className="relative mb-16 mt-4">
+            <div className="absolute -top-8 right-4 w-64">
               <div className="text-center">
                 <h3 className="text-2xl font-bold text-[#D4AF37] mb-2">RANK</h3>
                 <img 
