@@ -185,43 +185,16 @@ export default function LobbyPage() {
           
           {/* Chat Section */}
           <div className="w-full md:w-96 order-1 md:order-2">
-            <div className="relative h-[520px] overflow-hidden" 
-                style={{
-                  backgroundImage: 'linear-gradient(135deg, #15342C 0%, #0A3A2A 100%)',
-                  borderRadius: '60% 40% 60% 40% / 40% 50% 50% 60%',
-                  border: '4px solid #D4AF37',
-                  boxShadow: '0 0 25px rgba(212, 175, 55, 0.5), inset 0 0 15px rgba(212, 175, 55, 0.3)'
-                }}>
-              {/* العنوان في الأعلى */}
-              <div className="absolute top-0 left-0 w-full text-center z-10">
-                <div className="bg-gradient-to-r from-[#D4AF37]/90 to-[#FFDF00]/90 inline-block px-6 py-1 rounded-b-xl shadow-lg text-center transform"
-                     style={{
-                       borderBottomLeftRadius: '20px',
-                       borderBottomRightRadius: '20px',
-                       borderLeft: '2px solid #D4AF37',
-                       borderRight: '2px solid #D4AF37',
-                       borderBottom: '2px solid #D4AF37'
-                     }}>
-                  <h2 className="text-sm font-bold text-black">⭐ الدردشة العامة ⭐</h2>
-                </div>
+            <div className="rounded-xl overflow-hidden border-2 border-[#D4AF37] h-[520px] shadow-lg">
+              {/* رأس الدردشة */}
+              <div className="bg-gradient-to-r from-[#0A3A2A] to-[#0A3A2A] p-3 border-b-2 border-[#D4AF37]">
+                <h2 className="text-lg font-bold text-[#D4AF37] text-center">الدردشة العامة</h2>
               </div>
               
               {/* منطقة الدردشة */}
-              <div className="h-full pt-8 px-3 pb-4">
-                <div className="h-full rounded-3xl bg-white/10 p-2 backdrop-blur-sm overflow-hidden"
-                     style={{
-                       border: '1px solid #D4AF37',
-                       borderRadius: '30px',
-                       boxShadow: 'inset 0 0 10px rgba(212, 175, 55, 0.3)'
-                     }}>
+              <div className="h-[calc(100%-56px)] bg-gradient-to-b from-[#1B4D3E]/80 to-black/60">
+                <div className="h-full w-full p-2">
                   <ChatBox />
-                </div>
-              </div>
-              
-              {/* زخرفة هلالية */}
-              <div className="absolute bottom-0 left-0 w-full">
-                <div className="flex justify-center">
-                  <div className="w-3/4 h-1 bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent"></div>
                 </div>
               </div>
             </div>

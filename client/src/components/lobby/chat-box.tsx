@@ -209,15 +209,15 @@ export function ChatBox() {
   };
 
   return (
-    <div className={`w-full bg-black/50 rounded-lg border border-gold/10 overflow-hidden flex flex-col transition-all duration-300 ${isExpanded ? 'h-[400px]' : 'h-[60px]'}`}>
-      <div className="bg-[#1B4D3E] p-3 flex items-center justify-between">
+    <div className={`w-full bg-black/70 rounded-lg border border-[#D4AF37] overflow-hidden flex flex-col transition-all duration-300 ${isExpanded ? 'h-[430px]' : 'h-[60px]'}`}>
+      <div className="bg-[#0A3A2A] p-2 flex items-center justify-between border-b border-[#D4AF37]">
         <div className="flex items-center gap-2">
-          <h3 className="text-white font-bold text-sm">الدردشة العامة</h3>
+          <MessageSquare className="h-4 w-4 text-[#D4AF37]" />
+          <h3 className="text-[#D4AF37] font-bold text-sm">الدردشة العامة</h3>
           
           {!isExpanded && (
-            <div className="flex items-center mr-2 text-xs text-gold/60">
-              <MessageSquare className="h-3 w-3 ml-1" />
-              <span>{messages.length} رسالة</span>
+            <div className="flex items-center mr-2 text-xs text-white">
+              <span>({messages.length} رسالة)</span>
             </div>
           )}
         </div>
@@ -225,7 +225,7 @@ export function ChatBox() {
         <Button 
           variant="ghost" 
           size="sm" 
-          className="p-1 text-white hover:bg-white/10 focus:ring-0 ring-offset-0 focus:ring-offset-0"
+          className="p-1 text-[#D4AF37] hover:bg-black/10 focus:ring-0"
           onClick={toggleExpanded}
         >
           {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
@@ -241,14 +241,13 @@ export function ChatBox() {
                   {msg.username === "system" ? (
                     // رسالة النظام (مثل الأخبار)
                     <div className="flex justify-center my-2">
-                      <div className="bg-gradient-to-r from-[#D4AF37]/20 via-[#D4AF37]/40 to-[#D4AF37]/20 text-gold text-sm px-6 py-2 rounded-full 
-                                      border border-gold/30 shadow-sm max-w-[90%] backdrop-blur-sm"
-                           style={{boxShadow: '0 2px 10px rgba(212, 175, 55, 0.15)'}}>
+                      <div className="bg-[#0A3A2A] text-white text-sm px-4 py-2 rounded-md 
+                                      border border-[#D4AF37] max-w-[90%]">
                         <div className="flex items-center gap-2 justify-center">
-                          <MessageSquare className="h-3 w-3 text-gold/60" />
-                          <span className="text-black font-medium">{msg.message}</span>
+                          <MessageSquare className="h-4 w-4 text-[#D4AF37]" />
+                          <span className="text-[#D4AF37] font-medium">{msg.message}</span>
                           {msg.timestamp && (
-                            <span className="text-xs text-gray-500 mr-1 opacity-70">
+                            <span className="text-xs text-gray-400 mr-1">
                               {getMessageTime(msg.timestamp)}
                             </span>
                           )}
@@ -259,31 +258,31 @@ export function ChatBox() {
                     // رسالة مستخدم عادية
                     <>
                       <div className="flex items-center gap-2 mb-1">
-                        <div className="w-7 h-7 rounded-full overflow-hidden bg-gradient-to-br from-gold/70 to-amber-600/70 p-0.5 shadow-lg">
+                        <div className="w-6 h-6 rounded-full overflow-hidden bg-[#0A3A2A] border border-[#D4AF37]">
                           {msg.avatar ? (
                             <Image 
                               src={msg.avatar} 
                               alt={msg.username} 
-                              className="w-full h-full object-cover rounded-full"
+                              className="w-full h-full object-cover"
                               fallback="https://via.placeholder.com/24?text=?"
                             />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center bg-white/90 rounded-full font-bold text-amber-800 text-xs">
+                            <div className="w-full h-full flex items-center justify-center text-[#D4AF37] text-xs">
                               {msg.username[0]?.toUpperCase()}
                             </div>
                           )}
                         </div>
-                        <span className="text-xs text-gold font-bold">{msg.username}</span>
+                        <span className="text-sm text-[#D4AF37] font-bold">{msg.username}</span>
                         {msg.timestamp && (
-                          <span className="text-xs text-gold/40">
+                          <span className="text-xs text-gray-400">
                             {getMessageTime(msg.timestamp)}
                           </span>
                         )}
                       </div>
-                      <div className={`p-3 max-w-[85%] text-base shadow-md ${
+                      <div className={`p-3 max-w-[85%] text-base ${
                         msg.username === user?.username
-                          ? "bg-white text-black rounded-2xl rounded-br-none mr-auto border-2 border-[#D4AF37]"
-                          : "bg-white text-black rounded-2xl rounded-bl-none border-2 border-gold/60"
+                          ? "bg-white text-black rounded-lg mr-auto border border-[#D4AF37]"
+                          : "bg-white text-black rounded-lg border border-[#D4AF37]"
                       }`}>
                         {msg.message}
                       </div>
@@ -294,32 +293,27 @@ export function ChatBox() {
             </div>
           </ScrollArea>
 
-          <div className="px-3 pt-3 pb-2 border-t border-gold/20 bg-gradient-to-b from-[#15342C]/80 to-[#0A3A2A]/90 backdrop-blur-sm">
+          <div className="px-3 pt-2 pb-2 border-t border-[#D4AF37] bg-[#0A3A2A]">
             {showEmojiPicker && (
               <div 
                 ref={emojiPickerRef} 
                 className="absolute bottom-16 right-3 z-50 shadow-lg rounded-lg overflow-hidden"
-                style={{
-                  boxShadow: '0 5px 20px rgba(0, 0, 0, 0.3)'
-                }}
               >
                 <EmojiPicker onEmojiClick={onEmojiClick} searchDisabled lazyLoadEmojis />
               </div>
             )}
             
             <div className="flex items-center justify-between mb-2">
-              <div className="text-xs bg-white/10 text-white px-3 py-1 rounded-full backdrop-blur-sm" 
-                   style={{ boxShadow: 'inset 0 0 5px rgba(212, 175, 55, 0.2)' }}>
-                <span className="text-gold font-bold">{100 - messageCount}</span> رسالة متبقية اليوم
+              <div className="text-xs text-white px-2">
+                <span className="text-[#D4AF37] font-bold">{100 - messageCount}</span> رسالة متبقية اليوم
               </div>
             </div>
             
-            <div className="flex gap-2 relative">
+            <div className="flex gap-2">
               <Button
                 onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                className="bg-gradient-to-br from-[#D4AF37]/80 to-[#AA8C2C]/80 hover:from-[#D4AF37] hover:to-[#AA8C2C] text-black border-none p-2 emoji-toggle-button shadow-md rounded-full"
+                className="bg-[#D4AF37] hover:bg-[#D4AF37]/80 text-black border-none p-2 emoji-toggle-button"
                 type="button"
-                style={{ width: '36px', height: '36px' }}
               >
                 <Smile className="h-4 w-4" />
               </Button>
@@ -330,12 +324,12 @@ export function ChatBox() {
                   onChange={(e) => setNewMessage(e.target.value)}
                   onKeyPress={handleKeyPress}
                   placeholder="اكتب رسالتك..."
-                  className="flex-1 text-base h-10 bg-white/90 border-2 border-gold/30 pr-4 rounded-full shadow-inner"
+                  className="flex-1 text-base h-10 bg-white border border-[#D4AF37] pr-3 rounded-md"
                   style={{ paddingLeft: '40px' }}
                 />
                 <Button
                   onClick={sendChatMessage}
-                  className="absolute left-0 top-0 bottom-0 w-10 bg-gradient-to-r from-[#D4AF37] to-[#FFDF00] hover:from-[#FFDF00] hover:to-[#D4AF37] text-black border-none rounded-l-full shadow-md"
+                  className="absolute left-0 top-0 bottom-0 w-10 bg-[#D4AF37] hover:bg-[#D4AF37]/80 text-black border-none"
                 >
                   <Send className="h-4 w-4" />
                 </Button>
