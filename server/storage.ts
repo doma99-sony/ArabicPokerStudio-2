@@ -143,40 +143,6 @@ export class MemStorage implements IStorage {
   }
 
   // User operations
-  // إضافة وظائف تحديث المستخدم
-  async updateUsername(userId: number, username: string): Promise<User | undefined> {
-    const user = this.users.get(userId);
-    if (!user) return undefined;
-    
-    user.username = username;
-    this.users.set(userId, user);
-    return user;
-  }
-
-  async uploadAvatar(userId: number, avatar: any): Promise<string> {
-    // في بيئة الإنتاج، سنقوم بتحميل الصورة إلى خدمة تخزين
-    // لكن للتجربة سنستخدم رابط وهمي
-    const avatarUrl = `https://via.placeholder.com/150?text=${encodeURIComponent(avatar.name)}`;
-    
-    const user = this.users.get(userId);
-    if (user) {
-      user.avatar = avatarUrl;
-      this.users.set(userId, user);
-    }
-    
-    return avatarUrl;
-  }
-
-  async convertGuestToRegistered(userId: number, username: string, password: string): Promise<User | undefined> {
-    const user = this.users.get(userId);
-    if (!user) return undefined;
-    
-    // تحديث معلومات المستخدم
-    user.username = username;
-    this.users.set(userId, user);
-    return user;
-  }
-
   async getUser(id: number): Promise<User | undefined> {
     return this.users.get(id);
   }
