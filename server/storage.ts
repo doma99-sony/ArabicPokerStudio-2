@@ -453,36 +453,69 @@ export class MemStorage implements IStorage {
   }
   
   async joinTable(tableId: number, userId: number, position?: number): Promise<{ success: boolean; message?: string; gameState?: GameState }> {
+    console.log(`محاولة انضمام المستخدم ${userId} إلى الطاولة ${tableId} بالموضع ${position}`);
+    
     const table = await this.getGameTable(tableId);
     if (!table) {
+      console.log(`الطاولة ${tableId} غير موجودة`);
       return { success: false, message: "الطاولة غير موجودة" };
     }
     
     if (table.status === "full") {
+      console.log(`الطاولة ${tableId} ممتلئة`);
       return { success: false, message: "الطاولة ممتلئة" };
     }
     
     const user = await this.getUser(userId);
     if (!user) {
+      console.log(`المستخدم ${userId} غير موجود`);
       return { success: false, message: "المستخدم غير موجود" };
     }
     
+    console.log(`تحقق من رصيد المستخدم ${user.username}: ${user.chips} - الحد الأدنى للدخول: ${table.minBuyIn}`);
+    
     if (user.chips < table.minBuyIn) {
+      console.log(`المستخدم ${userId} لا يملك رقاقات كافية`);
       return { success: false, message: "لا تملك رقاقات كافية للانضمام إلى هذه الطاولة" };
     }
     
     const gameRoom = this.gameRooms.get(tableId);
     if (!gameRoom) {
+      console.log(`غرفة اللعبة ${tableId} غير موجودة`);
       return { success: false, message: "غرفة اللعبة غير موجودة" };
     }
     
+    // التحقق إذا كان اللاعب بالفعل في الغرفة
+    try {
+      const currentGameState = gameRoom.getGameStateForPlayer(userId);
+      const playerInGame = currentGameState.players.some(p => p.id === userId);
+      
+      if (playerInGame) {
+        console.log(`المستخدم ${userId} موجود بالفعل في الطاولة ${tableId}`);
+        return { 
+          success: true, 
+          gameState: currentGameState,
+          message: "أنت منضم بالفعل لهذه الطاولة"
+        };
+      }
+    } catch (error) {
+      // يمكن تجاهل الخطأ هنا، هذا يعني أن اللاعب غير موجود في اللعبة
+      console.log(`المستخدم ${userId} لم يوجد في الغرفة سابقاً، سيتم إضافته الآن`);
+    }
+    
     // أولاً أضف اللاعب إلى غرفة اللعبة بموضع محدد إن وجد
+    console.log(`محاولة إضافة المستخدم ${userId} إلى غرفة اللعبة`);
     const joinResult = gameRoom.addPlayer(userId, user.username, table.minBuyIn, user.avatar, position);
+    
+    console.log(`نتيجة إضافة المستخدم:`, joinResult);
+    
     if (!joinResult.success) {
+      console.log(`فشل إضافة المستخدم ${userId}: ${joinResult.message}`);
       return joinResult;
     }
     
     // بعد التأكد من نجاح إضافة اللاعب، نقوم بخصم الرقاقات
+    console.log(`تحديث رصيد المستخدم ${userId} من ${user.chips} إلى ${user.chips - table.minBuyIn}`);
     await this.updateUserChips(userId, user.chips - table.minBuyIn);
     
     // Update table status and player count
@@ -494,11 +527,17 @@ export class MemStorage implements IStorage {
     }
     this.tables.set(tableId, table);
     
+    console.log(`تم انضمام المستخدم ${userId} إلى الطاولة ${tableId} بنجاح`);
+    
     // تم إزالة اللاعبين الوهميين بناءً على طلب المستخدم
+    
+    // احصل على حالة اللعبة المُحدّثة
+    const updatedGameState = gameRoom.getGameStateForPlayer(userId);
+    console.log(`عدد اللاعبين في الطاولة ${tableId}: ${updatedGameState.players.length}`);
     
     return { 
       success: true, 
-      gameState: gameRoom.getGameStateForPlayer(userId) 
+      gameState: updatedGameState
     };
   }
   

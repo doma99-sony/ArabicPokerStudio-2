@@ -327,6 +327,9 @@ export function createGameRoom(table: GameTable): GameRoom {
                  player.position === (currentPlayer?.position || 0) + 3 ? "top" : "left",
         isCurrentPlayer: player.id === playerId,
         isTurn: round.currentTurn === player.id,
+        isActive: true, // تعيين جميع اللاعبين كنشطين
+        isAllIn: player.isAllIn || false,
+        isVIP: false, // يمكن تغييرها لاحقًا بناءً على حالة VIP للاعب
         cards: player.id === playerId || round.gameStatus === "showdown" 
                ? player.cards 
                : player.cards.map(card => ({ ...card, hidden: true })),
