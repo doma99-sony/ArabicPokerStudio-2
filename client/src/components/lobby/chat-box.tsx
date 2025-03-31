@@ -2,9 +2,9 @@
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useWebSocket } from "@/hooks/use-websocket";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send } from "lucide-react";
 
 interface ChatMessage {
@@ -60,7 +60,9 @@ export function ChatBox() {
         onClick={() => setShowChat(!showChat)}
       >
         <h3 className="text-white font-bold">الدردشة العامة</h3>
-        <span className="text-sm text-white/70">اضغط للدردشة</span>
+        <span className="text-sm text-white/70">
+          {showChat ? "إخفاء الدردشة" : "اضغط للدردشة"}
+        </span>
       </div>
 
       {showChat && (
