@@ -1,11 +1,16 @@
 const loginGuest = async () => {
   if (user) return user;
-
-  const loginInProgress = sessionStorage.getItem('loginInProgress');
-  if (loginInProgress) return null;
-
+  
+  const loginTimestamp = sessionStorage.getItem('lastLoginAttempt');
+  const now = Date.now();
+  
+  if (loginTimestamp && now - parseInt(loginTimestamp) < 5000) {
+    return null;
+  }
+  
+  sessionStorage.setItem('lastLoginAttempt', now.toString());
+  
   try {
-    sessionStorage.setItem('loginInProgress', 'true');
     const response = await fetch('/api/login/guest', {
       method: 'POST',
       credentials: 'include'
