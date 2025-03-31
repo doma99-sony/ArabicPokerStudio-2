@@ -167,13 +167,13 @@
   }
   
   .assistant-container.desktop {
-    right: 35px;
-    top: 200px;
+    right: 20px;
+    bottom: 140px;
   }
   
   .assistant-container.mobile {
-    right: 20px;
-    top: 160px;
+    right: 15px;
+    bottom: 130px;
   }
   
   .assistant-button {
@@ -217,12 +217,10 @@
   }
   
   .assistant-image {
-    width: 200px;
-    height: 200px;
+    width: 250px;
+    height: 250px;
     object-fit: contain;
     filter: drop-shadow(0 6px 15px rgba(0, 0, 0, 0.8));
-    border-radius: 50%;
-    background-color: rgba(0, 0, 0, 0.5);
     border: 5px solid var(--gold);
     animation: pulse-gold 2s infinite;
   }
@@ -243,8 +241,8 @@
   
   @media (max-width: 640px) {
     .assistant-image {
-      width: 160px;
-      height: 160px;
+      width: 200px;
+      height: 200px;
       border-width: 4px;
     }
   }
