@@ -10,9 +10,11 @@ import LevelSelectPage from "@/pages/level-select-page";
 import PokerTablesPage from "@/pages/poker-tables-page";
 import RankingsPage from "@/pages/rankings-page";
 import DominoPage from "@/pages/domino-page";
+import NotificationsPage from "@/pages/notifications-page";
 import { ProtectedRoute } from "./lib/protected-route";
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
+import { WelcomeMessageNotification } from "@/components/ui/welcome-message";
 
 function Router() {
   return (
@@ -27,6 +29,8 @@ function Router() {
       <ProtectedRoute path="/naruto" component={NarutoPage} />
       <ProtectedRoute path="/rankings" component={RankingsPage} />
       <ProtectedRoute path="/domino" component={DominoPage} />
+      <ProtectedRoute path="/notifications" component={NotificationsPage} />
+      <ProtectedRoute path="/notifications/:messageId" component={NotificationsPage} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -50,6 +54,7 @@ function App() {
   return (
     <>
       <Router />
+      <WelcomeMessageNotification />
       <Toaster />
     </>
   );

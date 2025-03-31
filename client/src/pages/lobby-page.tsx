@@ -6,7 +6,7 @@ import { GameType } from "@/types";
 import { ChatBox } from "@/components/lobby/chat-box";
 import { Button } from "@/components/ui/button";
 import { OnlineUsersCounter } from "@/components/ui/online-users-badge";
-import { LogOut, User, ChevronRight, Loader2, ChevronLeft, ChevronUp } from "lucide-react";
+import { LogOut, User, ChevronRight, Loader2, ChevronLeft, ChevronUp, Bell } from "lucide-react";
 
 export default function LobbyPage() {
   const [location, navigate] = useLocation();
@@ -103,6 +103,15 @@ export default function LobbyPage() {
               <p className="text-[#D4AF37] text-sm">مرحباً، {user?.username}</p>
               <p className="text-white/80 text-xs">الرصيد: <span className="text-[#D4AF37] font-bold">{user?.chips?.toLocaleString()}</span></p>
             </div>
+
+            <Button 
+              variant="outline" 
+              className="border-[#D4AF37]/50 text-[#D4AF37] hover:bg-[#D4AF37]/10 h-8 py-0 px-2 text-xs"
+              onClick={() => navigate("/notifications")}
+            >
+              <Bell size={14} className="ml-1" />
+              الإشعارات
+            </Button>
 
             <Button 
               variant="outline" 
