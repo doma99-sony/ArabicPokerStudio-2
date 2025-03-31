@@ -167,22 +167,45 @@
   }
   
   .assistant-container.desktop {
-    left: 20px;
-    bottom: 20px;
+    right: 20px;
+    bottom: 85px;
   }
   
   .assistant-container.mobile {
-    left: 10px;
-    bottom: 70px;
+    right: 15px;
+    bottom: 90px;
   }
   
   .assistant-button {
     background: none;
     border: none;
     cursor: pointer;
-    transition: transform 0.3s ease;
+    transition: all 0.3s ease;
     outline: none;
     position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: var(--casino-red);
+    color: white;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: bold;
+    border: 2px solid black;
+    animation: pulse-gold 1.5s infinite;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    z-index: 51;
   }
   
   .assistant-button:hover {
@@ -194,29 +217,35 @@
   }
   
   .assistant-image {
-    width: 80px;
-    height: 80px;
+    width: 120px;
+    height: 120px;
     object-fit: contain;
-    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.4));
+    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.6));
     border-radius: 50%;
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: rgba(0, 0, 0, 0.5);
+    border: 3px solid var(--gold);
+    animation: pulse-gold 2s infinite;
   }
   
   .assistant-dialog {
     direction: rtl;
+    max-width: 90vw !important;
   }
   
   .tip-container {
-    min-height: 100px;
+    min-height: 120px;
     display: flex;
     align-items: center;
     justify-content: center;
+    border-radius: 12px;
+    border: 1px solid var(--gold);
   }
   
   @media (max-width: 640px) {
     .assistant-image {
-      width: 60px;
-      height: 60px;
+      width: 90px;
+      height: 90px;
+      border-width: 2px;
     }
   }
   
