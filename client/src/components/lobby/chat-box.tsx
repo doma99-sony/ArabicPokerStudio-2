@@ -209,142 +209,123 @@ export function ChatBox() {
   };
 
   return (
-    <div className={`w-full bg-black/70 rounded-lg border border-[#D4AF37] overflow-hidden flex flex-col transition-all duration-300 ${isExpanded ? 'h-[430px]' : 'h-[60px]'}`}>
+    <div className="w-full h-full bg-black/70 border-r border-[#D4AF37] overflow-hidden flex flex-col">
       <div className="bg-[#0A3A2A] p-2 flex items-center justify-between border-b border-[#D4AF37]">
         <div className="flex items-center gap-2">
           <MessageSquare className="h-4 w-4 text-[#D4AF37]" />
           <h3 className="text-[#D4AF37] font-bold text-sm">الدردشة العامة</h3>
           
-          {!isExpanded && (
-            <div className="flex items-center mr-2 text-xs text-white">
-              <span>({messages.length} رسالة)</span>
-            </div>
-          )}
+          <div className="flex items-center mr-2 text-xs text-white">
+            <span>({messages.length} رسالة)</span>
+          </div>
         </div>
-        
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="p-1 text-[#D4AF37] hover:bg-black/10 focus:ring-0"
-          onClick={toggleExpanded}
-        >
-          {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
-        </Button>
       </div>
 
-      {isExpanded && (
-        <div className="flex-1 flex flex-col">
-          <ScrollArea ref={scrollAreaRef} className="flex-1 p-4">
-            <div className="space-y-3">
-              {messages.map((msg) => (
-                <div key={msg.id} className="flex flex-col">
-                  {msg.username === "system" ? (
-                    // رسالة النظام (مثل الأخبار)
-                    <div className="flex justify-center my-2">
-                      <div className="bg-[#0A3A2A] text-white text-sm px-4 py-2 rounded-md 
-                                      border border-[#D4AF37] max-w-[90%]">
-                        <div className="flex items-center gap-2 justify-center">
-                          <MessageSquare className="h-4 w-4 text-[#D4AF37]" />
-                          <span className="text-[#D4AF37] font-medium">{msg.message}</span>
-                          {msg.timestamp && (
-                            <span className="text-xs text-gray-400 mr-1">
-                              {getMessageTime(msg.timestamp)}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    // رسالة مستخدم عادية
-                    <>
-                      <div className="flex items-center gap-2 mb-1">
-                        <div className="w-6 h-6 rounded-full overflow-hidden bg-[#0A3A2A] border border-[#D4AF37]">
-                          {msg.avatar ? (
-                            <Image 
-                              src={msg.avatar} 
-                              alt={msg.username} 
-                              className="w-full h-full object-cover"
-                              fallback="https://via.placeholder.com/24?text=?"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-[#D4AF37] text-xs">
-                              {msg.username[0]?.toUpperCase()}
-                            </div>
-                          )}
-                        </div>
-                        <span className="text-sm text-[#D4AF37] font-bold">{msg.username}</span>
+      <div className="flex-1 flex flex-col">
+        <ScrollArea ref={scrollAreaRef} className="flex-1 p-3">
+          <div className="space-y-3">
+            {messages.map((msg) => (
+              <div key={msg.id} className="flex flex-col mb-2">
+                {msg.username === "system" ? (
+                  // رسالة النظام (مثل الأخبار)
+                  <div className="flex justify-center my-1">
+                    <div className="bg-[#0A3A2A] text-white text-xs px-3 py-1 rounded-md 
+                                  border border-[#D4AF37] max-w-[90%]">
+                      <div className="flex items-center gap-1 justify-center">
+                        <MessageSquare className="h-3 w-3 text-[#D4AF37]" />
+                        <span className="text-[#D4AF37] font-medium">{msg.message}</span>
                         {msg.timestamp && (
-                          <span className="text-xs text-gray-400">
+                          <span className="text-xs text-gray-400 mr-1">
                             {getMessageTime(msg.timestamp)}
                           </span>
                         )}
                       </div>
-                      <div className={`p-3 max-w-[85%] text-base ${
-                        msg.username === user?.username
-                          ? "bg-white text-black rounded-lg mr-auto border border-[#D4AF37]"
-                          : "bg-white text-black rounded-lg border border-[#D4AF37]"
-                      }`}>
-                        {msg.message}
+                    </div>
+                  </div>
+                ) : (
+                  // رسالة مستخدم عادية
+                  <>
+                    <div className="flex items-center gap-1 mb-1">
+                      <div className="w-5 h-5 rounded-full overflow-hidden bg-[#0A3A2A] border border-[#D4AF37]">
+                        {msg.avatar ? (
+                          <Image 
+                            src={msg.avatar} 
+                            alt={msg.username} 
+                            className="w-full h-full object-cover"
+                            fallback="https://via.placeholder.com/24?text=?"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-[#D4AF37] text-xs">
+                            {msg.username[0]?.toUpperCase()}
+                          </div>
+                        )}
                       </div>
-                    </>
-                  )}
-                </div>
-              ))}
-            </div>
-          </ScrollArea>
+                      <span className="text-xs text-[#D4AF37] font-bold">{msg.username}</span>
+                      {msg.timestamp && (
+                        <span className="text-[10px] text-gray-400 ml-auto">
+                          {getMessageTime(msg.timestamp)}
+                        </span>
+                      )}
+                    </div>
+                    <div className={`p-2 max-w-[85%] text-sm ${
+                      msg.username === user?.username
+                        ? "bg-white text-black rounded-lg mr-auto border border-[#D4AF37]"
+                        : "bg-white text-black rounded-lg border border-[#D4AF37]"
+                    }`}>
+                      {msg.message}
+                    </div>
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+        </ScrollArea>
 
-          <div className="px-3 pt-2 pb-2 border-t border-[#D4AF37] bg-[#0A3A2A]">
-            {showEmojiPicker && (
-              <div 
-                ref={emojiPickerRef} 
-                className="absolute bottom-16 right-3 z-50 shadow-lg rounded-lg overflow-hidden"
-              >
-                <EmojiPicker onEmojiClick={onEmojiClick} searchDisabled lazyLoadEmojis />
-              </div>
-            )}
-            
-            <div className="flex items-center justify-between mb-2">
-              <div className="text-xs text-white px-2">
-                <span className="text-[#D4AF37] font-bold">{100 - messageCount}</span> رسالة متبقية اليوم
-              </div>
+        <div className="px-2 pt-1 pb-2 border-t border-[#D4AF37] bg-[#0A3A2A]">
+          {showEmojiPicker && (
+            <div 
+              ref={emojiPickerRef} 
+              className="absolute bottom-14 right-3 z-50 shadow-lg rounded-lg overflow-hidden"
+              style={{ height: '250px' }}
+            >
+              <EmojiPicker onEmojiClick={onEmojiClick} searchDisabled lazyLoadEmojis height={250} width={260} />
             </div>
+          )}
+          
+          <div className="flex items-center justify-between mb-1">
+            <div className="text-[10px] text-white px-1">
+              <span className="text-[#D4AF37] font-bold">{100 - messageCount}</span> رسالة متبقية اليوم
+            </div>
+          </div>
+          
+          <div className="flex gap-1">
+            <Button
+              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+              className="bg-[#D4AF37] hover:bg-[#D4AF37]/80 text-black border-none p-1 h-9 w-9 emoji-toggle-button"
+              type="button"
+            >
+              <Smile className="h-4 w-4" />
+            </Button>
             
-            <div className="flex gap-2">
+            <div className="flex-1 relative">
+              <Input
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="اكتب رسالتك..."
+                className="flex-1 text-sm h-9 bg-white border border-[#D4AF37] pr-2 rounded-md"
+                style={{ paddingLeft: '36px' }}
+              />
               <Button
-                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                className="bg-[#D4AF37] hover:bg-[#D4AF37]/80 text-black border-none p-2 emoji-toggle-button"
-                type="button"
+                onClick={sendChatMessage}
+                className="absolute left-0 top-0 bottom-0 w-9 bg-[#D4AF37] hover:bg-[#D4AF37]/80 text-black border-none"
               >
-                <Smile className="h-4 w-4" />
+                <Send className="h-4 w-4" />
               </Button>
-              
-              <div className="flex-1 relative">
-                <Input
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="اكتب رسالتك..."
-                  className="flex-1 text-base h-10 bg-white border border-[#D4AF37] pr-3 rounded-md"
-                  style={{ paddingLeft: '40px' }}
-                />
-                <Button
-                  onClick={sendChatMessage}
-                  className="absolute left-0 top-0 bottom-0 w-10 bg-[#D4AF37] hover:bg-[#D4AF37]/80 text-black border-none"
-                >
-                  <Send className="h-4 w-4" />
-                </Button>
-              </div>
             </div>
           </div>
         </div>
-      )}
-      
-      {/* المساحة السفلية المتوفرة عند تصغير مربع الدردشة */}
-      {!isExpanded && (
-        <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex gap-3">
-          <div className="text-xs text-gold/60">● المساحة المتاحة للأيقونات ●</div>
-        </div>
-      )}
+      </div>
     </div>
   );
 }
