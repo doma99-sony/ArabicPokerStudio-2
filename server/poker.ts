@@ -14,9 +14,10 @@ export function setupPokerGame(app: Express, httpServer: Server) {
 
   // Broadcast message to all connected clients
   const broadcast = (message: any, excludeUserId?: number) => {
+    const serializedMessage = JSON.stringify(message);
     clients.forEach((client, userId) => {
       if (userId !== excludeUserId && client.readyState === WebSocket.OPEN) {
-        client.send(JSON.stringify(message));
+        client.send(serializedMessage);
       }
     });
   };

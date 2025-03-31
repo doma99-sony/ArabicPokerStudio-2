@@ -88,25 +88,24 @@ export function createGameRoom(table: GameTable): GameRoom {
     return -1; // No positions available
   };
   
-  // Get next player's turn
+  // Get next player's turn with improved performance
   const getNextPlayerTurn = (currentPosition: number): number => {
     const playerArray = Array.from(players.values());
     if (playerArray.length <= 1) return -1;
     
-    let next = (currentPosition + 1) % playerArray.length;
-    let count = 0;
+    const maxPosition = playerArray.length;
+    let next = (currentPosition + 1) % maxPosition;
+    const startPosition = next;
     
-    // Find the next player who hasn't folded and has chips
-    while (count < playerArray.length) {
+    do {
       const player = playerArray.find(p => p.position === next);
       if (player && !player.folded && player.chips > 0) {
         return player.id;
       }
-      next = (next + 1) % playerArray.length;
-      count++;
-    }
+      next = (next + 1) % maxPosition;
+    } while (next !== startPosition);
     
-    return -1; // No active players found
+    return -1;
   };
   
   // Check if round is complete (all players have acted)
