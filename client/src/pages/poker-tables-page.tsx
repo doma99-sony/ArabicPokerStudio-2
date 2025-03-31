@@ -295,8 +295,11 @@ export default function PokerTablesPage() {
 
       {/* Footer */}
       <footer className="relative z-10 bg-black/80 text-white/60 text-center p-4 mt-8 border-t border-[#D4AF37]/20">
-        <div className="container mx-auto">
-          <p className="border-b border-[#D4AF37]/20 pb-4 mb-4">&copy; {new Date().getFullYear()} بوكر تكساس عرباوي - جميع الحقوق محفوظة</p>
+        <div className="container mx-auto flex flex-col items-center">
+          <p className="mb-4">&copy; {new Date().getFullYear()} بوكر تكساس عرباوي - جميع الحقوق محفوظة</p>
+          <div className="flex justify-center space-x-4">
+            {/* Icons would go here */}
+          </div>
         </div>
       </footer>
     </div>
