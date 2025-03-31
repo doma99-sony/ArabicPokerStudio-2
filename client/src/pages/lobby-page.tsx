@@ -100,7 +100,7 @@ export default function LobbyPage() {
       <main className="relative z-10 flex-1 overflow-hidden">
         {/* Chat Section - Fixed to left */}
         <div 
-          className="fixed top-16 left-0 h-[calc(100%-6rem)] z-20 transition-all duration-300" 
+          className="fixed top-16 left-0 h-[calc(100%-8rem)] z-20 transition-all duration-300" 
           id="chat-container"
           style={{ transform: isChatHidden ? "translateX(-100%)" : "translateX(0)" }}
         >
@@ -248,108 +248,145 @@ export default function LobbyPage() {
       </main>
 
       {/* Bottom Navigation Bar */}
-      <div className="fixed bottom-12 left-1/2 transform -translate-x-1/2 z-30 w-full max-w-3xl mx-auto">
-        <div className="bg-black/80 border-2 border-[#D4AF37] rounded-full px-2 py-1 shadow-xl backdrop-blur-md flex items-center justify-between">
+      <div className="fixed bottom-0 left-0 right-0 z-30 w-full mx-auto">
+        <div className="bg-black border-t-2 border-[#D4AF37] px-1 py-1 shadow-xl backdrop-blur-md flex items-center justify-between">
           {/* الأحداث */}
           <div className="relative group">
-            <button className="relative flex flex-col items-center justify-center p-2 min-w-[60px]">
-              <div className="bg-white rounded-full w-10 h-10 border-2 border-[#D4AF37] flex items-center justify-center relative">
-                <span className="text-xs font-bold text-[#0A3A2A]">الأحداث</span>
-                <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border border-white animate-pulse"></span>
+            <button 
+              className="relative flex flex-col items-center justify-center p-2 min-w-[60px]"
+              onClick={() => {
+                // إظهار صفحة الأحداث
+                alert("سيتم فتح صفحة الأحداث");
+              }}
+            >
+              <div className="bg-white rounded-full w-12 h-12 border-2 border-[#D4AF37] flex items-center justify-center relative">
+                <span className="text-sm font-bold text-[#0A3A2A]">الأحداث</span>
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border border-white animate-pulse"></span>
               </div>
-              <span className="text-[10px] text-white mt-1">الأحداث</span>
+              <span className="text-[11px] text-white mt-1">الأحداث</span>
             </button>
           </div>
           
           {/* الإعدادات */}
           <div className="relative">
-            <button className="flex flex-col items-center justify-center p-2 min-w-[48px]">
-              <div className="bg-black/60 rounded-full w-9 h-9 border border-[#D4AF37] flex items-center justify-center text-[#D4AF37]">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            <button 
+              onClick={() => alert("سيتم فتح إعدادات اللعبة")}
+              className="flex flex-col items-center justify-center p-2 min-w-[48px]"
+            >
+              <div className="bg-black/60 rounded-full w-11 h-11 border border-[#D4AF37] flex items-center justify-center text-[#D4AF37]">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
               </div>
-              <span className="text-[10px] text-white mt-1">الإعدادات</span>
+              <span className="text-[11px] text-white mt-1">الإعدادات</span>
             </button>
           </div>
           
           {/* الرسائل */}
           <div className="relative">
-            <button className="flex flex-col items-center justify-center p-2 min-w-[48px]">
-              <div className="bg-black/60 rounded-full w-9 h-9 border border-[#D4AF37] flex items-center justify-center text-yellow-300">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+            <button 
+              onClick={() => alert("سيتم فتح الرسائل")}
+              className="flex flex-col items-center justify-center p-2 min-w-[48px]"
+            >
+              <div className="bg-black/60 rounded-full w-11 h-11 border border-[#D4AF37] flex items-center justify-center text-yellow-300">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
               </div>
-              <span className="text-[10px] text-white mt-1">الرسائل</span>
+              <span className="text-[11px] text-white mt-1">الرسائل</span>
             </button>
-            <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[10px] text-white flex items-center justify-center border border-black">2</span>
+            <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-[10px] text-white flex items-center justify-center border border-black">2</span>
           </div>
           
           {/* المهمة */}
           <div className="relative">
-            <button className="flex flex-col items-center justify-center p-2 min-w-[48px]">
-              <div className="bg-black/60 rounded-full w-9 h-9 border border-[#D4AF37] flex items-center justify-center text-[#D4AF37]">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+            <button 
+              onClick={() => alert("سيتم فتح المهام")}
+              className="flex flex-col items-center justify-center p-2 min-w-[48px]"
+            >
+              <div className="bg-black/60 rounded-full w-11 h-11 border border-[#D4AF37] flex items-center justify-center text-[#D4AF37]">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
               </div>
-              <span className="text-[10px] text-white mt-1">المهمة</span>
+              <span className="text-[11px] text-white mt-1">المهمة</span>
             </button>
+            <span className="absolute -top-1 -right-1 w-5 h-5 bg-amber-500 rounded-full text-[10px] text-white flex items-center justify-center border border-black">3</span>
           </div>
           
           {/* الأصدقاء */}
           <div className="relative">
-            <button className="flex flex-col items-center justify-center p-2 min-w-[48px]">
-              <div className="bg-black/60 rounded-full w-9 h-9 border border-[#D4AF37] flex items-center justify-center text-[#D4AF37]">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            <button 
+              onClick={() => alert("سيتم فتح قائمة الأصدقاء")}
+              className="flex flex-col items-center justify-center p-2 min-w-[48px]"
+            >
+              <div className="bg-black/60 rounded-full w-11 h-11 border border-[#D4AF37] flex items-center justify-center text-[#D4AF37]">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
               </div>
-              <span className="text-[10px] text-white mt-1">الأصدقاء</span>
+              <span className="text-[11px] text-white mt-1">الأصدقاء</span>
             </button>
           </div>
           
           {/* الحقيبة */}
           <div className="relative">
-            <button className="flex flex-col items-center justify-center p-2 min-w-[48px]">
-              <div className="bg-black/60 rounded-full w-9 h-9 border border-[#D4AF37] flex items-center justify-center text-[#D4AF37]">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+            <button 
+              onClick={() => alert("سيتم فتح الحقيبة")}
+              className="flex flex-col items-center justify-center p-2 min-w-[48px]"
+            >
+              <div className="bg-black/60 rounded-full w-11 h-11 border border-[#D4AF37] flex items-center justify-center text-[#D4AF37]">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
               </div>
-              <span className="text-[10px] text-white mt-1">الحقيبة</span>
+              <span className="text-[11px] text-white mt-1">الحقيبة</span>
             </button>
           </div>
           
           {/* الترتيب */}
           <div className="relative">
-            <button className="flex flex-col items-center justify-center p-2 min-w-[48px]">
-              <div className="bg-black/60 rounded-full w-9 h-9 border border-[#D4AF37] flex items-center justify-center text-[#D4AF37]">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+            <button 
+              onClick={() => alert("سيتم فتح ترتيب اللاعبين")}
+              className="flex flex-col items-center justify-center p-2 min-w-[48px]"
+            >
+              <div className="bg-black/60 rounded-full w-11 h-11 border border-[#D4AF37] flex items-center justify-center text-[#D4AF37]">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
               </div>
-              <span className="text-[10px] text-white mt-1">الترتيب</span>
+              <span className="text-[11px] text-white mt-1">الترتيب</span>
             </button>
           </div>
           
           {/* VIP */}
           <div className="relative">
-            <button className="flex flex-col items-center justify-center p-2 min-w-[48px]">
-              <div className="bg-black/60 rounded-full w-9 h-9 border border-[#D4AF37] flex items-center justify-center text-[#D4AF37]">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+            <button 
+              onClick={() => alert("سيتم فتح قائمة VIP")}
+              className="flex flex-col items-center justify-center p-2 min-w-[48px]"
+            >
+              <div className="bg-black/60 rounded-full w-11 h-11 border border-[#D4AF37] flex items-center justify-center text-[#D4AF37]">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
               </div>
-              <span className="text-[10px] text-white mt-1">VIP</span>
+              <span className="text-[11px] text-white mt-1">VIP</span>
             </button>
           </div>
           
           {/* المتجر */}
           <div className="relative">
-            <button className="flex flex-col items-center justify-center p-2 min-w-[48px]">
-              <div className="bg-black/60 rounded-full w-9 h-9 border border-[#D4AF37] flex items-center justify-center text-[#D4AF37]">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+            <button 
+              onClick={() => alert("سيتم فتح المتجر")}
+              className="flex flex-col items-center justify-center p-2 min-w-[48px]"
+            >
+              <div className="bg-black/60 rounded-full w-11 h-11 border border-[#D4AF37] flex items-center justify-center text-[#D4AF37]">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
               </div>
-              <span className="text-[10px] text-white mt-1">المتجر</span>
+              <span className="text-[11px] text-white mt-1">المتجر</span>
             </button>
           </div>
           
           {/* العبها الآن */}
           <div className="relative group">
-            <button className="relative flex flex-col items-center justify-center p-2 min-w-[60px]">
-              <div className="bg-white rounded-full w-10 h-10 border-2 border-[#D4AF37] flex items-center justify-center relative overflow-hidden">
-                <span className="text-xs font-bold text-[#0A3A2A]">العبها</span>
+            <button 
+              className="relative flex flex-col items-center justify-center p-2 min-w-[60px]"
+              onClick={() => {
+                // الانتقال إلى صفحة اللعب
+                navigateToGameTables('poker');
+              }}
+            >
+              <div className="bg-white rounded-full w-12 h-12 border-2 border-[#D4AF37] flex items-center justify-center relative overflow-hidden">
+                <span className="text-sm font-bold text-[#0A3A2A]">العبها</span>
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-400/20 to-transparent animate-shine"></div>
               </div>
-              <span className="text-[10px] text-white mt-1">العبها الآن</span>
+              <span className="text-[11px] text-white mt-1">العبها الآن</span>
             </button>
           </div>
         </div>
