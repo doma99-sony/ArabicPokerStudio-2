@@ -168,12 +168,12 @@
   
   .assistant-container.desktop {
     right: 20px;
-    bottom: 85px;
+    bottom: 140px;
   }
   
   .assistant-container.mobile {
     right: 15px;
-    bottom: 90px;
+    bottom: 130px;
   }
   
   .assistant-button {
@@ -217,13 +217,13 @@
   }
   
   .assistant-image {
-    width: 120px;
-    height: 120px;
+    width: 280px;
+    height: 280px;
     object-fit: contain;
-    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.6));
+    filter: drop-shadow(0 6px 15px rgba(0, 0, 0, 0.8));
     border-radius: 50%;
     background-color: rgba(0, 0, 0, 0.5);
-    border: 3px solid var(--gold);
+    border: 5px solid var(--gold);
     animation: pulse-gold 2s infinite;
   }
   
@@ -243,9 +243,9 @@
   
   @media (max-width: 640px) {
     .assistant-image {
-      width: 90px;
-      height: 90px;
-      border-width: 2px;
+      width: 240px;
+      height: 240px;
+      border-width: 4px;
     }
   }
   
