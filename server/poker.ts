@@ -11,15 +11,6 @@ export function setupPokerGame(app: Express, httpServer: Server) {
     path: "/ws", // Specify explicit path for WebSocket connections
     perMessageDeflate: false // Disable compression to avoid some connection issues
   });
-
-  // Broadcast message to all connected clients
-  const broadcast = (message: any, excludeUserId?: number) => {
-    clients.forEach((client, userId) => {
-      if (userId !== excludeUserId && client.readyState === WebSocket.OPEN) {
-        client.send(JSON.stringify(message));
-      }
-    });
-  };
   
   // Map to track active connections by user ID
   const clients = new Map<number, WebSocket>();
@@ -51,24 +42,6 @@ export function setupPokerGame(app: Express, httpServer: Server) {
           
           userId = user.id;
           clients.set(userId, ws);
-          
-        } else if (data.type === "chat_message" && userId) {
-          // Handle chat messages
-          const messageId = Date.now().toString();
-          const user = await storage.getUser(userId);
-          
-          if (user) {
-            const chatMessage = {
-              type: "chat_message",
-              id: messageId,
-              username: user.username,
-              message: data.message,
-              timestamp: Date.now()
-            };
-            
-            // Broadcast to all connected clients
-            broadcast(chatMessage);
-          }et(userId, ws);
           
           ws.send(JSON.stringify({ type: "auth", success: true }));
         } else if (data.type === "join_table") {

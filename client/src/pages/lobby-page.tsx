@@ -4,7 +4,6 @@ import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { GameTable, GameType } from "@/types";
 import { TableCard } from "@/components/lobby/table-card";
-import { ChatBox } from "@/components/lobby/chat-box";
 import { Button } from "@/components/ui/button";
 import { Loader2, LogOut, User, Plus, Coins } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
