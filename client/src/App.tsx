@@ -12,6 +12,7 @@ import RankingsPage from "@/pages/rankings-page";
 import DominoPage from "@/pages/domino-page";
 import NotificationsPage from "@/pages/notifications-page";
 import InventoryPage from "@/pages/inventory-page";
+import ShopPage from "@/pages/shop-page";
 import { ProtectedRoute } from "./lib/protected-route";
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
@@ -33,7 +34,7 @@ function Router() {
       <ProtectedRoute path="/notifications" component={NotificationsPage} />
       <ProtectedRoute path="/notifications/:messageId" component={NotificationsPage} />
       <ProtectedRoute path="/inventory" component={InventoryPage} />
-      <ProtectedRoute path="/shop" component={InventoryPage} />
+      <ProtectedRoute path="/shop" component={ShopPage} />
       <Route component={NotFound} />
     </Switch>
   );

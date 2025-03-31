@@ -6,7 +6,7 @@ import { GameType } from "@/types";
 import { ChatBox } from "@/components/lobby/chat-box";
 import { Button } from "@/components/ui/button";
 import { OnlineUsersCounter } from "@/components/ui/online-users-badge";
-import { LogOut, User, ChevronRight, Loader2, ChevronLeft, ChevronUp, Bell } from "lucide-react";
+import { LogOut, User, ChevronRight, Loader2, ChevronLeft, ChevronUp, Bell, ShoppingBag, ShoppingCart } from "lucide-react";
 
 export default function LobbyPage() {
   const [location, navigate] = useLocation();
@@ -338,6 +338,33 @@ export default function LobbyPage() {
             </button>
           </div>
           
+          {/* المتجر */}
+          <div className="relative group">
+            <button 
+              className="relative flex flex-col items-center justify-center p-2 min-w-[60px]"
+              onClick={() => navigate("/shop")}
+            >
+              <div className="bg-gradient-to-br from-[#1B4D3E] to-[#0A3A2A] rounded-full w-12 h-12 border-2 border-[#D4AF37] flex items-center justify-center relative shadow-lg hover:shadow-[#D4AF37]/20 transition-all duration-300">
+                <ShoppingCart className="h-6 w-6 text-[#D4AF37]" />
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border border-white animate-pulse"></span>
+              </div>
+              <span className="text-[11px] text-white mt-1">المتجر</span>
+            </button>
+          </div>
+          
+          {/* الحقيبة */}
+          <div className="relative group">
+            <button 
+              className="relative flex flex-col items-center justify-center p-2 min-w-[60px]"
+              onClick={() => navigate("/inventory")}
+            >
+              <div className="bg-gradient-to-br from-[#1B4D3E] to-[#0A3A2A] rounded-full w-12 h-12 border-2 border-[#D4AF37] flex items-center justify-center relative shadow-lg hover:shadow-[#D4AF37]/20 transition-all duration-300">
+                <ShoppingBag className="h-6 w-6 text-[#D4AF37]" />
+              </div>
+              <span className="text-[11px] text-white mt-1">الحقيبة</span>
+            </button>
+          </div>
+          
           {/* الأحداث */}
           <div className="relative group">
             <button 
@@ -409,16 +436,16 @@ export default function LobbyPage() {
             </button>
           </div>
           
-          {/* الحقيبة */}
+          {/* الملابس */}
           <div className="relative">
             <button 
-              onClick={() => alert("سيتم فتح الحقيبة")}
+              onClick={() => alert("سيتم فتح الملابس")}
               className="flex flex-col items-center justify-center p-2 min-w-[48px]"
             >
               <div className="bg-black/60 rounded-full w-11 h-11 border border-[#D4AF37] flex items-center justify-center text-[#D4AF37]">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.47a1 1 0 00.99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 002-2V10h2.15a1 1 0 00.99-.84l.58-3.47a2 2 0 00-1.34-2.23z"></path></svg>
               </div>
-              <span className="text-[11px] text-white mt-1">الحقيبة</span>
+              <span className="text-[11px] text-white mt-1">الملابس</span>
             </button>
           </div>
           
@@ -448,16 +475,16 @@ export default function LobbyPage() {
             </button>
           </div>
           
-          {/* المتجر */}
+          {/* المكافآت */}
           <div className="relative">
             <button 
-              onClick={() => alert("سيتم فتح المتجر")}
+              onClick={() => alert("سيتم فتح المكافآت")}
               className="flex flex-col items-center justify-center p-2 min-w-[48px]"
             >
               <div className="bg-black/60 rounded-full w-11 h-11 border border-[#D4AF37] flex items-center justify-center text-[#D4AF37]">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
               </div>
-              <span className="text-[11px] text-white mt-1">المتجر</span>
+              <span className="text-[11px] text-white mt-1">المكافآت</span>
             </button>
           </div>
           
