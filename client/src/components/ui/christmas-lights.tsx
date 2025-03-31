@@ -70,7 +70,8 @@ export function ChristmasLights({
               {/* الضوء نفسه */}
               <div
                 className={`relative w-4 h-6 rounded-full transition-all duration-300 
-                  ${isActive || isGlowing ? 'animate-pulse shadow-lg scale-110' : 'opacity-70'}`}
+                  ${isActive || isGlowing ? 'animate-pulse-slow shadow-lg scale-110' : 'opacity-70'} 
+                  ${isActive ? 'animate-glitter' : ''}`}
                 style={{
                   backgroundColor: colors[colorIndex],
                   boxShadow: (isActive || isGlowing) 
@@ -116,7 +117,8 @@ export function ChristmasDecoration({ className = '' }: ChristmasDecorationProps
               left,
               top,
               fontSize: `${size}rem`,
-              animation: `float ${animationDuration}s ease-in-out ${delay}s infinite`,
+              animationDuration: `${animationDuration}s`,
+              animationDelay: `${delay}s`,
               transform: `rotate(${Math.random() * 360}deg)`,
             }}
           >
