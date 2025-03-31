@@ -217,12 +217,16 @@
   }
   
   .assistant-image {
-    width: 250px;
-    height: 250px;
+    width: 500px;
+    height: 500px;
     object-fit: contain;
-    filter: drop-shadow(0 6px 15px rgba(0, 0, 0, 0.8));
-    border: 5px solid var(--gold);
-    animation: pulse-gold 2s infinite;
+    filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.9));
+    transform-style: preserve-3d;
+    transition: transform 0.3s ease;
+  }
+  
+  .assistant-button:hover .assistant-image {
+    transform: perspective(500px) rotateY(-5deg) rotateX(2deg);
   }
   
   .assistant-dialog {
@@ -241,9 +245,8 @@
   
   @media (max-width: 640px) {
     .assistant-image {
-      width: 200px;
-      height: 200px;
-      border-width: 4px;
+      width: 400px;
+      height: 400px;
     }
   }
   
