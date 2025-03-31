@@ -18,22 +18,22 @@ export function PokerTable({ gameState }: PokerTableProps) {
   const { toast } = useToast();
   const [isJoining, setIsJoining] = useState(false);
   
-  // Positions for players based on their slot
+  // Positions for players based on their slot - updated for oval table layout
   const playerPositions = [
     "bottom", // current user (0)
     "bottomRight", // position 1
-    "right", // position 2
-    "top", // position 3
-    "left", // position 4
+    "topRight", // position 2
+    "topLeft", // position 3
+    "bottomLeft", // position 4
   ];
   
-  // Define empty seat positions for a 5-player table
+  // Define empty seat positions for a 5-player table - updated for oval table layout
   const seatPositions = [
-    { position: "bottom", className: "absolute bottom-2 left-1/2 transform -translate-x-1/2" },
-    { position: "bottomRight", className: "absolute bottom-10 right-10" },
-    { position: "right", className: "absolute right-3 top-1/2 transform -translate-y-1/2" },
-    { position: "top", className: "absolute top-2 left-1/2 transform -translate-x-1/2" },
-    { position: "left", className: "absolute left-3 top-1/2 transform -translate-y-1/2" }
+    { position: "bottom", className: "absolute bottom-4 left-1/2 transform -translate-x-1/2" },
+    { position: "bottomRight", className: "absolute bottom-12 right-16" },
+    { position: "topRight", className: "absolute top-12 right-20" },
+    { position: "topLeft", className: "absolute top-12 left-20" },
+    { position: "bottomLeft", className: "absolute bottom-12 left-16" }
   ];
 
   // Map game state players to positions
@@ -108,18 +108,45 @@ export function PokerTable({ gameState }: PokerTableProps) {
 
   return (
     <div className="flex-grow relative my-6">
+      {/* Main table container */}
       <div 
-        className="poker-table absolute inset-0 rounded-[40%] border-8 border-[#8B4513] overflow-hidden flex items-center justify-center"
+        className="poker-table absolute inset-0 rounded-full overflow-hidden flex items-center justify-center"
         style={{
-          backgroundImage: `url(${pokerTableBg})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          boxShadow: '0 10px 30px rgba(0, 0, 0, 0.5), inset 0 0 30px rgba(0, 0, 0, 0.5)'
+          // Apply the oval/stadium shape
+          borderRadius: "45%/55%",
+          boxShadow: '0 10px 30px rgba(0, 0, 0, 0.5)'
         }}
       >
+        {/* Border layer */}
+        <div className="absolute inset-0 rounded-full" 
+          style={{ 
+            borderRadius: "45%/55%", 
+            border: "10px solid #333333",
+            boxShadow: 'inset 0 0 20px rgba(0, 0, 0, 0.8)'
+          }}>
+        </div>
+        
+        {/* Table surface */}
+        <div className="absolute inset-[10px] bg-[#0f653a]" 
+          style={{ 
+            borderRadius: "45%/55%",
+            background: 'linear-gradient(to bottom, #0f653a, #0a4528)',
+            boxShadow: 'inset 0 0 50px rgba(0, 0, 0, 0.5)'
+          }}>
+          
+          {/* Center table logo - faded watermark */}
+          <div className="absolute inset-0 flex items-center justify-center text-white/10 text-4xl font-bold"
+            style={{ 
+              textShadow: '0 2px 10px rgba(255, 255, 255, 0.1)',
+              userSelect: 'none'
+            }}>
+            BOYA POKER
+          </div>
+        </div>
+
         {/* Dealer button */}
         {gameState.gameStatus !== "waiting" && (
-          <div className="absolute z-10 w-8 h-8 bg-white rounded-full flex items-center justify-center text-xs font-bold border-2 border-gold shadow-lg" 
+          <div className="absolute z-10 w-10 h-10 bg-white rounded-full flex items-center justify-center text-sm font-bold border-2 border-gold shadow-lg" 
                style={{ 
                  bottom: '45%', 
                  right: '40%' 
@@ -128,8 +155,29 @@ export function PokerTable({ gameState }: PokerTableProps) {
           </div>
         )}
       
+        {/* Center pot indicator */}
+        {gameState.pot > 0 && (
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30">
+            <div className="flex flex-col items-center">
+              {/* Current bet amount */}
+              <div className="bg-black/60 rounded-full px-3 py-1 mb-2 text-center">
+                <span className="text-white text-lg font-bold">
+                  {gameState.currentBet > 0 ? `${gameState.currentBet}+${gameState.pot - gameState.currentBet}` : gameState.pot}
+                </span>
+              </div>
+              
+              {/* Chip visualization */}
+              <div className="relative h-12 w-16">
+                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-12 h-12 bg-red-600 rounded-full border-4 border-white z-20 flex items-center justify-center text-white font-bold">
+                  {Math.floor(gameState.pot / 1000)}K
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Community Cards */}
-        <div className="absolute flex space-x-2 rtl:space-x-reverse z-20">
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex space-x-1 rtl:space-x-reverse z-20">
           {gameState.communityCards.map((card, index) => (
             <motion.div
               key={`community-card-${index}`}
@@ -137,26 +185,28 @@ export function PokerTable({ gameState }: PokerTableProps) {
               initial="hidden"
               animate="visible"
               variants={cardVariants}
-              className="card"
+              className="card transform"
+              style={{ 
+                margin: '0 -5px', 
+                transform: `rotate(${-10 + index * 5}deg)`
+              }}
             >
               <CardComponent card={card} size="lg" />
             </motion.div>
           ))}
           
-          {/* Empty card placeholders */}
-          {gameState.gameStatus !== "waiting" && Array.from({ length: 5 - gameState.communityCards.length }).map((_, index) => (
-            <div key={`empty-card-${index}`} className="w-14 h-20 bg-white/10 rounded-md shadow-lg"></div>
+          {/* Empty card placeholders - hidden until cards are dealt */}
+          {gameState.gameStatus !== "waiting" && gameState.gameStatus !== "preflop" && Array.from({ length: 5 - gameState.communityCards.length }).map((_, index) => (
+            <div 
+              key={`empty-card-${index}`} 
+              className="w-14 h-20 bg-white/10 rounded-md shadow-lg"
+              style={{ 
+                margin: '0 -5px', 
+                transform: `rotate(${-10 + (index + gameState.communityCards.length) * 5}deg)`
+              }}
+            ></div>
           ))}
         </div>
-        
-        {/* Pot */}
-        {gameState.pot > 0 && (
-          <div className="absolute top-1/3 mt-24 bg-slate/60 rounded-full px-4 py-1 text-center z-10">
-            <span className="text-gold text-sm font-tajawal">المراهنة الكلية</span>
-            <Chips amount={gameState.pot} />
-            <span className="block text-white text-lg font-roboto">{gameState.pot.toLocaleString()}</span>
-          </div>
-        )}
         
         {/* Players */}
         {positionedPlayers.map(player => (
@@ -167,21 +217,37 @@ export function PokerTable({ gameState }: PokerTableProps) {
           />
         ))}
         
-        {/* Empty seats with + sign */}
+        {/* Empty seats with join buttons */}
         {!isUserPlaying && emptySeats.map((seat, index) => (
           <div key={`empty-seat-${index}`} className={`${seat.className} z-10`}>
             <motion.button
               onClick={() => handleJoinSeat(seat.position)}
               disabled={isJoining}
-              className="w-14 h-14 bg-black/40 hover:bg-gold/40 rounded-full border-2 border-dashed border-white/50 flex items-center justify-center cursor-pointer transition-all duration-300 transform hover:scale-110"
+              className="w-14 h-14 bg-black/60 hover:bg-gold/40 rounded-full border-2 border-dashed border-white/50 flex items-center justify-center cursor-pointer transition-all duration-300 transform hover:scale-110"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
             >
               <Plus className="w-8 h-8 text-white" />
               <span className="sr-only">الانضمام إلى المقعد</span>
             </motion.button>
+            <div className="mt-2 text-center text-white/70 text-xs">اضغط للجلوس</div>
           </div>
         ))}
+
+        {/* Table action buttons - shown based on game state */}
+        {gameState.gameStatus !== "waiting" && isUserPlaying && (
+          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 flex space-x-2 rtl:space-x-reverse z-40 mb-2">
+            <button className="bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700">
+              تخلي
+            </button>
+            <button className="bg-green-600 text-white px-4 py-2 rounded-full hover:bg-green-700">
+              كشف 1K
+            </button>
+            <button className="bg-amber-600 text-white px-4 py-2 rounded-full hover:bg-amber-700">
+              زيادة
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
