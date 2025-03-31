@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
 import { GameState } from "@/types";
 import { PlayerComponent } from "./player-component";
 import { CardComponent } from "./card-component";
@@ -86,22 +85,6 @@ export function PokerTable({ gameState }: PokerTableProps) {
       setIsJoining(false);
     }
   };
-
-  // Animation for cards entering table
-  const cardVariants = {
-    hidden: { opacity: 0, y: 50, rotateY: 180 },
-    visible: (i: number) => ({
-      opacity: 1,
-      y: 0,
-      rotateY: 0,
-      transition: {
-        delay: i * 0.1,
-        duration: 0.5,
-        type: "spring",
-        stiffness: 100
-      }
-    })
-  };
   
   // Check if current user is already at the table
   const isUserPlaying = positionedPlayers.some(player => player.isCurrentPlayer);
@@ -131,16 +114,15 @@ export function PokerTable({ gameState }: PokerTableProps) {
         {/* Community Cards */}
         <div className="absolute flex space-x-2 rtl:space-x-reverse z-20">
           {gameState.communityCards.map((card, index) => (
-            <motion.div
+            <div
               key={`community-card-${index}`}
-              custom={index}
-              initial="hidden"
-              animate="visible"
-              variants={cardVariants}
-              className="card"
+              className="card opacity-100 transition-opacity duration-500 ease-in-out"
+              style={{
+                transitionDelay: `${index * 100}ms`
+              }}
             >
               <CardComponent card={card} size="lg" />
-            </motion.div>
+            </div>
           ))}
           
           {/* Empty card placeholders */}
@@ -170,16 +152,14 @@ export function PokerTable({ gameState }: PokerTableProps) {
         {/* Empty seats with + sign */}
         {!isUserPlaying && emptySeats.map((seat, index) => (
           <div key={`empty-seat-${index}`} className={`${seat.className} z-10`}>
-            <motion.button
+            <button
               onClick={() => handleJoinSeat(seat.position)}
               disabled={isJoining}
               className="w-14 h-14 bg-black/40 hover:bg-gold/40 rounded-full border-2 border-dashed border-white/50 flex items-center justify-center cursor-pointer transition-all duration-300 transform hover:scale-110"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
             >
               <Plus className="w-8 h-8 text-white" />
               <span className="sr-only">الانضمام إلى المقعد</span>
-            </motion.button>
+            </button>
           </div>
         ))}
       </div>
