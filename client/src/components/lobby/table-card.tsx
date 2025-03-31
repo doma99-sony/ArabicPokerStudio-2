@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useLocation } from "wouter";
 import { useMutation } from "@tanstack/react-query";
 import { GameTable } from "@/types";
@@ -23,6 +23,20 @@ export function TableCard({ table }: TableCardProps) {
   // دالة للتحقق مما إذا كانت الطاولة ممتلئة
   const isTableFull = table.status === "full";
   
+  // دالة للانتقال إلى صفحة اللعبة
+  const navigateToGamePage = useCallback((tableId: number) => {
+    // استخدم الانتقال المباشر عن طريق تغيير هاش URL يدويًا
+    // هذا يتجنب أي مشاكل مع التوجيه
+    window.location.href = `#/game/${tableId}`;
+    
+    // إعادة تحميل الصفحة إذا لم ينجح الانتقال
+    setTimeout(() => {
+      if (!window.location.hash.includes(`/game/${tableId}`)) {
+        window.location.href = `/game/${tableId}`;
+      }
+    }, 200);
+  }, []);
+
   // الانضمام للعبة - إما كلاعب نشط أو كمشاهد
   const joinMutation = useMutation({
     mutationFn: async () => {
@@ -45,7 +59,11 @@ export function TableCard({ table }: TableCardProps) {
         
         const result = await res.json();
         console.log("نتيجة محاولة الانضمام:", result);
-        return result;
+        
+        // تخزين معرف الطاولة في الـ localStorage للتأكد من استمرارية الجلسة
+        localStorage.setItem('lastTableId', table.id.toString());
+        
+        return { ...result, tableId: table.id };
       } catch (error) {
         console.error("خطأ أثناء محاولة الانضمام:", error);
         throw error;
@@ -73,14 +91,16 @@ export function TableCard({ table }: TableCardProps) {
           });
         }
         
-        // تأكد من أن هناك معرّف طاولة صالح قبل الانتقال
-        if (table && table.id) {
-          console.log("تم الانضمام بنجاح، جارٍ الانتقال إلى صفحة اللعبة", table.id);
+        // استخدام معرف الطاولة من البيانات أو من الجدول
+        const tableId = data.tableId || table.id;
+        
+        if (tableId && typeof tableId === 'number' && tableId > 0) {
+          console.log("تم الانضمام بنجاح، جارٍ الانتقال إلى صفحة اللعبة", tableId);
           
-          // استخدم history.pushState بدلاً من setTimeout لتجنب مشاكل التوقيت
-          navigate(`/game/${table.id}`);
+          // استخدام الطريقة الجديدة للانتقال
+          navigateToGamePage(tableId);
         } else {
-          console.error("معرّف الطاولة غير موجود أو غير صالح:", table);
+          console.error("معرّف الطاولة غير موجود أو غير صالح:", tableId);
           toast({
             title: "خطأ في الانتقال",
             description: "حدث خطأ أثناء محاولة الانتقال إلى صفحة اللعبة. يرجى المحاولة مرة أخرى.",

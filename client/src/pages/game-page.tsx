@@ -18,9 +18,19 @@ export default function GamePage({ params }: { params?: { tableId?: string } }) 
   const [tableName, setTableName] = useState<string>("");
   const [maxPlayers, setMaxPlayers] = useState<number>(9);
   
-  // التأكد من وجود معرف الطاولة
+  // التأكد من وجود معرف الطاولة - استخدام localStorage كاحتياطي
   useEffect(() => {
+    // محاولة استعادة معرف الطاولة من localStorage إذا لم يكن متوفراً في params
     if (!params || !params.tableId) {
+      const lastTableId = localStorage.getItem('lastTableId');
+      
+      if (lastTableId) {
+        console.log("تم استعادة معرف الطاولة من التخزين المحلي:", lastTableId);
+        // الانتقال مباشرة إلى الطاولة المخزنة
+        navigate(`/game/${lastTableId}`);
+        return;
+      }
+      
       console.error("معرّف الطاولة غير موجود:", params);
       toast({
         title: "خطأ",
@@ -41,15 +51,21 @@ export default function GamePage({ params }: { params?: { tableId?: string } }) 
         variant: "destructive",
       });
       navigate("/");
+    } else {
+      // تخزين معرف الطاولة الصالح في localStorage
+      localStorage.setItem('lastTableId', tableIdValue.toString());
     }
   }, [params, toast, navigate]);
   
-  if (!params?.tableId) {
+  // فحص إذا كان هناك معرف طاولة
+  const hasTableId = params?.tableId && !isNaN(parseInt(params.tableId));
+  
+  if (!hasTableId) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-deepBlack">
         <div className="text-center">
           <Loader2 className="h-12 w-12 animate-spin text-gold mx-auto mb-4" />
-          <p className="text-gold font-cairo text-lg">جاري التحميل...</p>
+          <p className="text-gold font-cairo text-lg">جاري التحقق من معرف الطاولة...</p>
         </div>
       </div>
     );
