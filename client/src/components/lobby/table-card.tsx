@@ -23,64 +23,46 @@ export function TableCard({ table }: TableCardProps) {
   // دالة للتحقق مما إذا كانت الطاولة ممتلئة
   const isTableFull = table.status === "full";
   
-  // الانضمام كمشاهد فقط (بدون خصم الرقاقات)
-  const joinAsSpectator = async () => {
-    try {
-      // انتقل مباشرة إلى صفحة اللعبة كمشاهد
-      window.location.href = `/game/${table.id}`;
-      toast({
-        title: "وضع المشاهدة",
-        description: "أنت الآن تشاهد اللعبة. ستتمكن من الانضمام عندما يصبح هناك مقعد متاح."
-      });
-    } catch (error) {
-      toast({
-        title: "خطأ",
-        description: "حدث خطأ أثناء المشاهدة. الرجاء المحاولة مرة أخرى.",
-        variant: "destructive"
-      });
-    }
-  };
-
-  // الانضمام كلاعب (مع خصم الرقاقات)
+  // الانضمام للعبة - إما كلاعب نشط أو كمشاهد
   const joinMutation = useMutation({
     mutationFn: async () => {
-      // إذا كانت الطاولة ممتلئة، لا تقم بالطلب ولكن انتقل مباشرة إلى وضع المشاهدة
-      if (isTableFull) {
-        return { success: true, spectatorMode: true };
-      }
-      
       if (table.gameType === "naruto") {
         return { success: true };
       }
       
-      const res = await apiRequest("POST", `/api/game/${table.id}/join`);
+      // إرسال طلب الانضمام مع تحديد ما إذا كان الانضمام كمشاهد
+      const payload = isTableFull ? { asSpectator: true } : {};
+      const res = await apiRequest("POST", `/api/game/${table.id}/join`, payload);
       return await res.json();
     },
     onSuccess: (data) => {
-      if (data.spectatorMode) {
-        // تم توجيهه كمشاهد
-        joinAsSpectator();
+      if (table.gameType === "naruto") {
+        window.location.href = `/naruto/${table.id}`;
         return;
       }
       
-      if (table.gameType === "naruto") {
-        window.location.href = `/naruto/${table.id}`;
-      } else {
-        // الانتقال إلى صفحة اللعبة كلاعب
-        window.location.href = `/game/${table.id}`;
-      }
-    },
-    onError: (error: Error) => {
-      // لا نظهر الخطأ عندما تكون الطاولة ممتلئة، بل ننتقل إلى الطاولة كمشاهد
-      if (error.message?.includes("الطاولة ممتلئة")) {
-        joinAsSpectator();
+      if (data.isSpectator) {
+        toast({
+          title: "وضع المشاهدة",
+          description: "أنت الآن تشاهد اللعبة. ستتمكن من الانضمام عندما يصبح هناك مقعد متاح.",
+        });
       } else {
         toast({
-          title: "فشل الانضمام إلى الطاولة",
-          description: error.message,
-          variant: "destructive",
+          title: "تم الانضمام بنجاح",
+          description: "انضممت إلى الطاولة كلاعب نشط",
         });
       }
+      
+      // الانتقال إلى صفحة اللعبة (سواء كمشاهد أو لاعب)
+      window.location.href = `/game/${table.id}`;
+    },
+    onError: (error: Error) => {
+      // عرض رسالة الخطأ
+      toast({
+        title: "فشل الانضمام إلى الطاولة",
+        description: error.message,
+        variant: "destructive",
+      });
     }
   });
 

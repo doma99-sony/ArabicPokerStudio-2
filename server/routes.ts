@@ -178,20 +178,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "غير مصرح" });
       }
       
-      // Validate position if provided
-      const positionSchema = z.object({
+      // Validate request parameters
+      const requestSchema = z.object({
         position: z.number().optional(),
+        asSpectator: z.boolean().optional(), // إذا كان يريد الانضمام كمشاهد
       });
       
       let position: number | undefined = undefined;
+      let asSpectator = false;
       
       try {
-        const data = positionSchema.parse(req.body);
+        const data = requestSchema.parse(req.body);
         position = data.position;
+        asSpectator = data.asSpectator || false;
       } catch (error) {
-        // No position or invalid position provided, will use default assignment
+        // No position or invalid parameters provided, will use default assignment
       }
       
+      // التحقق مما إذا كانت الطاولة موجودة
+      const table = await storage.getGameTable(tableId);
+      if (!table) {
+        return res.status(404).json({ message: "الطاولة غير موجودة" });
+      }
+      
+      // وضع المشاهدة - لا حاجة لخصم الرقاقات أو إضافة اللاعب إلى الطاولة
+      if (asSpectator || table.status === "full") {
+        // الوصول إلى حالة اللعبة فقط كمشاهد
+        const gameState = await storage.getGameState(tableId, req.user.id);
+        if (!gameState) {
+          return res.status(400).json({ message: "لا يمكن الوصول إلى حالة اللعبة" });
+        }
+        
+        // إشارة إلى أن المستخدم في وضع المشاهدة
+        return res.json({ 
+          success: true,
+          isSpectator: true, 
+          gameState,
+          message: "أنت الآن في وضع المشاهدة" 
+        });
+      }
+      
+      // الانضمام كلاعب نشط
       const result = await storage.joinTable(tableId, req.user.id, position);
       if (!result.success) {
         return res.status(400).json({ message: result.message });
