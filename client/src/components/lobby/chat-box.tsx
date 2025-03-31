@@ -65,14 +65,20 @@ export function ChatBox() {
     // استخدام نظام التسجيل الموحد للرسائل
     const unregister = registerHandler("chat_message", (data) => {
       const newMessage = {
-        id: data.id,
+        id: data.id || Date.now().toString(),
         username: data.username,
         message: data.message,
         avatar: data.avatar,
-        timestamp: Date.now() // إضافة طابع زمني للرسالة
+        timestamp: data.timestamp || Date.now() // إضافة طابع زمني للرسالة
       };
       
       setMessages(prev => {
+        // التحقق مما إذا كانت الرسالة موجودة بالفعل (لتجنب التكرار)
+        const messageExists = prev.some(msg => msg.id === newMessage.id);
+        if (messageExists) {
+          return prev; // عدم إضافة رسالة مكررة
+        }
+        
         const updatedMessages = [...prev, newMessage];
         // حفظ الرسائل في التخزين المحلي
         localStorage.setItem('chatMessages', JSON.stringify(updatedMessages));

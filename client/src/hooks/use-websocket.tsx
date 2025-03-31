@@ -87,11 +87,20 @@ export function useWebSocket() {
   // Send message via WebSocket
   const sendMessage = useCallback((message: any) => {
     if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+      // إذا كان نوع الرسالة هو رسالة دردشة، وتم إرسالها من العميل، نقوم بمعالجتها محلياً أيضاً
+      if (message.type === "chat_message" && user) {
+        // إشارة للمعالج المحلي بالرسالة (لضمان ظهور الرسائل المرسلة حتى لو لم ترجع من الخادم)
+        const handler = messageHandlersRef.current.get("chat_message");
+        if (handler) {
+          handler(message);
+        }
+      }
+      
       socketRef.current.send(JSON.stringify(message));
       return true;
     }
     return false;
-  }, []);
+  }, [user]);
 
   // Register a message handler
   const registerHandler = useCallback((type: string, handler: (data: any) => void) => {

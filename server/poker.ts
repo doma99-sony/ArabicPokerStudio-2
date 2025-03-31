@@ -68,23 +68,43 @@ export function setupPokerGame(app: Express, httpServer: Server) {
           // Send authentication success response
           ws.send(JSON.stringify({ type: "auth", success: true }));
           
-        } else if (data.type === "chat_message" && userId) {
-          // Handle chat messages
-          const messageId = Date.now().toString();
-          const user = await storage.getUser(userId);
+        } else if (data.type === "chat_message") {
+          // Handle chat messages - تفعيل الرسائل حتى للمستخدمين غير المصادق عليهم مسبقاً
+          // استخدام معرف الرسالة المرسل من العميل، أو إنشاء واحد جديد
+          const messageId = data.id || Date.now().toString();
           
-          if (user) {
+          // استخدام معلومات المستخدم المرسلة في الرسالة أو الحصول عليها من تخزين الجلسة
+          let username = data.username;
+          let avatar = data.avatar;
+          let timestamp = data.timestamp || Date.now();
+          
+          if (userId) {
+            try {
+              const user = await storage.getUser(userId);
+              if (user) {
+                username = username || user.username;
+                avatar = avatar || user.avatar;
+              }
+            } catch (e) {
+              console.error("خطأ في الحصول على معلومات المستخدم:", e);
+            }
+          }
+          
+          if (username && data.message) {
             const chatMessage = {
               type: "chat_message",
               id: messageId,
-              username: user.username,
+              username: username,
               message: data.message,
-              avatar: user.avatar, // إضافة الصورة الرمزية للمستخدم
-              timestamp: Date.now()
+              avatar: avatar, // إضافة الصورة الرمزية للمستخدم
+              timestamp: timestamp
             };
             
-            // Broadcast to all connected clients
-            broadcast(chatMessage);
+            // إرسال الرسالة للمرسل أولاً لتأكيد الاستلام
+            ws.send(JSON.stringify(chatMessage));
+            
+            // ثم بث إلى جميع العملاء المتصلين الآخرين
+            broadcast(chatMessage, userId);
           }
         } else if (data.type === "join_table") {
           // User joining a table
