@@ -22,7 +22,6 @@ function Router() {
       <ProtectedRoute path="/poker-tables" component={PokerTablesPage} />
       <ProtectedRoute path="/poker/levels" component={LevelSelectPage} />
       <ProtectedRoute path="/poker/:level" component={GamePage} />
-      <ProtectedRoute path="/naruto/:tableId" component={NarutoPage} />
       <ProtectedRoute path="/naruto" component={NarutoPage} />
       <Route component={NotFound} />
     </Switch>

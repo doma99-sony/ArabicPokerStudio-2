@@ -1,20 +1,5 @@
 
-{/* خلفية الفيديو */}
-<div className="fixed inset-0 z-0 overflow-hidden">
-  <video
-    ref={videoRef}
-    autoPlay
-    loop
-    muted={videoMuted}
-    playsInline
-    className="absolute w-full h-full object-cover"
-  >
-    <source src="/assets/lobby-background.mp4" type="video/mp4" />
-  </video>
-  <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
-</div>
-
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { GameType } from "@/types";
@@ -83,6 +68,22 @@ export default function LobbyPage() {
   return (
     <div className="min-h-screen bg-cover bg-center flex flex-col"
          style={{ backgroundImage: "url('/images/egyptian-background.jpg')" }}>
+      
+      {/* خلفية الفيديو */}
+      <div className="fixed inset-0 z-0 overflow-hidden">
+        <video
+          ref={videoRef}
+          autoPlay
+          loop
+          muted={videoMuted}
+          playsInline
+          className="absolute w-full h-full object-cover"
+        >
+          <source src="/assets/WhatsApp Video 2025-03-30 at 11.41.26 PM.mp4" type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+      </div>
+      
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
 
       {/* Header Bar */}
@@ -273,6 +274,18 @@ export default function LobbyPage() {
         </div>
       </main>
 
+      {/* زر كتم/تشغيل الصوت */}
+      <button 
+        className="fixed bottom-20 right-4 z-50 bg-black/60 p-2 rounded-full border border-[#D4AF37] text-[#D4AF37] hover:bg-black/80 transition-all"
+        onClick={toggleMute}
+      >
+        {videoMuted ? (
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="1" y1="1" x2="23" y2="23"></line><path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"></path><path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+        ) : (
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+        )}
+      </button>
+      
       {/* Bottom Navigation Bar */}
       <div className="fixed bottom-0 left-0 right-0 z-30 w-full mx-auto">
         <div className="bg-gradient-to-t from-black via-[#0A3A2A] to-[#0A3A2A]/90 border-t-2 border-[#D4AF37] px-1 py-1 shadow-xl backdrop-blur-md flex items-center justify-between">
