@@ -293,7 +293,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "غير مصرح" });
       }
       
-      const chipsAmount = req.body.amount || 1000000;
+      // التحقق من كلمة المرور
+      const { password, amount } = req.body;
+      
+      // كلمة المرور المطلوبة للسماح بإعادة تعيين الرصيد
+      const REQUIRED_PASSWORD = "56485645";
+      
+      if (password !== REQUIRED_PASSWORD) {
+        return res.status(403).json({ 
+          success: false, 
+          message: "كلمة المرور غير صحيحة" 
+        });
+      }
+      
+      // التأكد من أن المبلغ قيمة رقمية صحيحة
+      const chipsAmount = typeof amount === 'number' && !isNaN(amount) ? amount : 1000000;
+      
       const updatedUser = await storage.updateUserChips(req.user.id, chipsAmount);
       
       if (!updatedUser) {
