@@ -19,7 +19,7 @@ export function ChatBox() {
   const { sendMessage, registerHandler } = useWebSocket();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
-  const [isMinimized, setIsMinimized] = useState(false);
+  const [showChat, setShowChat] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -54,20 +54,18 @@ export function ChatBox() {
   };
 
   return (
-    <div className={`w-full h-full flex flex-col rounded-lg border border-gold/10 overflow-hidden bg-[url('/gradient-poker-table-background_23-2151085419.jpg')] bg-cover bg-center shadow-lg`}>
-      <div className="px-4 py-2 border-b border-gold/10 bg-black/50 flex justify-between items-center">
-        <h3 className="text-gold font-bold">الدردشة</h3>
-        <button
-          onClick={() => setIsMinimized(!isMinimized)}
-          className="px-3 py-1 bg-gold/20 hover:bg-gold/30 text-gold rounded-md transition-colors"
-        >
-          {isMinimized ? 'فتح الدردشة' : 'تصغير'}
-        </button>
+    <div className="w-full">
+      <div 
+        className="cursor-pointer bg-[#1B4D3E] hover:bg-[#2A6E5B] p-4 rounded-lg flex items-center justify-between"
+        onClick={() => setShowChat(!showChat)}
+      >
+        <h3 className="text-white font-bold">الدردشة العامة</h3>
+        <span className="text-sm text-white/70">اضغط للدردشة</span>
       </div>
-      
-      {!isMinimized && (
-        <>
-          <ScrollArea ref={scrollAreaRef} className="flex-1 p-4">
+
+      {showChat && (
+        <div className="mt-4 bg-black/50 rounded-lg border border-gold/10 overflow-hidden">
+          <ScrollArea ref={scrollAreaRef} className="h-[300px] p-4">
             <div className="space-y-4">
               {messages.map((msg) => (
                 <div key={msg.id} className="flex flex-col">
@@ -101,7 +99,7 @@ export function ChatBox() {
               </Button>
             </div>
           </div>
-        </>
+        </div>
       )}
     </div>
   );
