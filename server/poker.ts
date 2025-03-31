@@ -27,6 +27,19 @@ export function setupPokerGame(app: Express, httpServer: Server) {
   
   // Map to track which tables users are connected to
   const userTables = new Map<number, number>();
+
+  // دالة لإرسال عدد المستخدمين المتصلين حاليًا
+  const broadcastOnlineUsers = () => {
+    const onlineCount = clients.size;
+    console.log(`عدد المستخدمين المتصلين حاليًا: ${onlineCount}`);
+    
+    const message = {
+      type: "online_users_count",
+      count: onlineCount
+    };
+    
+    broadcast(message);
+  };
   
   const PING_INTERVAL = 30000;
   wss.on("connection", (ws: WebSocket, req: any) => {
@@ -67,6 +80,9 @@ export function setupPokerGame(app: Express, httpServer: Server) {
           
           // Send authentication success response
           ws.send(JSON.stringify({ type: "auth", success: true }));
+          
+          // بث عدد المستخدمين المتصلين بعد تسجيل الدخول
+          broadcastOnlineUsers();
           
         } else if (data.type === "chat_message") {
           // Handle chat messages - تفعيل الرسائل حتى للمستخدمين غير المصادق عليهم مسبقاً
@@ -228,6 +244,9 @@ export function setupPokerGame(app: Express, httpServer: Server) {
             tableId: tableId
           }, userId);
         }
+        
+        // تحديث عدد المستخدمين المتصلين بعد قطع الاتصال
+        broadcastOnlineUsers();
       }
     });
   });

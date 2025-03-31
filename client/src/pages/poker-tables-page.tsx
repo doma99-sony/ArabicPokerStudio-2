@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { GameTable } from "@/types";
 import { TableCard } from "@/components/lobby/table-card";
 import { Button } from "@/components/ui/button";
+import { OnlineUsersCounter } from "@/components/ui/online-users-badge";
 import { Loader2, ArrowRight, Coins } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -72,7 +73,13 @@ export default function PokerTablesPage() {
       {/* Header Bar */}
       <header className="relative z-10 bg-black/80 text-white p-12 shadow-xl border-b border-[#D4AF37]/30">
         <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-7xl font-bold text-[#D4AF37]">طاولات بوكر تكساس</h1>
+          <div className="flex items-center gap-4">
+            <h1 className="text-7xl font-bold text-[#D4AF37]">طاولات بوكر تكساس</h1>
+            {/* عداد المستخدمين المتصلين */}
+            <div className="absolute top-6 left-6">
+              <OnlineUsersCounter />
+            </div>
+          </div>
 
           <Button 
             variant="outline" 

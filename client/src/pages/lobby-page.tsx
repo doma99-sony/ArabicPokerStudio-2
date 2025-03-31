@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { GameType } from "@/types";
 import { ChatBox } from "@/components/lobby/chat-box";
 import { Button } from "@/components/ui/button";
+import { OnlineUsersCounter } from "@/components/ui/online-users-badge";
 import { LogOut, User, ChevronRight, Loader2, ChevronLeft, ChevronUp } from "lucide-react";
 
 export default function LobbyPage() {
@@ -89,7 +90,11 @@ export default function LobbyPage() {
       {/* Header Bar */}
       <header className="relative z-10 bg-black/80 text-white p-2 shadow-xl border-b border-[#D4AF37]/30">
         <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-xl font-bold text-[#D4AF37]">بوكر تكساس عرباوي</h1>
+          <div className="flex items-center gap-4">
+            <h1 className="text-xl font-bold text-[#D4AF37]">بوكر تكساس عرباوي</h1>
+            {/* عداد المستخدمين المتصلين */}
+            <OnlineUsersCounter />
+          </div>
 
           <div className="flex items-center gap-2">
             <div className="text-right">
