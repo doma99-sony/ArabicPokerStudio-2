@@ -22,7 +22,6 @@ import { Loader2 } from "lucide-react";
 import { WelcomeMessageNotification } from "@/components/ui/welcome-message";
 import { LandscapeNotice } from "@/components/ui/landscape-notice";
 import { GameAssistant } from "@/components/ui/game-assistant";
-import CasinoBuilding from "@/components/ui/casino-building";
 import { initializePerformanceOptimizations } from "@/lib/performance-utils";
 import { useEffect } from "react";
 
@@ -99,7 +98,6 @@ function App() {
       <WelcomeMessageNotification />
       <LandscapeNotice />
       <GameAssistant />
-      <CasinoBuilding />
       <Toaster />
     </>
   );
