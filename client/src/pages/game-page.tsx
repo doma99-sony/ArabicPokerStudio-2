@@ -148,17 +148,34 @@ export default function GamePage({ params }: { params?: { tableId?: string } }) 
         body: JSON.stringify({ asSpectator: false })
       });
       
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("خطأ في الانضمام:", errorText);
+        throw new Error(errorText || "حدث خطأ أثناء الانضمام كلاعب نشط");
+      }
+      
       const data = await response.json();
       console.log("استجابة الانضمام:", data);
       
       if (data.success) {
-        toast({
-          title: "تم الانضمام بنجاح",
-          description: data.message || "انضممت إلى الطاولة كلاعب نشط",
-        });
+        // فحص ما إذا كان اللاعب لا يزال في وضع المشاهدة
+        if (data.isSpectator) {
+          toast({
+            title: "لا يزال في وضع المشاهدة",
+            description: data.message || "لا تزال الطاولة ممتلئة. يرجى الانتظار حتى يتوفر مقعد.",
+            variant: "default",
+          });
+        } else {
+          toast({
+            title: "تم الانضمام بنجاح",
+            description: data.message || "انضممت إلى الطاولة كلاعب نشط",
+          });
+          
+          // تحديث حالة المشاهدة في الواجهة مباشرة
+          setIsSpectator(false);
+        }
         
         // تحديث واجهة المستخدم لتعكس حالة اللاعب الجديدة
-        setIsSpectator(false);
       } else {
         toast({
           title: "تعذر الانضمام",

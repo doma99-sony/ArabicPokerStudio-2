@@ -35,7 +35,7 @@ export interface IStorage {
   
   // Game state operations
   getGameState(tableId: number, userId: number): Promise<GameState | undefined>;
-  joinTable(tableId: number, userId: number, position?: number): Promise<{ success: boolean; message?: string; gameState?: GameState }>;
+  joinTable(tableId: number, userId: number, position?: number): Promise<{ success: boolean; message?: string; gameState?: GameState; isSpectator?: boolean }>;
   leaveTable(tableId: number, userId: number): Promise<{ success: boolean; message?: string }>;
   performGameAction(
     tableId: number,
@@ -578,7 +578,8 @@ export class MemStorage implements IStorage {
     
     return { 
       success: true, 
-      gameState: updatedGameState
+      gameState: updatedGameState,
+      isSpectator: false
     };
   }
   

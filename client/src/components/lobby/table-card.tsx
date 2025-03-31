@@ -32,13 +32,24 @@ export function TableCard({ table }: TableCardProps) {
       
       console.log("محاولة الانضمام إلى الطاولة...", { tableId: table.id, isFull: isTableFull });
       
-      // إرسال طلب الانضمام مع تحديد ما إذا كان الانضمام كمشاهد
-      const payload = isTableFull ? { asSpectator: true } : {};
-      const res = await apiRequest("POST", `/api/game/${table.id}/join`, payload);
-      const result = await res.json();
-      
-      console.log("نتيجة محاولة الانضمام:", result);
-      return result;
+      try {
+        // إرسال طلب الانضمام مع تحديد ما إذا كان الانضمام كمشاهد
+        const payload = isTableFull ? { asSpectator: true } : {};
+        const res = await apiRequest("POST", `/api/game/${table.id}/join`, payload);
+        
+        if (!res.ok) {
+          const errorText = await res.text();
+          console.error("خطأ في الاستجابة:", errorText);
+          throw new Error(errorText || "حدث خطأ في الطلب");
+        }
+        
+        const result = await res.json();
+        console.log("نتيجة محاولة الانضمام:", result);
+        return result;
+      } catch (error) {
+        console.error("خطأ أثناء محاولة الانضمام:", error);
+        throw error;
+      }
     },
     onSuccess: (data) => {
       if (table.gameType === "naruto") {
@@ -47,7 +58,10 @@ export function TableCard({ table }: TableCardProps) {
       }
       
       if (data.success) {
-        if (data.isSpectator) {
+        // تأكد من وجود خاصية isSpectator في البيانات
+        const isUserSpectator = data.isSpectator === true;
+        
+        if (isUserSpectator) {
           toast({
             title: "وضع المشاهدة",
             description: "أنت الآن تشاهد اللعبة. ستتمكن من الانضمام عندما يصبح هناك مقعد متاح.",

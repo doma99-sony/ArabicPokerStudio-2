@@ -48,20 +48,31 @@ export function SpectatorBar({ tableId, currentPlayers, maxPlayers, onJoinSucces
         return { success: false, message: "الطاولة لا تزال ممتلئة، في انتظار مقعد..." };
       }
       
-      // إذا أصبح هناك مقعد متاح، حاول الانضمام كلاعب نشط (ليس كمشاهد)
-      console.log("محاولة الانضمام إلى الطاولة من وضع المشاهدة...");
-      const res = await fetch(`/api/game/${tableId}/join`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({ asSpectator: false }) // تأكيد أننا نريد الانضمام كلاعب نشط
-      });
-      
-      const data = await res.json();
-      console.log("نتيجة محاولة الانضمام:", data);
-      return data;
+      try {
+        // إذا أصبح هناك مقعد متاح، حاول الانضمام كلاعب نشط (ليس كمشاهد)
+        console.log("محاولة الانضمام إلى الطاولة من وضع المشاهدة...");
+        const res = await fetch(`/api/game/${tableId}/join`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({ asSpectator: false }) // تأكيد أننا نريد الانضمام كلاعب نشط
+        });
+        
+        if (!res.ok) {
+          const errorText = await res.text();
+          console.error("خطأ في استجابة الانضمام:", errorText);
+          throw new Error(errorText || "خطأ في الاستجابة من الخادم");
+        }
+        
+        const data = await res.json();
+        console.log("نتيجة محاولة الانضمام:", data);
+        return data;
+      } catch (error) {
+        console.error("خطأ أثناء محاولة الانضمام من وضع المشاهدة:", error);
+        throw error;
+      }
     },
     onSuccess: (data) => {
       if (data.success && !data.isSpectator) {
