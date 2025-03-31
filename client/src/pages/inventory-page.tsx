@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { ArrowRight, Gift, Package, Award, ShoppingBag, Star, Search, Tag } from "lucide-react";
+import { ArrowRight, Gift, Package, Award, ShoppingBag, Star, Search, Tag, User, Shirt } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -9,7 +9,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 
 // أنواع العناصر في المتجر
-type ItemType = "frame" | "avatar" | "badge" | "chip" | "table" | "card";
+type ItemType = "frame" | "avatar" | "badge" | "chip" | "table" | "card" | "character" | "clothing";
 
 interface InventoryItem {
   id: string;
@@ -97,6 +97,26 @@ export default function InventoryPage() {
           rarity: "common",
           acquired: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
           equipped: true
+        },
+        {
+          id: "character_1",
+          name: "ناروتو أوزوماكي",
+          description: "شخصية ناروتو الشهيرة من أنمي ناروتو شيبودن",
+          imageSrc: "/assets/characters/naruto.png",
+          type: "character",
+          rarity: "epic",
+          acquired: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+          equipped: true
+        },
+        {
+          id: "clothing_2",
+          name: "حذاء ذهبي",
+          description: "حذاء ذهبي اللون بتصميم فرعوني فاخر",
+          imageSrc: "/assets/clothing/golden_shoes.png",
+          type: "clothing",
+          rarity: "rare",
+          acquired: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+          equipped: true
         }
       ];
 
@@ -161,7 +181,9 @@ export default function InventoryPage() {
       badge: "شارة",
       chip: "رقاقة",
       table: "طاولة",
-      card: "أوراق لعب"
+      card: "أوراق لعب",
+      character: "شخصية",
+      clothing: "ملابس"
     };
     return typeMap[type] || type;
   };
@@ -298,11 +320,23 @@ export default function InventoryPage() {
                   <span>أوراق اللعب</span>
                 </div>
               </TabsTrigger>
+              <TabsTrigger value="character" className="text-[#D4AF37]">
+                <div className="flex items-center gap-1">
+                  <User className="h-3 w-3" />
+                  <span>الشخصيات</span>
+                </div>
+              </TabsTrigger>
+              <TabsTrigger value="clothing" className="text-[#D4AF37]">
+                <div className="flex items-center gap-1">
+                  <Shirt className="h-3 w-3" />
+                  <span>الملابس</span>
+                </div>
+              </TabsTrigger>
             </TabsList>
           </div>
           
           {/* محتوى كل تبويب */}
-          {(["frame", "avatar", "badge", "chip", "table", "card"] as ItemType[]).map((tabType) => (
+          {(["frame", "avatar", "badge", "chip", "table", "card", "character", "clothing"] as ItemType[]).map((tabType) => (
             <TabsContent key={tabType} value={tabType} className="mt-6">
               {filteredItems.length === 0 ? (
                 <div className="bg-black/20 rounded-lg border border-[#D4AF37]/20 p-8 text-center">
@@ -345,6 +379,8 @@ export default function InventoryPage() {
                             {item.type === 'chip' && <span className="text-2xl">🎮</span>}
                             {item.type === 'table' && <span className="text-2xl">🎲</span>}
                             {item.type === 'card' && <span className="text-2xl">🃏</span>}
+                            {item.type === 'character' && <User className="h-8 w-8 text-[#D4AF37]" />}
+                            {item.type === 'clothing' && <Shirt className="h-8 w-8 text-[#D4AF37]" />}
                           </div>
                         </div>
                         
@@ -441,6 +477,8 @@ export default function InventoryPage() {
                   {selectedItem.type === 'chip' && <span className="text-4xl">🎮</span>}
                   {selectedItem.type === 'table' && <span className="text-4xl">🎲</span>}
                   {selectedItem.type === 'card' && <span className="text-4xl">🃏</span>}
+                  {selectedItem.type === 'character' && <User className="h-12 w-12 text-[#D4AF37]" />}
+                  {selectedItem.type === 'clothing' && <Shirt className="h-12 w-12 text-[#D4AF37]" />}
                 </div>
               </div>
               

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { ArrowRight, ShoppingCart, DollarSign, Zap, CreditCard, ShoppingBag } from "lucide-react";
+import { ArrowRight, ShoppingCart, DollarSign, Zap, CreditCard, ShoppingBag, Shirt, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -16,6 +16,18 @@ type ChipPackage = {
   discountPercent?: number;
   popular?: boolean;
   bestValue?: boolean;
+};
+
+// نوع الشخصيات والملابس
+type Character = {
+  id: string;
+  name: string;
+  description: string;
+  imageSrc: string;
+  price: number;
+  isCharacter: boolean;
+  category?: string;
+  popular?: boolean;
 };
 
 type MissionType = {
@@ -34,7 +46,9 @@ export default function ShopPage() {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("chips");
   const [selectedPackage, setSelectedPackage] = useState<ChipPackage | null>(null);
+  const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
   const [openPurchaseDialog, setOpenPurchaseDialog] = useState(false);
+  const [openCharacterDialog, setOpenCharacterDialog] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
   // عروض شحن الرقاقات
@@ -68,6 +82,71 @@ export default function ShopPage() {
       price: 1600,
       discountPercent: 15,
       bestValue: true
+    }
+  ];
+
+  // عناصر الشخصيات والملابس
+  const characters: Character[] = [
+    {
+      id: "character_1",
+      name: "ناروتو أوزوماكي",
+      description: "شخصية ناروتو الشهيرة من أنمي ناروتو شيبودن",
+      imageSrc: "/assets/characters/naruto.png",
+      price: 1200,
+      isCharacter: true,
+      popular: true
+    },
+    {
+      id: "character_2",
+      name: "رورونوا زورو",
+      description: "شخصية زورو من أنمي ون بيس، أحد أفراد طاقم قبعة القش",
+      imageSrc: "/assets/characters/zoro.png",
+      price: 1200,
+      isCharacter: true
+    },
+    {
+      id: "character_3",
+      name: "نامي",
+      description: "شخصية نامي من أنمي ون بيس، ملاح طاقم قبعة القش",
+      imageSrc: "/assets/characters/nami.png",
+      price: 1200,
+      isCharacter: true
+    },
+    {
+      id: "clothing_1",
+      name: "بدلة فاخرة",
+      description: "بدلة رسمية فاخرة تناسب لاعبي VIP",
+      imageSrc: "/assets/clothing/luxury_suit.png",
+      price: 500,
+      isCharacter: false,
+      category: "tops"
+    },
+    {
+      id: "clothing_2",
+      name: "حذاء ذهبي",
+      description: "حذاء ذهبي اللون بتصميم فرعوني فاخر",
+      imageSrc: "/assets/clothing/golden_shoes.png",
+      price: 300,
+      isCharacter: false,
+      category: "shoes"
+    },
+    {
+      id: "clothing_3",
+      name: "قبعة عصرية",
+      description: "قبعة عصرية بلمسة شرقية",
+      imageSrc: "/assets/clothing/modern_hat.png",
+      price: 250,
+      isCharacter: false,
+      category: "head"
+    },
+    {
+      id: "clothing_4",
+      name: "قناع ذهبي",
+      description: "قناع ذهبي على طراز الفراعنة",
+      imageSrc: "/assets/clothing/gold_mask.png",
+      price: 700,
+      isCharacter: false,
+      category: "face"
     }
   ];
 
@@ -120,7 +199,7 @@ export default function ShopPage() {
     }
   ];
 
-  // محاكاة عملية الشراء
+  // محاكاة عملية شراء الرقاقات
   const handlePurchase = () => {
     if (!selectedPackage) return;
     
@@ -137,6 +216,32 @@ export default function ShopPage() {
 
       // تحديث تقدم المهمة الثالثة (المشتري الذهبي)
       if (selectedPackage.price >= 100) {
+        toast({
+          title: "مهمة مكتملة!",
+          description: "لقد أكملت مهمة المشتري الذهبي وحصلت على 500,000 رقاقة!",
+          duration: 5000
+        });
+      }
+    }, 2000);
+  };
+  
+  // محاكاة عملية شراء الشخصيات والملابس
+  const handleCharacterPurchase = () => {
+    if (!selectedCharacter) return;
+    
+    setIsProcessing(true);
+    setTimeout(() => {
+      setIsProcessing(false);
+      setOpenCharacterDialog(false);
+      
+      toast({
+        title: "تمت عملية الشراء بنجاح!",
+        description: `تم إضافة ${selectedCharacter.name} إلى حقيبتك.`,
+        duration: 5000
+      });
+
+      // تحديث تقدم المهمة الثالثة (المشتري الذهبي)
+      if (selectedCharacter.price >= 100) {
         toast({
           title: "مهمة مكتملة!",
           description: "لقد أكملت مهمة المشتري الذهبي وحصلت على 500,000 رقاقة!",
@@ -213,6 +318,10 @@ export default function ShopPage() {
                 <Zap className="h-4 w-4 ml-1" />
                 شحن الرقاقات
               </TabsTrigger>
+              <TabsTrigger value="characters" className="text-[#D4AF37]">
+                <User className="h-4 w-4 ml-1" />
+                الشخصيات والملابس
+              </TabsTrigger>
               <TabsTrigger value="missions" className="text-[#D4AF37]">
                 <div className="h-4 w-4 ml-1 rounded-full bg-[#D4AF37]/20 flex items-center justify-center">
                   <span className="text-xs">🎯</span>
@@ -267,6 +376,79 @@ export default function ShopPage() {
                     <Button className="w-full bg-[#D4AF37] hover:bg-[#c9a431] text-black font-bold">
                       شراء الآن
                     </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </TabsContent>
+          
+          {/* قسم الشخصيات والملابس */}
+          <TabsContent value="characters" className="mt-6">
+            <div className="bg-black/20 rounded-lg border border-[#D4AF37]/20 p-4 mb-4">
+              <h3 className="text-lg font-bold text-[#D4AF37] mb-2">الشخصيات والملابس</h3>
+              <p className="text-sm text-white/70">قم بتخصيص مظهرك في اللعبة بشخصيات وملابس مميزة!</p>
+            </div>
+            
+            {/* تصفية حسب النوع */}
+            <div className="flex flex-wrap gap-2 mb-4">
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="bg-[#D4AF37] text-black border-none hover:bg-[#c9a431]"
+              >
+                الكل
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="bg-black/40 text-white/80 border-[#D4AF37]/30 hover:bg-[#D4AF37]/20"
+              >
+                الشخصيات
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="bg-black/40 text-white/80 border-[#D4AF37]/30 hover:bg-[#D4AF37]/20"
+              >
+                الملابس
+              </Button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {characters.map((item) => (
+                <div
+                  key={item.id}
+                  className="bg-[#1a1708]/80 rounded-lg border border-gray-700 overflow-hidden cursor-pointer hover:shadow-[0_0_12px_rgba(212,175,55,0.2)] transition-all duration-300 relative"
+                  onClick={() => {
+                    setSelectedCharacter(item);
+                    setOpenCharacterDialog(true);
+                  }}
+                >
+                  {item.popular && (
+                    <div className="absolute top-0 right-0 bg-orange-500 text-white text-xs px-2 py-1 font-bold">
+                      الأكثر شهرة
+                    </div>
+                  )}
+                  
+                  <div className="aspect-square bg-gradient-to-br from-[#1a1708] to-black flex items-center justify-center p-4">
+                    <div className="w-32 h-32 bg-[#D4AF37]/10 rounded-full border border-[#D4AF37]/20 flex items-center justify-center">
+                      {item.isCharacter ? (
+                        <User className="h-16 w-16 text-[#D4AF37]/60" />
+                      ) : (
+                        <Shirt className="h-16 w-16 text-[#D4AF37]/60" />
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="p-4 bg-black/40">
+                    <h3 className="font-bold text-lg text-[#D4AF37] mb-1">{item.name}</h3>
+                    <p className="text-sm text-white/70 mb-3 line-clamp-2 h-10">{item.description}</p>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-bold text-white/90">{formatNumber(item.price)} رقاقة</span>
+                      <Button size="sm" className="bg-[#D4AF37] hover:bg-[#c9a431] text-black">
+                        شراء
+                      </Button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -334,7 +516,7 @@ export default function ShopPage() {
         </Tabs>
       </div>
       
-      {/* نافذة منبثقة لتأكيد الشراء */}
+      {/* نافذة منبثقة لتأكيد شراء الرقاقات */}
       {selectedPackage && (
         <Dialog open={openPurchaseDialog} onOpenChange={setOpenPurchaseDialog}>
           <DialogContent className="sm:max-w-[425px] bg-gradient-to-b from-black to-[#1a1708] border-[#D4AF37]/30 text-white">
@@ -392,6 +574,77 @@ export default function ShopPage() {
                   <>
                     <CreditCard className="h-4 w-4 ml-1" />
                     تأكيد الشراء
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+      
+      {/* نافذة منبثقة لتأكيد شراء الشخصيات والملابس */}
+      {selectedCharacter && (
+        <Dialog open={openCharacterDialog} onOpenChange={setOpenCharacterDialog}>
+          <DialogContent className="sm:max-w-[425px] bg-gradient-to-b from-black to-[#1a1708] border-[#D4AF37]/30 text-white">
+            <DialogHeader>
+              <DialogTitle className="text-center text-xl font-bold text-[#D4AF37]">
+                تأكيد عملية الشراء
+              </DialogTitle>
+            </DialogHeader>
+            
+            <div className="py-4">
+              <div className="flex items-center justify-center mb-4">
+                <div className="w-24 h-24 bg-[#D4AF37]/10 rounded-full border border-[#D4AF37]/20 flex items-center justify-center">
+                  {selectedCharacter.isCharacter ? (
+                    <User className="h-12 w-12 text-[#D4AF37]/60" />
+                  ) : (
+                    <Shirt className="h-12 w-12 text-[#D4AF37]/60" />
+                  )}
+                </div>
+              </div>
+              
+              <h3 className="text-lg font-bold text-white text-center mb-2">{selectedCharacter.name}</h3>
+              <p className="text-sm text-center text-white/70 mb-4">{selectedCharacter.description}</p>
+              
+              <div className="flex justify-between items-center bg-black/30 p-3 rounded-lg mb-3">
+                <span className="text-white/70">النوع:</span>
+                <span className="font-bold text-[#D4AF37]">{selectedCharacter.isCharacter ? 'شخصية' : 'ملابس'}</span>
+              </div>
+              
+              <div className="flex justify-between items-center bg-black/30 p-3 rounded-lg mb-4">
+                <span className="text-white/70">السعر:</span>
+                <span className="font-bold text-[#D4AF37]">{formatNumber(selectedCharacter.price)} رقاقة</span>
+              </div>
+              
+              <div className="text-center text-sm text-white/70 mb-4">
+                سيتم إضافة {selectedCharacter.isCharacter ? 'الشخصية' : 'الملابس'} إلى حقيبتك فوراً بعد إتمام العملية
+              </div>
+            </div>
+            
+            <DialogFooter className="sm:justify-between">
+              <Button 
+                variant="outline" 
+                className="text-white/70 border-white/20"
+                onClick={() => setOpenCharacterDialog(false)}
+                disabled={isProcessing}
+              >
+                إلغاء
+              </Button>
+              
+              <Button 
+                className="bg-[#D4AF37] hover:bg-[#c9a431] text-black"
+                onClick={handleCharacterPurchase}
+                disabled={isProcessing}
+              >
+                {isProcessing ? (
+                  <span className="flex items-center">
+                    <span className="animate-spin h-4 w-4 border-2 border-black border-t-transparent rounded-full ml-2"></span>
+                    جاري المعالجة...
+                  </span>
+                ) : (
+                  <>
+                    <ShoppingBag className="h-4 w-4 ml-1" />
+                    شراء الآن
                   </>
                 )}
               </Button>
