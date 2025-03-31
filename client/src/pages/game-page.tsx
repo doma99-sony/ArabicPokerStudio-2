@@ -80,8 +80,13 @@ export default function GamePage({ params }: { params?: { tableId?: string } }) 
       const savedTableId = localStorage.getItem('lastTableId');
       if (savedTableId) {
         console.log("تم استعادة معرّف الطاولة من التخزين المحلي:", savedTableId);
-        navigate(`/game/${savedTableId}`);
+        // استخدم إعادة توجيه مباشرة بدلاً من navigate لتجنب مشاكل التوجيه
+        window.location.href = `/game/${savedTableId}`;
       }
+    } else {
+      // تأكد من أن المعرف مخزن في التخزين المحلي حتى في حالة التحميل المباشر للصفحة
+      localStorage.setItem('lastTableId', tableId.toString());
+      console.log("تم تحديث/تخزين معرف الطاولة:", tableId);
     }
   }, [tableId, navigate]);
   
@@ -120,14 +125,56 @@ export default function GamePage({ params }: { params?: { tableId?: string } }) 
   // Handle errors and redirect if needed
   useEffect(() => {
     if (error) {
-      toast({
-        title: "خطأ",
-        description: "تعذر الانضمام إلى الطاولة. يرجى المحاولة مرة أخرى.",
-        variant: "destructive",
-      });
-      navigate("/");
+      console.error("خطأ في جلب بيانات اللعبة:", error);
+      
+      // في حالة فشل جلب البيانات، حاول إعادة الانضمام إلى الطاولة أولاً
+      if (tableId) {
+        console.log("محاولة إعادة الانضمام إلى الطاولة:", tableId);
+        
+        // محاولة الانضمام إلى الطاولة مرة أخرى
+        fetch(`/api/game/${tableId}/join`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include"
+        })
+        .then(res => res.json())
+        .then(data => {
+          console.log("نتيجة محاولة إعادة الانضمام:", data);
+          
+          if (data.success) {
+            // إعادة تحميل الصفحة بعد الانضمام
+            window.location.reload();
+          } else {
+            // فشل في إعادة الانضمام، توجيه المستخدم إلى الصفحة الرئيسية
+            toast({
+              title: "خطأ",
+              description: "تعذر الانضمام إلى الطاولة. يرجى المحاولة مرة أخرى.",
+              variant: "destructive",
+            });
+            navigate("/");
+          }
+        })
+        .catch(err => {
+          console.error("خطأ في إعادة الانضمام:", err);
+          toast({
+            title: "خطأ",
+            description: "تعذر الانضمام إلى الطاولة. يرجى المحاولة مرة أخرى.",
+            variant: "destructive",
+          });
+          navigate("/");
+        });
+      } else {
+        toast({
+          title: "خطأ",
+          description: "تعذر الانضمام إلى الطاولة. يرجى المحاولة مرة أخرى.",
+          variant: "destructive",
+        });
+        navigate("/");
+      }
     }
-  }, [error, toast, navigate]);
+  }, [error, toast, navigate, tableId]);
   
   // تحقق مما إذا كان اللاعب في وضع المشاهدة عند تحميل بيانات اللعبة
   useEffect(() => {
