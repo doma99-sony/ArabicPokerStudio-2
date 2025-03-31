@@ -91,6 +91,7 @@ export class MemStorage implements IStorage {
     this.createTableCategory("نوب", 10, 20, 20000, 5, 10, "poker");
     this.createTableCategory("لسه بتعلم", 50, 100, 100000, 5, 10, "poker");
     this.createTableCategory("محترف", 250, 500, 500000, 5, 10, "poker");
+    this.createTableCategory("طاولات الكبار", 500, 1000, 750000, 5, 10, "poker");
     this.createTableCategory("الفاجر", 2000, 4000, 10000000, 5, 10, "poker");
     
     // طاولات بوكر عرباوي VIP
