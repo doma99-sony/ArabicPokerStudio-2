@@ -476,16 +476,14 @@ export class MemStorage implements IStorage {
       return { success: false, message: "غرفة اللعبة غير موجودة" };
     }
     
-    // Update user's chips (deduct table buy-in)
-    await this.updateUserChips(userId, user.chips - table.minBuyIn);
-    
-    // Add player to the game at the specified position if provided
-    const joinResult = gameRoom.addPlayer(userId, user.username, table.minBuyIn, user.avatar);
+    // أولاً أضف اللاعب إلى غرفة اللعبة بموضع محدد إن وجد
+    const joinResult = gameRoom.addPlayer(userId, user.username, table.minBuyIn, user.avatar, position);
     if (!joinResult.success) {
-      // Refund chips if join failed
-      await this.updateUserChips(userId, user.chips);
       return joinResult;
     }
+    
+    // بعد التأكد من نجاح إضافة اللاعب، نقوم بخصم الرقاقات
+    await this.updateUserChips(userId, user.chips - table.minBuyIn);
     
     // Update table status and player count
     table.currentPlayers++;
@@ -496,30 +494,7 @@ export class MemStorage implements IStorage {
     }
     this.tables.set(tableId, table);
     
-    // Add AI players if the table has only one player (the current user)
-    if (table.currentPlayers === 1 && table.gameType === "poker") {
-      // Add 1-3 AI players
-      const aiCount = Math.min(3, table.maxPlayers - table.currentPlayers);
-      
-      for (let i = 0; i < aiCount; i++) {
-        // Generate AI profile with negative IDs (to distinguish from real users)
-        const aiId = -10000 - i; // Negative IDs for AI players
-        const aiNames = ["لاعب_آلي_علي", "لاعب_آلي_عمر", "لاعب_آلي_سعيد", "لاعب_آلي_محمد"];
-        const aiName = aiNames[i % aiNames.length];
-        const aiChips = table.minBuyIn * 2; // AI players start with double buy-in
-        
-        // Add AI to game
-        gameRoom.addPlayer(aiId, aiName, aiChips, null);
-        
-        // Update table info
-        table.currentPlayers++;
-        if (table.currentPlayers >= table.maxPlayers) {
-          table.status = "full";
-          break;
-        }
-      }
-      this.tables.set(tableId, table);
-    }
+    // تم إزالة اللاعبين الوهميين بناءً على طلب المستخدم
     
     return { 
       success: true, 
