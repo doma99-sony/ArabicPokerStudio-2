@@ -54,9 +54,14 @@ export default function LobbyPage() {
     // ستتم إضافة المزيد من الألعاب لاحقًا
   };
 
+  const backgroundStyle = {
+    backgroundImage: "url('/images/egyptian-background.jpg')",
+    backgroundSize: "cover",
+    backgroundPosition: "center"
+  };
+
   return (
-    <div className="min-h-screen bg-cover bg-center flex flex-col"
-         style={{ backgroundImage: "url('/images/egyptian-background.jpg')" }}>
+    <div className="min-h-screen py-8" style={backgroundStyle}>
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
 
       {/* Header Bar */}
@@ -98,6 +103,8 @@ export default function LobbyPage() {
 
       {/* Main Content */}
       <main className="relative z-10 flex-1 overflow-hidden">
+        {/*Added Image Here*/}
+        <img src="/images/lobby_image.jpg" alt="Lobby Image" className="w-full h-64 object-cover mb-4"/> {/* Adjust w-full and h-64 as needed */}
         {/* Chat Section - Fixed to left */}
         <div 
           className="fixed top-16 left-0 h-[calc(100%-8rem)] z-20 transition-all duration-300" 
@@ -111,7 +118,7 @@ export default function LobbyPage() {
                 <div className="bg-[#0A3A2A] p-3 border-b border-[#D4AF37] flex justify-between items-center">
                   <h2 className="text-base font-bold text-[#D4AF37]">الدردشة العامة</h2>
                 </div>
-                
+
                 {/* منطقة الدردشة */}
                 <div className="h-[calc(80%-50px)] bg-gradient-to-b from-[#1B4D3E]/80 to-black/60 w-80">
                   <div className="h-full w-full">
@@ -120,7 +127,7 @@ export default function LobbyPage() {
                 </div>
               </div>
             </div>
-            
+
             {/* زر التبديل */}
             <button 
               id="chat-toggle"
@@ -208,7 +215,7 @@ export default function LobbyPage() {
                       قريباً...
                     </div>
                   </div>
-                  
+
                   {/* دومينو */}
                   <div 
                     className={`flex flex-col h-32 rounded-lg overflow-hidden border-2 ${activeGameCategory === 'domino' ? 'ring-2 ring-blue-600' : ''} border-blue-600/80 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer`}
@@ -226,7 +233,7 @@ export default function LobbyPage() {
                   </div>
                 </div>
               </div>
-              
+
               {/* مساحة للأيقونات */}
               <div className="flex justify-center gap-4 my-2">
                 <div className="p-2 bg-black/40 rounded-full w-8 h-8 flex items-center justify-center text-white/70 hover:bg-black/60 hover:text-white cursor-pointer transition-all">
@@ -266,7 +273,7 @@ export default function LobbyPage() {
               <span className="text-[11px] text-white mt-1">الأحداث</span>
             </button>
           </div>
-          
+
           {/* الإعدادات */}
           <div className="relative">
             <button 
@@ -274,12 +281,12 @@ export default function LobbyPage() {
               className="flex flex-col items-center justify-center p-2 min-w-[48px]"
             >
               <div className="bg-black/60 rounded-full w-11 h-11 border border-[#D4AF37] flex items-center justify-center text-[#D4AF37]">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0 2.83l.06.06a1.65 1.65 0 0 0 .33 1.82H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
               </div>
               <span className="text-[11px] text-white mt-1">الإعدادات</span>
             </button>
           </div>
-          
+
           {/* الرسائل */}
           <div className="relative">
             <button 
@@ -293,7 +300,7 @@ export default function LobbyPage() {
             </button>
             <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-[10px] text-white flex items-center justify-center border border-black">2</span>
           </div>
-          
+
           {/* المهمة */}
           <div className="relative">
             <button 
@@ -307,7 +314,7 @@ export default function LobbyPage() {
             </button>
             <span className="absolute -top-1 -right-1 w-5 h-5 bg-amber-500 rounded-full text-[10px] text-white flex items-center justify-center border border-black">3</span>
           </div>
-          
+
           {/* الأصدقاء */}
           <div className="relative">
             <button 
@@ -320,7 +327,7 @@ export default function LobbyPage() {
               <span className="text-[11px] text-white mt-1">الأصدقاء</span>
             </button>
           </div>
-          
+
           {/* الحقيبة */}
           <div className="relative">
             <button 
@@ -333,7 +340,7 @@ export default function LobbyPage() {
               <span className="text-[11px] text-white mt-1">الحقيبة</span>
             </button>
           </div>
-          
+
           {/* الترتيب */}
           <div className="relative">
             <button 
@@ -346,7 +353,7 @@ export default function LobbyPage() {
               <span className="text-[11px] text-white mt-1">الترتيب</span>
             </button>
           </div>
-          
+
           {/* VIP */}
           <div className="relative">
             <button 
@@ -359,7 +366,7 @@ export default function LobbyPage() {
               <span className="text-[11px] text-white mt-1">VIP</span>
             </button>
           </div>
-          
+
           {/* المتجر */}
           <div className="relative">
             <button 
@@ -372,7 +379,7 @@ export default function LobbyPage() {
               <span className="text-[11px] text-white mt-1">المتجر</span>
             </button>
           </div>
-          
+
           {/* العبها الآن */}
           <div className="relative group">
             <button 
@@ -384,21 +391,21 @@ export default function LobbyPage() {
             >
               <div className="bg-white rounded-full w-12 h-12 border-2 border-[#D4AF37] flex items-center justify-center relative overflow-hidden">
                 <span className="text-sm font-bold text-[#0A3A2A]">العبها</span>
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-400/20 to-transparent animate-shine"></div>
+                <<div className="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-400/20 to-transparent animate-shine"></div>
               </div>
               <span className="text-[11px] text-white mt-1">العبها الآن</span>
             </button>
           </div>
         </div>
       </div>
-      
+
       {/* Footer */}
       <footer className="relative z-10 bg-black/80 text-white/60 text-center p-2 border-t border-[#D4AF37]/20">
         <div className="container mx-auto">
           <p className="text-xs">&copy; {new Date().getFullYear()} بوكر تكساس عرباوي - جميع الحقوق محفوظة</p>
         </div>
       </footer>
-      
+
       <style dangerouslySetInnerHTML={{
         __html: `
           @keyframes shine {
