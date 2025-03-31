@@ -91,7 +91,9 @@ export class MemStorage implements IStorage {
     this.createTableCategory("نوب", 10, 20, 20000, 5, 10, "poker");
     this.createTableCategory("لسه بتعلم", 50, 100, 100000, 5, 10, "poker");
     this.createTableCategory("محترف", 250, 500, 500000, 5, 10, "poker");
-    this.createTableCategory("الفاجر", 2000, 4000, 10000000, 5, 10, "poker");
+    // طاولات صف الفاجر الجديد
+    this.createTableCategoryWithNames(["الفاجر المصري", "الفاجر السعودي", "الفاجر الإماراتي", "الفاجر الكويتي", "الفاجر اللبناني", "الفاجر الأردني", "الفاجر المغربي"], 
+      100000, 200000, 1000000, 5, "poker");
     
     // طاولات بوكر عرباوي VIP
     this.createTableCategoryWithNames(["المصريين", "السعوديين", "الإماراتيين", "الكويتيين", "اللبنانيين", "الأردنيين", "المغاربة"], 
@@ -185,7 +187,7 @@ export class MemStorage implements IStorage {
         maxPlayers,
         currentPlayers,
         status,
-        category: "بوكر عرباوي VIP", // فئة الطاولة
+        category: "الفاجر", // فئة الطاولة
         gameType,
         isVip: true,
         requiredVipLevel: 1

@@ -217,10 +217,10 @@ export default function PokerTablesPage() {
                 </TabsTrigger>
                 <TabsTrigger 
                   value="الفاجر" 
-                  className={`py-3 ${canPlayLevel(10000000) ? '' : 'opacity-70'}`}
-                  disabled={!canPlayLevel(10000000)}
+                  className={`py-3 ${canPlayLevel(1000000) ? '' : 'opacity-70'}`}
+                  disabled={!canPlayLevel(1000000)}
                 >
-                  الفاجر <Coins className="ml-2 h-4 w-4" /> 10,000,000
+                  الفاجر <Coins className="ml-2 h-4 w-4" /> 1,000,000
                 </TabsTrigger>
               </TabsList>
 
@@ -286,7 +286,7 @@ export default function PokerTablesPage() {
                   </div>
                 ) : (
                   <div className="bg-black/30 rounded-lg p-4">
-                    <h3 className="text-[#D4AF37] text-lg mb-4">طاولات الفاجر <span className="text-white/70 text-sm mr-2">الحد الأدنى: 10,000,000 رقاقة</span></h3>
+                    <h3 className="text-[#D4AF37] text-lg mb-4">طاولات الفاجر <span className="text-white/70 text-sm mr-2">الحد الأدنى: 1,000,000 رقاقة</span></h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                       {getTablesByCategory("الفاجر").map((table) => (
                         <TableCard key={table.id} table={table} />
