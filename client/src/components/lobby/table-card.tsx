@@ -25,16 +25,11 @@ export function TableCard({ table }: TableCardProps) {
   
   // دالة للانتقال إلى صفحة اللعبة
   const navigateToGamePage = useCallback((tableId: number) => {
-    // استخدم الانتقال المباشر عن طريق تغيير هاش URL يدويًا
-    // هذا يتجنب أي مشاكل مع التوجيه
-    window.location.href = `#/game/${tableId}`;
+    // تخزين معرف الطاولة في التخزين المحلي
+    localStorage.setItem('lastTableId', tableId.toString());
     
-    // إعادة تحميل الصفحة إذا لم ينجح الانتقال
-    setTimeout(() => {
-      if (!window.location.hash.includes(`/game/${tableId}`)) {
-        window.location.href = `/game/${tableId}`;
-      }
-    }, 200);
+    // استخدام إعادة توجيه مباشرة بدلاً من التغيير التدريجي
+    window.location.href = `/game/${tableId}`;
   }, []);
 
   // الانضمام للعبة - إما كلاعب نشط أو كمشاهد

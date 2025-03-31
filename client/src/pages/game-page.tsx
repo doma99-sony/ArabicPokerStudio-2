@@ -71,16 +71,33 @@ export default function GamePage({ params }: { params?: { tableId?: string } }) 
     );
   }
   
-  const tableId = parseInt(params.tableId);
+  // تحويل معرّف الطاولة إلى رقم
+  const tableId = params && params.tableId ? parseInt(params.tableId) : null;
+  
+  // في حالة لم يتم العثور على معرّف صالح، حاول استعادته من التخزين المحلي
+  useEffect(() => {
+    if (!tableId) {
+      const savedTableId = localStorage.getItem('lastTableId');
+      if (savedTableId) {
+        console.log("تم استعادة معرّف الطاولة من التخزين المحلي:", savedTableId);
+        navigate(`/game/${savedTableId}`);
+      }
+    }
+  }, [tableId, navigate]);
   
   // Fetch game state
   const { data: gameState, isLoading, error } = useQuery<GameState>({
     queryKey: [`/api/game/${tableId}`],
     refetchInterval: 2000, // Poll every 2 seconds for updates
-    enabled: !!user && !!tableId, // تمكين الاستعلام فقط عند وجود مستخدم مسجل الدخول ومعرف طاولة صالح
+    enabled: !!user && !!tableId && tableId > 0, // تمكين الاستعلام فقط عند وجود مستخدم مسجل الدخول ومعرف طاولة صالح
     retry: false,
     queryFn: async () => {
       try {
+        if (!tableId) {
+          // في حالة عدم وجود معرّف طاولة، ارجع خطأ
+          throw new Error("لم يتم تحديد معرّف الطاولة");
+        }
+        
         const res = await fetch(`/api/game/${tableId}`, {
           credentials: 'include'
         });
@@ -235,9 +252,9 @@ export default function GamePage({ params }: { params?: { tableId?: string } }) 
         {!isSpectator && <BetControls gameState={gameState} />}
         
         {/* شريط المشاهدة - يظهر فقط في وضع المشاهدة */}
-        {isSpectator && (
+        {isSpectator && tableId && (
           <SpectatorBar 
-            tableId={tableId}
+            tableId={tableId as number}
             currentPlayers={gameState.players.length}
             maxPlayers={maxPlayers}
             onJoinSuccess={handleJoinFromSpectator}
