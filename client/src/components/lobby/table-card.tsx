@@ -5,7 +5,7 @@ import { GameTable } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Users, DollarSign, PlayCircle, Plus } from "lucide-react";
+import { Loader2, Users, DollarSign, PlayCircle, Plus, Eye as EyeIcon } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -28,19 +28,30 @@ export function TableCard({ table }: TableCardProps) {
       const res = await apiRequest("POST", `/api/game/${table.id}/join`);
       return await res.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       if (table.gameType === "naruto") {
         window.location.href = `/naruto/${table.id}`;
       } else {
+        // الانتقال إلى صفحة اللعبة حتى لو كانت الطاولة ممتلئة (سيصبح مشاهدًا)
         window.location.href = `/game/${table.id}`;
       }
     },
     onError: (error: Error) => {
-      toast({
-        title: "فشل الانضمام إلى الطاولة",
-        description: error.message,
-        variant: "destructive",
-      });
+      // لا نظهر الخطأ عندما تكون الطاولة ممتلئة، بل ننتقل إلى الطاولة كمشاهد
+      if (error.message.includes("الطاولة ممتلئة")) {
+        toast({
+          title: "الطاولة ممتلئة",
+          description: "ستنضم كمشاهد حتى يصبح هناك مقعد متاح",
+        });
+        // الانتقال إلى الطاولة كمشاهد
+        window.location.href = `/game/${table.id}`;
+      } else {
+        toast({
+          title: "فشل الانضمام إلى الطاولة",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
     }
   });
 
@@ -160,13 +171,21 @@ export function TableCard({ table }: TableCardProps) {
         </div>
       </CardContent>
       <CardFooter>
-        <Button className="w-full bg-gradient-to-br from-[#D4AF37] to-[#AA8C2C] hover:from-[#E5C04B] hover:to-[#D4AF37] text-[#0A0A0A] font-bold" 
-                disabled={table.status === "full" || joinMutation.isPending} 
+        <Button className={`w-full font-bold ${
+          table.status === "full" 
+            ? "bg-gradient-to-br from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black" 
+            : "bg-gradient-to-br from-[#D4AF37] to-[#AA8C2C] hover:from-[#E5C04B] hover:to-[#D4AF37] text-[#0A0A0A]"
+        }`}
+                disabled={joinMutation.isPending} 
                 onClick={() => joinMutation.mutate()}>
           {joinMutation.isPending ? (
             <Loader2 className="h-5 w-5 animate-spin mx-auto" />
           ) : (
-            <> <PlayCircle size={18} className="ml-2" /> انضم للعب </>
+            table.status === "full" ? (
+              <> <EyeIcon size={18} className="ml-2" /> مشاهدة </>
+            ) : (
+              <> <PlayCircle size={18} className="ml-2" /> انضم للعب </>
+            )
           )}
         </Button>
       </CardFooter>

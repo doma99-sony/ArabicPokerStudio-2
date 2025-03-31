@@ -17,6 +17,7 @@ export function PokerTable({ gameState }: PokerTableProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isJoining, setIsJoining] = useState(false);
+  const [isSpectator, setIsSpectator] = useState(false);
   
   // Positions for players based on their slot - updated for 9-seat oval table layout
   const playerPositions = [
@@ -113,9 +114,49 @@ export function PokerTable({ gameState }: PokerTableProps) {
   
   // Check if current user is already at the table
   const isUserPlaying = positionedPlayers.some(player => player.isCurrentPlayer);
+  
+  // Check if the table is full to determine spectator status
+  const isTableFull = gameState.players.length >= 9;
+  
+  // Effect to update spectator status
+  useEffect(() => {
+    // User is a spectator if they're not playing and the table is full
+    setIsSpectator(!isUserPlaying && isTableFull);
+  }, [isUserPlaying, isTableFull]);
 
   return (
     <div className="flex-grow relative my-6">
+      {/* Spectator banner - Show only if user is spectating */}
+      {isSpectator && (
+        <div className="absolute top-0 left-0 right-0 bg-amber-600/80 py-2 px-4 text-white text-center z-50 rounded-md mx-4">
+          <p className="font-bold">أنت الآن في وضع المشاهدة - ستتمكن من الانضمام عندما يصبح مقعد متاحًا</p>
+          <button 
+            onClick={() => {
+              // Poll for available seats
+              const checkInterval = setInterval(() => {
+                if (emptySeats.length > 0 && !isUserPlaying) {
+                  // When seat becomes available, try to join
+                  handleJoinSeat(emptySeats[0].position);
+                  clearInterval(checkInterval);
+                  toast({
+                    title: "مقعد متاح",
+                    description: "تم العثور على مقعد فارغ، جاري محاولة الانضمام...",
+                  });
+                }
+              }, 5000); // Check every 5 seconds
+              
+              toast({
+                title: "انتظار مقعد",
+                description: "سيتم إعلامك عندما يصبح هناك مقعد متاح",
+              });
+            }}
+            className="mt-1 bg-white text-amber-700 px-4 py-1 rounded-full font-bold hover:bg-white/90 transition-colors"
+          >
+            انتظار مقعد متاح
+          </button>
+        </div>
+      )}
+      
       {/* Main table container */}
       <div 
         className="poker-table absolute inset-0 rounded-full overflow-hidden flex items-center justify-center"
