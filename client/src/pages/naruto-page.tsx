@@ -1,9 +1,8 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Volume2, VolumeX } from "lucide-react";
-import { useState } from "react";
 import { Image } from "@/components/ui/image";
 import { ChatBox } from "@/components/lobby/chat-box";
 
@@ -13,14 +12,12 @@ export default function NarutoPage({ params }: { params?: { tableId?: string } }
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isMuted, setIsMuted] = useState(true);
 
-  // التحقق من وجود المستخدم
   useEffect(() => {
     if (!user) {
       navigate("/auth");
     }
   }, [user, navigate]);
 
-  // التعامل مع تشغيل/إيقاف الصوت
   const toggleMute = () => {
     if (videoRef.current) {
       videoRef.current.muted = !videoRef.current.muted;
@@ -28,24 +25,21 @@ export default function NarutoPage({ params }: { params?: { tableId?: string } }
     }
   };
 
-  // العودة للصفحة السابقة
   const goBack = () => {
     navigate("/");
   };
 
   return (
     <div 
-  className="min-h-screen text-white py-4 px-6"
-  style={{
-    backgroundImage: 'url("/assets/images/naruto-bg.jpg")',
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    backgroundRepeat: 'no-repeat',
-    loading: 'lazy'
-  }}
->
+      className="min-h-screen text-white py-4 px-6"
+      style={{
+        backgroundImage: 'url("/assets/images/naruto-bg.jpg")',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+      }}
+    >
       <div className="container mx-auto">
-        {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <Button variant="ghost" className="text-white hover:text-gold transition-colors" onClick={goBack}>
             <ArrowLeft className="ml-2" />
@@ -60,7 +54,6 @@ export default function NarutoPage({ params }: { params?: { tableId?: string } }
           </Button>
         </div>
 
-        {/* Main Content */}
         <div className="flex flex-col items-center justify-center naruto-container">
           <div className="rounded-lg overflow-hidden shadow-2xl mb-8 max-w-4xl w-full">
             <video 
@@ -85,7 +78,6 @@ export default function NarutoPage({ params }: { params?: { tableId?: string } }
               backgroundPosition: 'center',
               backgroundBlendMode: 'overlay',
               backgroundColor: 'rgba(26, 26, 46, 0.95)',
-              loading: 'lazy'
             }}
           >
             <h2 className="text-2xl font-bold text-[#ff9d00] mb-6 font-cairo">لعبة ناروتو - قريباً</h2>
@@ -97,13 +89,11 @@ export default function NarutoPage({ params }: { params?: { tableId?: string } }
               الميزات القادمة:
             </p>
             <ul className="list-disc list-inside text-white space-y-3 font-cairo mb-8">
-              <li className="text-lg">شخصيات من عالم ناروتو</li>
-              <li className="text-lg">معارك مثيرة بنظام قتال تكتيكي</li>
-              <li className="text-lg">قدرات خاصة (جوتسو) لكل شخصية</li>
-              <li className="text-lg">جوائز وترقيات للشخصيات</li>
-              <li className="text-lg">منافسة مع لاعبين آخرين</li>
+              <li className="text-lg">شخصيات مميزة من عالم ناروتو</li>
+              <li className="text-lg">قتال تكتيكي مع تقنيات النينجا</li>
+              <li className="text-lg">قصة مشوقة ومهام متنوعة</li>
+              <li className="text-lg">رسومات عالية الجودة</li>
             </ul>
-
             <div className="mt-10 text-center">
               <Button 
                 className="bg-[#ff9d00] hover:bg-[#ff9d00]/80 text-black font-bold px-10 py-6 rounded-full naruto-glow text-xl" 
@@ -113,16 +103,8 @@ export default function NarutoPage({ params }: { params?: { tableId?: string } }
               </Button>
             </div>
             <div className="flex flex-wrap justify-center items-start gap-8 mb-12">
-              {/* Chat Section */}
               <div className="w-full md:w-auto">
                 <div className="bg-[#1a1a2e] p-6 rounded-lg max-w-4xl mx-auto border border-[#ff9d00]/30">
-                  <h2 className="text-2xl font-bold text-[#ff9d00] mb-6 font-cairo">الدردشة</h2>
-                  <div className="bg-black/30 rounded-lg p-4 h-[300px] overflow-y-auto mb-4">
-                    <ChatBox />
-                  </div>
-                </div>
-              </div>
-            </div>xl w-full border border-[#ff9d00]/30">
                   <h2 className="text-2xl font-bold text-[#ff9d00] mb-6 font-cairo">الدردشة</h2>
                   <div className="bg-black/30 rounded-lg p-4 h-[300px] overflow-y-auto mb-4" dir="ltr">
                     <ChatBox />
