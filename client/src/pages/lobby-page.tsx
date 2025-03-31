@@ -93,7 +93,14 @@ export default function LobbyPage() {
       <header className="relative z-10 bg-black/80 text-white p-2 shadow-xl border-b border-[#D4AF37]/30">
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center gap-4">
-            <h1 className="text-xl font-bold text-[#D4AF37]">بوكر تكساس عرباوي</h1>
+            <div className="flex items-center gap-2">
+              <img 
+                src="/assets/poker-icon.jpg" 
+                alt="بوكر عرباوي" 
+                className="w-8 h-8 rounded-full border border-[#D4AF37]" 
+              />
+              <h1 className="text-xl font-bold text-[#D4AF37]">بوكر تكساس عرباوي</h1>
+            </div>
             {/* عداد المستخدمين المتصلين */}
             <OnlineUsersCounter />
           </div>
