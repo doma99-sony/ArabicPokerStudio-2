@@ -11,6 +11,7 @@ export default function NarutoPage({ params }: { params?: { tableId?: string } }
   const [, navigate] = useLocation();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isMuted, setIsMuted] = useState(true);
+  const [showChat, setShowChat] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -102,10 +103,21 @@ export default function NarutoPage({ params }: { params?: { tableId?: string } }
                 <span className="font-cairo">قريباً - ترقب الإطلاق</span>
               </Button>
             </div>
-            <div className="flex flex-wrap justify-center items-start gap-8 mb-12">
-              <div className="w-full md:w-auto">
-                <div className="bg-[#1a1a2e] p-6 rounded-lg max-w-4xl mx-auto border border-[#ff9d00]/30">
-                  <h2 className="text-2xl font-bold text-[#ff9d00] mb-6 font-cairo">الدردشة</h2>
+            <div className="mt-8">
+              <Button
+                onClick={() => setShowChat(!showChat)}
+                className="bg-[#ff9d00] hover:bg-[#ff9d00]/80 text-black font-bold px-6 py-3 rounded-lg"
+              >
+                <span className="font-cairo">{showChat ? 'إغلاق الدردشة' : 'فتح الدردشة'}</span>
+              </Button>
+            </div>
+            {showChat && (
+              <div className="mt-4 w-full max-w-md mx-auto">
+                <div className="bg-[#1a1a2e] p-4 rounded-lg border border-[#ff9d00]/30">
+                  <ChatBox />
+                </div>
+              </div>
+            )}nt-bold text-[#ff9d00] mb-6 font-cairo">الدردشة</h2>
                   <div className="bg-black/30 rounded-lg p-4 h-[300px] overflow-y-auto mb-4" dir="ltr">
                     <ChatBox />
                   </div>
