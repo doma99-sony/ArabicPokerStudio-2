@@ -1,0 +1,100 @@
+import { useState } from "react";
+import { useLocation } from "wouter";
+import { useMutation } from "@tanstack/react-query";
+import { GameTable } from "@/types";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Loader2, Users, DollarSign, PlayCircle, Plus } from "lucide-react";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
+
+interface TableCardProps {
+  table: GameTable;
+}
+
+export function TableCard({ table }: TableCardProps) {
+  const [, navigate] = useLocation();
+  const { toast } = useToast();
+  const [hoverSeat, setHoverSeat] = useState<number | null>(null);
+  const [showSeats, setShowSeats] = useState(false);
+
+  const joinMutation = useMutation({
+    mutationFn: async () => {
+      if (table.gameType === "naruto") {
+        return { success: true };
+      }
+      const res = await apiRequest("POST", `/api/game/${table.id}/join`);
+      return await res.json();
+    },
+    onSuccess: () => {
+      if (table.gameType === "naruto") {
+        window.location.href = `/naruto/${table.id}`;
+      } else {
+        window.location.href = `/game/${table.id}`;
+      }
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "فشل الانضمام إلى الطاولة",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+
+  const getStatusColor = () => {
+    switch (table.status) {
+      case "available":
+        return "bg-green-500/70 hover:bg-green-500/60";
+      case "busy":
+        return "bg-amber-500/70 hover:bg-amber-500/60";
+      case "full":
+        return "bg-red-500/70 hover:bg-red-500/60";
+      default:
+        return "bg-gray-500/70 hover:bg-gray-500/60";
+    }
+  };
+
+  const getStatusText = () => {
+    switch (table.status) {
+      case "available":
+        return "متاحة";
+      case "busy":
+        return "مشغولة";
+      case "full":
+        return "ممتلئة";
+      default:
+        return "غير معروف";
+    }
+  };
+
+  const handleSeatJoin = () => {
+    joinMutation.mutate();
+  };
+
+  const generateSeats = () => {
+    const seats = [];
+    const occupied = table.currentPlayers;
+    const maxPlayers = table.maxPlayers;
+    
+    const occupiedSeats = new Set();
+    while (occupiedSeats.size < occupied) {
+      occupiedSeats.add(Math.floor(Math.random() * maxPlayers));
+    }
+    for (let i = 0; i < maxPlayers; i++) {
+      seats.push({ id: i, occupied: occupiedSeats.has(i) });
+    }
+    return seats;
+  };
+
+  const seats = generateSeats();
+
+  return (
+    <Card className="bg-black/70 border border-[#D4AF37]/30 shadow-xl hover:shadow-2xl transition-all duration-300 hover:border-[#D4AF37]/50" 
+          onMouseEnter={() => setShowSeats(true)} 
+          onMouseLeave={() => setShowSeats(false)}>
+      <CardHeader className="pb-2">
+        <div className="flex justify-between items-start">
+          <CardTitle className="text-[#D

@@ -39,7 +39,7 @@ export function ChatBox() {
       socket.addEventListener('message', messageHandler);
 
       return () => {
-        socket.removeEventListener('message', messageHandler);
+        socket.removeEventListener('message', messageHandler);  // تنظيف الدالة عند التحديث
       };
     }
   }, [socket]);
