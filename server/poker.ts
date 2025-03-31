@@ -27,8 +27,20 @@ export function setupPokerGame(app: Express, httpServer: Server) {
   // Map to track which tables users are connected to
   const userTables = new Map<number, number>();
   
+  const PING_INTERVAL = 30000;
   wss.on("connection", (ws: WebSocket, req: any) => {
     let userId: number | undefined;
+    let pingTimeout: NodeJS.Timeout;
+
+    const heartbeat = () => {
+      clearTimeout(pingTimeout);
+      pingTimeout = setTimeout(() => {
+        ws.terminate();
+      }, PING_INTERVAL + 1000);
+    };
+
+    ws.on('pong', heartbeat);
+    heartbeat();
     
     // Parse session cookie to get user ID (simplified version)
     const cookieString = req.headers.cookie;

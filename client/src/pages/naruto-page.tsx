@@ -10,14 +10,14 @@ export default function NarutoPage({ params }: { params?: { tableId?: string } }
   const [, navigate] = useLocation();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isMuted, setIsMuted] = useState(true);
-  
+
   // التحقق من وجود المستخدم
   useEffect(() => {
     if (!user) {
       navigate("/auth");
     }
   }, [user, navigate]);
-  
+
   // التعامل مع تشغيل/إيقاف الصوت
   const toggleMute = () => {
     if (videoRef.current) {
@@ -25,7 +25,7 @@ export default function NarutoPage({ params }: { params?: { tableId?: string } }
       setIsMuted(!isMuted);
     }
   };
-  
+
   // العودة للصفحة السابقة
   const goBack = () => {
     navigate("/");
@@ -38,7 +38,8 @@ export default function NarutoPage({ params }: { params?: { tableId?: string } }
     backgroundImage: 'url("/assets/images/naruto-bg.jpg")',
     backgroundSize: 'cover',
     backgroundPosition: 'center',
-    backgroundRepeat: 'no-repeat'
+    backgroundRepeat: 'no-repeat',
+    loading: 'lazy'
   }}
 >
       <div className="container mx-auto">
@@ -48,15 +49,15 @@ export default function NarutoPage({ params }: { params?: { tableId?: string } }
             <ArrowLeft className="ml-2" />
             <span className="font-cairo">العودة للوبي</span>
           </Button>
-          
+
           <h1 className="text-3xl font-bold text-[#ff9d00] font-cairo naruto-glow">ناروتو - قريباً</h1>
-          
+
           <Button variant="ghost" className="text-white hover:text-[#ff9d00] transition-colors" onClick={toggleMute}>
             {isMuted ? <VolumeX className="ml-2" /> : <Volume2 className="ml-2" />}
             <span className="font-cairo">{isMuted ? "تشغيل الصوت" : "كتم الصوت"}</span>
           </Button>
         </div>
-        
+
         {/* Main Content */}
         <div className="flex flex-col items-center justify-center naruto-container">
           <div className="rounded-lg overflow-hidden shadow-2xl mb-8 max-w-4xl w-full">
@@ -73,7 +74,7 @@ export default function NarutoPage({ params }: { params?: { tableId?: string } }
               متصفحك لا يدعم تشغيل الفيديو
             </video>
           </div>
-          
+
           <div 
             className="p-8 rounded-lg max-w-4xl w-full border border-[#ff9d00]/30"
             style={{
@@ -81,7 +82,8 @@ export default function NarutoPage({ params }: { params?: { tableId?: string } }
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               backgroundBlendMode: 'overlay',
-              backgroundColor: 'rgba(26, 26, 46, 0.95)'
+              backgroundColor: 'rgba(26, 26, 46, 0.95)',
+              loading: 'lazy'
             }}
           >
             <h2 className="text-2xl font-bold text-[#ff9d00] mb-6 font-cairo">لعبة ناروتو - قريباً</h2>
@@ -99,7 +101,7 @@ export default function NarutoPage({ params }: { params?: { tableId?: string } }
               <li className="text-lg">جوائز وترقيات للشخصيات</li>
               <li className="text-lg">منافسة مع لاعبين آخرين</li>
             </ul>
-            
+
             <div className="mt-10 text-center">
               <Button 
                 className="bg-[#ff9d00] hover:bg-[#ff9d00]/80 text-black font-bold px-10 py-6 rounded-full naruto-glow text-xl" 

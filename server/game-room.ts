@@ -51,9 +51,16 @@ export interface GameRoom {
 }
 
 // Create a new game room for a table
+const gameStateCache = new Map<number, GameState>();
+
 export function createGameRoom(table: GameTable): GameRoom {
   // Players in the game
   const players: Map<number, GamePlayer> = new Map();
+  
+  // Cache cleanup
+  setInterval(() => {
+    gameStateCache.clear();
+  }, 60000);
   
   // Current game round
   let round: GameRound = {
