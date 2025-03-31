@@ -5,6 +5,15 @@ import { Card } from "@/components/ui/card";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 
+// تعريف نوع للمستوى
+type GameLevel = {
+  id: string;
+  name: string;
+  chips: number;
+  color: string;
+  game: string;
+};
+
 // تعريف مستويات اللعب والمبلغ المطلوب لكل مستوى
 const pokerLevels = [
   { id: "noob", name: "نوب", chips: 20000, color: "bg-green-600", game: "poker" },
