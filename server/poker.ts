@@ -28,10 +28,25 @@ export function setupPokerGame(app: Express, httpServer: Server) {
   // Map to track which tables users are connected to
   const userTables = new Map<number, number>();
 
+  // عدد افتراضي من المستخدمين المتصلين (بين 5-15 مستخدم)
+  const getRandomOnlineCount = () => {
+    const baseUsers = clients.size; // عدد المستخدمين الحقيقيين
+    const fakeUsers = Math.floor(Math.random() * 10) + 5; // عدد وهمي بين 5-15
+    return baseUsers + fakeUsers;
+  };
+
+  // عداد لتتبع عدد المستخدمين في وقت معين
+  let activeCounter = 0;
+  
   // دالة لإرسال عدد المستخدمين المتصلين حاليًا
   const broadcastOnlineUsers = () => {
-    const onlineCount = clients.size;
-    console.log(`عدد المستخدمين المتصلين حاليًا: ${onlineCount}`);
+    const realCount = clients.size;
+    const onlineCount = getRandomOnlineCount();
+    activeCounter++;
+    
+    console.log(`عدد المستخدمين المتصلين حقيقياً: ${realCount}`);
+    console.log(`العداد: ${activeCounter}`);
+    console.log(`إجمالي عدد المستخدمين المتصلين مع الوهميين: ${onlineCount}`);
     
     const message = {
       type: "online_users_count",
@@ -42,6 +57,13 @@ export function setupPokerGame(app: Express, httpServer: Server) {
   };
   
   const PING_INTERVAL = 30000;
+  
+  // تحديث عدد المستخدمين المتصلين كل 5 ثوانٍ
+  const UPDATE_INTERVAL = 5000; // 5 seconds
+  setInterval(() => {
+    broadcastOnlineUsers();
+  }, UPDATE_INTERVAL);
+  
   wss.on("connection", (ws: WebSocket, req: any) => {
     let userId: number | undefined;
     let pingTimeout: NodeJS.Timeout;
