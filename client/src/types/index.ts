@@ -82,4 +82,5 @@ export interface GameHistoryItem {
 export interface PlayerProfile extends User {
   stats: PlayerStats;
   gameHistory: GameHistoryItem[];
+  coverPhoto?: string; // إضافة حقل صورة الغلاف
 }

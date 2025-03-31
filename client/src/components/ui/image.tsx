@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-interface ImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
-  fallback?: string;
+interface ImageProps extends Omit<React.ImgHTMLAttributes<HTMLImageElement>, 'fallback'> {
+  fallback?: string | ReactNode;
 }
 
 export function Image({ 
@@ -22,13 +22,17 @@ export function Image({
     setError(false);
   }, [src]);
 
+  if (error && typeof fallback !== 'string') {
+    return <div className={className}>{fallback}</div>;
+  }
+
   return (
     <div className={cn("relative overflow-hidden", className)}>
       {isLoading && (
         <div className="absolute inset-0 bg-slate-200 animate-pulse" />
       )}
       <img
-        src={error ? fallback : imgSrc}
+        src={error && typeof fallback === 'string' ? fallback : imgSrc}
         alt={alt}
         className={cn("w-full h-full object-cover", className)}
         onLoad={() => setIsLoading(false)}

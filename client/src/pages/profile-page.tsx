@@ -127,10 +127,67 @@ export default function ProfilePage() {
     );
   }
 
+  const handleCoverPhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const formData = new FormData();
+      formData.append('coverPhoto', file);
+      
+      try {
+        const response = await fetch('/api/profile/cover', {
+          method: 'POST',
+          body: formData
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+          alert('تم تغيير صورة الغلاف بنجاح!');
+          refetch();
+        } else {
+          alert(data.message || 'حدث خطأ أثناء تغيير صورة الغلاف');
+        }
+      } catch (error) {
+        alert('حدث خطأ في الاتصال');
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen py-8 bg-deepBlack">
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto bg-slate/20 rounded-lg overflow-hidden border border-gold/10">
+          {/* صورة الغلاف */}
+          <div className="relative h-48 md:h-64 overflow-hidden">
+            {profile.coverPhoto ? (
+              <Image 
+                src={profile.coverPhoto} 
+                alt="صورة الغلاف" 
+                className="w-full h-full object-cover"
+                fallback={<div className="w-full h-full bg-gradient-to-r from-slate-900 to-slate-800 flex items-center justify-center">
+                  <span className="text-gold/50 text-sm">أضف صورة غلاف</span>
+                </div>}
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-r from-slate-900 to-slate-800 flex items-center justify-center">
+                <span className="text-gold/50 text-sm">أضف صورة غلاف</span>
+              </div>
+            )}
+            
+            {/* زر تغيير صورة الغلاف */}
+            <label className="absolute cursor-pointer bottom-4 left-4 bg-black/50 text-white px-3 py-1 rounded-md hover:bg-black/70 transition-colors">
+              <input 
+                type="file" 
+                accept="image/*"
+                className="hidden"
+                onChange={handleCoverPhotoChange}
+              />
+              <span className="flex items-center text-xs font-tajawal">
+                <i className="fas fa-camera ml-1"></i>
+                تغيير صورة الغلاف
+              </span>
+            </label>
+          </div>
+          
           <div className="p-6 md:p-8">
             <div className="flex items-center mb-6">
               <Button
@@ -154,7 +211,9 @@ export default function ProfilePage() {
                             src={profile.avatar} 
                             alt={profile.username} 
                             className="w-full h-full object-cover"
-                            fallback="https://via.placeholder.com/150?text=User"
+                            fallback={<div className="w-full h-full flex items-center justify-center bg-slate-800">
+                              <User className="h-12 w-12 text-gold/70" />
+                            </div>}
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center bg-slate-800">

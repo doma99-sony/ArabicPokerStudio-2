@@ -1,9 +1,10 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth } from "./auth";
+import { setupAuth, hashPassword } from "./auth";
 import { setupPokerGame } from "./poker";
 import { z } from "zod";
+import fileUpload from "express-fileupload";
 
 // ميدلوير للتحقق من المصادقة
 function ensureAuthenticated(req: Request, res: Response, next: NextFunction) {
@@ -79,6 +80,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true, avatarUrl });
     } catch (error) {
       res.status(500).json({ message: "حدث خطأ أثناء تحديث الصورة" });
+    }
+  });
+  
+  // تحميل صورة الغلاف
+  app.post("/api/profile/cover", ensureAuthenticated, async (req, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "غير مصرح" });
+      }
+
+      if (!req.files || !req.files.coverPhoto) {
+        return res.status(400).json({ message: "لم يتم تحميل أي صورة" });
+      }
+
+      const coverPhoto = req.files.coverPhoto;
+      const coverPhotoUrl = await storage.uploadCoverPhoto(req.user.id, coverPhoto);
+      res.json({ success: true, coverPhotoUrl });
+    } catch (error) {
+      res.status(500).json({ message: "حدث خطأ أثناء تحديث صورة الغلاف" });
     }
   });
 

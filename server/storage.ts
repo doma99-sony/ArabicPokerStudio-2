@@ -1,6 +1,8 @@
 import { users, type User, type InsertUser } from "@shared/schema";
 import createMemoryStore from "memorystore";
 import session from "express-session";
+import fs from "fs";
+import path from "path";
 import { 
   GameTable, 
   TableStatus, 
@@ -22,6 +24,9 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUserChips(userId: number, newChips: number): Promise<User | undefined>;
+  updateUsername(userId: number, username: string): Promise<User | undefined>;
+  uploadAvatar(userId: number, avatar: any): Promise<string>;
+  uploadCoverPhoto(userId: number, coverPhoto: any): Promise<string>;
   
   // Game table operations
   getGameTables(): Promise<GameTable[]>;
@@ -154,17 +159,90 @@ export class MemStorage implements IStorage {
   }
 
   async uploadAvatar(userId: number, avatar: any): Promise<string> {
-    // في بيئة الإنتاج، سنقوم بتحميل الصورة إلى خدمة تخزين
-    // لكن للتجربة سنستخدم رابط وهمي
-    const avatarUrl = `https://via.placeholder.com/150?text=${encodeURIComponent(avatar.name)}`;
+    // تحديد نوع الملف
+    let fileType = avatar.mimetype.split('/')[1];
+    if (!fileType || !['jpeg', 'jpg', 'png', 'gif'].includes(fileType)) {
+      fileType = 'jpeg'; // استخدام jpeg كامتداد افتراضي
+    }
     
+    // إنشاء معرّف فريد للصورة
+    const uniqueId = Date.now().toString();
+    const relativePath = `/uploads/avatars/${userId}_${uniqueId}.${fileType}`;
+    const avatarUrl = relativePath; // سنستخدم المسار النسبي
+    
+    // تأكد من وجود المجلد
+    const uploadDir = path.join(process.cwd(), 'public/uploads/avatars');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    
+    // تخزين بيانات الصورة على القرص
+    try {
+      // حفظ الملف في المجلد العام
+      const fullPath = path.join(process.cwd(), 'public', relativePath);
+      fs.writeFileSync(fullPath, avatar.data);
+      console.log(`تم حفظ صورة الملف الشخصي بنجاح في: ${fullPath}`);
+    } catch (error) {
+      console.error('حدث خطأ أثناء تخزين صورة الملف الشخصي:', error);
+      // في حالة حدوث خطأ، نستخدم رابط وهمي
+      return `https://via.placeholder.com/150?text=user_${userId}`;
+    }
+    
+    // تحديث معلومات المستخدم
     const user = this.users.get(userId);
     if (user) {
       user.avatar = avatarUrl;
       this.users.set(userId, user);
     }
     
+    // تحديث ملف تعريف المستخدم
+    const profile = this.playerProfiles.get(userId);
+    if (profile) {
+      profile.avatar = avatarUrl;
+      this.playerProfiles.set(userId, profile);
+    }
+    
     return avatarUrl;
+  }
+
+  async uploadCoverPhoto(userId: number, coverPhoto: any): Promise<string> {
+    // تحديد نوع الملف
+    let fileType = coverPhoto.mimetype.split('/')[1];
+    if (!fileType || !['jpeg', 'jpg', 'png', 'gif'].includes(fileType)) {
+      fileType = 'jpeg'; // استخدام jpeg كامتداد افتراضي
+    }
+    
+    // إنشاء معرّف فريد للصورة
+    const uniqueId = Date.now().toString();
+    const relativePath = `/uploads/covers/${userId}_${uniqueId}.${fileType}`;
+    const coverPhotoUrl = relativePath; // سنستخدم المسار النسبي
+    
+    // تأكد من وجود المجلد
+    const uploadDir = path.join(process.cwd(), 'public/uploads/covers');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    
+    // تخزين بيانات الصورة على القرص
+    try {
+      // حفظ الملف في المجلد العام
+      const fullPath = path.join(process.cwd(), 'public', relativePath);
+      fs.writeFileSync(fullPath, coverPhoto.data);
+      console.log(`تم حفظ صورة الغلاف بنجاح في: ${fullPath}`);
+    } catch (error) {
+      console.error('حدث خطأ أثناء تخزين صورة الغلاف:', error);
+      // في حالة حدوث خطأ، نستخدم رابط وهمي
+      return `https://via.placeholder.com/1200x400?text=cover_${userId}`;
+    }
+    
+    // تحديث ملف تعريف المستخدم
+    const profile = this.playerProfiles.get(userId);
+    if (profile) {
+      profile.coverPhoto = coverPhotoUrl;
+      this.playerProfiles.set(userId, profile);
+    }
+    
+    return coverPhotoUrl;
   }
 
   async convertGuestToRegistered(userId: number, username: string, password: string): Promise<User | undefined> {
@@ -173,7 +251,16 @@ export class MemStorage implements IStorage {
     
     // تحديث معلومات المستخدم
     user.username = username;
+    user.password = password; // كلمة المرور المشفرة بالفعل
     this.users.set(userId, user);
+    
+    // تحديث المعلومات في ملف التعريف
+    const profile = this.playerProfiles.get(userId);
+    if (profile) {
+      profile.username = username;
+      this.playerProfiles.set(userId, profile);
+    }
+    
     return user;
   }
 

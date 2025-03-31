@@ -2,11 +2,22 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import cookieParser from "cookie-parser";
+import fileUpload from "express-fileupload";
+import path from "path";
 
 const app = express();
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 app.use(cookieParser());
+app.use(fileUpload({
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  useTempFiles: false,
+  abortOnLimit: true,
+  responseOnLimit: "حجم الملف تجاوز الحد المسموح (5 ميجابايت)"
+}));
+
+// خدمة الملفات الثابتة من مجلد public
+app.use('/uploads', express.static(path.join(process.cwd(), 'public/uploads')));
 app.set('trust proxy', 1);
 app.disable('x-powered-by');
 
