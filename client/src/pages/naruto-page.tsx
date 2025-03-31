@@ -115,7 +115,14 @@ export default function NarutoPage({ params }: { params?: { tableId?: string } }
             <div className="flex flex-wrap justify-center items-start gap-8 mb-12">
               {/* Chat Section */}
               <div className="w-full md:w-auto">
-                <div className="bg-[#1a1a2e] p-6 rounded-lg max-w-4xl w-full border border-[#ff9d00]/30">
+                <div className="bg-[#1a1a2e] p-6 rounded-lg max-w-4xl mx-auto border border-[#ff9d00]/30">
+                  <h2 className="text-2xl font-bold text-[#ff9d00] mb-6 font-cairo">الدردشة</h2>
+                  <div className="bg-black/30 rounded-lg p-4 h-[300px] overflow-y-auto mb-4">
+                    <ChatBox />
+                  </div>
+                </div>
+              </div>
+            </div>xl w-full border border-[#ff9d00]/30">
                   <h2 className="text-2xl font-bold text-[#ff9d00] mb-6 font-cairo">الدردشة</h2>
                   <div className="bg-black/30 rounded-lg p-4 h-[300px] overflow-y-auto mb-4" dir="ltr">
                     <ChatBox />
