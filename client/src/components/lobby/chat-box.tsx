@@ -240,45 +240,50 @@ export function ChatBox() {
                 <div key={msg.id} className="flex flex-col">
                   {msg.username === "system" ? (
                     // رسالة النظام (مثل الأخبار)
-                    <div className="flex justify-center my-1">
-                      <div className="bg-white/80 text-black text-sm px-4 py-1 rounded-full border border-gold/40">
-                        {msg.message}
-                        {msg.timestamp && (
-                          <span className="text-xs text-gray-500 mr-2">
-                            {getMessageTime(msg.timestamp)}
-                          </span>
-                        )}
+                    <div className="flex justify-center my-2">
+                      <div className="bg-gradient-to-r from-[#D4AF37]/20 via-[#D4AF37]/40 to-[#D4AF37]/20 text-gold text-sm px-6 py-2 rounded-full 
+                                      border border-gold/30 shadow-sm max-w-[90%] backdrop-blur-sm"
+                           style={{boxShadow: '0 2px 10px rgba(212, 175, 55, 0.15)'}}>
+                        <div className="flex items-center gap-2 justify-center">
+                          <MessageSquare className="h-3 w-3 text-gold/60" />
+                          <span className="text-black font-medium">{msg.message}</span>
+                          {msg.timestamp && (
+                            <span className="text-xs text-gray-500 mr-1 opacity-70">
+                              {getMessageTime(msg.timestamp)}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ) : (
                     // رسالة مستخدم عادية
                     <>
                       <div className="flex items-center gap-2 mb-1">
-                        <div className="w-6 h-6 rounded-full overflow-hidden bg-gold/20 border border-gold/30">
+                        <div className="w-7 h-7 rounded-full overflow-hidden bg-gradient-to-br from-gold/70 to-amber-600/70 p-0.5 shadow-lg">
                           {msg.avatar ? (
                             <Image 
                               src={msg.avatar} 
                               alt={msg.username} 
-                              className="w-full h-full object-cover"
+                              className="w-full h-full object-cover rounded-full"
                               fallback="https://via.placeholder.com/24?text=?"
                             />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center text-gold/70 text-xs">
+                            <div className="w-full h-full flex items-center justify-center bg-white/90 rounded-full font-bold text-amber-800 text-xs">
                               {msg.username[0]?.toUpperCase()}
                             </div>
                           )}
                         </div>
-                        <span className="text-xs text-gold/60">{msg.username}</span>
+                        <span className="text-xs text-gold font-bold">{msg.username}</span>
                         {msg.timestamp && (
                           <span className="text-xs text-gold/40">
                             {getMessageTime(msg.timestamp)}
                           </span>
                         )}
                       </div>
-                      <div className={`p-3 max-w-[80%] text-base ${
+                      <div className={`p-3 max-w-[85%] text-base shadow-md ${
                         msg.username === user?.username
-                          ? "bg-white text-black rounded-t-2xl rounded-l-2xl rounded-br-sm mr-auto border-2 border-[#D4AF37]"
-                          : "bg-white text-black rounded-t-2xl rounded-r-2xl rounded-bl-sm border-2 border-gold/60"
+                          ? "bg-white text-black rounded-2xl rounded-br-none mr-auto border-2 border-[#D4AF37]"
+                          : "bg-white text-black rounded-2xl rounded-bl-none border-2 border-gold/60"
                       }`}>
                         {msg.message}
                       </div>
@@ -289,45 +294,52 @@ export function ChatBox() {
             </div>
           </ScrollArea>
 
-          <div className="p-3 border-t border-gold/10 bg-black/30">
+          <div className="px-3 pt-3 pb-2 border-t border-gold/20 bg-gradient-to-b from-[#15342C]/80 to-[#0A3A2A]/90 backdrop-blur-sm">
             {showEmojiPicker && (
               <div 
                 ref={emojiPickerRef} 
                 className="absolute bottom-16 right-3 z-50 shadow-lg rounded-lg overflow-hidden"
+                style={{
+                  boxShadow: '0 5px 20px rgba(0, 0, 0, 0.3)'
+                }}
               >
                 <EmojiPicker onEmojiClick={onEmojiClick} searchDisabled lazyLoadEmojis />
               </div>
             )}
             
             <div className="flex items-center justify-between mb-2">
-              <div className="text-xs text-white">
+              <div className="text-xs bg-white/10 text-white px-3 py-1 rounded-full backdrop-blur-sm" 
+                   style={{ boxShadow: 'inset 0 0 5px rgba(212, 175, 55, 0.2)' }}>
                 <span className="text-gold font-bold">{100 - messageCount}</span> رسالة متبقية اليوم
               </div>
             </div>
             
-            <div className="flex gap-2">
+            <div className="flex gap-2 relative">
               <Button
                 onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                className="bg-black/30 hover:bg-black/50 text-gold border border-gold/30 p-2 emoji-toggle-button"
+                className="bg-gradient-to-br from-[#D4AF37]/80 to-[#AA8C2C]/80 hover:from-[#D4AF37] hover:to-[#AA8C2C] text-black border-none p-2 emoji-toggle-button shadow-md rounded-full"
                 type="button"
+                style={{ width: '36px', height: '36px' }}
               >
                 <Smile className="h-4 w-4" />
               </Button>
               
-              <Input
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="اكتب رسالتك..."
-                className="flex-1 text-base h-10"
-              />
-              
-              <Button
-                onClick={sendChatMessage}
-                className="bg-gold hover:bg-gold/80 text-black px-3"
-              >
-                <Send className="h-4 w-4" />
-              </Button>
+              <div className="flex-1 relative">
+                <Input
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="اكتب رسالتك..."
+                  className="flex-1 text-base h-10 bg-white/90 border-2 border-gold/30 pr-4 rounded-full shadow-inner"
+                  style={{ paddingLeft: '40px' }}
+                />
+                <Button
+                  onClick={sendChatMessage}
+                  className="absolute left-0 top-0 bottom-0 w-10 bg-gradient-to-r from-[#D4AF37] to-[#FFDF00] hover:from-[#FFDF00] hover:to-[#D4AF37] text-black border-none rounded-l-full shadow-md"
+                >
+                  <Send className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </div>
         </div>
