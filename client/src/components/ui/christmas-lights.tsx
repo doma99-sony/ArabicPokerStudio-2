@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+
+import { useState, useEffect } from 'react';
 
 interface ChristmasLightsProps {
   count?: number;
@@ -7,6 +8,7 @@ interface ChristmasLightsProps {
   speed?: number;
 }
 
+// مكون أضواء الكريسماس المتحركة
 export function ChristmasLights({
   count = 20,
   className = '',
@@ -17,25 +19,19 @@ export function ChristmasLights({
   const [glowingLights, setGlowingLights] = useState<number[]>([]);
 
   useEffect(() => {
-    // إنشاء مصفوفة للأضواء المتوهجة العشوائية
-    const randomLights = Array.from({ length: Math.floor(count / 3) }, () => 
+    const randomLights = Array.from({ length: Math.floor(count / 2) }, () => 
       Math.floor(Math.random() * count)
     );
     setGlowingLights(randomLights);
 
-    // بدء تأثير الوميض
     const interval = setInterval(() => {
-      // تحديث الأضواء المتوهجة
-      const newRandomLights = Array.from({ length: Math.floor(count / 3) }, () => 
+      const newRandomLights = Array.from({ length: Math.floor(count / 2) }, () => 
         Math.floor(Math.random() * count)
       );
       setGlowingLights(newRandomLights);
       
-      // تأثير توهج ضوء واحد بشكل متسلسل
       setActiveLight((prev) => {
-        if (prev === null || prev >= count - 1) {
-          return 0;
-        }
+        if (prev === null || prev >= count - 1) return 0;
         return prev + 1;
       });
     }, speed);
@@ -44,41 +40,36 @@ export function ChristmasLights({
   }, [count, speed]);
 
   return (
-    <div className={`flex justify-center overflow-hidden ${className}`}>
-      <div className="relative w-full flex justify-between mx-auto">
-        {/* سلك الأضواء */}
-        <div 
-          className="absolute top-2 left-0 right-0 h-1 bg-gray-800 z-0"
-          style={{ transform: 'translateY(8px)' }}
-        ></div>
-        
-        {/* الأضواء */}
+    <div className={`absolute inset-0 pointer-events-none ${className}`}>
+      <div className="flex justify-around items-center h-full" style={{ gap: '10px' }}>
         {Array.from({ length: count }).map((_, index) => {
-          const colorIndex = index % colors.length;
           const isGlowing = glowingLights.includes(index);
-          const isActive = activeLight === index;
+          const color = colors[index % colors.length];
           
           return (
-            <div 
+            <div
               key={index}
               className="relative"
-              style={{ zIndex: 1 }}
+              style={{
+                animation: `swing ${2 + Math.random()}s ease-in-out infinite`,
+                transformOrigin: 'top'
+              }}
             >
-              {/* سلك متصل بالضوء */}
-              <div className="absolute top-0 left-1/2 h-3 w-[2px] bg-gray-700 -translate-x-1/2"></div>
-              
-              {/* الضوء نفسه */}
               <div
-                className={`relative w-4 h-6 rounded-full transition-all duration-300 
-                  ${isActive || isGlowing ? 'animate-pulse-slow shadow-lg scale-110' : 'opacity-70'} 
-                  ${isActive ? 'animate-glitter' : ''}`}
+                className={`w-4 h-4 rounded-full transition-all duration-300 ${
+                  isGlowing ? 'scale-125' : 'scale-100'
+                }`}
                 style={{
-                  backgroundColor: colors[colorIndex],
-                  boxShadow: (isActive || isGlowing) 
-                    ? `0 0 10px 2px ${colors[colorIndex]}, 0 0 20px ${colors[colorIndex]}` 
-                    : 'none',
-                  marginTop: '6px'
+                  backgroundColor: color,
+                  boxShadow: isGlowing
+                    ? `0 0 10px ${color}, 0 0 20px ${color}, 0 0 30px ${color}`
+                    : `0 0 5px ${color}`,
+                  opacity: isGlowing ? 1 : 0.7
                 }}
+              />
+              <div
+                className="absolute top-0 left-1/2 w-px h-4 -translate-x-1/2 -translate-y-full"
+                style={{ backgroundColor: '#2C3E50' }}
               />
             </div>
           );
@@ -88,44 +79,108 @@ export function ChristmasLights({
   );
 }
 
-// مكون للزينة المتناثرة (أشكال الكريسماس)
 interface ChristmasDecorationProps {
   className?: string;
 }
 
+// مكون الزينة المتناثرة
 export function ChristmasDecoration({ className = '' }: ChristmasDecorationProps) {
-  // أشكال متنوعة للديكور (ندفة ثلج، شجرة، هدية، إلخ)
-  const shapes = [
-    '❄️', '🎄', '🎁', '🎅', '⭐', '🔔', '🦌', '🧦', '🕯️'
+  const decorations = [
+    { emoji: '❄️', size: '2rem', animation: 'float-slow' },
+    { emoji: '🎄', size: '3rem', animation: 'float-medium' },
+    { emoji: '🎁', size: '2.5rem', animation: 'float-fast' },
+    { emoji: '🎅', size: '3rem', animation: 'float-medium' },
+    { emoji: '⭐', size: '2rem', animation: 'float-slow' },
+    { emoji: '🔔', size: '2rem', animation: 'float-medium' },
+    { emoji: '🦌', size: '2.5rem', animation: 'float-fast' },
+    { emoji: '🧦', size: '2rem', animation: 'float-slow' },
+    { emoji: '🕯️', size: '2rem', animation: 'float-medium' }
   ];
-  
+
   return (
     <div className={`absolute inset-0 pointer-events-none overflow-hidden ${className}`}>
-      {Array.from({ length: 30 }).map((_, index) => {
-        const shape = shapes[index % shapes.length];
-        const size = Math.random() * 1.5 + 0.7; // حجم عشوائي
-        const left = `${Math.random() * 100}%`;
-        const top = `${Math.random() * 100}%`;
-        const animationDuration = Math.random() * 20 + 10; // مدة التحريك
-        const delay = Math.random() * 5; // تأخير عشوائي
-        
+      {decorations.map((decoration, index) => {
+        const left = `${Math.random() * 90 + 5}%`;
+        const top = `${Math.random() * 90 + 5}%`;
+        const delay = `${Math.random() * 5}s`;
+
         return (
           <div
             key={index}
-            className="absolute opacity-80 animate-float"
+            className={`absolute animate-${decoration.animation}`}
             style={{
               left,
               top,
-              fontSize: `${size}rem`,
-              animationDuration: `${animationDuration}s`,
-              animationDelay: `${delay}s`,
+              fontSize: decoration.size,
+              animationDelay: delay,
+              filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.5))',
               transform: `rotate(${Math.random() * 360}deg)`,
+              transition: 'all 0.3s ease-in-out'
             }}
           >
-            {shape}
+            {decoration.emoji}
           </div>
         );
       })}
+    </div>
+  );
+}
+
+// إضافة ثلج متساقط
+export function Snowflakes({ count = 50 }: { count?: number }) {
+  return (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden">
+      {Array.from({ length: count }).map((_, index) => {
+        const size = Math.random() * 10 + 5;
+        const left = `${Math.random() * 100}%`;
+        const animationDuration = `${Math.random() * 5 + 5}s`;
+        const animationDelay = `${Math.random() * 5}s`;
+
+        return (
+          <div
+            key={index}
+            className="absolute top-0 animate-snowfall"
+            style={{
+              left,
+              width: size,
+              height: size,
+              background: 'white',
+              borderRadius: '50%',
+              filter: 'blur(1px)',
+              opacity: Math.random() * 0.6 + 0.4,
+              animationDuration,
+              animationDelay,
+            }}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
+// بابا نويل مع العربة
+interface SantaSleighProps {
+  size?: 'sm' | 'md' | 'lg';
+  startDelay?: number;
+}
+
+export function SantaSleigh({ size = 'md', startDelay = 0 }: SantaSleighProps) {
+  const sizes = {
+    sm: 'text-2xl',
+    md: 'text-4xl',
+    lg: 'text-6xl'
+  };
+
+  return (
+    <div 
+      className={`fixed -right-20 animate-fly-across ${sizes[size]}`}
+      style={{
+        top: size === 'lg' ? '20%' : size === 'md' ? '40%' : '60%',
+        animationDelay: `${startDelay}s`,
+        filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.3))'
+      }}
+    >
+      🎅🏻🛷
     </div>
   );
 }
