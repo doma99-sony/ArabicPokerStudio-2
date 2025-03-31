@@ -465,7 +465,7 @@ export default function LobbyPage() {
           {/* VIP */}
           <div className="relative">
             <button 
-              onClick={() => alert("سيتم فتح قائمة VIP")}
+              onClick={() => navigate("/vip")}
               className="flex flex-col items-center justify-center p-2 min-w-[48px]"
             >
               <div className="bg-black/60 rounded-full w-11 h-11 border border-[#D4AF37] flex items-center justify-center text-[#D4AF37]">
