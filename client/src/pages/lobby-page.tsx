@@ -249,7 +249,7 @@ export default function LobbyPage() {
 
       {/* Bottom Navigation Bar */}
       <div className="fixed bottom-0 left-0 right-0 z-30 w-full mx-auto">
-        <div className="bg-gradient-to-t from-black via-[#0A3A2A] to-[#0A3A2A]/90 border-t-2 border-[#D4AF37] px-1 py-1 shadow-xl backdrop-blur-md flex items-center justify-between">
+        <div className="bg-black border-t-2 border-[#D4AF37] px-1 py-1 shadow-xl backdrop-blur-md flex items-center justify-between">
           {/* الأحداث */}
           <div className="relative group">
             <button 
@@ -259,7 +259,7 @@ export default function LobbyPage() {
                 alert("سيتم فتح صفحة الأحداث");
               }}
             >
-              <div className="bg-gradient-to-br from-white to-[#f0f0f0] rounded-full w-12 h-12 border-2 border-[#D4AF37] flex items-center justify-center relative shadow-lg hover:shadow-[#D4AF37]/20 transition-all duration-300">
+              <div className="bg-white rounded-full w-12 h-12 border-2 border-[#D4AF37] flex items-center justify-center relative">
                 <span className="text-sm font-bold text-[#0A3A2A]">الأحداث</span>
                 <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border border-white animate-pulse"></span>
               </div>
