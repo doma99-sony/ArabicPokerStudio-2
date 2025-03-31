@@ -94,6 +94,47 @@ export default function PokerTablesPage() {
               <div className="text-center">
                 <h3 className="text-2xl font-bold text-[#D4AF37] mb-2">RANK</h3>
                 <img 
+                  src="/attached_assets/image_1743420817096.png" 
+                  alt="Games Ranking" 
+                  className="w-full h-auto"
+                  style={{ maxWidth: "200px" }}
+                />
+              </div>
+            </div>
+
+            {/* Popup Button */}
+            <button
+              onClick={() => setShowRankPopup(true)}
+              className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#D4AF37] text-black px-6 py-3 rounded-lg font-bold hover:bg-[#E5C04B] transition-colors z-20"
+            >
+              عرض التفاصيل
+            </button>
+
+            {/* Popup Dialog */}
+            {showRankPopup && (
+              <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-30">
+                <div className="bg-deepBlack border-2 border-[#D4AF37] rounded-xl p-8 max-w-2xl w-full mx-4">
+                  <h2 className="text-2xl font-bold text-[#D4AF37] mb-4">تفاصيل التصنيف</h2>
+                  <div className="text-white space-y-4">
+                    {/* Add your ranking details here */}
+                    <p>سيتم إضافة تفاصيل التصنيف هنا...</p>
+                  </div>
+                  <button
+                    onClick={() => setShowRankPopup(false)}
+                    className="mt-6 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition-colors"
+                  >
+                    إغلاق
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+          {/* Ranking Section */}
+          <div className="relative mb-8">
+            <div className="absolute top-4 right-4 w-64">
+              <div className="text-center">
+                <h3 className="text-2xl font-bold text-[#D4AF37] mb-2">RANK</h3>
+                <img 
                   src="/your-uploaded-games-image.png" 
                   alt="Ranking" 
                   className="w-full h-auto"
