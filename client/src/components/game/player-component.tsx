@@ -8,22 +8,30 @@ interface PlayerComponentProps {
 }
 
 export function PlayerComponent({ player, isTurn }: PlayerComponentProps) {
-  // Position classes based on player position - adjusted for the new table layout
+  // Position classes based on player position - adjusted for the 9-seat table layout
   const positionClasses: Record<string, string> = {
     bottom: "absolute bottom-4 left-1/2 transform -translate-x-1/2 flex-col items-center",
-    bottomRight: "absolute bottom-12 right-16 flex-col items-end",
-    topRight: "absolute top-12 right-20 flex-col items-end",
-    topLeft: "absolute top-12 left-20 flex-col items-start",
-    bottomLeft: "absolute bottom-12 left-16 flex-col items-start"
+    bottomRight: "absolute bottom-10 right-16 flex-col items-end",
+    right: "absolute right-10 top-1/2 transform -translate-y-1/2 flex-col items-end",
+    topRight: "absolute top-10 right-16 flex-col items-end",
+    top: "absolute top-4 left-1/2 transform -translate-x-1/2 flex-col items-center",
+    topLeft: "absolute top-10 left-16 flex-col items-start",
+    left: "absolute left-10 top-1/2 transform -translate-y-1/2 flex-col items-start",
+    bottomLeft: "absolute bottom-10 left-16 flex-col items-start",
+    dealer: "absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex-col items-center"
   };
 
   // Calculate rotation for cards based on position
   const cardRotations: Record<string, number[]> = {
     bottom: [10, -10],
     bottomRight: [5, -5],
+    right: [5, -5],
     topRight: [5, -5],
+    top: [-5, 5],
     topLeft: [-5, 5],
-    bottomLeft: [-5, 5]
+    left: [-5, 5],
+    bottomLeft: [-5, 5],
+    dealer: [0, 0]
   };
 
   // Determine card visibility based on if it's the current player or showdown

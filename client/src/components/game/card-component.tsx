@@ -25,14 +25,28 @@ export function CardComponent({ card, size = "md" }: CardComponentProps) {
   // If card is hidden, show the back of the card
   if (card.hidden) {
     return (
-      <div className={`${sizeClasses[size]} bg-slate-400/20 rounded-md shadow-lg overflow-hidden`}>
-        <div className="w-full h-full bg-slate-800 flex items-center justify-center">
-          <svg viewBox="0 0 24 24" className="w-1/2 h-1/2 text-gold/80">
-            <path
-              fill="currentColor"
-              d="M17.5,12A1.5,1.5 0 0,1 16,10.5A1.5,1.5 0 0,1 17.5,9A1.5,1.5 0 0,1 19,10.5A1.5,1.5 0 0,1 17.5,12M14.5,8A1.5,1.5 0 0,1 13,6.5A1.5,1.5 0 0,1 14.5,5A1.5,1.5 0 0,1 16,6.5A1.5,1.5 0 0,1 14.5,8M9.5,8A1.5,1.5 0 0,1 8,6.5A1.5,1.5 0 0,1 9.5,5A1.5,1.5 0 0,1 11,6.5A1.5,1.5 0 0,1 9.5,8M6.5,12A1.5,1.5 0 0,1 5,10.5A1.5,1.5 0 0,1 6.5,9A1.5,1.5 0 0,1 8,10.5A1.5,1.5 0 0,1 6.5,12M12,3A9,9 0 0,0 3,12A9,9 0 0,0 12,21A9,9 0 0,0 21,12A9,9 0 0,0 12,3Z"
-            />
-          </svg>
+      <div className={`${sizeClasses[size]} bg-white rounded-md shadow-lg overflow-hidden`}>
+        <div className="w-full h-full bg-blue-800 flex flex-col items-center justify-center">
+          {/* Card back pattern */}
+          <div className="w-full h-full absolute flex items-center justify-center opacity-80">
+            <div className="w-[80%] h-[80%] rounded-lg border-2 border-white/30"></div>
+          </div>
+          
+          {/* Diamond pattern */}
+          <div className="relative w-3/4 h-3/4 flex items-center justify-center">
+            <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 gap-1 p-1">
+              {[...Array(9)].map((_, i) => (
+                <div key={`diamond-${i}`} className="flex items-center justify-center">
+                  <div className="text-gold text-xs transform rotate-45">♦</div>
+                </div>
+              ))}
+            </div>
+            
+            {/* Center logo */}
+            <div className="bg-gold/20 rounded-full w-8 h-8 flex items-center justify-center">
+              <div className="text-gold text-lg">♠</div>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -48,6 +62,9 @@ export function CardComponent({ card, size = "md" }: CardComponentProps) {
       whileHover={{ y: -5, rotate: 5, transition: { duration: 0.2 } }}
     >
       <div className="flex flex-col items-center justify-center h-full relative">
+        {/* Card background with a subtle gradient */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white to-gray-50"></div>
+        
         {/* Top left value and suit */}
         <div className={`absolute top-1 left-1 ${fontSizeClasses[size]} font-bold ${suitColor}`}>
           {value}
@@ -56,9 +73,18 @@ export function CardComponent({ card, size = "md" }: CardComponentProps) {
           {suit}
         </div>
         
-        {/* Center suit (larger) */}
-        <div className={`text-2xl ${suitColor}`}>
-          {suit}
+        {/* Center suit (larger) with decorative elements */}
+        <div className="relative z-10">
+          <div className={`text-3xl ${suitColor}`} style={{ filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.1))' }}>
+            {suit}
+          </div>
+          
+          {/* Decorative accent around the center suit */}
+          <div className="absolute inset-0 -z-10 opacity-10 transform scale-150">
+            <div className={`text-4xl ${suitColor}`}>
+              {suit}
+            </div>
+          </div>
         </div>
         
         {/* Bottom right value and suit (inverted) */}

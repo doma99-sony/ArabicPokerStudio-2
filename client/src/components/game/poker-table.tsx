@@ -18,28 +18,36 @@ export function PokerTable({ gameState }: PokerTableProps) {
   const { toast } = useToast();
   const [isJoining, setIsJoining] = useState(false);
   
-  // Positions for players based on their slot - updated for oval table layout
+  // Positions for players based on their slot - updated for 9-seat oval table layout
   const playerPositions = [
-    "bottom", // current user (0)
+    "bottom", // current user (0) - دائما في الوسط أسفل
     "bottomRight", // position 1
-    "topRight", // position 2
-    "topLeft", // position 3
-    "bottomLeft", // position 4
+    "right", // position 2
+    "topRight", // position 3
+    "top", // position 4
+    "topLeft", // position 5
+    "left", // position 6
+    "bottomLeft", // position 7
+    "dealer", // position 8 - dealer in the middle
   ];
   
-  // Define empty seat positions for a 5-player table - updated for oval table layout
+  // Define empty seat positions for a 9-player table - updated for oval table layout
   const seatPositions = [
     { position: "bottom", className: "absolute bottom-4 left-1/2 transform -translate-x-1/2" },
-    { position: "bottomRight", className: "absolute bottom-12 right-16" },
-    { position: "topRight", className: "absolute top-12 right-20" },
-    { position: "topLeft", className: "absolute top-12 left-20" },
-    { position: "bottomLeft", className: "absolute bottom-12 left-16" }
+    { position: "bottomRight", className: "absolute bottom-10 right-16" },
+    { position: "right", className: "absolute right-10 top-1/2 transform -translate-y-1/2" },
+    { position: "topRight", className: "absolute top-10 right-16" },
+    { position: "top", className: "absolute top-4 left-1/2 transform -translate-x-1/2" },
+    { position: "topLeft", className: "absolute top-10 left-16" },
+    { position: "left", className: "absolute left-10 top-1/2 transform -translate-y-1/2" },
+    { position: "bottomLeft", className: "absolute bottom-10 left-16" },
+    { position: "dealer", className: "absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" }
   ];
 
   // Map game state players to positions
   const positionedPlayers = gameState.players.map((player) => ({
     ...player,
-    position: playerPositions[gameState.players.findIndex(p => p.id === player.id) % 5] as any
+    position: playerPositions[gameState.players.findIndex(p => p.id === player.id) % 9] as any
   }));
   
   // Find all occupied positions
@@ -140,7 +148,10 @@ export function PokerTable({ gameState }: PokerTableProps) {
               textShadow: '0 2px 10px rgba(255, 255, 255, 0.1)',
               userSelect: 'none'
             }}>
-            BOYA POKER
+            <div className="flex flex-col items-center justify-center">
+              <div className="text-gold/30 text-6xl mb-2">♠</div>
+              <div className="text-white/20 text-2xl font-bold">BOYA</div>
+            </div>
           </div>
         </div>
 
@@ -280,18 +291,30 @@ export function PokerTable({ gameState }: PokerTableProps) {
           </div>
         ))}
 
-        {/* Table action buttons - shown based on game state */}
+        {/* Table action buttons - shown based on game state - positioned on bottom right */}
         {gameState.gameStatus !== "waiting" && isUserPlaying && (
-          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 flex space-x-2 rtl:space-x-reverse z-40 mb-2">
-            <button className="bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700">
-              تخلي
-            </button>
-            <button className="bg-green-600 text-white px-4 py-2 rounded-full hover:bg-green-700">
-              كشف 1K
-            </button>
-            <button className="bg-amber-600 text-white px-4 py-2 rounded-full hover:bg-amber-700">
-              زيادة
-            </button>
+          <div className="absolute bottom-4 right-4 flex flex-col space-y-2 z-40">
+            <div className="flex flex-col items-end space-y-2">
+              {/* Action buttons */}
+              <button className="bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 shadow-lg w-28 flex items-center justify-between">
+                <span>تخلي</span>
+                <span className="bg-white/20 rounded-full h-6 w-6 flex items-center justify-center text-xs">F</span>
+              </button>
+              <button className="bg-green-600 text-white px-4 py-2 rounded-full hover:bg-green-700 shadow-lg w-28 flex items-center justify-between">
+                <span>كشف 1K</span>
+                <span className="bg-white/20 rounded-full h-6 w-6 flex items-center justify-center text-xs">C</span>
+              </button>
+              <button className="bg-amber-600 text-white px-4 py-2 rounded-full hover:bg-amber-700 shadow-lg w-28 flex items-center justify-between">
+                <span>زيادة</span>
+                <span className="bg-white/20 rounded-full h-6 w-6 flex items-center justify-center text-xs">R</span>
+              </button>
+            </div>
+            
+            {/* Bet amount slider */}
+            <div className="flex items-center space-x-2 rtl:space-x-reverse bg-black/50 p-2 rounded-lg">
+              <input type="range" min="1" max="100" className="accent-gold flex-grow" />
+              <div className="text-white text-sm bg-black/70 px-2 py-1 rounded">500K</div>
+            </div>
           </div>
         )}
       </div>
