@@ -6,50 +6,54 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send } from "lucide-react";
+import { Image } from "@/components/ui/image";
 
 interface ChatMessage {
   id: string;
   username: string;
   message: string;
-  timestamp: number;
+  avatar?: string;
 }
 
 export function ChatBox() {
   const { user } = useAuth();
-  const { sendMessage, registerHandler } = useWebSocket();
+  const { sendMessage, lastMessage } = useWebSocket();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
+  // تحديث الرسائل عند استلام رسالة جديدة
   useEffect(() => {
-    if (!user) return;
+    if (lastMessage?.type === "chat_message") {
+      setMessages(prev => [...prev, {
+        id: lastMessage.id,
+        username: lastMessage.username,
+        message: lastMessage.message,
+        avatar: lastMessage.avatar
+      }]);
+    }
+  }, [lastMessage]);
 
-    const handler = (message: ChatMessage) => {
-      setMessages(prev => [...prev, message]);
-      requestAnimationFrame(() => {
-        if (scrollAreaRef.current) {
-          scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
-        }
-      });
-    };
-
-    registerHandler("chat_message", handler);
-    
-    // تنظيف الرسائل عند إغلاق المكون
-    return () => {
-      setMessages([]);
-    };
-  }, [registerHandler, user]);
+  // التمرير التلقائي إلى آخر رسالة
+  useEffect(() => {
+    if (scrollAreaRef.current) {
+      const scrollElement = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      if (scrollElement) {
+        scrollElement.scrollTop = scrollElement.scrollHeight;
+      }
+    }
+  }, [messages]);
 
   const sendChatMessage = () => {
-    if (!newMessage.trim() || !user) return;
-
-    sendMessage({
-      type: "chat_message",
-      message: newMessage.trim()
-    });
-
-    setNewMessage("");
+    if (newMessage.trim() && user) {
+      sendMessage({
+        type: "chat_message",
+        message: newMessage.trim(),
+        username: user.username,
+        avatar: user.avatar
+      });
+      setNewMessage("");
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -69,7 +73,23 @@ export function ChatBox() {
         <div className="space-y-3">
           {messages.map((msg) => (
             <div key={msg.id} className="flex flex-col">
-              <span className="text-xs text-gold/60 mb-1">{msg.username}</span>
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-6 h-6 rounded-full overflow-hidden bg-gold/20 border border-gold/30">
+                  {msg.avatar ? (
+                    <Image 
+                      src={msg.avatar} 
+                      alt={msg.username} 
+                      className="w-full h-full object-cover"
+                      fallback="https://via.placeholder.com/24?text=?"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gold/70 text-xs">
+                      {msg.username[0]?.toUpperCase()}
+                    </div>
+                  )}
+                </div>
+                <span className="text-xs text-gold/60">{msg.username}</span>
+              </div>
               <div className={`p-2 max-w-[80%] ${
                 msg.username === user?.username
                   ? "bg-gold/90 text-black rounded-t-2xl rounded-l-2xl rounded-br-sm mr-auto"
