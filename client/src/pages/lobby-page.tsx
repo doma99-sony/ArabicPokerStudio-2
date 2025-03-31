@@ -1,3 +1,19 @@
+
+{/* خلفية الفيديو */}
+<div className="fixed inset-0 z-0 overflow-hidden">
+  <video
+    ref={videoRef}
+    autoPlay
+    loop
+    muted={videoMuted}
+    playsInline
+    className="absolute w-full h-full object-cover"
+  >
+    <source src="/assets/lobby-background.mp4" type="video/mp4" />
+  </video>
+  <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+</div>
+
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
@@ -11,6 +27,16 @@ export default function LobbyPage() {
   const { user, logoutMutation } = useAuth();
   const [activeGameCategory, setActiveGameCategory] = useState<GameType>("poker");
   const [isChatHidden, setIsChatHidden] = useState(false);
+  const [videoMuted, setVideoMuted] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // التحكم في كتم/تشغيل الصوت
+  const toggleMute = () => {
+    if (videoRef.current) {
+      videoRef.current.muted = !videoRef.current.muted;
+      setVideoMuted(!videoMuted);
+    }
+  };
 
   useEffect(() => {
     // Inicializar el chat como visible al cargar la página
