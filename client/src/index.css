@@ -224,10 +224,35 @@
     transform-style: preserve-3d;
     transition: transform 0.3s ease;
     transform: scale(1.1);
+    position: relative;
   }
   
   .assistant-button:hover .assistant-image {
     transform: scale(1.1) perspective(600px) rotateY(-5deg) rotateX(3deg);
+  }
+  
+  .assistant-head-clickable {
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    top: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    cursor: pointer;
+    z-index: 52;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+  }
+  
+  .assistant-head-clickable:hover {
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.6);
+    animation: glow-hint 2s infinite;
+  }
+  
+  @keyframes glow-hint {
+    0% { box-shadow: 0 0 5px rgba(212, 175, 55, 0.3); }
+    50% { box-shadow: 0 0 20px rgba(212, 175, 55, 0.6); }
+    100% { box-shadow: 0 0 5px rgba(212, 175, 55, 0.3); }
   }
   
   .assistant-dialog {
@@ -244,6 +269,15 @@
     border: 1px solid var(--gold);
   }
   
+  .assistant-wrapper {
+    position: relative;
+    width: 650px;
+    height: 650px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
   @media (max-width: 640px) {
     .assistant-image {
       width: 500px;
@@ -251,8 +285,15 @@
       transform: scale(1.05);
     }
     
-    .assistant-button:hover .assistant-image {
-      transform: scale(1.05) perspective(600px) rotateY(-5deg) rotateX(2deg);
+    .assistant-wrapper {
+      width: 500px;
+      height: 500px;
+    }
+    
+    .assistant-head-clickable {
+      width: 120px;
+      height: 120px;
+      top: 60px;
     }
   }
   

@@ -79,7 +79,7 @@ const TIPS = [
 export function GameAssistant() {
   const [currentTip, setCurrentTip] = useState<number>(0);
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [showBadge, setShowBadge] = useState<boolean>(true);
+  const [showBadge, setShowBadge] = useState<boolean>(false);
   const isMobile = useIsMobile();
   
   // تغيير النصيحة التالية
@@ -105,27 +105,10 @@ export function GameAssistant() {
   const handleOpen = () => {
     setIsOpen(true);
     setShowBadge(false);
-    
-    // إعادة عرض الشارة بعد فترة زمنية
-    setTimeout(() => {
-      setShowBadge(true);
-    }, 300000); // 5 دقائق
   };
   
-  // عرض نصيحة عشوائية كل 60 ثانية عندما تكون النافذة مفتوحة
-  useEffect(() => {
-    let tipInterval: NodeJS.Timeout;
-    
-    if (isOpen) {
-      tipInterval = setInterval(() => {
-        nextTip();
-      }, 60000);
-    }
-    
-    return () => {
-      if (tipInterval) clearInterval(tipInterval);
-    };
-  }, [isOpen]);
+  // إزالة تحديث تلقائي للنصائح
+  // الآن سيتم عرض النصائح فقط عند النقر على رأس الصورة
   
   return (
     <div className={`assistant-container ${isMobile ? 'mobile' : 'desktop'}`}>
@@ -133,20 +116,21 @@ export function GameAssistant() {
         setIsOpen(open);
         if (open) handleOpen();
       }}>
-        <DialogTrigger asChild>
-          <button className="assistant-button" aria-label="فتح المساعد">
-            <img 
-              src="/assets/assistant/game-assistant.png" 
-              alt="مساعد اللعبة" 
-              className="assistant-image" 
-            />
-            {showBadge && (
-              <span className="notification-badge">
-                <Info size={12} />
-              </span>
-            )}
-          </button>
-        </DialogTrigger>
+        <div className="assistant-wrapper">
+          <img 
+            src="/assets/assistant/game-assistant.png" 
+            alt="مساعد اللعبة" 
+            className="assistant-image" 
+          />
+          <DialogTrigger asChild>
+            <div className="assistant-head-clickable" aria-label="انقر هنا لعرض النصائح"></div>
+          </DialogTrigger>
+          {showBadge && (
+            <span className="notification-badge">
+              <Info size={12} />
+            </span>
+          )}
+        </div>
         <DialogContent className="assistant-dialog sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-center text-xl font-bold text-gold">
