@@ -2,11 +2,12 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
-import { GameType } from "@/types";
+import { GameType } from "@shared/types";
 import { ChatBox } from "@/components/lobby/chat-box";
 import { Button } from "@/components/ui/button";
 import { OnlineUsersCounter } from "@/components/ui/online-users-badge";
 import { ResetChipsButton } from "@/components/reset-chips-button";
+import { RemoveVirtualPlayersButton } from "@/components/remove-virtual-players-button";
 import { LogOut, User, ChevronRight, Loader2, ChevronLeft, ChevronUp, Bell, ShoppingBag, ShoppingCart, Download, Smartphone } from "lucide-react";
 
 export default function LobbyPage() {
@@ -112,8 +113,9 @@ export default function LobbyPage() {
               <div className="flex items-center gap-2">
                 <p className="text-white/80 text-xs">الرصيد: <span className="text-[#D4AF37] font-bold">{user?.chips?.toLocaleString()}</span></p>
                 {/* زر إعادة تعيين الرصيد - وضع للاختبار فقط */}
-                <div className="scale-75 origin-right">
+                <div className="flex gap-1 scale-75 origin-right">
                   <ResetChipsButton />
+                  <RemoveVirtualPlayersButton />
                 </div>
               </div>
             </div>

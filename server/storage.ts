@@ -32,6 +32,7 @@ export interface IStorage {
   getGameTables(): Promise<GameTable[]>;
   getGameTablesByType(gameType: GameType): Promise<GameTable[]>;
   getGameTable(tableId: number): Promise<GameTable | undefined>;
+  removeVirtualPlayers(): Promise<void>; // إضافة وظيفة لإزالة اللاعبين الوهميين
   
   // Game state operations
   getGameState(tableId: number, userId: number): Promise<GameState | undefined>;
@@ -442,6 +443,31 @@ export class MemStorage implements IStorage {
   
   async getGameTable(tableId: number): Promise<GameTable | undefined> {
     return this.tables.get(tableId);
+  }
+  
+  // إزالة اللاعبين الوهميين من جميع الطاولات
+  async removeVirtualPlayers(): Promise<void> {
+    console.log("جاري إزالة جميع اللاعبين الوهميين من الطاولات...");
+    
+    // إعادة تعيين حالة الطاولات إلى متاحة وعدد اللاعبين إلى 0
+    for (const table of this.tables.values()) {
+      const oldCount = table.currentPlayers;
+      table.currentPlayers = 0;
+      table.status = "available";
+      
+      console.log(`تم تفريغ الطاولة ${table.id} (${table.name}) من ${oldCount} لاعب وهمي`);
+    }
+    
+    // تجديد غرف اللعبة
+    for (const [tableId, gameRoom] of this.gameRooms.entries()) {
+      const table = this.tables.get(tableId);
+      if (table) {
+        // إعادة إنشاء غرفة اللعبة لهذه الطاولة
+        this.gameRooms.set(tableId, createGameRoom(table));
+      }
+    }
+    
+    console.log("تمت إزالة جميع اللاعبين الوهميين بنجاح!");
   }
   
   // Game state operations

@@ -28,10 +28,11 @@ export function setupPokerGame(app: Express, httpServer: Server) {
   // Map to track which tables users are connected to
   const userTables = new Map<number, number>();
 
-  // عدد افتراضي من المستخدمين المتصلين (بين 5-15 مستخدم)
+  // عدد افتراضي من المستخدمين المتصلين (بين 0 مستخدم) - بعد إزالة اللاعبين الوهميين
   const getRandomOnlineCount = () => {
     const baseUsers = clients.size; // عدد المستخدمين الحقيقيين
-    const fakeUsers = Math.floor(Math.random() * 10) + 5; // عدد وهمي بين 5-15
+    // const fakeUsers = Math.floor(Math.random() * 10) + 5; // تم تعطيل العدد الوهمي
+    const fakeUsers = 0; // لا يوجد لاعبين وهميين
     return baseUsers + fakeUsers;
   };
 

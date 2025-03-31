@@ -208,7 +208,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         const currentState = await storage.getGameState(tableId, req.user.id);
         if (currentState) {
-          const playerOnTable = currentState.players.some(p => p.id === req.user?.id);
+          const playerOnTable = currentState.players.some((p: { id: number }) => p.id === req.user?.id);
           if (playerOnTable) {
             console.log(`المستخدم ${req.user.id} منضم بالفعل للطاولة ${tableId}`);
             return res.json({ 
@@ -380,6 +380,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "حدث خطأ أثناء مغادرة الطاولة" });
     }
   });
+
+  // مسار جديد لإزالة جميع اللاعبين الوهميين (يتطلب كلمة مرور)
+  app.post("/api/system/remove-virtual-players", async (req, res) => {
+    try {
+      // التحقق من كلمة المرور - كلمة مرور مشفرة للإدارة
+      const { password } = req.body;
+      
+      if (password !== "56485645") {
+        return res.status(403).json({ 
+          success: false, 
+          message: "كلمة المرور غير صحيحة" 
+        });
+      }
+      
+      // استدعاء وظيفة إزالة اللاعبين الوهميين
+      await storage.removeVirtualPlayers();
+      
+      return res.json({ 
+        success: true, 
+        message: "تمت إزالة جميع اللاعبين الوهميين بنجاح" 
+      });
+    } catch (error) {
+      console.error("خطأ أثناء إزالة اللاعبين الوهميين:", error);
+      return res.status(500).json({ 
+        success: false, 
+        message: "حدث خطأ أثناء إزالة اللاعبين الوهميين" 
+      });
+    }
+  });
+
+  // Setup poker game events
+  setupPokerGame(app, httpServer);
 
   return httpServer;
 }
