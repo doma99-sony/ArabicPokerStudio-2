@@ -69,9 +69,9 @@ export default function PokerTablesPage() {
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
 
       {/* Header Bar */}
-      <header className="relative z-10 bg-black/80 text-white p-6 shadow-xl border-b border-[#D4AF37]/30">
+      <header className="relative z-10 bg-black/80 text-white p-8 shadow-xl border-b border-[#D4AF37]/30">
         <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-4xl font-bold text-[#D4AF37]">طاولات بوكر تكساس</h1>
+          <h1 className="text-5xl font-bold text-[#D4AF37]">طاولات بوكر تكساس</h1>
           
           <Button 
             variant="outline" 
@@ -102,10 +102,10 @@ export default function PokerTablesPage() {
               onValueChange={setActivePokerLevel}
               className="w-full"
             >
-              <TabsList className="grid w-full grid-cols-4 h-auto mb-6">
+              <TabsList className="grid w-full grid-cols-4 h-auto mb-8">
                 <TabsTrigger 
                   value="نوب" 
-                  className={`py-3 ${canPlayLevel(20000) ? '' : 'opacity-70'}`}
+                  className={`py-4 text-lg ${canPlayLevel(20000) ? '' : 'opacity-70'}`}
                   disabled={!canPlayLevel(20000)}
                 >
                   نوب <Coins className="ml-2 h-4 w-4" /> 20,000
