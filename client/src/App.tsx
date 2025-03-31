@@ -6,6 +6,7 @@ import LobbyPage from "@/pages/lobby-page";
 import GamePage from "@/pages/game-page";
 import ProfilePage from "@/pages/profile-page";
 import NarutoPage from "@/pages/naruto-page";
+import LevelSelectPage from "@/pages/level-select-page";
 import { ProtectedRoute } from "./lib/protected-route";
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
@@ -17,6 +18,8 @@ function Router() {
       <ProtectedRoute path="/" component={LobbyPage} />
       <ProtectedRoute path="/game/:tableId" component={GamePage} />
       <ProtectedRoute path="/profile" component={ProfilePage} />
+      <ProtectedRoute path="/poker/levels" component={LevelSelectPage} />
+      <ProtectedRoute path="/poker/:level" component={GamePage} />
       <ProtectedRoute path="/naruto/:tableId" component={NarutoPage} />
       <ProtectedRoute path="/naruto" component={NarutoPage} />
       <Route component={NotFound} />
