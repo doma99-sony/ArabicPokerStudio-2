@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { Card } from "@/types";
 import { getSuitColor, getCardDisplayValue } from "@/lib/card-utils";
 
@@ -43,10 +42,7 @@ export function CardComponent({ card, size = "md" }: CardComponentProps) {
   const suitColor = getSuitColor(card.suit);
   
   return (
-    <motion.div
-      className={`${sizeClasses[size]} bg-white rounded-md shadow-lg overflow-hidden flex flex-col`}
-      whileHover={{ y: -5, rotate: 5, transition: { duration: 0.2 } }}
-    >
+    <div className={`${sizeClasses[size]} bg-white rounded-md shadow-lg overflow-hidden flex flex-col hover:translate-y-[-5px] hover:rotate-[5deg] transition-transform duration-200`}>
       <div className="flex flex-col items-center justify-center h-full relative">
         {/* Top left value and suit */}
         <div className={`absolute top-1 left-1 ${fontSizeClasses[size]} font-bold ${suitColor}`}>
@@ -69,6 +65,6 @@ export function CardComponent({ card, size = "md" }: CardComponentProps) {
           {suit}
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }

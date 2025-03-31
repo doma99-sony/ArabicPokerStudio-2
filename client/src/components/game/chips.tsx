@@ -1,5 +1,3 @@
-import { motion } from "framer-motion";
-
 interface ChipsProps {
   amount: number;
   size?: "sm" | "md" | "lg";
@@ -46,16 +44,9 @@ export function Chips({ amount, size = "md" }: ChipsProps) {
   return (
     <div className="flex justify-center mt-1">
       {limitedChips.map((chip, index) => (
-        <motion.div 
+        <div 
           key={`chip-${index}`}
-          className={`chip ${sizeClasses[size]} rounded-full ${chip.color} border-2 border-white mx-0.5`}
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ 
-            y: 0, 
-            opacity: 1,
-            transition: { delay: index * 0.1, type: "spring", stiffness: 200 }
-          }}
-          whileHover={{ y: -5, transition: { duration: 0.2 } }}
+          className={`chip ${sizeClasses[size]} rounded-full ${chip.color} border-2 border-white mx-0.5 hover:translate-y-[-5px] transition-transform duration-200`}
           style={{ zIndex: limitedChips.length - index }}
         />
       ))}

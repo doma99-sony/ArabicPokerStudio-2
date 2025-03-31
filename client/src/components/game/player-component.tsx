@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { PlayerPosition } from "@/types";
 import { Image } from "@/components/ui/image";
 import { CardComponent } from "./card-component";
@@ -20,57 +19,33 @@ export function PlayerComponent({ player, isTurn }: PlayerComponentProps) {
 
   // Determine card visibility based on if it's the current player or showdown
   const showCards = player.isCurrentPlayer || player.cards?.every(c => !c.hidden);
-  
-  // Animation variants
-  const containerVariants = {
-    initial: { opacity: 0, scale: 0.8 },
-    animate: { opacity: 1, scale: 1, transition: { duration: 0.3 } },
-  };
-  
-  const pulseAnimation = isTurn ? {
-    animate: {
-      boxShadow: ["0 0 0 0 rgba(212, 175, 55, 0.7)", "0 0 0 10px rgba(212, 175, 55, 0)", "0 0 0 0 rgba(212, 175, 55, 0)"],
-      transition: { duration: 2, repeat: Infinity }
-    }
-  } : {};
 
   return (
-    <motion.div 
-      className={`flex flex-col items-center ${positionClasses[player.position]}`}
-      initial="initial"
-      animate="animate"
-      variants={containerVariants}
-    >
+    <div className={`flex flex-col items-center ${positionClasses[player.position]}`}>
       {/* Display player's cards if they have them */}
       {player.cards && (
         <div className="flex flex-col items-center mb-2">
           <div className="flex space-x-1 rtl:space-x-reverse mb-2">
             {player.cards.map((card, index) => (
-              <motion.div
+              <div
                 key={`player-card-${index}`}
-                className="card"
-                animate={index === 0 ? { rotate: -5 } : { rotate: 5 }}
-                transition={{ type: "spring", stiffness: 100 }}
+                className={`card ${index === 0 ? "rotate-[-5deg]" : "rotate-[5deg]"}`}
               >
                 <CardComponent 
                   card={showCards ? card : { ...card, hidden: true }} 
                   size="sm" 
                 />
-              </motion.div>
+              </div>
             ))}
           </div>
           
           {/* Player's turn indicator */}
           {isTurn && (
-            <motion.div 
-              className="bg-slate/60 rounded-full px-3 py-0.5 text-white"
-              animate="animate"
-              variants={pulseAnimation}
-            >
+            <div className="bg-slate/60 rounded-full px-3 py-0.5 text-white">
               <span className="text-sm font-cairo">
                 {player.isCurrentPlayer ? "دورك للعب" : "دور اللاعب"}
               </span>
-            </motion.div>
+            </div>
           )}
           
           {/* Player's bet amount if any */}
@@ -108,6 +83,6 @@ export function PlayerComponent({ player, isTurn }: PlayerComponentProps) {
           طوى
         </div>
       )}
-    </motion.div>
+    </div>
   );
 }
