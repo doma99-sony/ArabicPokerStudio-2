@@ -57,7 +57,34 @@ export default function ProfilePage() {
       } catch (error) {
         alert('حدث خطأ في الاتصال');
       }
-    } else if (newUsername) {
+    } else {
+      alert('اسم المستخدم يجب أن يكون 3 أحرف على الأقل');
+    }
+  };
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const formData = new FormData();
+      formData.append('avatar', file);
+      try {
+        const response = await fetch('/api/profile/avatar', {
+          method: 'POST',
+          body: formData
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+          alert('تم تحديث الصورة بنجاح!');
+          refetch();
+        } else {
+          alert(data.message || 'حدث خطأ أثناء تحديث الصورة');
+        }
+      } catch (error) {
+        alert('حدث خطأ في الاتصال');
+      }
+    }
+  };f (newUsername) {
       alert('يجب أن يكون اسم المستخدم 3 أحرف على الأقل');
     }
   };
