@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "wouter";
@@ -7,12 +7,16 @@ import { Loader2 } from "lucide-react";
 import { PokerTable } from "@/components/game/poker-table";
 import { GameControls } from "@/components/game/game-controls";
 import { BetControls } from "@/components/game/bet-controls";
+import { SpectatorBar } from "@/components/game/spectator-bar";
 import { useToast } from "@/hooks/use-toast";
 
 export default function GamePage({ params }: { params?: { tableId?: string } }) {
   const { user } = useAuth();
   const [, navigate] = useLocation();
   const { toast } = useToast();
+  const [isSpectator, setIsSpectator] = useState(false);
+  const [tableName, setTableName] = useState<string>("");
+  const [maxPlayers, setMaxPlayers] = useState<number>(9);
   
   // التأكد من وجود معرف الطاولة
   if (!params || !params.tableId) {
@@ -76,6 +80,30 @@ export default function GamePage({ params }: { params?: { tableId?: string } }) 
     }
   }, [error, toast, navigate]);
   
+  // تحقق مما إذا كان اللاعب في وضع المشاهدة عند تحميل بيانات اللعبة
+  useEffect(() => {
+    if (gameState) {
+      // تحديث معلومات الطاولة
+      // استخدم معرف الطاولة من gameState أو من الباراميتر
+      const gameTableId = gameState.tableId || tableId;
+      setMaxPlayers(gameState.players.length);
+      
+      // لاحظ أننا نستخدم خاصية isActive من GamePlayer
+      const isActivePlayer = gameState.players.some(
+        player => player.id === user?.id && player.isActive
+      );
+      
+      setIsSpectator(!isActivePlayer);
+      
+      if (!isActivePlayer) {
+        toast({
+          title: "وضع المشاهدة",
+          description: "أنت الآن تشاهد هذه اللعبة. يمكنك الانتظار حتى يصبح هناك مقعد متاح للانضمام.",
+        });
+      }
+    }
+  }, [gameState, user, toast, tableId]);
+  
   // If still loading, show loading indicator
   if (isLoading || !gameState) {
     return (
@@ -88,6 +116,12 @@ export default function GamePage({ params }: { params?: { tableId?: string } }) 
     );
   }
 
+  // وظيفة للتعامل مع الانضمام من وضع المشاهدة
+  const handleJoinFromSpectator = () => {
+    // إعادة تحميل الصفحة للحصول على حالة اللعبة المحدثة
+    window.location.reload();
+  };
+
   return (
     <div className="min-h-screen bg-deepBlack text-white py-2 flex flex-col">
       <div className="container mx-auto px-4 h-full flex flex-col">
@@ -97,8 +131,18 @@ export default function GamePage({ params }: { params?: { tableId?: string } }) 
         {/* Poker table (middle) */}
         <PokerTable gameState={gameState} />
         
-        {/* Betting controls (footer) */}
-        <BetControls gameState={gameState} />
+        {/* Betting controls (footer) - تظهر فقط إذا كان اللاعب نشطًا وليس في وضع المشاهدة */}
+        {!isSpectator && <BetControls gameState={gameState} />}
+        
+        {/* شريط المشاهدة - يظهر فقط في وضع المشاهدة */}
+        {isSpectator && (
+          <SpectatorBar 
+            tableId={tableId}
+            currentPlayers={gameState.players.length}
+            maxPlayers={maxPlayers}
+            onJoinSuccess={handleJoinFromSpectator}
+          />
+        )}
       </div>
     </div>
   );
