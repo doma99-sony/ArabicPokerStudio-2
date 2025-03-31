@@ -28,8 +28,8 @@ export function TableCard({ table }: TableCardProps) {
     // تخزين معرف الطاولة في التخزين المحلي
     localStorage.setItem('lastTableId', tableId.toString());
     
-    // استخدام إعادة توجيه مباشرة بدلاً من التغيير التدريجي
-    window.location.href = `/game/${tableId}`;
+    // استخدام الصفحة المبسطة بدلاً من الصفحة الأصلية للتغلب على مشكلة التحميل
+    window.location.href = `/game-simple/${tableId}`;
   }, []);
 
   // الانضمام للعبة - إما كلاعب نشط أو كمشاهد
