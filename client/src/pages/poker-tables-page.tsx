@@ -69,9 +69,9 @@ export default function PokerTablesPage() {
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
 
       {/* Header Bar */}
-      <header className="relative z-10 bg-black/80 text-white p-8 shadow-xl border-b border-[#D4AF37]/30">
+      <header className="relative z-10 bg-black/80 text-white p-10 shadow-xl border-b border-[#D4AF37]/30">
         <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-5xl font-bold text-[#D4AF37]">طاولات بوكر تكساس</h1>
+          <h1 className="text-6xl font-bold text-[#D4AF37]">طاولات بوكر تكساس</h1>
           
           <Button 
             variant="outline" 
@@ -85,8 +85,8 @@ export default function PokerTablesPage() {
       </header>
 
       {/* Main Content */}
-      <main className="relative z-10 container mx-auto flex-1 p-6">
-        <div className="space-y-6">
+      <main className="relative z-10 container mx-auto flex-1 p-6 mt-8">
+        <div className="space-y-8">
           {/* مستويات البوكر */}
           <div className="rounded-xl bg-black/60 border border-[#D4AF37]/20 p-6 backdrop-blur-sm">
             <div className="flex justify-between items-center mb-6">
