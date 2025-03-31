@@ -77,7 +77,7 @@ export default function NarutoPage({ params }: { params?: { tableId?: string } }
           <div 
             className="p-8 rounded-lg max-w-4xl w-full border border-[#ff9d00]/30"
             style={{
-              backgroundImage: 'url("/assets/images/naruto-box-bg.jpg")',
+              backgroundImage: 'url("/assets/images/th (17).jfif")',
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               backgroundBlendMode: 'overlay',
