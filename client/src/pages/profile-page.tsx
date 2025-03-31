@@ -66,22 +66,68 @@ export default function ProfilePage() {
               <div className="md:w-1/3 mb-6 md:mb-0">
                 <div className="bg-deepBlack p-4 rounded-lg border border-gold/20">
                   <div className="flex flex-col items-center">
-                    <div className="w-24 h-24 bg-gold/20 rounded-full overflow-hidden border-4 border-gold/30 mb-4">
-                      {profile.avatar ? (
-                        <Image 
-                          src={profile.avatar} 
-                          alt={profile.username} 
-                          className="w-full h-full object-cover"
-                          fallback="https://via.placeholder.com/150?text=User"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-slate-800">
-                          <User className="h-12 w-12 text-gold/70" />
+                    <div className="relative group">
+                      <div className="w-24 h-24 bg-gold/20 rounded-full overflow-hidden border-4 border-gold/30 mb-4">
+                        {profile.avatar ? (
+                          <Image 
+                            src={profile.avatar} 
+                            alt={profile.username} 
+                            className="w-full h-full object-cover"
+                            fallback="https://via.placeholder.com/150?text=User"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-slate-800">
+                            <User className="h-12 w-12 text-gold/70" />
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <label className="cursor-pointer">
+                            <input 
+                              type="file" 
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  const formData = new FormData();
+                                  formData.append('avatar', file);
+                                  fetch('/api/profile/avatar', {
+                                    method: 'POST',
+                                    body: formData
+                                  }).then(() => {
+                                    window.location.reload();
+                                  });
+                                }
+                              }}
+                            />
+                            <span className="text-white text-sm">تغيير الصورة</span>
+                          </label>
                         </div>
-                      )}
+                      </div>
                     </div>
                     
-                    <h3 className="text-xl font-bold text-white mb-1 font-cairo">{profile.username}</h3>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="text-xl font-bold text-white font-cairo">{profile.username}</h3>
+                      <button 
+                        onClick={() => {
+                          const newUsername = prompt('أدخل اسم المستخدم الجديد');
+                          if (newUsername) {
+                            fetch('/api/profile/username', {
+                              method: 'POST',
+                              headers: {
+                                'Content-Type': 'application/json'
+                              },
+                              body: JSON.stringify({ username: newUsername })
+                            }).then(() => {
+                              window.location.reload();
+                            });
+                          }
+                        }}
+                        className="text-gold/70 hover:text-gold"
+                      >
+                        <i className="fas fa-edit text-sm"></i>
+                      </button>
+                    </div>
                     <p className="text-gold/80 text-sm mb-3 font-tajawal">عضو منذ {profile.stats.joinDate}</p>
                     
                     <div className="w-full bg-pokerGreen rounded-full px-4 py-2 flex items-center justify-center mb-4">

@@ -45,6 +45,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "حدث خطأ أثناء جلب الملف الشخصي" });
     }
   });
+
+  app.post("/api/profile/username", ensureAuthenticated, async (req, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "غير مصرح" });
+      }
+
+      const { username } = req.body;
+      if (!username || username.length < 3) {
+        return res.status(400).json({ message: "اسم المستخدم يجب أن يكون 3 أحرف على الأقل" });
+      }
+
+      await storage.updateUsername(req.user.id, username);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "حدث خطأ أثناء تحديث اسم المستخدم" });
+    }
+  });
+
+  app.post("/api/profile/avatar", ensureAuthenticated, async (req, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "غير مصرح" });
+      }
+
+      if (!req.files || !req.files.avatar) {
+        return res.status(400).json({ message: "لم يتم تحميل أي صورة" });
+      }
+
+      const avatar = req.files.avatar;
+      const avatarUrl = await storage.uploadAvatar(req.user.id, avatar);
+      res.json({ success: true, avatarUrl });
+    } catch (error) {
+      res.status(500).json({ message: "حدث خطأ أثناء تحديث الصورة" });
+    }
+  });
   
   // Get all available game tables
   app.get("/api/tables", ensureAuthenticated, async (req, res) => {
