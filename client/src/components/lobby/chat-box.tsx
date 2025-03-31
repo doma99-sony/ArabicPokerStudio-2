@@ -16,33 +16,28 @@ interface ChatMessage {
 
 export function ChatBox() {
   const { user } = useAuth();
-  const { socket } = useWebSocket();
+  const { registerHandler, sendMessage, socket } = useWebSocket();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   // تحديث الرسائل عند استلام رسالة جديدة
   useEffect(() => {
-    if (socket) {
-      const messageHandler = (event: MessageEvent) => {
-        const data = JSON.parse(event.data);
-        if (data.type === "chat_message") {
-          setMessages(prev => [...prev, {
-            id: data.id,
-            username: data.username,
-            message: data.message,
-            avatar: data.avatar
-          }]);
-        }
-      };
+    // استخدام نظام التسجيل الموحد للرسائل
+    const unregister = registerHandler("chat_message", (data) => {
+      setMessages(prev => [...prev, {
+        id: data.id,
+        username: data.username,
+        message: data.message,
+        avatar: data.avatar
+      }]);
+    });
 
-      socket.addEventListener('message', messageHandler);
-
-      return () => {
-        socket.removeEventListener('message', messageHandler);
-      };
-    }
-  }, [socket]);
+    // تنظيف عند إزالة المكون
+    return () => {
+      unregister();
+    };
+  }, [registerHandler]);
 
   // التمرير التلقائي إلى آخر رسالة
   useEffect(() => {
@@ -63,7 +58,7 @@ export function ChatBox() {
         avatar: user.avatar,
         id: Date.now().toString()  // استخدم معرف فريد
       };
-      socket?.send(JSON.stringify(messageData));
+      sendMessage(messageData);
       setNewMessage("");
     }
   };

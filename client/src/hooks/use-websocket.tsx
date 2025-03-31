@@ -130,6 +130,7 @@ export function useWebSocket() {
 
   return {
     status,
+    socket: socketRef.current,
     sendMessage,
     registerHandler,
     joinTable,

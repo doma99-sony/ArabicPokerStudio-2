@@ -79,14 +79,13 @@ export function setupPokerGame(app: Express, httpServer: Server) {
               id: messageId,
               username: user.username,
               message: data.message,
+              avatar: user.avatar, // إضافة الصورة الرمزية للمستخدم
               timestamp: Date.now()
             };
             
             // Broadcast to all connected clients
             broadcast(chatMessage);
           }
-          
-          ws.send(JSON.stringify({ type: "auth", success: true }));
         } else if (data.type === "join_table") {
           // User joining a table
           if (!userId) {
