@@ -19,16 +19,19 @@ export default function GamePage({ params }: { params?: { tableId?: string } }) 
   const [maxPlayers, setMaxPlayers] = useState<number>(9);
   
   // التأكد من وجود معرف الطاولة
-  if (!params || !params.tableId) {
-    useEffect(() => {
+  useEffect(() => {
+    if (!params || !params.tableId || isNaN(parseInt(params.tableId))) {
+      console.error("معرّف الطاولة غير صالح أو غير موجود:", params?.tableId);
       toast({
         title: "خطأ",
         description: "معرف الطاولة غير صالح",
         variant: "destructive",
       });
       navigate("/");
-    }, [toast, navigate]);
-    
+    }
+  }, [params, toast, navigate]);
+  
+  if (!params?.tableId) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-deepBlack">
         <div className="text-center">

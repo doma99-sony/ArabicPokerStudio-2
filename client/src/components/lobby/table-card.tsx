@@ -59,9 +59,11 @@ export function TableCard({ table }: TableCardProps) {
           });
         }
         
-        // نستخدم wouter للانتقال بدلاً من window.location.href
-        // لتجنب إعادة تحميل الصفحة بالكامل
-        navigate(`/game/${table.id}`);
+        // تأخير قصير ثم الانتقال (لإعطاء بيانات الانضمام وقتًا للمعالجة)
+        console.log("تم الانضمام بنجاح، جارٍ الانتقال إلى صفحة اللعبة", table.id);
+        setTimeout(() => {
+          navigate(`/game/${table.id}`);
+        }, 100);
       } else {
         // في حالة الإخفاق مع وجود رسالة
         toast({
