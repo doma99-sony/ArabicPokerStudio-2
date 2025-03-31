@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
@@ -7,6 +6,14 @@ import { ChatBox } from "@/components/lobby/chat-box";
 import { Button } from "@/components/ui/button";
 import { OnlineUsersCounter } from "@/components/ui/online-users-badge";
 import { LogOut, User, ChevronRight, Loader2, ChevronLeft, ChevronUp, Bell, ShoppingBag, ShoppingCart, Download, Smartphone } from "lucide-react";
+
+// Placeholder component -  Replace with actual implementation
+const EgyptianPyramid = () => (
+  <div className="w-64 h-64 bg-brown-500 ml-8 rounded-lg shadow-2xl relative">
+    <p className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white text-center font-bold text-lg">بوكر بويا المصريين</p>
+    <p className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-center text-sm">انضم الان</p>
+  </div>
+);
 
 export default function LobbyPage() {
   const [location, navigate] = useLocation();
@@ -71,7 +78,7 @@ export default function LobbyPage() {
   return (
     <div className="min-h-screen bg-cover bg-center flex flex-col"
          style={{ backgroundImage: "url('/images/egyptian-background.jpg')" }}>
-      
+
       {/* خلفية الفيديو */}
       <div className="fixed inset-0 z-0 overflow-hidden">
         <video
@@ -86,7 +93,7 @@ export default function LobbyPage() {
         </video>
         <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
       </div>
-      
+
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
 
       {/* Header Bar */}
@@ -104,6 +111,9 @@ export default function LobbyPage() {
             {/* عداد المستخدمين المتصلين */}
             <OnlineUsersCounter />
           </div>
+
+          {/* إضافة الهرم المصري */}
+          <EgyptianPyramid onClick={() => navigate('/game-tables')} />
 
           <div className="flex items-center gap-2">
             <div className="text-right">
@@ -140,7 +150,7 @@ export default function LobbyPage() {
               <Smartphone size={14} className="ml-1" />
               تحميل التطبيق
             </Button>
-            
+
             <Button 
               variant="outline" 
               className="border-red-500/50 text-red-400 hover:bg-red-500/10 h-8 py-0 px-2 text-xs"
@@ -173,7 +183,7 @@ export default function LobbyPage() {
                 <div className="bg-[#0A3A2A] p-3 border-b border-[#D4AF37] flex justify-between items-center">
                   <h2 className="text-base font-bold text-[#D4AF37]">الدردشة العامة</h2>
                 </div>
-                
+
                 {/* منطقة الدردشة */}
                 <div className="h-[calc(80%-50px)] bg-gradient-to-b from-[#1B4D3E]/80 to-black/60 w-80">
                   <div className="h-full w-full">
@@ -182,7 +192,7 @@ export default function LobbyPage() {
                 </div>
               </div>
             </div>
-            
+
             {/* زر التبديل */}
             <button 
               id="chat-toggle"
@@ -277,7 +287,7 @@ export default function LobbyPage() {
                       قريباً...
                     </div>
                   </div>
-                  
+
                   {/* دومينو */}
                   <div 
                     className={`flex flex-col h-32 rounded-lg overflow-hidden border-2 ${activeGameCategory === 'domino' ? 'ring-2 ring-blue-600' : ''} border-blue-600/80 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer`}
@@ -305,7 +315,7 @@ export default function LobbyPage() {
                   </div>
                 </div>
               </div>
-              
+
               {/* مساحة للأيقونات */}
               <div className="flex justify-center gap-4 my-2">
                 <div className="p-2 bg-black/40 rounded-full w-8 h-8 flex items-center justify-center text-white/70 hover:bg-black/60 hover:text-white cursor-pointer transition-all">
@@ -337,7 +347,7 @@ export default function LobbyPage() {
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
         )}
       </button>
-      
+
       {/* Bottom Navigation Bar */}
       <div className="fixed bottom-0 left-0 right-0 z-30 w-full mx-auto">
         <div className="bg-gradient-to-t from-black via-[#0A3A2A] to-[#0A3A2A]/90 border-t-2 border-[#D4AF37] px-1 py-1 shadow-xl backdrop-blur-md flex items-center justify-between">
@@ -363,7 +373,7 @@ export default function LobbyPage() {
               <span className="text-[11px] text-white mt-1 font-bold text-[#D4AF37]">الرانك</span>
             </button>
           </div>
-          
+
           {/* المتجر */}
           <div className="relative group">
             <button 
@@ -377,7 +387,7 @@ export default function LobbyPage() {
               <span className="text-[11px] text-white mt-1">المتجر</span>
             </button>
           </div>
-          
+
           {/* الحقيبة */}
           <div className="relative group">
             <button 
@@ -390,7 +400,7 @@ export default function LobbyPage() {
               <span className="text-[11px] text-white mt-1">الحقيبة</span>
             </button>
           </div>
-          
+
           {/* الأحداث */}
           <div className="relative group">
             <button 
@@ -407,7 +417,7 @@ export default function LobbyPage() {
               <span className="text-[11px] text-white mt-1">الأحداث</span>
             </button>
           </div>
-          
+
           {/* الإعدادات */}
           <div className="relative">
             <button 
@@ -420,7 +430,7 @@ export default function LobbyPage() {
               <span className="text-[11px] text-white mt-1">الإعدادات</span>
             </button>
           </div>
-          
+
           {/* الرسائل */}
           <div className="relative">
             <button 
@@ -434,7 +444,7 @@ export default function LobbyPage() {
             </button>
             <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-[10px] text-white flex items-center justify-center border border-black">2</span>
           </div>
-          
+
           {/* المهمات */}
           <div className="relative">
             <button 
@@ -448,7 +458,7 @@ export default function LobbyPage() {
             </button>
             <span className="absolute -top-1 -right-1 w-5 h-5 bg-amber-500 rounded-full text-[10px] text-white flex items-center justify-center border border-black">3</span>
           </div>
-          
+
           {/* الأصدقاء */}
           <div className="relative">
             <button 
@@ -461,7 +471,7 @@ export default function LobbyPage() {
               <span className="text-[11px] text-white mt-1">الأصدقاء</span>
             </button>
           </div>
-          
+
           {/* الملابس */}
           <div className="relative">
             <button 
@@ -474,7 +484,7 @@ export default function LobbyPage() {
               <span className="text-[11px] text-white mt-1">الملابس</span>
             </button>
           </div>
-          
+
           {/* الترتيب */}
           <div className="relative">
             <button 
@@ -487,7 +497,7 @@ export default function LobbyPage() {
               <span className="text-[11px] text-white mt-1">الترتيب</span>
             </button>
           </div>
-          
+
           {/* VIP */}
           <div className="relative">
             <button 
@@ -500,7 +510,7 @@ export default function LobbyPage() {
               <span className="text-[11px] text-white mt-1">VIP</span>
             </button>
           </div>
-          
+
           {/* المكافآت */}
           <div className="relative">
             <button 
@@ -513,7 +523,7 @@ export default function LobbyPage() {
               <span className="text-[11px] text-white mt-1">المكافآت</span>
             </button>
           </div>
-          
+
           {/* العبها الآن */}
           <div className="relative group">
             <button 
@@ -532,14 +542,14 @@ export default function LobbyPage() {
           </div>
         </div>
       </div>
-      
+
       {/* Footer */}
       <footer className="relative z-10 bg-black/80 text-white/60 text-center p-2 border-t border-[#D4AF37]/20">
         <div className="container mx-auto">
           <p className="text-xs">&copy; {new Date().getFullYear()} بوكر تكساس عرباوي - جميع الحقوق محفوظة</p>
         </div>
       </footer>
-      
+
       <style dangerouslySetInnerHTML={{
         __html: `
           @keyframes shine {
