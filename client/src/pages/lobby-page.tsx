@@ -28,44 +28,13 @@ export default function LobbyPage() {
   const [activeGameCategory, setActiveGameCategory] = useState<GameType>("poker");
   const [isChatHidden, setIsChatHidden] = useState(false);
   const [videoMuted, setVideoMuted] = useState(true);
-  const [wsConnected, setWsConnected] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const wsRef = useRef<WebSocket | null>(null);
-
-  useEffect(() => {
-    if (user) {
-      const ws = new WebSocket(`ws://${window.location.hostname}:5000/ws`);
-      
-      ws.onopen = () => {
-        setWsConnected(true);
-        console.log("WebSocket connected successfully");
-      };
-
-      ws.onclose = () => {
-        setWsConnected(false);
-        // محاولة إعادة الاتصال بعد 3 ثوانٍ
-        setTimeout(() => {
-          if (user && !wsRef.current) {
-            wsRef.current = new WebSocket(`ws://${window.location.hostname}:5000/ws`);
-          }
-        }, 3000);
-      };
-
-      wsRef.current = ws;
-      return () => {
-        ws.close();
-        wsRef.current = null;
-      };
-    }
-  }, [user]);
 
   // التحكم في كتم/تشغيل الصوت
   const toggleMute = () => {
     if (videoRef.current) {
       videoRef.current.muted = !videoRef.current.muted;
       setVideoMuted(!videoMuted);
-    }
-  };deoMuted(!videoMuted);
     }
   };
 
