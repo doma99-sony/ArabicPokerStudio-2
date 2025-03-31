@@ -48,13 +48,24 @@ export function SpectatorBar({ tableId, currentPlayers, maxPlayers, onJoinSucces
         return { success: false, message: "الطاولة لا تزال ممتلئة، في انتظار مقعد..." };
       }
       
-      // إذا أصبح هناك مقعد متاح، حاول الانضمام
-      const res = await apiRequest("POST", `/api/game/${tableId}/join`);
+      // إذا أصبح هناك مقعد متاح، حاول الانضمام كلاعب نشط (ليس كمشاهد)
+      console.log("محاولة الانضمام إلى الطاولة من وضع المشاهدة...");
+      const res = await fetch(`/api/game/${tableId}/join`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ asSpectator: false }) // تأكيد أننا نريد الانضمام كلاعب نشط
+      });
+      
       const data = await res.json();
+      console.log("نتيجة محاولة الانضمام:", data);
       return data;
     },
     onSuccess: (data) => {
-      if (data.success) {
+      if (data.success && !data.isSpectator) {
+        // نجح الانضمام كلاعب نشط
         toast({
           title: "تم الانضمام بنجاح",
           description: "أنت الآن لاعب نشط في الطاولة"
@@ -64,16 +75,41 @@ export function SpectatorBar({ tableId, currentPlayers, maxPlayers, onJoinSucces
         if (onJoinSuccess) {
           onJoinSuccess();
         }
-      } else if (data.message.includes("الطاولة لا تزال ممتلئة")) {
+      } else if (data.success && data.isSpectator) {
+        // لا تزال في وضع المشاهدة (الطاولة ممتلئة)
+        toast({
+          title: "الطاولة ممتلئة",
+          description: "لا تزال الطاولة ممتلئة. سنحاول الانضمام مرة أخرى عندما يتوفر مقعد.",
+        });
+        
         // جدولة محاولة أخرى بعد 5 ثوانٍ
         setTimeout(() => {
           if (waitingForSeat) {
             joinMutation.mutate();
           }
         }, 5000);
+      } else {
+        // خطأ آخر غير مرتبط بوضع المشاهدة
+        toast({
+          title: "تعذر الانضمام",
+          description: data.message || "حدث خطأ أثناء محاولة الانضمام",
+          variant: "destructive"
+        });
+        
+        // إذا كان الخطأ يتعلق بالانتظار، نواصل الانتظار
+        if (data.message && data.message.includes("الطاولة") && data.message.includes("ممتلئة")) {
+          setTimeout(() => {
+            if (waitingForSeat) {
+              joinMutation.mutate();
+            }
+          }, 5000);
+        } else {
+          setWaitingForSeat(false);
+        }
       }
     },
     onError: (error: Error) => {
+      console.error("خطأ في الانضمام من المشاهدة:", error);
       toast({
         title: "فشل الانضمام",
         description: error.message,

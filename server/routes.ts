@@ -178,6 +178,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "غير مصرح" });
       }
       
+      console.log(`طلب انضمام من المستخدم ${req.user.id} إلى الطاولة ${tableId}`, req.body);
+      
       // Validate request parameters
       const requestSchema = z.object({
         position: z.number().optional(),
@@ -198,15 +200,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // التحقق مما إذا كانت الطاولة موجودة
       const table = await storage.getGameTable(tableId);
       if (!table) {
-        return res.status(404).json({ message: "الطاولة غير موجودة" });
+        console.log(`الطاولة ${tableId} غير موجودة`);
+        return res.status(404).json({ success: false, message: "الطاولة غير موجودة" });
+      }
+      
+      // التحقق إذا كان اللاعب منضمًا بالفعل
+      try {
+        const currentState = await storage.getGameState(tableId, req.user.id);
+        if (currentState) {
+          const playerOnTable = currentState.players.some(p => p.id === req.user?.id);
+          if (playerOnTable) {
+            console.log(`المستخدم ${req.user.id} منضم بالفعل للطاولة ${tableId}`);
+            return res.json({ 
+              success: true, 
+              isSpectator: false,
+              gameState: currentState,
+              message: "أنت منضم بالفعل لهذه الطاولة" 
+            });
+          }
+        }
+      } catch (error) {
+        // يمكننا تجاهل هذا الخطأ، مما يعني أن اللاعب ليس في اللعبة
       }
       
       // وضع المشاهدة - لا حاجة لخصم الرقاقات أو إضافة اللاعب إلى الطاولة
       if (asSpectator || table.status === "full") {
+        console.log(`المستخدم ${req.user.id} ينضم كمشاهد إلى الطاولة ${tableId}`);
         // الوصول إلى حالة اللعبة فقط كمشاهد
         const gameState = await storage.getGameState(tableId, req.user.id);
         if (!gameState) {
-          return res.status(400).json({ message: "لا يمكن الوصول إلى حالة اللعبة" });
+          return res.status(400).json({ success: false, message: "لا يمكن الوصول إلى حالة اللعبة" });
         }
         
         // إشارة إلى أن المستخدم في وضع المشاهدة
@@ -218,15 +241,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
+      console.log(`المستخدم ${req.user.id} يحاول الانضمام كلاعب نشط إلى الطاولة ${tableId}`);
+      
       // الانضمام كلاعب نشط
       const result = await storage.joinTable(tableId, req.user.id, position);
+      
       if (!result.success) {
-        return res.status(400).json({ message: result.message });
+        console.log(`فشل انضمام المستخدم ${req.user.id}: ${result.message}`);
+        return res.status(400).json({ success: false, message: result.message });
       }
       
-      res.json({ success: true, gameState: result.gameState });
+      console.log(`نجاح انضمام المستخدم ${req.user.id} إلى الطاولة ${tableId}`);
+      
+      // تأكيد أن المستخدم ليس في وضع المشاهدة
+      res.json({ 
+        success: true, 
+        isSpectator: false,
+        gameState: result.gameState,
+        message: "تم الانضمام بنجاح كلاعب نشط"
+      });
     } catch (error) {
-      res.status(500).json({ message: "حدث خطأ أثناء الانضمام إلى الطاولة" });
+      console.error(`خطأ عام أثناء انضمام المستخدم: ${error}`);
+      res.status(500).json({ success: false, message: "حدث خطأ أثناء الانضمام إلى الطاولة" });
     }
   });
   

@@ -82,27 +82,41 @@ export default function GamePage({ params }: { params?: { tableId?: string } }) 
   
   // تحقق مما إذا كان اللاعب في وضع المشاهدة عند تحميل بيانات اللعبة
   useEffect(() => {
-    if (gameState) {
+    if (gameState && user) {
+      console.log("تحقق من حالة اللاعب في الطاولة:", gameState.players);
+      
       // تحديث معلومات الطاولة
-      // استخدم معرف الطاولة من gameState أو من الباراميتر
-      const gameTableId = gameState.tableId || tableId;
       setMaxPlayers(gameState.players.length);
       
-      // لاحظ أننا نستخدم خاصية isActive من GamePlayer
-      const isActivePlayer = gameState.players.some(
-        player => player.id === user?.id && player.isActive
-      );
+      // نتحقق إذا كان اللاعب موجود في قائمة اللاعبين على الطاولة
+      const playerOnTable = gameState.players.some(player => player.id === user.id);
       
-      setIsSpectator(!isActivePlayer);
+      // تحديث حالة المشاهدة
+      const shouldBeSpectator = !playerOnTable;
+      console.log(`اللاعب ${user.id}:`, playerOnTable ? "موجود في الطاولة" : "في وضع المشاهدة");
       
-      if (!isActivePlayer) {
-        toast({
-          title: "وضع المشاهدة",
-          description: "أنت الآن تشاهد هذه اللعبة. يمكنك الانتظار حتى يصبح هناك مقعد متاح للانضمام.",
-        });
+      // تحديث حالة المشاهدة فقط إذا تغيرت
+      if (isSpectator !== shouldBeSpectator) {
+        console.log(`تحديث حالة المشاهدة: ${shouldBeSpectator}`);
+        setIsSpectator(shouldBeSpectator);
+        
+        if (shouldBeSpectator) {
+          // رسالة توضيحية عند دخول وضع المشاهدة
+          toast({
+            title: "وضع المشاهدة",
+            description: "أنت الآن تشاهد هذه اللعبة. يمكنك الانتظار حتى يصبح هناك مقعد متاح للانضمام.",
+          });
+        } else {
+          // رسالة توضيحية عند التحول من مشاهد إلى لاعب
+          toast({
+            title: "وضع اللعب النشط",
+            description: "أنت الآن لاعب نشط في هذه الطاولة.",
+          });
+          console.log("أنت لاعب نشط في هذه الطاولة");
+        }
       }
     }
-  }, [gameState, user, toast, tableId]);
+  }, [gameState, user, toast, tableId, isSpectator]);
   
   // If still loading, show loading indicator
   if (isLoading || !gameState) {
@@ -117,9 +131,46 @@ export default function GamePage({ params }: { params?: { tableId?: string } }) 
   }
 
   // وظيفة للتعامل مع الانضمام من وضع المشاهدة
-  const handleJoinFromSpectator = () => {
-    // إعادة تحميل الصفحة للحصول على حالة اللعبة المحدثة
-    window.location.reload();
+  const handleJoinFromSpectator = async () => {
+    try {
+      console.log("محاولة الانضمام كلاعب من وضع المشاهدة");
+      
+      // إرسال طلب انضمام مع تعيين asSpectator إلى false
+      const response = await fetch(`/api/game/${tableId}/join`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ asSpectator: false })
+      });
+      
+      const data = await response.json();
+      console.log("استجابة الانضمام:", data);
+      
+      if (data.success) {
+        toast({
+          title: "تم الانضمام بنجاح",
+          description: data.message || "انضممت إلى الطاولة كلاعب نشط",
+        });
+        
+        // تحديث واجهة المستخدم لتعكس حالة اللاعب الجديدة
+        setIsSpectator(false);
+      } else {
+        toast({
+          title: "تعذر الانضمام",
+          description: data.message || "حدث خطأ أثناء محاولة الانضمام",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("خطأ في الانضمام من وضع المشاهدة:", error);
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ أثناء محاولة الانضمام إلى الطاولة",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

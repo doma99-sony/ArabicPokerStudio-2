@@ -30,33 +30,49 @@ export function TableCard({ table }: TableCardProps) {
         return { success: true };
       }
       
+      console.log("محاولة الانضمام إلى الطاولة...", { tableId: table.id, isFull: isTableFull });
+      
       // إرسال طلب الانضمام مع تحديد ما إذا كان الانضمام كمشاهد
       const payload = isTableFull ? { asSpectator: true } : {};
       const res = await apiRequest("POST", `/api/game/${table.id}/join`, payload);
-      return await res.json();
+      const result = await res.json();
+      
+      console.log("نتيجة محاولة الانضمام:", result);
+      return result;
     },
     onSuccess: (data) => {
       if (table.gameType === "naruto") {
-        window.location.href = `/naruto/${table.id}`;
+        navigate(`/naruto/${table.id}`);
         return;
       }
       
-      if (data.isSpectator) {
-        toast({
-          title: "وضع المشاهدة",
-          description: "أنت الآن تشاهد اللعبة. ستتمكن من الانضمام عندما يصبح هناك مقعد متاح.",
-        });
+      if (data.success) {
+        if (data.isSpectator) {
+          toast({
+            title: "وضع المشاهدة",
+            description: "أنت الآن تشاهد اللعبة. ستتمكن من الانضمام عندما يصبح هناك مقعد متاح.",
+          });
+        } else {
+          toast({
+            title: "تم الانضمام بنجاح",
+            description: "انضممت إلى الطاولة كلاعب نشط",
+          });
+        }
+        
+        // نستخدم wouter للانتقال بدلاً من window.location.href
+        // لتجنب إعادة تحميل الصفحة بالكامل
+        navigate(`/game/${table.id}`);
       } else {
+        // في حالة الإخفاق مع وجود رسالة
         toast({
-          title: "تم الانضمام بنجاح",
-          description: "انضممت إلى الطاولة كلاعب نشط",
+          title: "تعذر الانضمام",
+          description: data.message || "حدث خطأ أثناء الانضمام إلى الطاولة",
+          variant: "destructive",
         });
       }
-      
-      // الانتقال إلى صفحة اللعبة (سواء كمشاهد أو لاعب)
-      window.location.href = `/game/${table.id}`;
     },
     onError: (error: Error) => {
+      console.error("خطأ في الانضمام:", error);
       // عرض رسالة الخطأ
       toast({
         title: "فشل الانضمام إلى الطاولة",

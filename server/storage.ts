@@ -452,7 +452,7 @@ export class MemStorage implements IStorage {
     return gameRoom.getGameStateForPlayer(userId);
   }
   
-  async joinTable(tableId: number, userId: number, position?: number): Promise<{ success: boolean; message?: string; gameState?: GameState }> {
+  async joinTable(tableId: number, userId: number, position?: number): Promise<{ success: boolean; message?: string; gameState?: GameState; isSpectator?: boolean }> {
     console.log(`محاولة انضمام المستخدم ${userId} إلى الطاولة ${tableId} بالموضع ${position}`);
     
     const table = await this.getGameTable(tableId);
@@ -503,37 +503,78 @@ export class MemStorage implements IStorage {
       console.log(`المستخدم ${userId} لم يوجد في الغرفة سابقاً، سيتم إضافته الآن`);
     }
     
-    // أولاً أضف اللاعب إلى غرفة اللعبة بموضع محدد إن وجد
-    console.log(`محاولة إضافة المستخدم ${userId} إلى غرفة اللعبة`);
-    const joinResult = gameRoom.addPlayer(userId, user.username, table.minBuyIn, user.avatar, position);
+    // نحفظ رصيد المستخدم الحالي قبل أي تعديل
+    const originalChips = user.chips;
+    let updatedGameState;
+    let joinSuccess = false;
     
-    console.log(`نتيجة إضافة المستخدم:`, joinResult);
-    
-    if (!joinResult.success) {
-      console.log(`فشل إضافة المستخدم ${userId}: ${joinResult.message}`);
-      return joinResult;
+    try {
+      // أولاً أضف اللاعب إلى غرفة اللعبة بموضع محدد إن وجد
+      console.log(`محاولة إضافة المستخدم ${userId} إلى غرفة اللعبة`);
+      const joinResult = gameRoom.addPlayer(userId, user.username, table.minBuyIn, user.avatar, position);
+      
+      console.log(`نتيجة إضافة المستخدم:`, joinResult);
+      
+      if (!joinResult.success) {
+        console.log(`فشل إضافة المستخدم ${userId}: ${joinResult.message}`);
+        return joinResult;
+      }
+      
+      // بعد التأكد من نجاح إضافة اللاعب، نقوم بخصم الرقاقات
+      console.log(`تحديث رصيد المستخدم ${userId} من ${user.chips} إلى ${user.chips - table.minBuyIn}`);
+      const updatedUser = await this.updateUserChips(userId, user.chips - table.minBuyIn);
+      
+      if (!updatedUser) {
+        throw new Error("فشل تحديث رصيد المستخدم");
+      }
+      
+      // Update table status and player count
+      table.currentPlayers++;
+      if (table.currentPlayers >= table.maxPlayers) {
+        table.status = "full";
+      } else if (table.currentPlayers > 0) {
+        table.status = "busy";
+      }
+      this.tables.set(tableId, table);
+      
+      console.log(`تم انضمام المستخدم ${userId} إلى الطاولة ${tableId} بنجاح`);
+      
+      // احصل على حالة اللعبة المُحدّثة
+      updatedGameState = gameRoom.getGameStateForPlayer(userId);
+      console.log(`عدد اللاعبين في الطاولة ${tableId}: ${updatedGameState.players.length}`);
+      
+      // التأكد من وجود اللاعب في قائمة اللاعبين
+      if (updatedGameState.players.some(p => p.id === userId)) {
+        joinSuccess = true;
+      } else {
+        throw new Error("اللاعب غير موجود في قائمة اللاعبين بعد الانضمام");
+      }
+    } catch (error) {
+      // في حالة حدوث أي خطأ، أعد رصيد المستخدم إلى الحالة الأصلية
+      console.error(`خطأ أثناء الانضمام: ${error}`);
+      await this.updateUserChips(userId, originalChips);
+      
+      // وحاول إزالته من الطاولة
+      try {
+        gameRoom.removePlayer(userId);
+      } catch (removeError) {
+        console.error(`خطأ أثناء محاولة إزالة اللاعب بعد فشل الانضمام: ${removeError}`);
+      }
+      
+      return { 
+        success: false, 
+        message: "حدث خطأ أثناء الانضمام إلى الطاولة. لم يتم خصم أي رقاقات." 
+      };
     }
     
-    // بعد التأكد من نجاح إضافة اللاعب، نقوم بخصم الرقاقات
-    console.log(`تحديث رصيد المستخدم ${userId} من ${user.chips} إلى ${user.chips - table.minBuyIn}`);
-    await this.updateUserChips(userId, user.chips - table.minBuyIn);
-    
-    // Update table status and player count
-    table.currentPlayers++;
-    if (table.currentPlayers >= table.maxPlayers) {
-      table.status = "full";
-    } else if (table.currentPlayers > 0) {
-      table.status = "busy";
+    if (!joinSuccess) {
+      // إذا فشلت العملية في أي مرحلة، تأكد من إعادة رصيد المستخدم
+      await this.updateUserChips(userId, originalChips);
+      return { 
+        success: false, 
+        message: "لم تنجح عملية الانضمام. لم يتم خصم أي رقاقات." 
+      };
     }
-    this.tables.set(tableId, table);
-    
-    console.log(`تم انضمام المستخدم ${userId} إلى الطاولة ${tableId} بنجاح`);
-    
-    // تم إزالة اللاعبين الوهميين بناءً على طلب المستخدم
-    
-    // احصل على حالة اللعبة المُحدّثة
-    const updatedGameState = gameRoom.getGameStateForPlayer(userId);
-    console.log(`عدد اللاعبين في الطاولة ${tableId}: ${updatedGameState.players.length}`);
     
     return { 
       success: true, 
