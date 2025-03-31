@@ -168,12 +168,12 @@
   
   .assistant-container.desktop {
     right: 20px;
-    bottom: 140px;
+    bottom: 40px;
   }
   
   .assistant-container.mobile {
     right: 15px;
-    bottom: 130px;
+    bottom: 30px;
   }
   
   .assistant-button {
@@ -217,16 +217,17 @@
   }
   
   .assistant-image {
-    width: 500px;
-    height: 500px;
+    width: 650px;
+    height: 650px;
     object-fit: contain;
-    filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.9));
+    filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.9));
     transform-style: preserve-3d;
     transition: transform 0.3s ease;
+    transform: scale(1.1);
   }
   
   .assistant-button:hover .assistant-image {
-    transform: perspective(500px) rotateY(-5deg) rotateX(2deg);
+    transform: scale(1.1) perspective(600px) rotateY(-5deg) rotateX(3deg);
   }
   
   .assistant-dialog {
@@ -245,8 +246,13 @@
   
   @media (max-width: 640px) {
     .assistant-image {
-      width: 400px;
-      height: 400px;
+      width: 500px;
+      height: 500px;
+      transform: scale(1.05);
+    }
+    
+    .assistant-button:hover .assistant-image {
+      transform: scale(1.05) perspective(600px) rotateY(-5deg) rotateX(2deg);
     }
   }
   
