@@ -276,11 +276,16 @@ export class MemStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.currentId++;
+    
+    // إنشاء معرف فريد مكون من 5 أرقام للمستخدم
+    const userCode = this.generateUniqueUserCode();
+    
     const user: User = { 
       ...insertUser, 
       id,
       chips: 1000000, // مليون رقاقة ترحيبية للمستخدمين الجدد
-      avatar: null // استخدام null بدلاً من undefined
+      avatar: null, // استخدام null بدلاً من undefined
+      userCode: userCode // إضافة معرف المستخدم المكون من 5 أرقام
     };
     this.users.set(id, user);
     
@@ -288,6 +293,30 @@ export class MemStorage implements IStorage {
     this.createInitialPlayerProfile(user);
     
     return user;
+  }
+  
+  // دالة مساعدة لإنشاء معرف فريد من 5 أرقام لكل مستخدم
+  private generateUniqueUserCode(): string {
+    // توليد رقم عشوائي من 5 أرقام
+    const min = 10000; // أصغر رقم مكون من 5 أرقام
+    const max = 99999; // أكبر رقم مكون من 5 أرقام
+    let userCode: string;
+    
+    do {
+      // توليد رقم عشوائي
+      const randomCode = Math.floor(Math.random() * (max - min + 1)) + min;
+      userCode = randomCode.toString();
+      
+      // التحقق من عدم وجود مستخدم آخر بنفس الرمز
+      const isCodeTaken = Array.from(this.users.values()).some(user => user.userCode === userCode);
+      
+      if (!isCodeTaken) {
+        break;
+      }
+      // إذا كان الرمز مستخدم بالفعل، سنقوم بتوليد رمز جديد في الدورة التالية
+    } while (true);
+    
+    return userCode;
   }
   
   async updateUserChips(userId: number, newChips: number): Promise<User | undefined> {

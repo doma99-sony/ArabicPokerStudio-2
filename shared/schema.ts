@@ -8,6 +8,7 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
   chips: integer("chips").default(5000).notNull(),
   avatar: text("avatar"),
+  userCode: text("user_code"), // معرف المستخدم المكون من 5 أرقام
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({

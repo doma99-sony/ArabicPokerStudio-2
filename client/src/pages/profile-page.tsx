@@ -7,7 +7,7 @@ import { StatsPanel } from "@/components/profile/stats-panel";
 import { Achievements } from "@/components/profile/achievements";
 import { GameHistory } from "@/components/profile/game-history";
 import { Button } from "@/components/ui/button";
-import { Loader2, User, ChevronRight, Eye, EyeOff } from "lucide-react";
+import { Loader2, User, ChevronRight, Eye, EyeOff, Clipboard, Check } from "lucide-react";
 import { Image } from "@/components/ui/image";
 import { useState } from "react";
 import {
@@ -24,6 +24,7 @@ import {
 export default function ProfilePage() {
   const { user } = useAuth();
   const [, navigate] = useLocation();
+  const [userCodeCopied, setUserCodeCopied] = useState(false);
   
   const { data: profile, isLoading, refetch } = useQuery<PlayerProfile>({
     queryKey: ["/api/profile"],
@@ -33,6 +34,18 @@ export default function ProfilePage() {
   
   const navigateToLobby = () => {
     navigate("/");
+  };
+  
+  const handleCopyUserCode = () => {
+    if (profile?.userCode) {
+      navigator.clipboard.writeText(profile.userCode);
+      setUserCodeCopied(true);
+      
+      // إعادة ضبط أيقونة النسخ بعد ثانيتين
+      setTimeout(() => {
+        setUserCodeCopied(false);
+      }, 2000);
+    }
   };
   
   const handleUsernameChange = async () => {
@@ -254,6 +267,28 @@ export default function ProfilePage() {
                     )}
                     
                     <p className="text-gold/80 text-sm mb-3 font-tajawal">عضو منذ {profile.stats.joinDate}</p>
+                    
+                    {/* معرف المستخدم مع زر النسخ */}
+                    {profile.userCode && (
+                      <div className="w-full bg-slate-900/80 rounded-md px-3 py-2 flex items-center justify-between mb-3 border border-gold/10">
+                        <div className="flex items-center">
+                          <span className="text-white font-bold ml-2 font-cairo">معرّف المستخدم:</span>
+                          <span className="text-gold font-roboto font-bold">{profile.userCode}</span>
+                        </div>
+                        <button 
+                          className="text-gold/80 hover:text-gold transition-colors p-1"
+                          onClick={handleCopyUserCode}
+                          aria-label="نسخ معرّف المستخدم"
+                          title="نسخ معرّف المستخدم"
+                        >
+                          {userCodeCopied ? (
+                            <Check className="h-4 w-4 text-green-500" />
+                          ) : (
+                            <Clipboard className="h-4 w-4" />
+                          )}
+                        </button>
+                      </div>
+                    )}
                     
                     <div className="w-full bg-pokerGreen rounded-full px-4 py-2 flex items-center justify-center mb-4">
                       <i className="fas fa-coins text-gold ml-2"></i>
