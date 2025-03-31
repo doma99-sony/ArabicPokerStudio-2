@@ -2,6 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import cookieParser from "cookie-parser";
+import { WebSocket, WebSocketServer } from 'ws';
 
 const app = express();
 app.use(express.json({ limit: '10mb' }));
@@ -14,10 +15,10 @@ app.use((req, res, next) => {
   if (!req.path.startsWith("/api")) {
     return next();
   }
-  
+
   const start = Date.now();
   const path = req.path;
-  
+
   res.on("finish", () => {
     const duration = Date.now() - start;
     log(`${req.method} ${path} ${res.statusCode} in ${duration}ms`);
@@ -28,6 +29,17 @@ app.use((req, res, next) => {
 
 (async () => {
   const server = await registerRoutes(app);
+
+  const wss = new WebSocketServer({ server });
+
+  wss.on('connection', (ws: WebSocket) => {
+    console.log('Client connected');
+
+    ws.on('close', () => {
+      console.log('Client disconnected');
+    });
+  });
+
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
@@ -52,6 +64,6 @@ app.use((req, res, next) => {
   const port = 5000;
   const host = "0.0.0.0"; // Bind to all available network interfaces
   server.listen(port, host, () => {
-    log(`serving on ${host}:${port}`);
+    console.log('Server running on port 5000 with WebSocket support');
   });
 })();
