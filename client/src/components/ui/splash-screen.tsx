@@ -440,33 +440,13 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
       
       {/* شعار اللعبة محسن */}
       <div className="w-48 h-48 mb-10 relative">
-        <div className="relative">
-          {/* توهج الخلفية */}
-          <div className="absolute -inset-4 rounded-xl bg-gradient-to-br from-[#D4AF37]/10 via-[#D4AF37]/20 to-[#D4AF37]/10 blur-xl animate-pulse-slow"></div>
-          
-          {/* حاوية الصورة */}
-          <div className="relative w-48 h-48 bg-black border-4 border-[#D4AF37] shadow-[0_0_35px_rgba(212,175,55,0.7)] overflow-hidden">
-            <img 
-              src="/assets/poker-logo-new.jpg" 
-              alt="Poker Logo" 
-              className="w-full h-full object-contain" 
-            />
-            
-            {/* طبقة تدرج */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30 pointer-events-none"></div>
-            
-            {/* شريط VIP */}
-            <div className="absolute bottom-0 left-0 right-0 bg-[#D4AF37]/90 text-black p-1 text-center font-bold">
-              <span className="text-lg">بوكر VIP</span>
-            </div>
-            
-            {/* علامة زاوية */}
-            <div className="absolute top-0 right-0 w-16 h-16 overflow-hidden">
-              <div className="absolute top-0 right-0 bg-[#D4AF37] w-32 h-8 transform rotate-45 translate-y-4 translate-x-2 shadow-md flex items-center justify-center">
-                <span className="text-black text-xs font-bold transform -rotate-45">VIP</span>
-              </div>
-            </div>
-          </div>
+        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#0A1C1A] to-black border-8 border-[#D4AF37] shadow-[0_0_35px_rgba(212,175,55,0.7)] overflow-hidden animate-pulse-slow">
+          <div className="absolute inset-0 bg-black/50"></div>
+          <img 
+            src="/assets/poker-logo-new.jpg" 
+            alt="Poker Logo" 
+            className="w-full h-full object-cover filter drop-shadow-lg" 
+          />
         </div>
         
         {/* تأثير توهج حول الشعار */}
