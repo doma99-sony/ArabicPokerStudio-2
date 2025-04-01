@@ -9,7 +9,8 @@ import { OnlineUsersCounter } from "@/components/ui/online-users-badge";
 import { ResetChipsButton } from "@/components/reset-chips-button";
 import { RemoveVirtualPlayersButton } from "@/components/remove-virtual-players-button";
 import { NotificationsButton } from "@/components/ui/notifications-system";
-import { LogOut, User, ChevronRight, Loader2, ChevronLeft, ChevronUp, Bell, ShoppingBag, ShoppingCart, Download, Smartphone, ExternalLink } from "lucide-react";
+import { LogOut, User, ChevronRight, Loader2, ChevronLeft, ChevronUp, Bell, ShoppingBag, ShoppingCart, Download, Smartphone, ExternalLink, Coins } from "lucide-react";
+import { formatChips } from "@/lib/utils";
 
 export default function LobbyPage() {
   const [location, navigate] = useLocation();
@@ -113,7 +114,7 @@ export default function LobbyPage() {
             <div className="text-right">
               <p className="text-[#D4AF37] text-sm">مرحباً، {user?.username}</p>
               <div className="flex items-center gap-2">
-                <p className="text-white/80 text-xs">الرصيد: <span className="text-[#D4AF37] font-bold">{user?.chips?.toLocaleString()}</span></p>
+                <p className="text-white/80 text-xs flex items-center">الرصيد: <span className="text-[#D4AF37] font-bold flex items-center mr-1"><Coins className="ml-1 h-3.5 w-3.5" /> {formatChips(user?.chips || 0)}</span></p>
                 {/* زر إعادة تعيين الرصيد - وضع للاختبار فقط */}
                 <div className="flex gap-1 scale-75 origin-right">
                   <ResetChipsButton />

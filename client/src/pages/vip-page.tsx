@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { ArrowRight, Crown, Star, Check, CreditCard, Lock, Shield, Gift, Zap } from "lucide-react";
+import { ArrowRight, Crown, Star, Check, CreditCard, Lock, Shield, Gift, Zap, Coins } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
+import { formatChips } from "@/lib/utils";
 
 // تعريف أنواع VIP
 type VIPLevel = {
@@ -39,7 +40,7 @@ export default function VIPPage() {
       icon: "👑",
       benefits: [
         "خصم 5% على شراء الرقاقات",
-        "رقاقات إضافية يومية: 5,000",
+        `رقاقات إضافية يومية: ${formatChips(5000)}`,
         "دعم أولوية"
       ],
       exclusive: "إطار VIP 1 حصري"
@@ -54,7 +55,7 @@ export default function VIPPage() {
       icon: "💎",
       benefits: [
         "خصم 10% على شراء الرقاقات",
-        "رقاقات إضافية يومية: 10,000",
+        `رقاقات إضافية يومية: ${formatChips(10000)}`,
         "دعم أولوية",
         "رموز تعبيرية خاصة في الدردشة"
       ],
@@ -232,7 +233,12 @@ export default function VIPPage() {
               </div>
               <div>
                 <p className="text-sm text-white/70">رصيدك الحالي</p>
-                <p className="text-lg font-bold text-[#D4AF37]">{user?.chips?.toLocaleString() || 0} رقاقة</p>
+                <p className="text-lg font-bold text-[#D4AF37]">
+                  <span className="flex items-center">
+                    <Coins className="h-4 w-4 ml-1" />
+                    {formatChips(user?.chips || 0)}
+                  </span>
+                </p>
               </div>
             </div>
             

@@ -231,13 +231,13 @@ export function TableCard({ table }: TableCardProps) {
           </div>
           <div className="flex items-center">
             <DollarSign size={16} className="text-[#D4AF37] ml-2" />
-            <span>العمى: {table.smallBlind} / {table.bigBlind}</span>
+            <span>العمى: {formatChips(table.smallBlind)} / {formatChips(table.bigBlind)}</span>
           </div>
         </div>
         <div className="border-t border-[#D4AF37]/20 pt-3 text-sm">
           <div className="flex justify-between mb-1">
             <span>الحد الأدنى للدخول:</span>
-            <span className="font-bold text-[#D4AF37]">{table.minBuyIn.toLocaleString()} رقاقة</span>
+            <span className="font-bold text-[#D4AF37] flex items-center"><Coins className="ml-1 h-4 w-4" /> {formatChips(table.minBuyIn)}</span>
           </div>
         </div>
       </CardContent>

@@ -7,9 +7,10 @@ import { StatsPanel } from "@/components/profile/stats-panel";
 import { Achievements } from "@/components/profile/achievements";
 import { GameHistory } from "@/components/profile/game-history";
 import { Button } from "@/components/ui/button";
-import { Loader2, User, ChevronRight, Eye, EyeOff, Clipboard, Check } from "lucide-react";
+import { Loader2, User, ChevronRight, Eye, EyeOff, Clipboard, Check, Coins } from "lucide-react";
 import { Image } from "@/components/ui/image";
 import { useState } from "react";
+import { formatChips } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -291,8 +292,8 @@ export default function ProfilePage() {
                     )}
                     
                     <div className="w-full bg-pokerGreen rounded-full px-4 py-2 flex items-center justify-center mb-4">
-                      <i className="fas fa-coins text-gold ml-2"></i>
-                      <span className="text-gold font-bold font-roboto">{profile.chips?.toLocaleString() || 0}</span>
+                      <Coins className="text-gold mr-2 h-5 w-5" />
+                      <span className="text-gold font-bold font-roboto">{formatChips(profile.chips || 0)}</span>
                     </div>
                     
                     <Dialog>
