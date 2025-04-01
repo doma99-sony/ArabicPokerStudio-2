@@ -17,9 +17,12 @@ type PlayingCardVariant = 'default' | 'gold' | 'platinum' | 'hidden';
 
 interface PlayingCardProps {
   card?: Card; // بيانات الورقة (الأساسية والشكل)
+  suit?: Suit; // نوع الورقة (قلوب، كارو، إلخ)
+  value?: Value; // قيمة الورقة
   size?: PlayingCardSize; // حجم الورقة
   variant?: PlayingCardVariant; // نوع الورقة
   isHidden?: boolean; // هل الورقة مخفية؟
+  hidden?: boolean; // بديل لـ isHidden للتوافق مع الواجهة البرمجية
   isActive?: boolean; // هل الورقة نشطة؟
   rotationAngle?: number; // زاوية الدوران
   className?: string; // فئات CSS إضافية
@@ -29,18 +32,28 @@ interface PlayingCardProps {
 
 export function PlayingCard({
   card,
+  suit,
+  value,
   size = 'md',
   variant = 'default',
   isHidden = false,
+  hidden,
   isActive = false,
   rotationAngle = 0,
   className,
   onClick,
   isWinning = false
 }: PlayingCardProps) {
+  // التعامل مع حالة hidden لتوافق مع الواجهة المستخدمة في المكونات الأخرى
+  const effectiveIsHidden = isHidden || hidden;
+  
+  // استخدم الخصائص المستقلة إذا تم تمريرها، وإلا استخدم الخصائص من كائن card
+  const effectiveSuit = suit || (card ? card.suit : undefined);
+  const effectiveValue = value || (card ? card.value : undefined);
+  
   // تحديد لون الورقة
-  const cardColor = card ? 
-    (card.suit === 'hearts' || card.suit === 'diamonds' ? 'text-red-600' : 'text-black') 
+  const cardColor = effectiveSuit ? 
+    (effectiveSuit === 'hearts' || effectiveSuit === 'diamonds' ? 'text-red-600' : 'text-black') 
     : 'text-black';
   
   // الرموز المقابلة لكل شكل
@@ -85,7 +98,7 @@ export function PlayingCard({
   };
   
   // إذا كانت الورقة مخفية، نستخدم نوع مخفي
-  const actualVariant = isHidden ? 'hidden' : variant;
+  const actualVariant = effectiveIsHidden ? 'hidden' : variant;
   
   // حساب نمط الدوران
   const rotationStyle = {
@@ -105,7 +118,7 @@ export function PlayingCard({
       style={rotationStyle}
       onClick={onClick}
     >
-      {isHidden ? (
+      {effectiveIsHidden ? (
         // الورقة المخفية
         <div className="w-full h-full flex items-center justify-center">
           <div className="absolute inset-2 rounded border border-gray-600 bg-gray-800 opacity-40 flex items-center justify-center">
@@ -114,24 +127,24 @@ export function PlayingCard({
             </div>
           </div>
         </div>
-      ) : card ? (
+      ) : effectiveSuit && effectiveValue ? (
         // عرض الورقة المكشوفة
         <div className={cn("w-full h-full flex flex-col p-1", cardColor)}>
           {/* القيمة والشكل في الأعلى */}
           <div className="flex items-center justify-between pl-1 pr-1">
-            <div className="font-bold">{valueLabels[card.value] || card.value}</div>
-            <div className="text-lg">{suitSymbols[card.suit]}</div>
+            <div className="font-bold">{valueLabels[effectiveValue] || effectiveValue}</div>
+            <div className="text-lg">{suitSymbols[effectiveSuit]}</div>
           </div>
           
           {/* الشكل الرئيسي في الوسط */}
           <div className="flex-grow flex items-center justify-center text-4xl">
-            {suitSymbols[card.suit]}
+            {suitSymbols[effectiveSuit]}
           </div>
           
           {/* القيمة والشكل في الأسفل - مقلوبة */}
           <div className="flex items-center justify-between pl-1 pr-1 transform rotate-180">
-            <div className="font-bold">{valueLabels[card.value] || card.value}</div>
-            <div className="text-lg">{suitSymbols[card.suit]}</div>
+            <div className="font-bold">{valueLabels[effectiveValue] || effectiveValue}</div>
+            <div className="text-lg">{suitSymbols[effectiveSuit]}</div>
           </div>
         </div>
       ) : (
@@ -255,13 +268,17 @@ export function PlayerCards({
   isHidden = false,
   size = 'md',
   variant = 'default',
-  className
+  className,
+  position,
+  rotations = [0, 0]
 }: {
   cards: Card[];
   isHidden?: boolean;
   size?: PlayingCardSize;
   variant?: PlayingCardVariant;
   className?: string;
+  position?: string;
+  rotations?: number[];
 }) {
   return (
     <div className={cn('relative', className)}>
@@ -274,7 +291,7 @@ export function PlayerCards({
               size={size}
               variant={variant}
               isHidden={isHidden}
-              rotationAngle={index === 0 ? -5 : 5}
+              rotationAngle={rotations && rotations.length > index ? rotations[index] : (index === 0 ? -5 : 5)}
             />
           ))
         ) : (

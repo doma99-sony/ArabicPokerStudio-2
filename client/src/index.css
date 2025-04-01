@@ -559,4 +559,67 @@
   }
 
   /* تم حذف مكون مبنى الكازينو */
+
+  /* Card glow effects for poker */
+  .shadow-glow-blue {
+    box-shadow: 0 0 15px rgba(64, 156, 255, 0.8);
+  }
+  
+  .shadow-glow-purple {
+    box-shadow: 0 0 15px rgba(170, 64, 255, 0.8);
+  }
+  
+  .shadow-glow-gold {
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.8);
+  }
+  
+  .drop-shadow-glow {
+    filter: drop-shadow(0 0 4px rgba(212, 175, 55, 0.7));
+  }
+  
+  /* Card deal animations */
+  @keyframes dealCard {
+    0% {
+      opacity: 0;
+      transform: translateY(-100px) rotate(-20deg);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) rotate(0deg);
+    }
+  }
+  
+  .deal-animation {
+    animation: dealCard 0.3s ease-out forwards;
+  }
+  
+  /* Pot effect */
+  .pot-highlight {
+    position: relative;
+  }
+  
+  .pot-highlight::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 120%;
+    height: 120%;
+    background: radial-gradient(ellipse at center, rgba(212, 175, 55, 0.2) 0%, rgba(212, 175, 55, 0) 70%);
+    transform: translate(-50%, -50%);
+    z-index: -1;
+    border-radius: 50%;
+    animation: potPulse 2s infinite;
+  }
+  
+  @keyframes potPulse {
+    0%, 100% {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 0.3;
+    }
+    50% {
+      transform: translate(-50%, -50%) scale(1.05);
+      opacity: 0.5;
+    }
+  }
 }

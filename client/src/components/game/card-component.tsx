@@ -1,100 +1,142 @@
-import { motion } from "framer-motion";
-import { Card } from "@/types";
-import { getSuitColor, getCardDisplayValue } from "@/lib/card-utils";
+import { useState, useEffect } from 'react';
+import { cn } from '@/lib/utils';
+
+// تعريف أنواع البطاقات
+export type Suit = "hearts" | "diamonds" | "clubs" | "spades";
+export type Value = "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | "J" | "Q" | "K" | "A";
+
+export interface Card {
+  suit: Suit;
+  value: Value;
+  hidden?: boolean;
+}
+
+type CardSize = 'sm' | 'md' | 'lg' | 'xl';
+type CardVariant = 'default' | 'gold' | 'platinum';
 
 interface CardComponentProps {
   card: Card;
-  size?: "sm" | "md" | "lg";
+  size?: CardSize;
+  variant?: CardVariant;
+  isWinning?: boolean;
+  className?: string;
+  onClick?: () => void;
 }
 
-export function CardComponent({ card, size = "md" }: CardComponentProps) {
-  // Size classes
-  const sizeClasses = {
-    sm: "w-10 h-14",
-    md: "w-12 h-16",
-    lg: "w-14 h-20",
-  };
-  
-  // Font size classes
-  const fontSizeClasses = {
-    sm: "text-xs",
-    md: "text-sm",
-    lg: "text-base",
-  };
-  
-  // If card is hidden, show the back of the card
-  if (card.hidden) {
-    return (
-      <div className={`${sizeClasses[size]} bg-white rounded-md shadow-lg overflow-hidden`}>
-        <div className="w-full h-full bg-blue-800 flex flex-col items-center justify-center">
-          {/* Card back pattern */}
-          <div className="w-full h-full absolute flex items-center justify-center opacity-80">
-            <div className="w-[80%] h-[80%] rounded-lg border-2 border-white/30"></div>
-          </div>
-          
-          {/* Diamond pattern */}
-          <div className="relative w-3/4 h-3/4 flex items-center justify-center">
-            <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 gap-1 p-1">
-              {[...Array(9)].map((_, i) => (
-                <div key={`diamond-${i}`} className="flex items-center justify-center">
-                  <div className="text-gold text-xs transform rotate-45">♦</div>
-                </div>
-              ))}
-            </div>
-            
-            {/* Center logo */}
-            <div className="bg-gold/20 rounded-full w-8 h-8 flex items-center justify-center">
-              <div className="text-gold text-lg">♠</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+// الألوان حسب نوع البطاقة
+const suitColors: Record<Suit, string> = {
+  hearts: 'text-red-600',
+  diamonds: 'text-red-600',
+  clubs: 'text-black',
+  spades: 'text-black'
+};
+
+// رموز أنواع البطاقات
+const suitSymbols: Record<Suit, string> = {
+  hearts: '♥',
+  diamonds: '♦',
+  clubs: '♣',
+  spades: '♠'
+};
+
+// حجم البطاقة حسب النوع
+const cardSizes: Record<CardSize, { width: string, height: string, textSize: string }> = {
+  sm: { width: 'w-10', height: 'h-14', textSize: 'text-xs' },
+  md: { width: 'w-16', height: 'h-22', textSize: 'text-sm' },
+  lg: { width: 'w-20', height: 'h-28', textSize: 'text-lg' },
+  xl: { width: 'w-24', height: 'h-32', textSize: 'text-xl' }
+};
+
+// ألوان الحواف حسب نوع البطاقة
+const cardVariants: Record<CardVariant, { border: string, glow: string, bg: string }> = {
+  default: { 
+    border: 'border-slate-300', 
+    glow: 'shadow-md', 
+    bg: 'bg-white' 
+  },
+  gold: { 
+    border: 'border-amber-400', 
+    glow: 'shadow-[0_0_15px_rgba(251,191,36,0.5)]', 
+    bg: 'bg-gradient-to-br from-amber-50 to-amber-100' 
+  },
+  platinum: { 
+    border: 'border-slate-400', 
+    glow: 'shadow-[0_0_15px_rgba(226,232,240,0.5)]', 
+    bg: 'bg-gradient-to-br from-slate-50 to-slate-200' 
   }
+};
+
+export function CardComponent({
+  card,
+  size = 'md',
+  variant = 'default',
+  isWinning = false,
+  className,
+  onClick
+}: CardComponentProps) {
+  const [showCard, setShowCard] = useState(!card.hidden);
   
-  // Get card display values
-  const { value, suit } = getCardDisplayValue(card);
-  const suitColor = getSuitColor(card.suit);
+  // عند تغيير حالة إخفاء البطاقة
+  useEffect(() => {
+    setShowCard(!card.hidden);
+  }, [card.hidden]);
+
+  const { width, height, textSize } = cardSizes[size];
+  const { border, glow, bg } = cardVariants[variant];
+  
+  // تأثير التوهج للبطاقات الرابحة
+  const winningGlow = isWinning ? 'animate-pulse shadow-[0_0_15px_rgba(59,130,246,0.7)]' : '';
   
   return (
-    <motion.div
-      className={`${sizeClasses[size]} bg-white rounded-md shadow-lg overflow-hidden flex flex-col`}
-      whileHover={{ y: -5, rotate: 5, transition: { duration: 0.2 } }}
+    <div 
+      className={cn(
+        width, 
+        height, 
+        border, 
+        glow, 
+        bg,
+        'rounded-md relative overflow-hidden transition-all duration-300 cursor-pointer',
+        winningGlow,
+        className
+      )}
+      onClick={onClick}
     >
-      <div className="flex flex-col items-center justify-center h-full relative">
-        {/* Card background with a subtle gradient */}
-        <div className="absolute inset-0 bg-gradient-to-b from-white to-gray-50"></div>
-        
-        {/* Top left value and suit */}
-        <div className={`absolute top-1 left-1 ${fontSizeClasses[size]} font-bold ${suitColor}`}>
-          {value}
-        </div>
-        <div className={`absolute top-4 left-1 ${fontSizeClasses[size]} ${suitColor}`}>
-          {suit}
-        </div>
-        
-        {/* Center suit (larger) with decorative elements */}
-        <div className="relative z-10">
-          <div className={`text-3xl ${suitColor}`} style={{ filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.1))' }}>
-            {suit}
+      {showCard ? (
+        <>
+          {/* الزاوية العلوية */}
+          <div className={`absolute top-1 left-1 rtl:right-1 rtl:left-auto flex flex-col items-center ${suitColors[card.suit]}`}>
+            <span className={`font-bold ${textSize}`}>{card.value}</span>
+            <span className={`${size === 'sm' ? 'text-xs' : size === 'md' ? 'text-sm' : 'text-lg'}`}>
+              {suitSymbols[card.suit]}
+            </span>
           </div>
           
-          {/* Decorative accent around the center suit */}
-          <div className="absolute inset-0 -z-10 opacity-10 transform scale-150">
-            <div className={`text-4xl ${suitColor}`}>
-              {suit}
+          {/* الرمز الرئيسي في منتصف البطاقة */}
+          <div className={`absolute inset-0 flex items-center justify-center ${suitColors[card.suit]}`}>
+            <span className={`${size === 'sm' ? 'text-2xl' : size === 'md' ? 'text-4xl' : 'text-6xl'}`}>
+              {suitSymbols[card.suit]}
+            </span>
+          </div>
+          
+          {/* الزاوية السفلية (مقلوبة) */}
+          <div className={`absolute bottom-1 right-1 rtl:left-1 rtl:right-auto flex flex-col items-center transform rotate-180 ${suitColors[card.suit]}`}>
+            <span className={`font-bold ${textSize}`}>{card.value}</span>
+            <span className={`${size === 'sm' ? 'text-xs' : size === 'md' ? 'text-sm' : 'text-lg'}`}>
+              {suitSymbols[card.suit]}
+            </span>
+          </div>
+        </>
+      ) : (
+        // ظهر البطاقة عندما تكون مخفية
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-700 to-blue-900 flex items-center justify-center">
+          <div className="absolute inset-0 bg-opacity-30 bg-blue-900 pattern-dots pattern-size-2 pattern-white"></div>
+          <div className="h-full w-full flex items-center justify-center">
+            <div className="w-2/3 h-2/3 border-2 border-blue-400 rounded-full flex items-center justify-center">
+              <span className="font-bold text-white text-xs">الملك</span>
             </div>
           </div>
         </div>
-        
-        {/* Bottom right value and suit (inverted) */}
-        <div className={`absolute bottom-1 right-1 ${fontSizeClasses[size]} font-bold ${suitColor} transform rotate-180`}>
-          {value}
-        </div>
-        <div className={`absolute bottom-4 right-1 ${fontSizeClasses[size]} ${suitColor} transform rotate-180`}>
-          {suit}
-        </div>
-      </div>
-    </motion.div>
+      )}
+    </div>
   );
 }

@@ -1,6 +1,7 @@
 import { PlayerPosition } from "@/types";
 import { Image } from "@/components/ui/image";
 import { CardComponent } from "./card-component";
+import { PlayerCards } from "./playing-card";
 
 interface PlayerComponentProps {
   player: PlayerPosition;

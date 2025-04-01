@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { GameAction, GameState } from "@/types";
+import { GameAction, GameState, PlayerPosition } from "@/types";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,7 +15,7 @@ export function BetControls({ gameState }: BetControlsProps) {
   const [betAmount, setBetAmount] = useState(gameState.currentBet || gameState.bigBlind);
   
   // Find the current player
-  const currentPlayer = gameState.players.find(p => p.isCurrentPlayer);
+  const currentPlayer = gameState.players.find((p: PlayerPosition) => p.isCurrentPlayer);
   
   // Determine if it's the current player's turn
   const isPlayerTurn = currentPlayer && gameState.currentTurn === currentPlayer.id;
@@ -121,6 +121,14 @@ export function BetControls({ gameState }: BetControlsProps) {
             onClick={() => executeAction("raise")}
           >
             رفع
+          </Button>
+          
+          <Button
+            className="bg-gradient-to-br from-amber-500 to-red-600 hover:from-red-500 hover:to-red-700 text-white font-cairo animate-pulse"
+            disabled={!canRaise || actionMutation.isPending}
+            onClick={() => executeAction("allIn")}
+          >
+            كل ما لديك
           </Button>
         </div>
         

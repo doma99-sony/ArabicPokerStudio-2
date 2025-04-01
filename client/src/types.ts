@@ -3,6 +3,7 @@ export interface Card {
   suit: "hearts" | "diamonds" | "clubs" | "spades";
   value: "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | "J" | "Q" | "K" | "A";
   hidden?: boolean;
+  isWinning?: boolean;
 }
 
 // تعريف نوع طاولة اللعب
@@ -40,4 +41,28 @@ export interface PlayerPosition {
   isVIP?: boolean;
   isActive?: boolean;
   isCurrentPlayer?: boolean;
+  isTurn?: boolean;
+}
+
+// إجراءات اللعب المختلفة 
+export type GameAction = 'fold' | 'check' | 'call' | 'raise' | 'allIn';
+
+// حالة اللعبة الحالية
+export interface GameState {
+  id: number;
+  gameId: number;
+  players: PlayerPosition[];
+  pot: number;
+  currentBet: number;
+  communityCards: Card[];
+  currentTurn: number;
+  status: 'waiting' | 'preflop' | 'flop' | 'turn' | 'river' | 'showdown';
+  gameStatus?: 'waiting' | 'preflop' | 'flop' | 'turn' | 'river' | 'showdown'; // لدعم الاسمين
+  dealer: number;
+  smallBlind: number;
+  bigBlind: number;
+  isSpectator?: boolean;
+  minRaise?: number;
+  winningHands?: Record<number, Card[]>;
+  winners?: { playerId: number, hand: string, amount: number }[];
 }

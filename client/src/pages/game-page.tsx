@@ -8,6 +8,8 @@ import { PokerTable } from "@/components/game/poker-table";
 import { GameControls } from "@/components/game/game-controls";
 import { BetControls } from "@/components/game/bet-controls";
 import { SpectatorBar } from "@/components/game/spectator-bar";
+import { GameActions } from "@/components/game/game-actions";
+import { CommunityCards } from "@/components/game/community-cards";
 import { useToast } from "@/hooks/use-toast";
 
 export default function GamePage({ params }: { params?: { tableId?: string } }) {
@@ -286,17 +288,104 @@ export default function GamePage({ params }: { params?: { tableId?: string } }) 
     }
   };
 
+  // تعريف المستخدم الحالي في اللعبة
+  const currentPlayer = gameState?.players?.find(player => player.id === user?.id);
+  
+  // حالة لتتبع تحميل الإجراء
+  const [isActionLoading, setIsActionLoading] = useState(false);
+  
+  // التحقق مما إذا كان دور اللاعب الحالي للعب
+  const isCurrentTurn = currentPlayer?.isTurn || false;
+  
+  // وظيفة لتنفيذ إجراء في اللعبة (مثل fold, call, raise, etc)
+  const performGameAction = async (action: 'fold' | 'check' | 'call' | 'raise' | 'allIn', amount?: number) => {
+    if (!tableId) {
+      toast({
+        title: "خطأ",
+        description: "معرف الطاولة غير متوفر",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setIsActionLoading(true);
+    
+    try {
+      const response = await fetch(`/api/game/${tableId}/action`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          action,
+          amount: amount || 0
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (!data.success) {
+        toast({
+          title: "خطأ في تنفيذ الإجراء",
+          description: data.message || "حدث خطأ غير معروف",
+          variant: "destructive"
+        });
+        setIsActionLoading(false);
+        return;
+      }
+      
+      // تحديث واجهة المستخدم بناءً على الإجراء
+      let actionMessage = "";
+      if (action === 'fold') actionMessage = "تم الانسحاب من الجولة";
+      else if (action === 'check') actionMessage = "تم المتابعة بدون مراهنة";
+      else if (action === 'call') actionMessage = `تم المتابعة بمبلغ ${gameState.currentBet}`;
+      else if (action === 'raise') actionMessage = `تم رفع المراهنة إلى ${amount}`;
+      else if (action === 'allIn') actionMessage = `تم المراهنة بكل الرقاقات (${amount})`;
+      
+      toast({
+        title: "تم تنفيذ الإجراء",
+        description: actionMessage,
+        variant: "default"
+      });
+      
+    } catch (error) {
+      console.error("خطأ في تنفيذ الإجراء:", error);
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ أثناء محاولة تنفيذ الإجراء",
+        variant: "destructive"
+      });
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-deepBlack text-white py-2 flex flex-col">
       <div className="container mx-auto px-4 h-full flex flex-col">
         {/* Game controls (header) */}
         <GameControls gameState={gameState} />
         
+        {/* عرض الأوراق المجتمعية في الوسط */}
+        {!isSpectator && gameState.gameStatus !== "waiting" && (
+          <div className="absolute top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-40">
+            <CommunityCards cards={gameState.communityCards || []} size="md" />
+          </div>
+        )}
+        
         {/* Poker table (middle) */}
         <PokerTable gameState={gameState} />
         
-        {/* Betting controls (footer) - تظهر فقط إذا كان اللاعب نشطًا وليس في وضع المشاهدة */}
-        {!isSpectator && <BetControls gameState={gameState} />}
+        {/* أزرار إجراءات اللعب - تظهر فقط في وضع اللعب النشط */}
+        {!isSpectator && (
+          <GameActions 
+            gameState={gameState}
+            onAction={performGameAction}
+            isLoading={isActionLoading}
+            isCurrentTurn={isCurrentTurn}
+          />
+        )}
         
         {/* شريط المشاهدة - يظهر فقط في وضع المشاهدة */}
         {isSpectator && tableId && (
