@@ -8,6 +8,7 @@ import { Plus, HelpCircle, X, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { GameActions } from "./game-actions";
+import { GameInstructions } from "./game-instructions";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -381,7 +382,7 @@ export function PokerTable({ gameState }: PokerTableProps) {
       {/* زر تعليمات اللعبة موجود في شريط الأدوات السفلي */}
       
       {/* نافذة تعليمات اللعبة */}
-      {showInstructions && (
+      <GameInstructions showInstructions={showInstructions} onClose={() => setShowInstructions(false)} />
         <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center overflow-y-auto p-4">
           <div className="bg-slate-900 text-white border-2 border-gold/50 rounded-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-slate-900 border-b border-gold/30 p-4 flex items-center justify-between z-10">
