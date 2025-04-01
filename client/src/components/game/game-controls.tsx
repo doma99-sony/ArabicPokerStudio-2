@@ -107,11 +107,6 @@ export function GameControls({ gameState, onShowInstructions }: GameControlsProp
             <Gift className="h-5 w-5" />
           </button>
 
-          <button className="w-10 h-10 bg-blue-500/20 rounded-full flex items-center justify-center text-blue-400 hover:bg-blue-500/30 transition-all relative">
-            <Bell className="h-5 w-5" />
-            <span className="absolute -top-1 -right-1 size-4 bg-red-500 rounded-full text-white text-xs flex items-center justify-center">1</span>
-          </button>
-
           <button className="w-10 h-10 bg-slate-500/20 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-500/30 transition-all">
             <User className="h-5 w-5" />
           </button>
@@ -133,7 +128,7 @@ export function GameControls({ gameState, onShowInstructions }: GameControlsProp
             <Settings className="h-5 w-5" />
           </button>
           
-          {/* زر التعليمات */}
+          {/* زر التعليمات (بدلاً من زر الإشعارات السفلي) */}
           <Button
             variant="ghost"
             className="bg-yellow-500 hover:bg-yellow-600 text-black font-cairo transition-colors rounded-full w-10 h-10 p-0 flex items-center justify-center"
