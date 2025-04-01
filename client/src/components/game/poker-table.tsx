@@ -379,9 +379,6 @@ export function PokerTable({ gameState }: PokerTableProps) {
         )}
       </div>
       
-      {/* شريط الأدوات السفلي مع زر التعليمات في البداية */}
-      <GameControls gameState={gameState} onShowInstructions={() => setShowInstructions(true)} />
-      
       {/* نافذة تعليمات اللعبة */}
       <GameInstructions showInstructions={showInstructions} onClose={() => setShowInstructions(false)} />
     </div>

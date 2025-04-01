@@ -368,10 +368,8 @@ export default function GamePage({ params }: { params?: { tableId?: string } }) 
   };
 
   return (
-    <div className="min-h-screen bg-deepBlack text-white py-2 flex flex-col">
+    <div className="min-h-screen bg-deepBlack text-white py-2 pb-16 flex flex-col">
       <div className="container mx-auto px-4 h-full flex flex-col">
-        {/* Game controls (header) */}
-        <GameControls gameState={gameState} />
         
         {/* عرض الأوراق المجتمعية في الوسط */}
         {!isSpectator && gameState.gameStatus !== "waiting" && (
@@ -405,6 +403,18 @@ export default function GamePage({ params }: { params?: { tableId?: string } }) 
           />
         )}
       </div>
+
+      {/* شريط الأدوات السفلي */}
+      <GameControls 
+        gameState={gameState} 
+        onShowInstructions={() => {
+          // يمكن إضافة منطق إظهار نافذة التعليمات هنا
+          toast({
+            title: "تعليمات اللعبة",
+            description: "سيتم عرض تعليمات وقواعد اللعبة قريباً.",
+          });
+        }} 
+      />
     </div>
   );
 }
