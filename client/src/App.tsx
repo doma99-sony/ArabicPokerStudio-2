@@ -108,15 +108,8 @@ function App() {
     }
   }, []);
   
-  // رصد حالة تسجيل الخروج
+  // رصد حالة تسجيل الدخول
   useEffect(() => {
-    // إذا كان المستخدم غير موجود (تم تسجيل خروجه)، ضع علامة في sessionStorage
-    if (user === null && sessionStorage.getItem('hadUser') === 'true') {
-      sessionStorage.setItem('hasLoggedOut', 'true');
-      // إعادة تحميل الصفحة لعرض شاشة البداية
-      window.location.reload();
-    }
-    
     // إذا كان المستخدم موجود، ضع علامة في sessionStorage
     if (user !== null) {
       sessionStorage.setItem('hadUser', 'true');

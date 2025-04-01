@@ -126,10 +126,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await apiRequest("POST", "/api/logout");
     },
     onSuccess: () => {
+      // تعيين علامة تسجيل الخروج لإظهار شاشة البداية مرة أخرى
+      sessionStorage.setItem('hasLoggedOut', 'true');
+      
+      // تخزين معلومة أن المستخدم كان مسجلاً
+      if (user) {
+        sessionStorage.setItem('hadUser', 'true');
+      }
+      
       queryClient.setQueryData(["/api/user"], null);
       toast({
         title: "تم تسجيل الخروج بنجاح",
       });
+      
+      // إعادة تحميل الصفحة بعد تسجيل الخروج لإظهار شاشة البداية
+      setTimeout(() => {
+        window.location.reload();
+      }, 800); // انتظار قليلاً للتأكد من ظهور رسالة النجاح
     },
     onError: (error: Error) => {
       toast({
