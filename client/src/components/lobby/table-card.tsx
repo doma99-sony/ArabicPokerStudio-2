@@ -5,10 +5,10 @@ import { GameTable } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Users, DollarSign, PlayCircle, Plus, Eye as EyeIcon, ExternalLink } from "lucide-react";
+import { Loader2, Users, DollarSign, PlayCircle, Plus, Eye as EyeIcon, ExternalLink, Coins } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { cn } from "@/lib/utils";
+import { cn, formatChips } from "@/lib/utils";
 
 interface TableCardProps {
   table: GameTable;

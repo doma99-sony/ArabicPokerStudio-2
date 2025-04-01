@@ -2,7 +2,7 @@ import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { GameState } from "@/types";
 import { Button } from "@/components/ui/button";
-import { LogOut, Loader2, Coins } from "lucide-react";
+import { LogOut, Loader2, Coins, HelpCircle } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -10,9 +10,10 @@ import { formatChips } from "@/lib/utils";
 
 interface GameControlsProps {
   gameState: GameState;
+  onShowInstructions?: () => void;
 }
 
-export function GameControls({ gameState }: GameControlsProps) {
+export function GameControls({ gameState, onShowInstructions }: GameControlsProps) {
   const [location, navigate] = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -50,6 +51,14 @@ export function GameControls({ gameState }: GameControlsProps) {
   return (
     <div className="mb-3 bg-slate/30 rounded-lg p-3 flex justify-between items-center">
       <div className="flex items-center">
+        <Button
+          variant="ghost"
+          className="bg-yellow-500 hover:bg-yellow-600 text-black font-cairo transition-colors ml-3"
+          onClick={onShowInstructions}
+        >
+          <HelpCircle className="ml-2 h-4 w-4" />
+          تعليمات
+        </Button>
         <Button
           variant="destructive"
           className="bg-casinoRed hover:bg-red-700 text-white font-cairo transition-colors ml-3"

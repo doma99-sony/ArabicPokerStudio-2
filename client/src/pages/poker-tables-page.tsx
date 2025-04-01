@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { OnlineUsersCounter } from "@/components/ui/online-users-badge";
 import { Loader2, ArrowRight, Coins } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { formatChips } from "@/lib/utils";
 
 export default function PokerTablesPage() {
   const [, navigate] = useLocation();
@@ -57,7 +58,11 @@ export default function PokerTablesPage() {
   // تصفية الطاولات حسب الفئة
   const getTablesByCategory = (category: string) => {
     if (!tables) return [];
-    return tables.filter(table => table.category === category);
+    // استخدام tableSettings?.category لدعم الواجهة التي قمنا بتحديثها
+    return tables.filter(table => {
+      const tableCategory = table.category || (table.tableSettings as any)?.category;
+      return tableCategory === category;
+    });
   };
 
   // التحقق مما إذا كان لدى اللاعب ما يكفي من الرقائق للعب في مستوى معين
@@ -183,7 +188,7 @@ export default function PokerTablesPage() {
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-[#D4AF37]">اختر مستوى اللعب</h2>
               <div className="text-white/80">
-                رصيدك: <span className="text-[#D4AF37] font-bold">{user?.chips?.toLocaleString()}</span> رقاقة
+                رصيدك: <span className="text-[#D4AF37] font-bold">{formatChips(user?.chips || 0)}</span> رقاقة
               </div>
             </div>
 

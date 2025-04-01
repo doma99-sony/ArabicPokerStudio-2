@@ -36,6 +36,7 @@ export interface GameTable {
   password?: string;
   ownerId?: number;
   tableSettings?: Record<string, any>;
+  category?: string; // مستوى الطاولة: نوب، لسه بتعلم، محترف، الفاجر
 }
 
 // واجهة لاعب في طاولة
