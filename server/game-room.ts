@@ -1,5 +1,5 @@
 import { GameTable, GameState, Card, GameAction } from "../shared/types";
-import { createDeck, shuffleDeck, dealCards, remainingCards } from "./card-utils";
+import { createDeck, shuffleDeck, dealCards, dealCardsToPlayer, remainingCards } from "./card-utils";
 
 // Interface for game room player
 interface GamePlayer {
@@ -147,26 +147,30 @@ export function createGameRoom(table: GameTable): GameRoom {
       case "preflop":
         // Deal the flop (first three community cards)
         round.gameStatus = "flop";
-        round.communityCards = dealCards(round.deck, 3);
-        round.deck = remainingCards(round.deck, 3);
+        let flopCards = [];
+        for (let i = 0; i < 3; i++) {
+          flopCards.push(...dealCardsToPlayer(round.deck, 1));
+        }
+        round.communityCards = flopCards;
+        console.log("تم توزيع بطاقات الفلوب:", flopCards);
         // Set the first active player after the dealer
         round.currentTurn = getNextPlayerTurn(round.dealer);
         break;
       case "flop":
         // Deal the turn (fourth community card)
         round.gameStatus = "turn";
-        const turnCard = dealCards(round.deck, 1);
+        const turnCard = dealCardsToPlayer(round.deck, 1);
         round.communityCards = [...round.communityCards, ...turnCard];
-        round.deck = remainingCards(round.deck, 1);
+        console.log("تم توزيع بطاقة التيرن:", turnCard);
         // Set the first active player after the dealer
         round.currentTurn = getNextPlayerTurn(round.dealer);
         break;
       case "turn":
         // Deal the river (fifth community card)
         round.gameStatus = "river";
-        const riverCard = dealCards(round.deck, 1);
+        const riverCard = dealCardsToPlayer(round.deck, 1);
         round.communityCards = [...round.communityCards, ...riverCard];
-        round.deck = remainingCards(round.deck, 1);
+        console.log("تم توزيع بطاقة الريفر:", riverCard);
         // Set the first active player after the dealer
         round.currentTurn = getNextPlayerTurn(round.dealer);
         break;
@@ -183,11 +187,16 @@ export function createGameRoom(table: GameTable): GameRoom {
   
   // Start a new round
   const startNewRound = (): void => {
+    console.log("بدء جولة جديدة من اللعب...");
+    
     round.roundNumber++;
     round.deck = shuffleDeck(createDeck());
     round.communityCards = [];
     round.pot = 0;
     round.currentBet = 0;
+    
+    // تعيين حالة اللعبة إلى preflop (بداية الجولة)
+    round.gameStatus = "preflop";
     
     // Reset player states
     for (const player of players.values()) {
@@ -201,10 +210,12 @@ export function createGameRoom(table: GameTable): GameRoom {
       round.dealer = getNextPlayerTurn(round.dealer);
     }
     
-    // Deal cards to players
-    for (const player of players.values()) {
-      player.cards = dealCards(round.deck, 2).map(card => ({ ...card, hidden: false }));
-      round.deck = remainingCards(round.deck, 2);
+    // Deal cards to players (just once)
+    const playerArray = Array.from(players.values());
+    for (let i = 0; i < playerArray.length; i++) {
+      const player = playerArray[i];
+      player.cards = dealCardsToPlayer(round.deck, 2).map(card => ({ ...card, hidden: false }));
+      console.log(`تم توزيع البطاقات للاعب ${player.username}`);
     }
     
     // Set small and big blinds
@@ -419,7 +430,23 @@ export function createGameRoom(table: GameTable): GameRoom {
     
     // If we have enough players and game isn't started yet, start the game
     if (players.size >= 2 && round.gameStatus === "waiting") {
-      startNewRound();
+      console.log(`بدء جولة جديدة تلقائيًا - عدد اللاعبين: ${players.size}`);
+      
+      // إضافة تأخير قصير قبل بدء الجولة للتأكد من جاهزية اللاعبين
+      setTimeout(() => {
+        if (players.size >= 2 && round.gameStatus === "waiting") {
+          // تعيين حالة اللعبة مبدئيًا إلى "preflop" لتجنب أي تضارب
+          round.gameStatus = "preflop";
+          
+          // بدء جولة جديدة
+          startNewRound();
+          
+          // تحديث حالة اللعبة وإرسالها للاعبين
+          gameStateCache.clear(); // مسح الكاش للتأكد من تحديث الحالة
+          
+          console.log(`تم بدء جولة جديدة بنجاح - الحالة: ${round.gameStatus}`);
+        }
+      }, 1000);
     }
     
     // If this player is an AI, automatically take actions when it's their turn

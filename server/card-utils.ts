@@ -41,6 +41,20 @@ export function dealCards(deck: Card[], numPlayers: number, cardsPerPlayer: numb
   return hands;
 }
 
+// دالة خاصة لتوزيع الأوراق للاعب واحد
+export function dealCardsToPlayer(deck: Card[], count: number): Card[] {
+  const hand: Card[] = [];
+  
+  for (let i = 0; i < count; i++) {
+    if (deck.length > 0) {
+      const card = deck.pop()!;
+      hand.push(card);
+    }
+  }
+  
+  return hand;
+}
+
 // الحصول على الأوراق المتبقية بعد التوزيع
 export function remainingCards(deck: Card[], numToPop: number): Card[] {
   if (numToPop <= 0) return [];
