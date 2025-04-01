@@ -96,23 +96,21 @@ export default function LobbyPage() {
 
       {/* Header Bar */}
       <header className="relative z-10 bg-black/80 text-white p-2 shadow-xl border-b border-[#D4AF37]/30">
-        <div className="container mx-auto">
-          {/* Top row with logo and user info - this stays fixed */}
-          <div className="flex justify-between items-center mb-2">
+        <div className="container mx-auto flex justify-between items-center">
+          <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <img 
                 src="/assets/poker-logo.jpeg" 
                 alt="بوكر عرباوي" 
                 className="w-10 h-10 rounded-full border-2 border-[#D4AF37] object-cover shadow-md shadow-[#D4AF37]/30" 
               />
-              <div>
-                <h1 className="text-xl font-bold text-[#D4AF37]">بوكر تكساس عرباوي</h1>
-                <div className="flex items-center gap-1">
-                  <OnlineUsersCounter />
-                </div>
-              </div>
+              <h1 className="text-xl font-bold text-[#D4AF37]">بوكر تكساس عرباوي</h1>
             </div>
+            {/* عداد المستخدمين المتصلين */}
+            <OnlineUsersCounter />
+          </div>
 
+          <div className="flex items-center gap-2">
             <div className="text-right">
               <p className="text-[#D4AF37] text-sm">مرحباً، {user?.username}</p>
               <div className="flex items-center gap-2">
@@ -124,81 +122,74 @@ export default function LobbyPage() {
                 </div>
               </div>
             </div>
-          </div>
-          
-          {/* Scrollable navigation buttons row */}
-          <div className="overflow-x-auto pb-1 scrollbar-thin scroll-indicator-container relative">
-            <div className="scroll-indicator-start"></div>
-            <div className="scroll-indicator-end"></div>
-            <div className="flex items-center gap-2 flex-nowrap min-w-min">
-              {/* زر الانتقال المباشر للطاولة */}
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <input
-                  type="number"
-                  placeholder="رقم الطاولة"
-                  value={directTableId}
-                  onChange={(e) => setDirectTableId(e.target.value)}
-                  className="bg-black/50 text-[#D4AF37] border border-[#D4AF37]/40 rounded-md h-8 w-20 text-xs px-2 focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/40 flex-shrink-0"
-                />
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  className="h-8 py-0 px-2 text-xs border-[#D4AF37]/40 text-[#D4AF37] hover:bg-[#D4AF37]/10 whitespace-nowrap flex-shrink-0"
-                  onClick={() => {
-                    if (directTableId && !isNaN(parseInt(directTableId))) {
-                      navigate(`/direct-table/${directTableId}`);
-                    }
-                  }}
-                >
-                  <ExternalLink size={14} className="ml-1" />
-                  انتقال مباشر
-                </Button>
-              </div>
-              
-              <Button 
-                variant="outline" 
-                className="border-[#D4AF37]/50 text-[#D4AF37] hover:bg-[#D4AF37]/10 h-8 py-0 px-2 text-xs whitespace-nowrap flex-shrink-0"
-                onClick={() => navigate("/notifications")}
-              >
-                <Bell size={14} className="ml-1" />
-                الإشعارات
-              </Button>
 
+            {/* زر الانتقال المباشر للطاولة */}
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                placeholder="رقم الطاولة"
+                value={directTableId}
+                onChange={(e) => setDirectTableId(e.target.value)}
+                className="bg-black/50 text-[#D4AF37] border border-[#D4AF37]/40 rounded-md h-8 w-24 text-xs px-2 focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/40"
+              />
               <Button 
                 variant="outline" 
-                className="border-[#D4AF37]/50 text-[#D4AF37] hover:bg-[#D4AF37]/10 h-8 py-0 px-2 text-xs whitespace-nowrap flex-shrink-0"
-                onClick={navigateToProfile}
-              >
-                <User size={14} className="ml-1" />
-                الملف
-              </Button>
-
-              <Button 
-                variant="outline" 
-                className="border-green-500/50 text-green-400 hover:bg-green-500/10 h-8 py-0 px-2 text-xs whitespace-nowrap flex-shrink-0"
+                size="sm"
+                className="h-8 py-0 px-2 text-xs border-[#D4AF37]/40 text-[#D4AF37] hover:bg-[#D4AF37]/10"
                 onClick={() => {
-                  // رابط تحميل التطبيق للأندرويد (ستقوم بتغييره لاحقا بالرابط الفعلي)
-                  alert("سيتم تحميل تطبيق الأندرويد");
+                  if (directTableId && !isNaN(parseInt(directTableId))) {
+                    navigate(`/direct-table/${directTableId}`);
+                  }
                 }}
               >
-                <Smartphone size={14} className="ml-1" />
-                تحميل التطبيق
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                className="border-red-500/50 text-red-400 hover:bg-red-500/10 h-8 py-0 px-2 text-xs whitespace-nowrap flex-shrink-0"
-                onClick={handleLogout}
-                disabled={logoutMutation.isPending}
-              >
-                {logoutMutation.isPending ? (
-                  <Loader2 className="h-3 w-3 animate-spin ml-1" />
-                ) : (
-                  <LogOut size={14} className="ml-1" />
-                )}
-                خروج
+                <ExternalLink size={14} className="ml-1" />
+                انتقال مباشر
               </Button>
             </div>
+            
+            <Button 
+              variant="outline" 
+              className="border-[#D4AF37]/50 text-[#D4AF37] hover:bg-[#D4AF37]/10 h-8 py-0 px-2 text-xs"
+              onClick={() => navigate("/notifications")}
+            >
+              <Bell size={14} className="ml-1" />
+              الإشعارات
+            </Button>
+
+            <Button 
+              variant="outline" 
+              className="border-[#D4AF37]/50 text-[#D4AF37] hover:bg-[#D4AF37]/10 h-8 py-0 px-2 text-xs"
+              onClick={navigateToProfile}
+            >
+              <User size={14} className="ml-1" />
+              الملف
+            </Button>
+
+            <Button 
+              variant="outline" 
+              className="border-green-500/50 text-green-400 hover:bg-green-500/10 h-8 py-0 px-2 text-xs"
+              onClick={() => {
+                // رابط تحميل التطبيق للأندرويد (ستقوم بتغييره لاحقا بالرابط الفعلي)
+                alert("سيتم تحميل تطبيق الأندرويد");
+              }}
+            >
+              <Smartphone size={14} className="ml-1" />
+              تحميل التطبيق
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              className="border-red-500/50 text-red-400 hover:bg-red-500/10 h-8 py-0 px-2 text-xs"
+              onClick={handleLogout}
+              disabled={logoutMutation.isPending}
+            >
+              {logoutMutation.isPending ? (
+                <Loader2 className="h-3 w-3 animate-spin ml-1" />
+              ) : (
+                <LogOut size={14} className="ml-1" />
+              )}
+              خروج
+            </Button>
           </div>
         </div>
       </header>
