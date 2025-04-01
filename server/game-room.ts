@@ -27,6 +27,9 @@ interface GameRound {
   currentTurn: number;
   lastRaisePosition: number;
   gameStatus: "waiting" | "preflop" | "flop" | "turn" | "river" | "showdown";
+  // إضافة متغيرات لتتبع وقت اللاعب الحالي
+  turnStartTime: number; // وقت بدء دور اللاعب الحالي (timestamp)
+  turnTimeoutId?: NodeJS.Timeout; // معرف مؤقت انتهاء الوقت
 }
 
 // Result interface for player actions
@@ -74,7 +77,38 @@ export function createGameRoom(table: GameTable): GameRoom {
     bigBlind: table.bigBlind,
     currentTurn: 0,
     lastRaisePosition: 0,
-    gameStatus: "waiting"
+    gameStatus: "waiting",
+    turnStartTime: Date.now() // تهيئة وقت بدء الدور
+  };
+  
+  // مدة مؤقت انتظار اللاعب (12 ثانية)
+  const TURN_TIMEOUT_SECONDS = 12;
+  
+  // وظيفة لبدء مؤقت الانتظار للاعب الحالي
+  const startTurnTimer = () => {
+    // إلغاء أي مؤقت سابق
+    if (round.turnTimeoutId) {
+      clearTimeout(round.turnTimeoutId);
+    }
+    
+    // تعيين وقت بدء الدور
+    round.turnStartTime = Date.now();
+    
+    // إنشاء مؤقت جديد للدور الحالي
+    round.turnTimeoutId = setTimeout(() => {
+      // التحقق من أن هناك لاعب حالي
+      if (round.currentTurn === -1 || round.gameStatus === "waiting" || round.gameStatus === "showdown") {
+        return;
+      }
+      
+      const currentPlayer = players.get(round.currentTurn);
+      if (!currentPlayer) return;
+      
+      console.log(`تم انتهاء وقت اللاعب ${currentPlayer.username} - يتم تنفيذ Fold تلقائيًا`);
+      
+      // تنفيذ إجراء Fold تلقائيًا للاعب
+      performAction(round.currentTurn, "fold");
+    }, TURN_TIMEOUT_SECONDS * 1000);
   };
   
   // Get available positions
@@ -248,6 +282,12 @@ export function createGameRoom(table: GameTable): GameRoom {
     // Set the first player to act (after big blind)
     round.currentTurn = getNextPlayerTurn(bigBlindPlayer);
     round.gameStatus = "preflop";
+    
+    // بدء المؤقت للاعب الأول
+    if (round.currentTurn !== -1) {
+      startTurnTimer();
+      console.log(`بدء مؤقت انتظار للاعب الأول ${round.currentTurn}`);
+    }
   };
   
   // Determine winners and distribute pot
@@ -542,7 +582,8 @@ export function createGameRoom(table: GameTable): GameRoom {
         bigBlind: table.bigBlind,
         currentTurn: 0,
         lastRaisePosition: 0,
-        gameStatus: "waiting"
+        gameStatus: "waiting",
+        turnStartTime: Date.now() // إعادة تعيين وقت بدء الدور
       };
     }
     
@@ -624,6 +665,12 @@ export function createGameRoom(table: GameTable): GameRoom {
     
     // Move to the next player
     round.currentTurn = getNextPlayerTurn(player.position);
+    
+    // إعادة تعيين مؤقت انتظار اللاعب الجديد
+    if (round.currentTurn !== -1) {
+      startTurnTimer();
+      console.log(`بدء مؤقت انتظار للاعب ${round.currentTurn}`);
+    }
     
     // Check if round is complete
     if (isRoundComplete()) {

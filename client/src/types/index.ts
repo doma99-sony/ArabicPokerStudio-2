@@ -36,7 +36,7 @@ export interface Card {
   hidden?: boolean;
 }
 
-export type GameAction = "fold" | "check" | "call" | "raise" | "allIn";
+export type GameAction = "fold" | "check" | "call" | "bet" | "raise" | "all_in";
 
 export interface GameState {
   id: number;

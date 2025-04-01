@@ -65,7 +65,7 @@ export interface Winner {
 }
 
 // إجراءات اللعب المختلفة 
-export type GameAction = 'fold' | 'check' | 'call' | 'raise' | 'allIn';
+export type GameAction = 'fold' | 'check' | 'call' | 'raise' | 'all_in';
 
 // حالة اللعبة الحالية
 export interface GameState {

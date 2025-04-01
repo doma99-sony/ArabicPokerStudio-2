@@ -3,6 +3,8 @@ import { Image } from "@/components/ui/image";
 import { CardComponent } from "./card-component";
 import { PlayerCards } from "./playing-card";
 import { formatChips } from "@/lib/utils";
+import { useState, useEffect } from "react";
+import { Clock } from "lucide-react";
 
 interface PlayerComponentProps {
   player: PlayerPosition;
@@ -10,6 +12,40 @@ interface PlayerComponentProps {
 }
 
 export function PlayerComponent({ player, isTurn }: PlayerComponentProps) {
+  // إضافة حالة لتتبع مؤقت الانتظار
+  const [turnTimeLeft, setTurnTimeLeft] = useState<number>(12);
+  
+  // مؤقت للعد التنازلي عندما يكون دور اللاعب
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    
+    if (isTurn) {
+      // ابدأ العد التنازلي من 12 ثانية
+      setTurnTimeLeft(12);
+      
+      timer = setInterval(() => {
+        setTurnTimeLeft(prev => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [isTurn, player.id]);
+  
+  // حساب لون الخلفية لمؤقت الانتظار بناءً على الوقت المتبقي
+  const getTimerColor = () => {
+    if (turnTimeLeft <= 3) return "bg-red-600";
+    if (turnTimeLeft <= 6) return "bg-amber-500";
+    return "bg-blue-600";
+  };
+  
   // Position classes based on player position - adjusted for the 9-seat table layout
   const positionClasses: Record<string, string> = {
     bottom: "absolute bottom-4 left-1/2 transform -translate-x-1/2 flex-col items-center",
@@ -43,11 +79,12 @@ export function PlayerComponent({ player, isTurn }: PlayerComponentProps) {
     <div className={`flex ${positionClasses[player.position]} z-30`}>
       {/* Player status indicators - top of player area */}
       <div className="flex flex-col items-center mb-1">
-        {/* Player's turn indicator */}
+        {/* Player's turn indicator with countdown timer */}
         {isTurn && (
-          <div className="bg-blue-600/80 rounded-full px-3 py-1 text-white mb-1.5 shadow-lg">
+          <div className={`${getTimerColor()}/80 rounded-full px-3 py-1 text-white mb-1.5 shadow-lg transition-colors duration-300 flex items-center gap-1`}>
+            <Clock className="w-4 h-4" />
             <span className="text-sm font-bold">
-              {player.isCurrentPlayer ? "دورك للعب" : "جاري اللعب..."}
+              {player.isCurrentPlayer ? "دورك للعب" : "جاري اللعب..."} ({turnTimeLeft})
             </span>
           </div>
         )}
