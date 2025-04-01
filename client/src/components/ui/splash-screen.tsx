@@ -1,13 +1,187 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Progress } from "@/components/ui/progress";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface SplashScreenProps {
   onComplete: () => void;
 }
 
+// قائمة بالنصوص التحفيزية العشوائية للظهور أثناء التحميل
+const motivationalTexts = [
+  "أفضل لاعبي البوكر في العالم العربي",
+  "استمتع بتجربة لعب مميزة",
+  "اجمع الرقائق وتنافس مع الأفضل",
+  "اربح البطولات واحصل على جوائز قيمة",
+  "تحدى أصدقاءك في مباريات خاصة",
+  "قريباً... بطولات أسبوعية بجوائز كبيرة",
+  "ابدأ من الصفر وكن بطل العرب",
+  "تعلم استراتيجيات البوكر المتقدمة",
+  "اكتسب خبرة أكبر مع كل لعبة",
+  "طور مهاراتك وصبح محترف بوكر",
+];
+
 export function SplashScreen({ onComplete }: SplashScreenProps) {
   const [progress, setProgress] = useState(0);
   const [title, setTitle] = useState('تحميل الموارد');
+  const [rotationAngle, setRotationAngle] = useState(0);
+  const [motivationalText, setMotivationalText] = useState(motivationalTexts[0]);
+  const [textIndex, setTextIndex] = useState(0);
+  const [showMotivational, setShowMotivational] = useState(false);
+  
+  // مرجع لعنصر الكونفاس للرسم عليه
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  
+  // إعداد تأثير رسم الكانفاس المتحرك
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    // ضبط حجم الكانفاس ليناسب الشاشة
+    const updateCanvasSize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    
+    updateCanvasSize();
+    window.addEventListener('resize', updateCanvasSize);
+    
+    // إعداد معاملات الرسم
+    const particleCount = 100;
+    const particles: {
+      x: number;
+      y: number;
+      size: number;
+      color: string;
+      speedX: number;
+      speedY: number;
+      opacity: number;
+      glowing: boolean;
+    }[] = [];
+    
+    // تهيئة الجسيمات
+    for (let i = 0; i < particleCount; i++) {
+      const size = Math.random() * 3 + 1;
+      const opacity = Math.random() * 0.5 + 0.1;
+      const isGolden = Math.random() > 0.7; // 30% احتمالية أن تكون ذهبية
+      
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        size,
+        color: isGolden ? '#D4AF37' : '#ffffff',
+        speedX: (Math.random() - 0.5) * 0.5,
+        speedY: (Math.random() - 0.5) * 0.5,
+        opacity,
+        glowing: isGolden && Math.random() > 0.5,
+      });
+    }
+    
+    // وظيفة رسم الجسيمات
+    const drawParticles = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // رسم الخطوط بين الجسيمات المتقاربة
+      ctx.lineWidth = 0.3;
+      ctx.strokeStyle = 'rgba(212, 175, 55, 0.03)';
+      
+      for (let i = 0; i < particles.length; i++) {
+        const p1 = particles[i];
+        
+        for (let j = i + 1; j < particles.length; j++) {
+          const p2 = particles[j];
+          const dx = p1.x - p2.x;
+          const dy = p1.y - p2.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          
+          // رسم خط بين الجسيمات إذا كانت قريبة من بعضها
+          if (distance < 100) {
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            
+            // جعل الخط أكثر شفافية كلما زادت المسافة
+            ctx.globalAlpha = 0.05 * (1 - distance / 100);
+            ctx.stroke();
+          }
+        }
+      }
+      
+      // رسم الجسيمات
+      for (const particle of particles) {
+        ctx.beginPath();
+        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+        
+        // إضافة تأثير توهج للجسيمات الذهبية
+        if (particle.glowing) {
+          const glow = ctx.createRadialGradient(
+            particle.x, particle.y, 0,
+            particle.x, particle.y, particle.size * 3
+          );
+          
+          glow.addColorStop(0, `rgba(212, 175, 55, ${particle.opacity * 1.5})`);
+          glow.addColorStop(1, 'rgba(212, 175, 55, 0)');
+          
+          ctx.fillStyle = glow;
+          ctx.globalAlpha = 0.3;
+          ctx.fill();
+        }
+        
+        // رسم الجسيم نفسه
+        ctx.globalAlpha = particle.opacity;
+        ctx.fillStyle = particle.color;
+        ctx.fill();
+        
+        // تحديث موقع الجسيم
+        particle.x += particle.speedX;
+        particle.y += particle.speedY;
+        
+        // إعادة الجسيم إلى الجانب المقابل إذا خرج من حدود الشاشة
+        if (particle.x > canvas.width) particle.x = 0;
+        else if (particle.x < 0) particle.x = canvas.width;
+        
+        if (particle.y > canvas.height) particle.y = 0;
+        else if (particle.y < 0) particle.y = canvas.height;
+      }
+    };
+    
+    // بدء حلقة الرسم
+    const animationId = setInterval(drawParticles, 30);
+    
+    return () => {
+      clearInterval(animationId);
+      window.removeEventListener('resize', updateCanvasSize);
+    };
+  }, []);
+  
+  // تحديث التشويقات النصية
+  useEffect(() => {
+    const textTimer = setInterval(() => {
+      setShowMotivational(false);
+      
+      setTimeout(() => {
+        setTextIndex((prev) => (prev + 1) % motivationalTexts.length);
+        setMotivationalText(motivationalTexts[(textIndex + 1) % motivationalTexts.length]);
+        setShowMotivational(true);
+      }, 500);
+    }, 4000);
+    
+    return () => clearInterval(textTimer);
+  }, [textIndex]);
+  
+  // تأثير دوران الشعار
+  useEffect(() => {
+    const rotationInterval = setInterval(() => {
+      setRotationAngle(prev => (prev + 0.1) % 360);
+    }, 50);
+    
+    return () => clearInterval(rotationInterval);
+  }, []);
+  
+  // متغير لتتبع ما إذا كان الانتقال قيد التنفيذ
+  const [isTransitioning, setIsTransitioning] = useState(false);
   
   useEffect(() => {
     // إنشاء عداد يزداد تدريجياً
@@ -17,8 +191,12 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
         setProgress((prevProgress) => {
           if (prevProgress >= 100) {
             clearInterval(interval);
+            
+            // بدء تأثير الانتقال
+            setIsTransitioning(true);
+            
             // قم بإنهاء شاشة البداية بعد اكتمال التحميل
-            setTimeout(() => onComplete(), 500);
+            setTimeout(() => onComplete(), 2000);
             return 100;
           }
           
@@ -31,7 +209,16 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
             setTitle('كل شيء جاهز');
           }
           
-          const increment = Math.floor(Math.random() * 3) + 1;
+          // تسريع التقدم في نهاية التحميل للتجربة الأفضل
+          let increment;
+          if (prevProgress < 50) {
+            increment = Math.floor(Math.random() * 2) + 1;
+          } else if (prevProgress < 80) {
+            increment = Math.floor(Math.random() * 3) + 1;
+          } else {
+            increment = Math.floor(Math.random() * 2) + 0.5;
+          }
+          
           return Math.min(prevProgress + increment, 100);
         });
       }, 100);
@@ -72,7 +259,7 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
   }, []);
 
   return (
-    <div className="fixed inset-0 flex flex-col items-center justify-center bg-black z-50">
+    <div className={`fixed inset-0 flex flex-col items-center justify-center bg-black z-50 ${isTransitioning ? 'blur-in fade-transition fade-transition-exit-active' : 'blur-in'}`}>
       {/* خلفية البوكر المحسنة */}
       <div className="absolute inset-0 overflow-hidden">
         {/* خلفية بنمط قماش طاولة البوكر */}
@@ -112,30 +299,141 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
       
       <div className="absolute inset-0 bg-gradient-radial from-black/30 via-black/60 to-black"></div>
       
-      {/* تساقط الثلج */}
+      {/* تساقط أوراق البوكر */}
       <div className="absolute inset-0 pointer-events-none">
-        {Array.from({ length: 30 }).map((_, index) => {
-          const size = Math.random() * 0.8 + 0.3; // حجم عشوائي
+        {Array.from({ length: 40 }).map((_, index) => {
+          const cardType = index % 4;
+          const cardSymbol = cardType === 0 ? '♠' : cardType === 1 ? '♥' : cardType === 2 ? '♣' : '♦';
+          const cardColor = cardType === 0 || cardType === 2 ? '#333' : '#CC0000';
+          
+          const size = Math.random() * 0.8 + 0.5; // حجم عشوائي
           const left = `${Math.random() * 100}%`;
-          const animationDuration = `${Math.random() * 10 + 5}s`;
+          const animationDuration = `${Math.random() * 15 + 5}s`;
           const animationDelay = `${Math.random() * 5}s`;
+          const rotateAnimation = `${Math.random() * 10 + 2}s`;
+          const rotateAmount = Math.random() * 360;
           const opacity = Math.random() * 0.7 + 0.3;
           
+          // تأثير دوران 3D عشوائي
+          const perspective = Math.random() * 500 + 300;
+          const rotateX = Math.random() * 360;
+          const rotateY = Math.random() * 360;
+          
           return (
-            <div
+            <motion.div
               key={index}
-              className="absolute animate-snow"
+              className="absolute"
+              initial={{ opacity: 0, y: -100, rotate: 0 }}
+              animate={{ 
+                opacity: [0, opacity, opacity, 0],
+                y: ['0vh', '100vh'],
+                rotate: [0, rotateAmount, rotateAmount * 2],
+              }}
+              transition={{ 
+                duration: parseFloat(animationDuration),
+                delay: parseFloat(animationDelay),
+                repeat: Infinity,
+                ease: "linear"
+              }}
               style={{
                 left,
                 top: '-5%',
                 fontSize: `${size}rem`,
-                animationDuration,
-                animationDelay,
-                opacity
+                color: cardColor,
+                textShadow: '0 0 3px rgba(0,0,0,0.5)',
+                filter: 'drop-shadow(0 0 2px rgba(255,255,255,0.7))',
+                transform: `perspective(${perspective}px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
               }}
             >
-              <span role="img" aria-label="snowflake">❄️</span>
-            </div>
+              {cardSymbol}
+            </motion.div>
+          );
+        })}
+        
+        {/* تساقط رقائق البوكر */}
+        {Array.from({ length: 15 }).map((_, index) => {
+          const size = Math.random() * 30 + 20; // حجم عشوائي
+          const left = `${Math.random() * 100}%`;
+          const animationDuration = `${Math.random() * 20 + 15}s`;
+          const animationDelay = `${Math.random() * 10}s`;
+          const rotateAnimation = `${Math.random() * 10 + 5}s`;
+          const opacity = Math.random() * 0.5 + 0.3;
+          
+          return (
+            <motion.div
+              key={`chip-${index}`}
+              className="absolute rounded-full"
+              initial={{ opacity: 0, y: -50, rotate: 0 }}
+              animate={{ 
+                opacity: [0, opacity, opacity, 0],
+                y: ['0vh', '100vh'],
+                rotate: [0, 360, 720],
+              }}
+              transition={{ 
+                duration: parseFloat(animationDuration),
+                delay: parseFloat(animationDelay),
+                repeat: Infinity,
+                ease: "linear"
+              }}
+              style={{
+                left,
+                top: '-5%',
+                width: `${size}px`,
+                height: `${size}px`,
+                backgroundImage: 'radial-gradient(circle, #D4AF37, #BF9B30)',
+                boxShadow: '0 0 10px rgba(212,175,55,0.6), inset 0 0 5px rgba(255,255,255,0.8)',
+                border: '2px solid rgba(255,255,255,0.5)',
+              }}
+            >
+              <div className="w-full h-full rounded-full border-4 border-dashed border-white/30 flex items-center justify-center">
+                <div className="w-1/2 h-1/2 rounded-full bg-black/50"></div>
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+      
+      {/* رسم كونفاس متحرك للخلفية */}
+      <canvas 
+        ref={canvasRef} 
+        className="absolute inset-0 w-full h-full opacity-20"
+      />
+      
+      {/* جسيمات متحركة 3D */}
+      <div className="absolute inset-0 pointer-events-none">
+        {Array.from({ length: 50 }).map((_, index) => {
+          const size = Math.random() * 4 + 2;
+          const x = Math.random() * 100;
+          const y = Math.random() * 100;
+          const blurAmount = Math.random() * 2 + 1;
+          const duration = Math.random() * 30 + 30;
+          const delay = Math.random() * 10;
+          
+          return (
+            <motion.div
+              key={`particle-${index}`}
+              className="absolute rounded-full"
+              initial={{ 
+                left: `${x}%`, 
+                top: `${y}%`, 
+                width: `${size}px`, 
+                height: `${size}px`,
+                background: `rgba(212, 175, 55, ${Math.random() * 0.3 + 0.1})`,
+                boxShadow: `0 0 ${blurAmount}px ${blurAmount}px rgba(212, 175, 55, 0.3)`,
+              }}
+              animate={{ 
+                left: [`${x}%`, `${x + (Math.random() * 10 - 5)}%`, `${x}%`],
+                top: [`${y}%`, `${y + (Math.random() * 10 - 5)}%`, `${y}%`],
+                opacity: [0.3, 0.7, 0.3],
+                scale: [1, 1.2, 1],
+              }}
+              transition={{
+                duration,
+                delay,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
           );
         })}
       </div>
@@ -248,8 +546,44 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
         }}
       ></div>
       
+      {/* حالة التحميل والنص التحفيزي */}
       <div className="text-[#D4AF37] text-sm mt-2 font-bold bg-black/40 px-4 py-1 rounded-full border border-[#D4AF37]/20 shadow-inner">
         {title}...
+      </div>
+      
+      {/* النص التحفيزي المتغير */}
+      <AnimatePresence>
+        {showMotivational && (
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.5 }}
+            className="mt-6 px-6 py-3 bg-black/30 backdrop-blur-sm border border-[#D4AF37]/10 rounded-lg max-w-md text-center"
+          >
+            <p className="text-white/80 text-sm italic">"{motivationalText}"</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      
+      {/* إضافة شعار VIP */}
+      <div className="absolute bottom-5 right-5 flex items-center">
+        <div className="bg-gradient-to-r from-[#D4AF37] to-[#FFD700] text-black font-bold px-4 py-1 rounded-full text-sm border-2 border-white shadow-lg transform rotate-12">
+          VIP
+        </div>
+        <div className="bg-black/70 backdrop-blur-sm text-white text-xs px-3 py-1 rounded-l-full -mr-2 shadow-lg border border-[#D4AF37]/20">
+          انضم للحصول على مميزات حصرية
+        </div>
+      </div>
+      
+      {/* شعار لموثوقية التعاملات */}
+      <div className="absolute bottom-5 left-5 flex items-center">
+        <div className="bg-black/70 backdrop-blur-sm text-[#D4AF37] text-xs px-3 py-1 rounded-full shadow-lg border border-[#D4AF37]/20 flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
+          لعب آمن 100%
+        </div>
       </div>
     </div>
   );

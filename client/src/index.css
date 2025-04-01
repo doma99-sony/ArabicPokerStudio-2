@@ -889,3 +889,67 @@
     }
   }
 }
+/* أنيميشن إضافية لشاشة التحميل */
+@keyframes floating {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+@keyframes rotateCard {
+  from { transform: rotateY(0deg); }
+  to { transform: rotateY(360deg); }
+}
+
+@keyframes glowPulse {
+  0% { box-shadow: 0 0 5px 0px rgba(212, 175, 55, 0.5); }
+  50% { box-shadow: 0 0 20px 5px rgba(212, 175, 55, 0.8); }
+  100% { box-shadow: 0 0 5px 0px rgba(212, 175, 55, 0.5); }
+}
+
+.animate-floating {
+  animation: floating 3s ease-in-out infinite;
+}
+
+.animate-rotate-card {
+  animation: rotateCard 5s linear infinite;
+}
+
+.animate-glow-pulse {
+  animation: glowPulse 2s ease-in-out infinite;
+}
+
+/* تحسين تجربة المستخدم عند تحميل الصفحة */
+.blur-in {
+  animation: blurIn 1.5s ease-out forwards;
+}
+
+@keyframes blurIn {
+  0% { filter: blur(10px); opacity: 0; }
+  100% { filter: blur(0); opacity: 1; }
+}
+
+/* تأثير انتقال ناعم بين الشاشات */
+.fade-transition {
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.fade-transition-enter {
+  opacity: 0;
+  transform: scale(0.98);
+}
+
+.fade-transition-enter-active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.fade-transition-exit {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.fade-transition-exit-active {
+  opacity: 0;
+  transform: scale(0.98);
+}
