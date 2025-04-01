@@ -1,163 +1,165 @@
-import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { GameAction, GameState, PlayerPosition } from "@/types";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
+import { Check, X } from "lucide-react";
+import { formatChips } from "@/lib/utils";
 
 interface BetControlsProps {
-  gameState: GameState;
+  currentBet: number;
+  minBet: number;
+  maxBet: number;
+  defaultValue?: number;
+  onConfirm: (amount: number) => void;
+  onCancel: () => void;
 }
 
-export function BetControls({ gameState }: BetControlsProps) {
-  const { toast } = useToast();
-  const [betAmount, setBetAmount] = useState(gameState.currentBet || gameState.bigBlind);
-  
-  // Find the current player
-  const currentPlayer = gameState.players.find((p: PlayerPosition) => p.isCurrentPlayer);
-  
-  // Determine if it's the current player's turn
-  const isPlayerTurn = currentPlayer && gameState.currentTurn === currentPlayer.id;
-  
-  // Calculate min and max bet amounts
-  const minBet = gameState.currentBet || gameState.bigBlind;
-  const maxBet = currentPlayer?.chips || 0;
-  
-  // Handle bet amount changes
-  const handleBetAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value) || 0;
-    setBetAmount(Math.max(minBet, Math.min(maxBet, value)));
-  };
-  
-  // Decrease bet amount
-  const decreaseBet = () => {
-    setBetAmount(Math.max(minBet, betAmount - gameState.bigBlind));
-  };
-  
-  // Increase bet amount
-  const increaseBet = () => {
-    setBetAmount(Math.min(maxBet, betAmount + gameState.bigBlind));
-  };
-  
-  // Game action mutation
-  const actionMutation = useMutation({
-    mutationFn: async ({ action, amount }: { action: GameAction; amount?: number }) => {
-      const res = await apiRequest("POST", `/api/game/${gameState.id}/action`, { action, amount });
-      return await res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/game/${gameState.id}`] });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "خطأ",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
-  
-  // Execute game action
-  const executeAction = (action: GameAction) => {
-    if (!isPlayerTurn) return;
+export function BetControls({
+  currentBet,
+  minBet,
+  maxBet,
+  defaultValue,
+  onConfirm,
+  onCancel
+}: BetControlsProps) {
+  const initialBet = defaultValue || Math.max(minBet, currentBet * 2);
+  const [betAmount, setBetAmount] = useState(Math.min(initialBet, maxBet));
+  const [sliderValue, setSliderValue] = useState(calculateSliderValue(betAmount));
+
+  // Calculate slider percentage based on bet amount
+  function calculateSliderValue(bet: number): number[] {
+    // 扭曲值以使滑块更有用 - 小提高较大比例
+    const percentage = Math.max(0, Math.min(100, ((bet - minBet) / (maxBet - minBet)) * 100));
+    return [percentage];
+  }
+
+  // Calculate bet amount based on slider percentage
+  function calculateBetFromSlider(value: number[]): number {
+    const percentage = value[0];
+    let bet = minBet + ((maxBet - minBet) * percentage) / 100;
+    // 取整到最接近的100
+    bet = Math.round(bet / 100) * 100;
+    return Math.max(minBet, Math.min(maxBet, bet));
+  }
+
+  // Handling slider change
+  function handleSliderChange(value: number[]) {
+    setSliderValue(value);
+    setBetAmount(calculateBetFromSlider(value));
+  }
+
+  // 处理输入框变化
+  function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const newValue = parseInt(e.target.value, 10) || 0;
     
-    let amount;
-    if (action === "raise" || action === "allIn") {
-      amount = action === "allIn" ? maxBet : betAmount;
+    // 控制限制
+    if (newValue < minBet) {
+      setBetAmount(minBet);
+      setSliderValue(calculateSliderValue(minBet));
+    } else if (newValue > maxBet) {
+      setBetAmount(maxBet);
+      setSliderValue(calculateSliderValue(maxBet));
+    } else {
+      setBetAmount(newValue);
+      setSliderValue(calculateSliderValue(newValue));
     }
-    
-    actionMutation.mutate({ action, amount });
-  };
-  
-  // Check if fold action is possible
-  const canFold = isPlayerTurn;
-  
-  // Check if check action is possible (only if no bet has been made)
-  const canCheck = isPlayerTurn && gameState.currentBet === 0;
-  
-  // Check if call action is possible (current bet exists and not equal to player's bet)
-  const canCall = isPlayerTurn && gameState.currentBet > 0 && (!currentPlayer?.betAmount || currentPlayer.betAmount < gameState.currentBet);
-  
-  // Check if raise action is possible
-  const canRaise = isPlayerTurn && currentPlayer && currentPlayer.chips > gameState.currentBet;
+  }
+
+  // Quick bet buttons - percentages of the pot
+  const quickBets = [
+    { label: "2x", value: currentBet * 2 },
+    { label: "3x", value: currentBet * 3 },
+    { label: "نصف", value: minBet + ((maxBet - minBet) / 2) },
+    { label: "الكل", value: maxBet }
+  ];
+
+  // Make sure the bet is always valid when min/max changes
+  useEffect(() => {
+    if (betAmount < minBet) {
+      setBetAmount(minBet);
+      setSliderValue(calculateSliderValue(minBet));
+    } else if (betAmount > maxBet) {
+      setBetAmount(maxBet);
+      setSliderValue(calculateSliderValue(maxBet));
+    }
+  }, [minBet, maxBet]);
 
   return (
-    <div className="mt-3 bg-slate/30 rounded-lg p-3">
-      <div className="flex flex-wrap justify-between items-center">
-        <div className="flex space-x-3 rtl:space-x-reverse">
-          <Button
-            variant="destructive"
-            className="bg-casinoRed hover:bg-red-700 text-white font-cairo"
-            disabled={!canFold || actionMutation.isPending}
-            onClick={() => executeAction("fold")}
-          >
-            طي
-          </Button>
-          
-          {canCheck ? (
-            <Button
-              variant="secondary"
-              className="bg-slate hover:bg-slate-700 text-white font-cairo"
-              disabled={actionMutation.isPending}
-              onClick={() => executeAction("check")}
-            >
-              متابعة
-            </Button>
-          ) : (
-            <Button
-              variant="secondary"
-              className="bg-slate hover:bg-slate-700 text-white font-cairo"
-              disabled={!canCall || actionMutation.isPending}
-              onClick={() => executeAction("call")}
-            >
-              مجاراة ({gameState.currentBet})
-            </Button>
-          )}
-          
-          <Button
-            className="bg-gradient-to-br from-gold to-darkGold hover:from-lightGold hover:to-gold text-deepBlack font-cairo"
-            disabled={!canRaise || actionMutation.isPending}
-            onClick={() => executeAction("raise")}
-          >
-            رفع
-          </Button>
-          
-          <Button
-            className="bg-gradient-to-br from-amber-500 to-red-600 hover:from-red-500 hover:to-red-700 text-white font-cairo animate-pulse"
-            disabled={!canRaise || actionMutation.isPending}
-            onClick={() => executeAction("allIn")}
-          >
-            كل ما لديك
-          </Button>
+    <div className="bg-black/80 backdrop-blur-sm rounded-lg p-3 border border-gold/30 shadow-lg flex flex-col space-y-2 w-[300px]">
+      <div className="flex justify-between items-center mb-1">
+        <span className="text-white text-sm">قيمة الرهان</span>
+        <div className="text-amber-400 font-bold">
+          {formatChips(betAmount)}
         </div>
+      </div>
+      
+      {/* Slider control */}
+      <div className="px-1">
+        <Slider
+          value={sliderValue}
+          min={0}
+          max={100}
+          step={1}
+          onValueChange={handleSliderChange}
+          className="accent-gold"
+        />
+      </div>
+      
+      {/* Min/Max labels */}
+      <div className="flex justify-between text-xs text-white/70">
+        <span>{formatChips(minBet)}</span>
+        <span>{formatChips(maxBet)}</span>
+      </div>
+      
+      {/* Input with confirm button */}
+      <div className="flex space-x-2 rtl:space-x-reverse">
+        <Input
+          type="number"
+          value={betAmount}
+          onChange={handleInputChange}
+          min={minBet}
+          max={maxBet}
+          step={100}
+          className="flex-grow text-right"
+        />
         
-        <div className="flex items-center mt-3 sm:mt-0">
-          <span className="text-white ml-2 font-tajawal">قيمة الرهان:</span>
-          <div className="flex items-center bg-deepBlack/50 border border-gold/30 rounded-md overflow-hidden">
-            <button
-              className="bg-slate/50 px-2 py-1 text-white"
-              onClick={decreaseBet}
-              disabled={betAmount <= minBet || !canRaise}
-            >
-              -
-            </button>
-            <Input
-              type="number"
-              value={betAmount}
-              onChange={handleBetAmountChange}
-              className="bg-deepBlack w-20 text-center text-white border-none focus:outline-none font-roboto"
-              disabled={!canRaise}
-            />
-            <button
-              className="bg-slate/50 px-2 py-1 text-white"
-              onClick={increaseBet}
-              disabled={betAmount >= maxBet || !canRaise}
-            >
-              +
-            </button>
-          </div>
+        <div className="flex space-x-1 rtl:space-x-reverse">
+          <Button 
+            onClick={() => onConfirm(betAmount)}
+            size="sm"
+            className="bg-green-600 hover:bg-green-700 text-white w-10 h-10 p-0"
+          >
+            <Check className="h-5 w-5" />
+          </Button>
+          
+          <Button 
+            onClick={onCancel}
+            size="sm"
+            variant="outline"
+            className="bg-red-500/20 hover:bg-red-500/30 border-red-500/50 text-white w-10 h-10 p-0"
+          >
+            <X className="h-5 w-5" />
+          </Button>
         </div>
+      </div>
+      
+      {/* Quick bet buttons */}
+      <div className="flex justify-between mt-2">
+        {quickBets.map((bet, index) => (
+          <Button
+            key={index}
+            size="sm"
+            variant="outline"
+            className="text-xs bg-slate-800 border-slate-600 hover:bg-slate-700 text-white px-2"
+            onClick={() => {
+              const newBet = Math.min(maxBet, Math.max(minBet, bet.value));
+              setBetAmount(newBet);
+              setSliderValue(calculateSliderValue(newBet));
+            }}
+          >
+            {bet.label}
+          </Button>
+        ))}
       </div>
     </div>
   );

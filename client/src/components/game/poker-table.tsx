@@ -7,6 +7,8 @@ import { Chips } from "./chips";
 import { Plus } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
+import { GameInstructions } from "./game-instructions";
+import { GameActions } from "./game-actions";
 import pokerTableBg from "@assets/gradient-poker-table-background_23-2151085419 (1).jpg";
 
 interface PokerTableProps {
@@ -334,28 +336,39 @@ export function PokerTable({ gameState }: PokerTableProps) {
 
         {/* Table action buttons - shown based on game state - positioned on bottom right */}
         {gameState.gameStatus !== "waiting" && isUserPlaying && (
-          <div className="absolute bottom-4 right-4 flex flex-col space-y-2 z-40">
-            <div className="flex flex-col items-end space-y-2">
-              {/* Action buttons */}
-              <button className="bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 shadow-lg w-28 flex items-center justify-between">
-                <span>تخلي</span>
-                <span className="bg-white/20 rounded-full h-6 w-6 flex items-center justify-center text-xs">F</span>
-              </button>
-              <button className="bg-green-600 text-white px-4 py-2 rounded-full hover:bg-green-700 shadow-lg w-28 flex items-center justify-between">
-                <span>كشف 1K</span>
-                <span className="bg-white/20 rounded-full h-6 w-6 flex items-center justify-center text-xs">C</span>
-              </button>
-              <button className="bg-amber-600 text-white px-4 py-2 rounded-full hover:bg-amber-700 shadow-lg w-28 flex items-center justify-between">
-                <span>زيادة</span>
-                <span className="bg-white/20 rounded-full h-6 w-6 flex items-center justify-center text-xs">R</span>
-              </button>
-            </div>
-            
-            {/* Bet amount slider */}
-            <div className="flex items-center space-x-2 rtl:space-x-reverse bg-black/50 p-2 rounded-lg">
-              <input type="range" min="1" max="100" className="accent-gold flex-grow" />
-              <div className="text-white text-sm bg-black/70 px-2 py-1 rounded">500K</div>
-            </div>
+          <div className="absolute bottom-4 right-4 z-40">
+            <GameActions 
+              currentBet={gameState.currentBet}
+              minRaise={gameState.currentBet * 2}
+              maxBet={100000} /* يجب استبدالها بالحد الأقصى المحدد */
+              playerChips={positionedPlayers.find(p => p.isCurrentPlayer)?.chips || 0}
+              isCurrentTurn={positionedPlayers.find(p => p.isCurrentPlayer)?.id === gameState.currentTurn}
+              onAction={(action, amount) => {
+                // إرسال طلب إجراء اللعب إلى الخادم
+                console.log(`Sending action ${action} with amount ${amount}`);
+                
+                // يمكن إضافة الكود هنا لإرسال طلب إلى نقطة نهاية API
+                fetch(`/api/game/${gameState.id || gameState.gameId}/action`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  credentials: 'include',
+                  body: JSON.stringify({ action, amount })
+                })
+                .then(response => {
+                  if (!response.ok) {
+                    throw new Error('Failed to execute action');
+                  }
+                  return response.json();
+                })
+                .catch(error => {
+                  toast({
+                    title: "خطأ في تنفيذ الإجراء",
+                    description: error.message,
+                    variant: "destructive",
+                  });
+                });
+              }}
+            />
           </div>
         )}
       </div>

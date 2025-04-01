@@ -384,11 +384,13 @@ export default function GamePage({ params }: { params?: { tableId?: string } }) 
         <PokerTable gameState={gameState} />
         
         {/* أزرار إجراءات اللعب - تظهر فقط في وضع اللعب النشط */}
-        {!isSpectator && (
+        {!isSpectator && gameState && (
           <GameActions 
-            gameState={gameState}
+            currentBet={gameState.currentBet || 0}
+            minRaise={gameState.minRaise || gameState.currentBet * 2 || 0}
+            maxBet={Math.max(...gameState.players.map(p => p.chips || 0), 1000)}
+            playerChips={user?.chips || 0}
             onAction={performGameAction}
-            isLoading={isActionLoading}
             isCurrentTurn={isCurrentTurn}
           />
         )}
