@@ -64,12 +64,13 @@ export function GameControls({ gameState, onShowInstructions }: GameControlsProp
   };
   
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-black/70 border-t border-gold/30 p-2 flex justify-center items-center z-50">
-      <div className="container mx-auto flex items-center justify-between">
-        <div className="flex items-center space-x-2 rtl:space-x-reverse">
+    <div className="fixed bottom-0 left-0 right-0 bg-black/70 border-t border-gold/30 py-2 px-4 flex items-center z-50">
+      <div className="flex items-center justify-between w-full">
+        {/* شريط الأدوات - صف واحد من الأزرار */}
+        <div className="flex items-center gap-3 flex-nowrap overflow-x-auto hide-scrollbar">
           <Button
             variant="ghost"
-            className="bg-yellow-500 hover:bg-yellow-600 text-black font-cairo transition-colors rounded-full size-10 p-0 flex items-center justify-center"
+            className="bg-yellow-500 hover:bg-yellow-600 text-black font-cairo transition-colors rounded-full min-w-10 h-10 p-0 flex items-center justify-center flex-shrink-0"
             onClick={onShowInstructions}
             title="تعليمات"
           >
@@ -78,7 +79,7 @@ export function GameControls({ gameState, onShowInstructions }: GameControlsProp
           
           <Button
             variant="destructive"
-            className="bg-casinoRed hover:bg-red-700 text-white font-cairo transition-colors rounded-full size-10 p-0 flex items-center justify-center"
+            className="bg-casinoRed hover:bg-red-700 text-white font-cairo transition-colors rounded-full min-w-10 h-10 p-0 flex items-center justify-center flex-shrink-0"
             onClick={handleLeaveTable}
             disabled={leaveMutation.isPending}
             title="خروج"
@@ -90,52 +91,51 @@ export function GameControls({ gameState, onShowInstructions }: GameControlsProp
             )}
           </Button>
           
-          <div className="px-3 py-1 rounded-full bg-deepBlack/80 text-gold border border-gold/20">
-            <span className="font-tajawal">{gameState.tableName}</span>
-          </div>
-        </div>
-        
-        <div className="flex justify-center items-center space-x-3 rtl:space-x-reverse flex-1">
-          <button className="size-10 bg-amber-500/20 rounded-full flex items-center justify-center text-amber-400 hover:bg-amber-500/30 transition-all">
+          <button className="min-w-10 h-10 bg-amber-500/20 rounded-full flex items-center justify-center text-amber-400 hover:bg-amber-500/30 transition-all flex-shrink-0">
             <Star className="h-5 w-5" />
           </button>
 
-          <button className="size-10 bg-red-500/20 rounded-full flex items-center justify-center text-red-400 hover:bg-red-500/30 transition-all">
+          <button className="min-w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center text-red-400 hover:bg-red-500/30 transition-all flex-shrink-0">
             <Heart className="h-5 w-5" />
           </button>
 
-          <button className="size-10 bg-green-500/20 rounded-full flex items-center justify-center text-green-400 hover:bg-green-500/30 transition-all relative">
+          <button className="min-w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center text-green-400 hover:bg-green-500/30 transition-all relative flex-shrink-0">
             <Mail className="h-5 w-5" />
             <span className="absolute -top-1 -right-1 size-4 bg-red-500 rounded-full text-white text-xs flex items-center justify-center">3</span>
           </button>
 
-          <button className="size-10 bg-purple-500/20 rounded-full flex items-center justify-center text-purple-400 hover:bg-purple-500/30 transition-all">
+          <button className="min-w-10 h-10 bg-purple-500/20 rounded-full flex items-center justify-center text-purple-400 hover:bg-purple-500/30 transition-all flex-shrink-0">
             <Gift className="h-5 w-5" />
           </button>
 
-          <button className="size-10 bg-blue-500/20 rounded-full flex items-center justify-center text-blue-400 hover:bg-blue-500/30 transition-all relative">
+          <button className="min-w-10 h-10 bg-blue-500/20 rounded-full flex items-center justify-center text-blue-400 hover:bg-blue-500/30 transition-all relative flex-shrink-0">
             <Bell className="h-5 w-5" />
             <span className="absolute -top-1 -right-1 size-4 bg-red-500 rounded-full text-white text-xs flex items-center justify-center">1</span>
           </button>
 
-          <button className="size-10 bg-slate-500/20 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-500/30 transition-all">
+          <button className="min-w-10 h-10 bg-slate-500/20 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-500/30 transition-all flex-shrink-0">
             <User className="h-5 w-5" />
           </button>
 
-          <button className="size-10 bg-emerald-500/20 rounded-full flex items-center justify-center text-emerald-400 hover:bg-emerald-500/30 transition-all">
+          <button className="min-w-10 h-10 bg-emerald-500/20 rounded-full flex items-center justify-center text-emerald-400 hover:bg-emerald-500/30 transition-all flex-shrink-0">
             <Home className="h-5 w-5" />
           </button>
 
-          <button className="size-10 bg-teal-500/20 rounded-full flex items-center justify-center text-teal-400 hover:bg-teal-500/30 transition-all">
+          <button className="min-w-10 h-10 bg-teal-500/20 rounded-full flex items-center justify-center text-teal-400 hover:bg-teal-500/30 transition-all flex-shrink-0">
             <UserPlus className="h-5 w-5" />
           </button>
 
-          <button className="size-10 bg-pink-500/20 rounded-full flex items-center justify-center text-pink-400 hover:bg-pink-500/30 transition-all">
+          <button className="min-w-10 h-10 bg-pink-500/20 rounded-full flex items-center justify-center text-pink-400 hover:bg-pink-500/30 transition-all flex-shrink-0">
             <ShoppingCart className="h-5 w-5" />
           </button>
+          
+          <div className="px-3 h-10 rounded-full bg-deepBlack/80 text-gold border border-gold/20 flex items-center flex-shrink-0">
+            <span className="font-tajawal">{gameState.tableName}</span>
+          </div>
         </div>
         
-        <div className="flex items-center space-x-3 rtl:space-x-reverse">
+        {/* معلومات اللاعب */}
+        <div className="flex items-center gap-3 flex-shrink-0">
           <div className="bg-deepBlack/80 rounded-full px-3 py-1 flex items-center border border-gold/20">
             <Coins className="text-gold w-4 h-4 ml-2" />
             <span className="text-gold font-roboto">{formatChips(user?.chips || 0)}</span>
