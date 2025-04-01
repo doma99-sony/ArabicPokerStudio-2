@@ -62,8 +62,24 @@ function Router() {
 }
 
 function App() {
-  const [showSplash, setShowSplash] = useState(true);
-  const { isLoading } = useAuth();
+  const [showSplash, setShowSplash] = useState(() => {
+    // تحقق مما إذا كانت شاشة البداية قد تم رؤيتها سابقاً في الجلسة الحالية
+    const hasSeenSplash = sessionStorage.getItem('hasSeenSplash');
+    
+    // تحقق مما إذا كان المستخدم قد سجل خروجه، إذا كان كذلك أظهر شاشة البداية من جديد
+    const hasLoggedOut = sessionStorage.getItem('hasLoggedOut');
+    
+    if (hasLoggedOut === 'true') {
+      // إعادة ضبط حالة تسجيل الخروج
+      sessionStorage.removeItem('hasLoggedOut');
+      return true;
+    }
+    
+    // إذا لم يكن قد رأى شاشة البداية من قبل، أظهرها
+    return hasSeenSplash !== 'true';
+  });
+  
+  const { isLoading, user } = useAuth();
   
   // تهيئة تحسينات الأداء عند بدء التطبيق
   useEffect(() => {
@@ -92,6 +108,21 @@ function App() {
     }
   }, []);
   
+  // رصد حالة تسجيل الخروج
+  useEffect(() => {
+    // إذا كان المستخدم غير موجود (تم تسجيل خروجه)، ضع علامة في sessionStorage
+    if (user === null && sessionStorage.getItem('hadUser') === 'true') {
+      sessionStorage.setItem('hasLoggedOut', 'true');
+      // إعادة تحميل الصفحة لعرض شاشة البداية
+      window.location.reload();
+    }
+    
+    // إذا كان المستخدم موجود، ضع علامة في sessionStorage
+    if (user !== null) {
+      sessionStorage.setItem('hadUser', 'true');
+    }
+  }, [user]);
+  
   // عرض شاشة التحميل العامة أثناء التحقق من حالة المصادقة
   if (isLoading) {
     return (
@@ -106,7 +137,11 @@ function App() {
   
   // إذا كانت شاشة البداية مفعلة، اعرضها أولاً
   if (showSplash) {
-    return <SplashScreen onComplete={() => setShowSplash(false)} />;
+    return <SplashScreen onComplete={() => {
+      // تعيين علامة في sessionStorage أنه قد رأى شاشة البداية
+      sessionStorage.setItem('hasSeenSplash', 'true');
+      setShowSplash(false);
+    }} />;
   }
   
   return (
