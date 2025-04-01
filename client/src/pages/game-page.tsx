@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "wouter";
-import { GameState, GameAction } from "@/types";
+import { GameState, GameAction, PlayerPosition } from "@/types";
 import { Loader2 } from "lucide-react";
 import { PokerTable } from "@/components/game/poker-table";
 import { GameControls } from "@/components/game/game-controls";
@@ -10,6 +10,7 @@ import { BetControls } from "@/components/game/bet-controls";
 import { SpectatorBar } from "@/components/game/spectator-bar";
 import { GameActions } from "@/components/game/game-actions";
 import { CommunityCards } from "@/components/game/community-cards";
+import { PlayerNotifications } from "@/components/game/player-notification";
 import { useToast } from "@/hooks/use-toast";
 
 export default function GamePage({ params }: { params?: { tableId?: string } }) {
@@ -314,6 +315,16 @@ export default function GamePage({ params }: { params?: { tableId?: string } }) 
       return;
     }
     
+    // منع الإجراء إذا لم يكن دور اللاعب
+    if (!isCurrentTurn && gameState.gameStatus !== "waiting") {
+      toast({
+        title: "ليس دورك",
+        description: "يرجى الانتظار حتى يأتي دورك للعب",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     // تسجيل بيانات الإجراء للتصحيح
     console.log("إرسال إجراء إلى الخادم:", { 
       action, 
@@ -324,7 +335,20 @@ export default function GamePage({ params }: { params?: { tableId?: string } }) 
     
     setIsActionLoading(true);
     
+    // تعريف رسائل الإجراءات
+    const actionMessages: Record<string, string> = {
+      fold: "تم الانسحاب من الجولة",
+      check: "تم المتابعة بدون مراهنة",
+      call: `تم المجاراة بمبلغ ${gameState?.currentBet || 0}`,
+      raise: `تم رفع المراهنة إلى ${amount || 0}`,
+      all_in: `تم المراهنة بكل الرقاقات (${amount || 0})`
+    };
+    
     try {
+      // إضافة مهلة زمنية للطلب لضمان عدم تعليق واجهة المستخدم
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 ثوانٍ كحد أقصى
+      
       const response = await fetch(`/api/game/${tableId}/action`, {
         method: 'POST',
         headers: {
@@ -334,8 +358,11 @@ export default function GamePage({ params }: { params?: { tableId?: string } }) 
         body: JSON.stringify({
           action,
           amount: amount || 0
-        })
+        }),
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId); // إلغاء المهلة عند نجاح الطلب
       
       const data = await response.json();
       
@@ -345,29 +372,53 @@ export default function GamePage({ params }: { params?: { tableId?: string } }) 
           description: data.message || "حدث خطأ غير معروف",
           variant: "destructive"
         });
-        setIsActionLoading(false);
         return;
       }
       
       // تحديث واجهة المستخدم بناءً على الإجراء
-      let actionMessage = "";
-      if (action === 'fold') actionMessage = "تم الانسحاب من الجولة";
-      else if (action === 'check') actionMessage = "تم المتابعة بدون مراهنة";
-      else if (action === 'call') actionMessage = `تم المتابعة بمبلغ ${gameState.currentBet}`;
-      else if (action === 'raise') actionMessage = `تم رفع المراهنة إلى ${amount}`;
-      else if (action === 'all_in') actionMessage = `تم المراهنة بكل الرقاقات (${amount})`;
-      
       toast({
         title: "تم تنفيذ الإجراء",
-        description: actionMessage,
+        description: actionMessages[action] || "تم تنفيذ الإجراء بنجاح",
         variant: "default"
       });
       
+      // تحديث حالة اللعبة في واجهة المستخدم
+      if (data.gameState) {
+        console.log("تم استلام حالة لعبة محدثة من الخادم:", data.gameState);
+        // سيتم تحديث البيانات تلقائيًا عبر useQuery
+      }
+      
+      // تحديث البيانات بعد فترة قصيرة عن طريق استعلام جديد - قد يكون هناك تأخير قبل أن تظهر النتائج
+      setTimeout(() => {
+        // تحديث بيانات الاستعلام
+        fetch(`/api/game/${tableId}`, {
+          credentials: 'include'
+        }).then(resp => {
+          if (resp.ok) return resp.json();
+        }).then(newData => {
+          if (newData) {
+            console.log("تم تحديث بيانات اللعبة من الخادم");
+          }
+        }).catch(err => {
+          console.error("خطأ في تحديث بيانات اللعبة:", err);
+        });
+      }, 300);
+      
     } catch (error) {
       console.error("خطأ في تنفيذ الإجراء:", error);
+      
+      // رسالة خطأ أكثر تفصيلاً حسب نوع الخطأ
+      let errorMessage = "حدث خطأ أثناء محاولة تنفيذ الإجراء";
+      
+      if (error instanceof DOMException && error.name === "AbortError") {
+        errorMessage = "استغرق الاتصال وقتاً طويلاً، يرجى المحاولة مرة أخرى";
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
       toast({
-        title: "خطأ",
-        description: "حدث خطأ أثناء محاولة تنفيذ الإجراء",
+        title: "خطأ في تنفيذ الإجراء",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
@@ -375,6 +426,16 @@ export default function GamePage({ params }: { params?: { tableId?: string } }) 
     }
   };
 
+  // حفظ الحالة السابقة للاعبين لرصد التغييرات
+  const [previousPlayers, setPreviousPlayers] = useState<PlayerPosition[]>([]);
+  
+  // تحديث اللاعبين السابقين عند تغير حالة اللعبة
+  useEffect(() => {
+    if (gameState && gameState.players) {
+      setPreviousPlayers([...gameState.players]);
+    }
+  }, [gameState]);
+  
   return (
     <div className="min-h-screen bg-deepBlack text-white py-2 pb-16 flex flex-col">
       <div className="container mx-auto px-4 h-full flex flex-col">
@@ -385,6 +446,13 @@ export default function GamePage({ params }: { params?: { tableId?: string } }) 
             <CommunityCards cards={gameState.communityCards || []} size="md" />
           </div>
         )}
+        
+        {/* إشعارات انضمام ومغادرة اللاعبين */}
+        <PlayerNotifications 
+          gameStatus={gameState.gameStatus || ''}
+          players={gameState.players}
+          previousPlayers={previousPlayers}
+        />
         
         {/* Poker table (middle) */}
         <PokerTable gameState={gameState} />
@@ -398,6 +466,8 @@ export default function GamePage({ params }: { params?: { tableId?: string } }) 
             playerChips={user?.chips || 0}
             onAction={performGameAction}
             isCurrentTurn={isCurrentTurn}
+            tableId={Number(tableId)}
+            gameStatus={gameState.gameStatus}
           />
         )}
         

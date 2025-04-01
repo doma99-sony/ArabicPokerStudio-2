@@ -35,6 +35,20 @@ export interface HandDetails {
   bestHand?: Card[]; // أفضل 5 أوراق تشكل اليد
 }
 
+export interface GamePlayer {
+  id: number;
+  username: string;
+  chips: number;
+  position: number;
+  avatar?: string;
+  cards: Card[];
+  folded: boolean;
+  betAmount: number;
+  isAllIn: boolean;
+  isActive: boolean;
+  isTurn?: boolean;
+}
+
 export interface PlayerPosition {
   id: number;
   username: string;
