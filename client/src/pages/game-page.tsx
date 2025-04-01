@@ -314,6 +314,14 @@ export default function GamePage({ params }: { params?: { tableId?: string } }) 
       return;
     }
     
+    // تسجيل بيانات الإجراء للتصحيح
+    console.log("إرسال إجراء إلى الخادم:", { 
+      action, 
+      amount: amount || 0, 
+      tableId, 
+      player: currentPlayer?.username
+    });
+    
     setIsActionLoading(true);
     
     try {

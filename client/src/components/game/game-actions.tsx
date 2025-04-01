@@ -82,6 +82,9 @@ export function GameActions({
       return;
     }
     
+    // تسجيل الإجراء في وحدة التحكم للتصحيح
+    console.log("تنفيذ إجراء اللعبة:", { action, amount });
+    
     // Hide bet controls when other actions are taken
     setShowBetControls(false);
     onAction(action, amount);

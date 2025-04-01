@@ -22,12 +22,20 @@ export interface PlayerPosition {
   username: string;
   chips: number;
   avatar: string;
-  position: "bottom" | "bottomRight" | "right" | "top" | "left";
+  position: "bottom" | "bottomRight" | "right" | "top" | "left" | "topRight" | "topLeft" | "bottomLeft" | "dealer";
   isCurrentPlayer: boolean;
   isTurn: boolean;
+  isActive: boolean;
+  isAllIn: boolean;
+  isVIP?: boolean;
   cards?: Card[];
   folded?: boolean;
   betAmount?: number;
+  winner?: boolean;
+  handName?: string;
+  handDetails?: {
+    bestHand?: Card[];
+  };
 }
 
 export interface Card {
@@ -52,6 +60,7 @@ export interface GameState {
   currentBet: number;
   userChips: number;
   gameStatus: "waiting" | "preflop" | "flop" | "turn" | "river" | "showdown";
+  minRaise?: number; // الحد الأدنى للزيادة (اختياري)
 }
 
 export interface Achievement {
@@ -79,8 +88,8 @@ export interface GameHistoryItem {
   chipsChange: number;
 }
 
-export interface PlayerProfile extends User {
+export interface PlayerProfile extends Omit<User, 'coverPhoto'> {
   stats: PlayerStats;
   gameHistory: GameHistoryItem[];
-  coverPhoto?: string; // إضافة حقل صورة الغلاف
+  coverPhoto?: string | null; // إضافة حقل صورة الغلاف
 }
