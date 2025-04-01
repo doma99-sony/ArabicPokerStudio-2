@@ -23,6 +23,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
 import { WelcomeMessageNotification } from "@/components/ui/welcome-message";
 import { LandscapeNotice } from "@/components/ui/landscape-notice";
+import { NotificationsProvider } from "@/components/ui/notifications-system";
 import { initializePerformanceOptimizations } from "@/lib/performance-utils";
 import { useEffect } from "react";
 
@@ -96,12 +97,12 @@ function App() {
   }
   
   return (
-    <>
+    <NotificationsProvider>
       <Router />
       <WelcomeMessageNotification />
       <LandscapeNotice />
       <Toaster />
-    </>
+    </NotificationsProvider>
   );
 }
 

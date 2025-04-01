@@ -1,49 +1,15 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "wouter";
-import { ArrowRight, Bell } from "lucide-react";
+import { ArrowRight, Bell, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-
-interface Notification {
-  id: string;
-  title: string;
-  content: string;
-  timestamp: number;
-  read: boolean;
-}
+import { useNotifications, Notification } from "@/components/ui/notifications-system";
 
 export default function NotificationsPage() {
   const { messageId } = useParams();
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const { notifications, markAsRead, markAllAsRead } = useNotifications();
   const [activeNotification, setActiveNotification] = useState<Notification | null>(null);
   const [isBlinking, setIsBlinking] = useState(false);
-
-  // محاكاة استرجاع الإشعارات من التخزين المحلي
-  useEffect(() => {
-    const storedNotifications = localStorage.getItem('notifications');
-    if (storedNotifications) {
-      setNotifications(JSON.parse(storedNotifications));
-    } else {
-      // بيانات تجريبية إذا لم يكن هناك إشعارات مخزنة
-      const demoNotifications: Notification[] = [
-        {
-          id: "msg_1",
-          title: "مرحبًا بك في بوكر ستارز!",
-          content: "استمتع بألعاب البوكر المثيرة وتنافس مع أفضل اللاعبين. إذا كنت جديدًا، يمكنك الاطلاع على دليل المبتدئين واستكشاف الطاولات المختلفة.",
-          timestamp: Date.now() - 1000 * 60 * 10, // 10 دقائق مضت
-          read: false
-        },
-        {
-          id: "msg_2",
-          title: "عرض خاص لهذا الأسبوع!",
-          content: "احصل على 1000 رقاقة إضافية عند تسجيل الدخول لمدة 3 أيام متتالية. استفد من العرض الآن واستمتع بالمزيد من اللعب!",
-          timestamp: Date.now() - 1000 * 60 * 60, // ساعة مضت
-          read: true
-        }
-      ];
-      setNotifications(demoNotifications);
-    }
-  }, []);
 
   // العثور على الإشعار النشط إذا تم تحديد معرف
   useEffect(() => {
@@ -59,25 +25,11 @@ export default function NotificationsPage() {
         
         return () => clearInterval(blinkInterval);
       }
+    } else if (notifications.length > 0) {
+      // إذا لم يتم تحديد معرف، اختر أحدث إشعار
+      setActiveNotification(notifications[notifications.length - 1]);
     }
   }, [messageId, notifications]);
-
-  // وضع علامة "مقروءة" على الإشعار
-  const markAsRead = (notificationId: string) => {
-    const updatedNotifications = notifications.map(notification => 
-      notification.id === notificationId 
-        ? { ...notification, read: true } 
-        : notification
-    );
-    
-    setNotifications(updatedNotifications);
-    localStorage.setItem('notifications', JSON.stringify(updatedNotifications));
-    
-    // إذا كان الإشعار النشط هو الذي تم وضع علامة "مقروءة" عليه
-    if (activeNotification && activeNotification.id === notificationId) {
-      setActiveNotification({ ...activeNotification, read: true });
-    }
-  };
 
   // تنسيق التاريخ للعرض
   const formatDate = (timestamp: number) => {
@@ -108,7 +60,20 @@ export default function NotificationsPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* قائمة الإشعارات */}
           <div className="md:col-span-1 space-y-4">
-            <h2 className="text-xl font-semibold text-[#D4AF37]/80 mb-4">جميع الإشعارات</h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold text-[#D4AF37]/80">جميع الإشعارات</h2>
+              {notifications.some(n => !n.read) && (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="border-[#D4AF37]/50 text-[#D4AF37]/80 hover:bg-[#D4AF37]/20 text-xs"
+                  onClick={markAllAsRead}
+                >
+                  <CheckCircle2 className="h-3 w-3 ml-1" />
+                  تعليم الكل كمقروء
+                </Button>
+              )}
+            </div>
             {notifications.length === 0 ? (
               <div className="bg-black/30 rounded-lg p-4 text-center">
                 لا توجد إشعارات حالياً

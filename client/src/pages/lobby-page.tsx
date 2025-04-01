@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { OnlineUsersCounter } from "@/components/ui/online-users-badge";
 import { ResetChipsButton } from "@/components/reset-chips-button";
 import { RemoveVirtualPlayersButton } from "@/components/remove-virtual-players-button";
+import { NotificationsButton } from "@/components/ui/notifications-system";
 import { LogOut, User, ChevronRight, Loader2, ChevronLeft, ChevronUp, Bell, ShoppingBag, ShoppingCart, Download, Smartphone, ExternalLink } from "lucide-react";
 
 export default function LobbyPage() {
@@ -468,6 +469,9 @@ export default function LobbyPage() {
             </button>
             <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-[10px] text-white flex items-center justify-center border border-black">2</span>
           </div>
+          
+          {/* الإشعارات */}
+          <NotificationsButton />
           
           {/* المهمات */}
           <div className="relative">
