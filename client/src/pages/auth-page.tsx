@@ -3,8 +3,8 @@ import { useLocation } from "wouter";
 import { LoginForm } from "@/components/auth/login-form";
 import { RegisterForm } from "@/components/auth/register-form";
 import { useAuth } from "@/hooks/use-auth";
-import { motion, AnimatePresence } from "framer-motion";
-import { Loader2 } from "lucide-react";
+import { motion, AnimatePresence, useAnimation } from "framer-motion";
+import { Loader2, BadgeCheck, ChevronDown, ChevronsUpDown, CircleCheck, History, Shield, Users } from "lucide-react";
 
 enum AuthTab {
   Login,
@@ -150,217 +150,250 @@ export default function AuthPage() {
   // مصفوفة رموز أوراق اللعب 
   const cardSuits = ['♠', '♥', '♦', '♣'];
   
-  return (
-    <div className="fixed inset-0 overflow-hidden flex items-center justify-center bg-black">
-      {/* خلفية متحركة */}
-      <canvas 
-        ref={canvasRef}
-        className="absolute inset-0 w-full h-full opacity-20"
-      />
+  // إعداد معرفات المميزات
+  const features = [
+    { 
+      id: 'safe', 
+      icon: <Shield className="w-5 h-5 text-[#D4AF37]" />, 
+      title: 'لعب آمن 100%',
+      description: 'تشفير كامل ونظام تحقق متقدم'
+    },
+    { 
+      id: 'players', 
+      icon: <Users className="w-5 h-5 text-[#D4AF37]" />, 
+      title: 'آلاف اللاعبين',
+      description: 'منضمين من جميع أنحاء العالم'
+    },
+    { 
+      id: 'vip', 
+      icon: <BadgeCheck className="w-5 h-5 text-[#D4AF37]" />, 
+      title: 'مكافآت يومية',
+      description: 'رصيد مجاني وهدايا خاصة'
+    },
+    { 
+      id: 'history', 
+      icon: <History className="w-5 h-5 text-[#D4AF37]" />, 
+      title: 'إحصائيات اللعب',
+      description: 'تتبع تقدمك وإنجازاتك'
+    }
+  ];
 
-      {/* خلفية تدرج الألوان وتأثيراتها */}
-      <div className="absolute inset-0" style={{ 
-        background: "radial-gradient(circle at center, rgba(20, 20, 20, 1) 0%, rgba(0, 0, 0, 1) 100%)",
-        boxShadow: "inset 0 0 100px rgba(212, 175, 55, 0.15)"
-      }}></div>
+  // إنشاء تأثيرات متحركة للمميزات
+  const controls = useAnimation();
+  useEffect(() => {
+    controls.start(i => ({
+      opacity: 1,
+      y: 0,
+      transition: { delay: i * 0.2, duration: 0.5 }
+    }));
+  }, [controls]);
+
+  return (
+    <div className="fixed inset-0 overflow-hidden bg-black flex items-center justify-center">
+      {/* فيديو خلفية مع طبقة داكنة */}
+      <div className="absolute inset-0 overflow-hidden z-0">
+        <video 
+          autoPlay 
+          loop 
+          muted 
+          playsInline
+          className="absolute w-full h-full object-cover opacity-20"
+        >
+          <source src="/assets/background-video.mp4" type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-black/70"></div>
+      </div>
       
-      {/* تأثير اللمعان الذهبي من الأعلى */}
-      <div className="absolute top-0 left-0 right-0 h-[300px] bg-gradient-to-b from-[#D4AF37]/10 to-transparent opacity-60"></div>
+      {/* صورة كازينو مستقبلية على الجانب الأيسر - خفية على الموبايل */}
+      <div className="absolute left-0 top-0 bottom-0 w-1/3 hidden lg:block">
+        <div className="absolute inset-0 bg-gradient-to-r from-black via-black/20 to-transparent z-10"></div>
+        <img 
+          src="/assets/futuristic-casino-architecture.jpg" 
+          alt="كازينو مستقبلي" 
+          className="w-full h-full object-cover opacity-30"
+        />
+      </div>
       
-      {/* تأثير الخطوط والنقاط الذهبية المتحركة */}
-      <div className="absolute inset-0 overflow-hidden opacity-10">
-        {Array.from({ length: 20 }).map((_, i) => (
-          <div
+      {/* صورة طاولة البوكر على الجانب الأيمن - خفية على الموبايل */}
+      <div className="absolute right-0 top-0 bottom-0 w-1/3 hidden lg:block">
+        <div className="absolute inset-0 bg-gradient-to-l from-black via-black/20 to-transparent z-10"></div>
+        <img 
+          src="/assets/poker-table-bg.jpg" 
+          alt="طاولة بوكر" 
+          className="w-full h-full object-cover opacity-30"
+        />
+      </div>
+      
+      {/* إضافة طبقة من التأثيرات اللونية */}
+      <div className="absolute inset-0 bg-gradient-radial from-[#D4AF37]/5 to-transparent opacity-30"></div>
+      
+      {/* كأننا على سطح طاولة البوكر - مؤثر ضوئي مركزي */}
+      <div className="absolute inset-0 bg-[#1B4D3E]/10"></div>
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-gradient-radial from-[#D4AF37]/10 to-transparent blur-3xl"></div>
+      
+      {/* الشعار المتحرك في الأعلى */}
+      <motion.div
+        className="absolute top-6 left-1/2 transform -translate-x-1/2 z-50 flex flex-col items-center"
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, type: 'spring' }}
+      >
+        <img 
+          src="/assets/poker-icon-gold.png" 
+          alt="VIP بوكر" 
+          className="w-20 h-20 object-contain rounded-full border-2 border-[#D4AF37] shadow-[0_0_20px_rgba(212,175,55,0.6)]"
+        />
+        <h1 className="mt-3 text-4xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] to-[#BF9B30] animate-glow-pulse">
+          بوكر تكساس العربي
+        </h1>
+      </motion.div>
+      
+      {/* تفاصيل كروت اللعب بشكل متقدم */}
+      <div className="absolute -top-10 -right-10 w-64 h-64 opacity-20 animate-floating">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+          <path d="M50,10 L90,50 L50,90 L10,50 Z" fill="#D4AF37" fillOpacity="0.2" />
+          <text x="50" y="55" fontSize="20" fill="#FFFFFF" textAnchor="middle">♠</text>
+        </svg>
+      </div>
+      
+      <div className="absolute -bottom-10 -left-10 w-64 h-64 opacity-20 animate-floating" style={{ animationDelay: '1s' }}>
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+          <path d="M50,10 L90,50 L50,90 L10,50 Z" fill="#C41E3A" fillOpacity="0.2" />
+          <text x="50" y="55" fontSize="20" fill="#FFFFFF" textAnchor="middle">♥</text>
+        </svg>
+      </div>
+      
+      {/* رسوم متحركة للنقاط اللامعة */}
+      <div className="absolute inset-0 pointer-events-none">
+        {Array.from({ length: 50 }).map((_, i) => (
+          <motion.div
             key={`sparkle-${i}`}
-            className="absolute w-1 h-1 bg-[#D4AF37] rounded-full animate-pulse-slow"
+            className="absolute w-1 h-1 rounded-full bg-[#D4AF37]"
             style={{
               top: `${Math.random() * 100}%`,
               left: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              animationDuration: `${Math.random() * 4 + 3}s`
+            }}
+            animate={{
+              opacity: [0, 0.8, 0],
+              scale: [0, 1, 0],
+            }}
+            transition={{
+              duration: Math.random() * 2 + 1,
+              repeat: Infinity,
+              delay: Math.random() * 3,
+              ease: 'easeInOut'
             }}
           />
         ))}
       </div>
       
-      {/* البطاقات العائمة باستخدام Framer Motion */}
-      {floatingCards.map((card, index) => (
-        <motion.div
-          key={`floating-card-${index}`}
-          className="absolute pointer-events-none"
-          initial={{ opacity: 0 }}
-          animate={{ 
-            opacity: [0, 0.8, 0.8, 0],
-            x: [card.x + '%', (card.x + 5) + '%', (card.x - 5) + '%', card.x + '%'],
-            y: [card.y + '%', (card.y - 5) + '%', (card.y + 5) + '%', card.y + '%'],
-            rotate: [card.rotation, card.rotation + 20, card.rotation - 20, card.rotation],
-          }}
-          transition={{
-            duration: card.speed,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-          style={{
-            left: `${card.x}%`,
-            top: `${card.y}%`,
-            fontSize: `${card.size}px`,
-            color: card.suit === '♥' || card.suit === '♦' ? 'rgba(220, 53, 69, 0.2)' : 'rgba(212, 175, 55, 0.2)',
-            textShadow: `0 0 15px ${card.suit === '♥' || card.suit === '♦' ? 'rgba(220, 53, 69, 0.3)' : 'rgba(212, 175, 55, 0.3)'}`,
-            filter: 'blur(1px)'
-          }}
-        >
-          {card.suit}
-        </motion.div>
-      ))}
-      
-      {/* كروت أكثر وضوحاً ودوارة بشكل منفصل */}
-      <div className="absolute w-32 h-40 top-20 left-32 transform -rotate-12 filter drop-shadow-lg animate-floating">
-        <div className="w-full h-full bg-white rounded-xl shadow-xl flex flex-col items-center justify-between p-3 border-2 border-[#D4AF37]/30">
-          <div className="text-red-600 font-bold text-2xl self-start">A</div>
-          <div className="text-red-600 font-bold text-6xl">♥</div>
-          <div className="text-red-600 font-bold text-2xl transform rotate-180 self-end">A</div>
+      {/* كروت البوكر المتحركة في المقدمة */}
+      <motion.div
+        className="absolute -left-5 top-1/3 w-40 h-56 pointer-events-none"
+        initial={{ opacity: 0, x: -100, rotate: -10 }}
+        animate={{ opacity: 0.8, x: 0, rotate: -10 }}
+        transition={{ duration: 0.8, delay: 0.3 }}
+      >
+        <div className="w-full h-full bg-white rounded-lg overflow-hidden relative shadow-[0_0_15px_rgba(0,0,0,0.5)]">
+          <div className="absolute inset-[3px] rounded-md border-2 border-[#D4AF37]/30 flex flex-col items-center justify-between p-4">
+            <div className="text-red-600 font-bold text-2xl self-start">K</div>
+            <div className="text-red-600 font-bold text-6xl">♥</div>
+            <div className="text-red-600 font-bold text-2xl transform rotate-180 self-end">K</div>
+          </div>
         </div>
-      </div>
+      </motion.div>
       
-      <div className="absolute w-28 h-36 bottom-32 right-36 transform rotate-12 filter drop-shadow-lg animate-floating" style={{ animationDelay: '1s' }}>
-        <div className="w-full h-full bg-white rounded-xl shadow-xl flex flex-col items-center justify-between p-3 border-2 border-[#D4AF37]/30">
-          <div className="text-black font-bold text-2xl self-start">A</div>
-          <div className="text-black font-bold text-6xl">♠</div>
-          <div className="text-black font-bold text-2xl transform rotate-180 self-end">A</div>
+      <motion.div
+        className="absolute -right-5 top-1/3 w-40 h-56 pointer-events-none"
+        initial={{ opacity: 0, x: 100, rotate: 10 }}
+        animate={{ opacity: 0.8, x: 0, rotate: 10 }}
+        transition={{ duration: 0.8, delay: 0.3 }}
+      >
+        <div className="w-full h-full bg-white rounded-lg overflow-hidden relative shadow-[0_0_15px_rgba(0,0,0,0.5)]">
+          <div className="absolute inset-[3px] rounded-md border-2 border-[#D4AF37]/30 flex flex-col items-center justify-between p-4">
+            <div className="text-black font-bold text-2xl self-start">A</div>
+            <div className="text-black font-bold text-6xl">♠</div>
+            <div className="text-black font-bold text-2xl transform rotate-180 self-end">A</div>
+          </div>
         </div>
-      </div>
+      </motion.div>
       
-      {/* رقائق بوكر دائرية متحركة في الخلفية */}
-      {[...Array(5)].map((_, index) => {
-        const size = Math.random() * 20 + 40;
-        const position = {
-          top: `${Math.random() * 60 + 20}%`,
-          left: index % 2 === 0 ? `${Math.random() * 20 + 5}%` : `${Math.random() * 20 + 75}%`
-        };
+      {/* مكعبات رقائق بوكر */}
+      {[...Array(6)].map((_, index) => {
         const colors = [
-          'bg-red-600', 'bg-blue-600', 'bg-green-600', 'bg-black', 'bg-purple-600'
+          'bg-red-600', 'bg-blue-600', 'bg-[#1B4D3E]', 'bg-[#D4AF37]', 'bg-purple-600', 'bg-[#333]'
         ];
-        const color = colors[index % colors.length];
-        
+        const position = {
+          bottom: `${10 + (index * 5)}%`,
+          left: index % 2 === 0 ? `${10 + (index * 3)}%` : `${80 - (index * 3)}%`,
+        };
         return (
           <motion.div
             key={`chip-${index}`}
-            className={`absolute rounded-full ${color} border-4 border-white flex items-center justify-center shadow-xl`}
-            style={{
-              top: position.top,
-              left: position.left,
-              width: `${size}px`,
-              height: `${size}px`,
-              animationDelay: `${index * 0.5}s`
-            }}
-            animate={{
-              y: [0, -20, 0],
-              rotate: [0, 180, 360],
-              scale: [1, 1.05, 1]
+            className={`absolute w-12 h-12 rounded-full ${colors[index]} border-2 border-white shadow-lg flex items-center justify-center z-10`}
+            style={position}
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ 
+              opacity: 0.8, 
+              y: [0, -15, 0],
+              rotate: [0, 360]
             }}
             transition={{
-              duration: 8,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: index * 0.7
+              y: {
+                duration: 3,
+                repeat: Infinity,
+                ease: 'easeInOut',
+                delay: index * 0.2
+              },
+              rotate: {
+                duration: 8,
+                repeat: Infinity,
+                ease: 'linear',
+                delay: index * 0.2
+              },
+              opacity: {
+                duration: 0.5,
+                delay: 0.2 + (index * 0.1)
+              }
             }}
           >
-            <div className="rounded-full w-2/3 h-2/3 border-2 border-dashed border-white/40"></div>
+            <div className="w-8 h-8 rounded-full border-2 border-white/30 flex items-center justify-center text-white font-bold text-xs">
+              {[100, 500, 1000, 5000, 10000, 25000][index]}
+            </div>
           </motion.div>
         );
       })}
       
-      {/* صندوق تسجيل الدخول المتحرك */}
-      <motion.div 
-        className="relative max-w-lg w-full mx-4 z-20"
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-      >
-        {/* توهج خلفي */}
-        <div className="absolute -inset-4 bg-[#D4AF37]/5 rounded-3xl blur-xl animate-pulse-slow"></div>
-        
-        {/* توهج حول الحدود */}
-        <div className="absolute -inset-0.5 bg-gradient-to-r from-[#D4AF37] via-[#D4AF37]/20 to-[#D4AF37] rounded-2xl blur-md opacity-50"></div>
-        
-        {/* الحاوية الرئيسية مع تأثيرات زجاجية */}
-        <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-black/90 to-[#121212]/95 backdrop-blur-xl border border-[#D4AF37]/30 shadow-[0_0_35px_rgba(0,0,0,0.8)]">
-          {/* شريط ذهبي علوي */}
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent"></div>
-          
-          {/* شريط ذهبي سفلي */}
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent"></div>
-          
-          {/* تقسيم الصفحة إلى عمودين للوضع المكتبي، وعمود واحد للوضع المحمول */}
-          <div className="md:grid md:grid-cols-5 items-stretch">
-            {/* عمود الصورة والمعلومات (الجهة اليمنى في لغات RTL) */}
-            <div className="md:col-span-2 relative bg-[#0a0f18] overflow-hidden p-6 md:p-8 flex flex-col items-center justify-center min-h-[250px] md:min-h-0">
-              {/* خلفية بإضاءة متموجة */}
-              <div className="absolute inset-0 bg-gradient-to-br from-black/40 to-black/70"></div>
-              <div className="absolute inset-0 bg-[length:400%_400%] animate-subtle-gradient" style={{
-                backgroundImage: "linear-gradient(45deg, #000000 0%, #0a0f18 25%, #D4AF37/5 50%, #0a0f18 75%, #000000 100%)"
-              }}></div>
-              
-              {/* الشعار والمحتوى */}
-              <motion.div
-                className="relative flex flex-col items-center text-center z-10"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7 }}
-              >
-                <div className="mb-6 relative">
-                  <div className="absolute -inset-2 rounded-full bg-[#D4AF37]/10 blur-md animate-pulse-slow"></div>
-                  <img 
-                    src="/assets/poker-icon-gold.png" 
-                    alt="بوكر تكساس" 
-                    className="w-28 h-28 object-contain rounded-full border-2 border-[#D4AF37] p-1"
-                  />
-                </div>
-                
-                <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] to-[#BF9B30] animate-glow-pulse">
-                  بوكر تكساس
-                </h1>
-                
-                <p className="mt-3 text-[#D4AF37]/70 max-w-[200px]">
-                  العب واربح رقائق مجانية واستمتع بالمميزات الحصرية!
-                </p>
-                
-                {/* بطاقات تزيينية حول الشعار */}
-                <div className="absolute -bottom-4 -right-4 w-12 h-16 transform rotate-12">
-                  <div className="w-full h-full rounded-md bg-white border border-[#D4AF37]/50 shadow-md flex items-center justify-center text-red-600 font-bold text-xl">
-                    A♥
-                  </div>
-                </div>
-                
-                <div className="absolute -top-5 -left-5 w-12 h-16 transform -rotate-12">
-                  <div className="w-full h-full rounded-md bg-white border border-[#D4AF37]/50 shadow-md flex items-center justify-center text-black font-bold text-xl">
-                    A♠
-                  </div>
-                </div>
-              </motion.div>
-            </div>
-            
-            {/* عمود النموذج (الجهة اليسرى في لغات RTL) */}
-            <div className="md:col-span-3 p-6 md:p-8">
-              {/* أزرار التبديل بين تسجيل الدخول والتسجيل الجديد */}
-              <div className="mb-8 flex justify-center">
-                <div className="grid grid-cols-2 gap-1 bg-black/50 p-1 rounded-full">
+      {/* المحتوى الرئيسي: نموذج تسجيل الدخول */}
+      <div className="relative z-50 w-full max-w-4xl mx-auto px-4">
+        <motion.div 
+          className="p-6 rounded-2xl backdrop-blur-xl border border-[#D4AF37]/20 bg-gradient-to-br from-black/90 to-[#0A1114]/90 shadow-[0_0_50px_rgba(0,0,0,0.3)]"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <div className="grid md:grid-cols-2 gap-6 md:gap-10">
+            {/* العمود الأول: النموذج */}
+            <div className="order-2 md:order-1">
+              {/* أزرار التبديل بين تسجيل الدخول والتسجيل */}
+              <div className="mb-8">
+                <div className="grid grid-cols-2 gap-2 p-1 rounded-xl border border-[#D4AF37]/20 bg-black/30">
                   <button
                     onClick={() => setActiveTab(AuthTab.Login)}
-                    className={`py-2 px-6 rounded-full text-sm font-medium transition-all ${
+                    className={`py-3 px-4 rounded-lg text-base font-medium transition-all ${
                       activeTab === AuthTab.Login
-                        ? "bg-gradient-to-r from-[#D4AF37] to-[#BF9B30] text-black shadow-lg"
-                        : "text-[#D4AF37]/70 hover:text-[#D4AF37]"
+                        ? "bg-gradient-to-b from-[#D4AF37] to-[#BF9B30] text-black shadow-lg"
+                        : "text-[#D4AF37] hover:bg-[#D4AF37]/10"
                     }`}
                   >
                     تسجيل الدخول
                   </button>
                   <button
                     onClick={() => setActiveTab(AuthTab.Register)}
-                    className={`py-2 px-6 rounded-full text-sm font-medium transition-all ${
+                    className={`py-3 px-4 rounded-lg text-base font-medium transition-all ${
                       activeTab === AuthTab.Register
-                        ? "bg-gradient-to-r from-[#D4AF37] to-[#BF9B30] text-black shadow-lg"
-                        : "text-[#D4AF37]/70 hover:text-[#D4AF37]"
+                        ? "bg-gradient-to-b from-[#D4AF37] to-[#BF9B30] text-black shadow-lg"
+                        : "text-[#D4AF37] hover:bg-[#D4AF37]/10"
                     }`}
                   >
                     حساب جديد
@@ -368,54 +401,163 @@ export default function AuthPage() {
                 </div>
               </div>
               
-              {/* عرض النموذج النشط مع تأثير انتقالي */}
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={activeTab}
-                  initial={{ opacity: 0, x: activeTab === AuthTab.Login ? -20 : 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: activeTab === AuthTab.Login ? 20 : -20 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  {activeTab === AuthTab.Login ? (
-                    <LoginForm onSwitchToRegister={() => setActiveTab(AuthTab.Register)} />
-                  ) : (
-                    <RegisterForm onSwitchToLogin={() => setActiveTab(AuthTab.Login)} />
-                  )}
-                </motion.div>
-              </AnimatePresence>
+              {/* النموذج */}
+              <div className="bg-black/50 rounded-2xl p-6 border border-[#D4AF37]/10">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={activeTab}
+                    initial={{ opacity: 0, x: activeTab === AuthTab.Login ? -20 : 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: activeTab === AuthTab.Login ? 20 : -20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {activeTab === AuthTab.Login ? (
+                      <LoginForm onSwitchToRegister={() => setActiveTab(AuthTab.Register)} />
+                    ) : (
+                      <RegisterForm onSwitchToLogin={() => setActiveTab(AuthTab.Login)} />
+                    )}
+                  </motion.div>
+                </AnimatePresence>
+              </div>
               
-              {/* ملاحظة أمان أسفل النموذج */}
-              <div className="mt-6 text-center">
-                <div className="inline-flex items-center bg-[#D4AF37]/5 text-[#D4AF37]/70 text-xs px-3 py-1.5 rounded-full border border-[#D4AF37]/10">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
-                  تسجيل دخول آمن 100%
+              {/* رسالة أمان */}
+              <div className="mt-6 flex justify-center">
+                <div className="inline-flex items-center bg-[#1B4D3E]/30 text-[#D4AF37] text-sm px-4 py-2 rounded-full">
+                  <Shield className="w-4 h-4 ml-2" />
+                  تسجيل دخول آمن ومشفر بالكامل
                 </div>
               </div>
             </div>
+            
+            {/* العمود الثاني: مميزات اللعبة */}
+            <div className="order-1 md:order-2 flex flex-col items-center justify-center relative">
+              {/* كرة توهج خلفية */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-[#D4AF37]/10 rounded-full blur-2xl"></div>
+              
+              {/* الشعار والعنوان */}
+              <div className="text-center mb-8">
+                <motion.div
+                  className="inline-block relative"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <div className="absolute -inset-3 rounded-full bg-[#D4AF37]/5 blur-xl animate-pulse-slow"></div>
+                  <img 
+                    src="/assets/poker-icon-gold.png" 
+                    alt="بوكر VIP" 
+                    className="w-24 h-24 object-contain rounded-full border-2 border-[#D4AF37]/30 p-1"
+                  />
+                </motion.div>
+                
+                <motion.h2
+                  className="mt-4 text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] to-[#BF9B30]"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                >
+                  بوكر تكساس VIP
+                </motion.h2>
+                
+                <motion.p
+                  className="mt-2 text-[#D4AF37]/70"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.3 }}
+                >
+                  أفضل تجربة بوكر عربية على الإطلاق
+                </motion.p>
+              </div>
+              
+              {/* مميزات اللعبة */}
+              <div className="mt-4 grid grid-cols-2 gap-4 w-full">
+                {features.map((feature, i) => (
+                  <motion.div
+                    key={feature.id}
+                    className="bg-black/30 rounded-xl p-4 border border-[#D4AF37]/10 hover:border-[#D4AF37]/30 transition-all"
+                    custom={i}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={controls}
+                  >
+                    <div className="flex gap-3 items-start">
+                      <div className="bg-black/50 rounded-full p-2 border border-[#D4AF37]/20">
+                        {feature.icon}
+                      </div>
+                      <div>
+                        <h3 className="text-[#D4AF37] font-bold mb-1">{feature.title}</h3>
+                        <p className="text-xs text-[#D4AF37]/70">{feature.description}</p>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+              
+              {/* صورة طاولة البوكر */}
+              <motion.div
+                className="mt-8 w-full rounded-xl overflow-hidden border border-[#D4AF37]/20 shadow-[0_0_15px_rgba(0,0,0,0.3)]"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.6 }}
+              >
+                <img 
+                  src="/assets/poker-table-bg.jpg" 
+                  alt="طاولة بوكر VIP" 
+                  className="w-full h-48 object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                <div className="absolute bottom-0 left-0 right-0 p-4 text-center">
+                  <p className="text-white font-bold text-lg">ابدأ اللعب مجاناً الآن</p>
+                  <p className="text-[#D4AF37] text-sm">احصل على 10,000 رقاقة مجانية عند التسجيل</p>
+                </div>
+              </motion.div>
+            </div>
           </div>
-        </div>
-        
-        {/* شارة VIP متحركة */}
-        <motion.div 
-          className="absolute -bottom-5 left-1/2 transform -translate-x-1/2 z-20"
-          animate={{ 
-            y: [0, -5, 0],
-            rotate: [-2, 2, -2]
-          }}
-          transition={{
-            duration: 5,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        >
-          <div className="bg-gradient-to-r from-[#D4AF37] to-[#BF9B30] text-black font-bold px-6 py-2 rounded-full text-sm border-2 border-white shadow-lg">
-            VIP بوكر
+          
+          {/* شعارات الثقة والأمان */}
+          <div className="mt-8 pt-6 border-t border-[#D4AF37]/10 grid grid-cols-4 gap-3">
+            {['لعب آمن', 'دفع مضمون', 'مراقبة 24/7', 'دعم فني'].map((text, i) => (
+              <motion.div
+                key={`trust-${i}`}
+                className="flex flex-col items-center justify-center text-center"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.8 + (i * 0.1) }}
+              >
+                <div className="w-10 h-10 rounded-full bg-[#D4AF37]/10 flex items-center justify-center mb-2">
+                  <div className="w-8 h-8 rounded-full bg-[#D4AF37]/30 flex items-center justify-center">
+                    <CircleCheck className="w-4 h-4 text-[#D4AF37]" />
+                  </div>
+                </div>
+                <span className="text-xs text-[#D4AF37]/70">{text}</span>
+              </motion.div>
+            ))}
           </div>
         </motion.div>
-      </motion.div>
+      </div>
+      
+      {/* زر معلومات سريع */}
+      <div className="absolute bottom-4 right-4 md:bottom-8 md:right-8 z-50">
+        <motion.button
+          className="bg-[#D4AF37] text-black rounded-full py-2 px-4 font-bold text-sm flex items-center gap-2 hover:bg-[#BF9B30] transition-colors shadow-lg"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <ChevronDown className="w-5 h-5" />
+          نبذة عن اللعبة
+        </motion.button>
+      </div>
+      
+      {/* زر متجر الرقائق */}
+      <div className="absolute bottom-4 left-4 md:bottom-8 md:left-8 z-50">
+        <motion.button
+          className="bg-[#1B4D3E] text-white rounded-full py-2 px-4 font-bold text-sm flex items-center gap-2 hover:bg-[#16423a] transition-colors shadow-lg border border-[#D4AF37]/30"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <span className="text-[#D4AF37]">💰</span>
+          متجر الرقائق
+        </motion.button>
+      </div>
     </div>
   );
 }
