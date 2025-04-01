@@ -43,15 +43,32 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
     };
   }, [onComplete]);
 
-  // تأثير النص المضيء
+  // تأثير النص المضيء بشكل متموج وطبيعي
+  const [glowIntensity, setGlowIntensity] = useState(0.5);
   const [isTextGlowing, setIsTextGlowing] = useState(true);
   
   useEffect(() => {
-    const glowInterval = setInterval(() => {
-      setIsTextGlowing(prev => !prev);
-    }, 800);
+    let direction = 1; // 1 للزيادة، -1 للنقصان
+    let value = 0.5;
     
-    return () => clearInterval(glowInterval);
+    // إنشاء تأثير نبض متموج بدلاً من تبديل ثنائي بسيط
+    const pulseInterval = setInterval(() => {
+      value += 0.03 * direction;
+      
+      // عكس الاتجاه عند الوصول للحدود
+      if (value >= 1) {
+        direction = -1;
+        value = 1;
+      } else if (value <= 0) {
+        direction = 1;
+        value = 0;
+      }
+      
+      setGlowIntensity(value);
+      setIsTextGlowing(value > 0.5); // لإبقاء التأثير الموجود للاحتفاظ بالتوافق
+    }, 30); // تحديث أكثر تواتراً للحصول على انتقال أكثر سلاسة
+    
+    return () => clearInterval(pulseInterval);
   }, []);
 
   return (
@@ -123,37 +140,47 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
         })}
       </div>
       
-      {/* شعار اللعبة وعنوانها */}
-      <div className="w-32 h-32 mb-6 relative">
-        <img 
-          src="/assets/poker-logo-alt.jpeg" 
-          alt="Poker Logo" 
-          className="w-full h-full object-cover rounded-full border-4 border-[#D4AF37] shadow-[0_0_25px_rgba(212,175,55,0.5)]" 
-        />
-        <div className="absolute -bottom-4 -right-20 w-16 h-16 rounded-full bg-red-600 border-2 border-white shadow-md flex items-center justify-center rotate-12">
-          <span className="text-white font-bold text-xl">A</span>
+      {/* شعار اللعبة محسن */}
+      <div className="w-48 h-48 mb-10 relative">
+        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#0A1C1A] to-black border-8 border-[#D4AF37] shadow-[0_0_35px_rgba(212,175,55,0.7)] overflow-hidden animate-pulse-slow">
+          <div className="absolute inset-0 bg-black/50"></div>
+          <img 
+            src="/assets/poker-icon-gold.png" 
+            alt="Poker Logo" 
+            className="w-full h-full object-contain p-2 filter drop-shadow-lg" 
+          />
         </div>
-        <div className="absolute -top-4 -left-16 w-14 h-14 rounded-full bg-black border-2 border-white shadow-md flex items-center justify-center -rotate-12">
-          <span className="text-white font-bold text-xl">♠</span>
+        
+        {/* تأثير توهج حول الشعار */}
+        <div className="absolute inset-0 rounded-full bg-[#D4AF37]/5 filter blur-xl transform scale-110 animate-pulse-slow"></div>
+        
+        {/* ورقة لعب حمراء */}
+        <div className="absolute -bottom-6 -right-20 w-20 h-24 rounded-lg bg-white border-4 border-[#D4AF37] shadow-xl flex flex-col items-center justify-between p-1 rotate-12 overflow-hidden">
+          <span className="text-red-600 font-bold text-xl self-start">A</span>
+          <span className="text-red-600 font-bold text-5xl">♥</span>
+          <span className="text-red-600 font-bold text-xl transform rotate-180 self-end">A</span>
+          
+          {/* تأثير توهج على الورقة */}
+          <div className="absolute inset-0 bg-gradient-to-t from-transparent via-white/10 to-transparent"></div>
+        </div>
+        
+        {/* ورقة لعب سوداء */}
+        <div className="absolute -top-6 -left-20 w-20 h-24 rounded-lg bg-white border-4 border-[#D4AF37] shadow-xl flex flex-col items-center justify-between p-1 -rotate-12 overflow-hidden">
+          <span className="text-black font-bold text-xl self-start">A</span>
+          <span className="text-black font-bold text-5xl">♠</span>
+          <span className="text-black font-bold text-xl transform rotate-180 self-end">A</span>
+          
+          {/* تأثير توهج على الورقة */}
+          <div className="absolute inset-0 bg-gradient-to-t from-transparent via-white/10 to-transparent"></div>
         </div>
       </div>
       
-      <h1 
-        className={`text-4xl font-bold mb-8 ${
-          isTextGlowing 
-            ? 'text-[#D4AF37] shadow-[0_0_10px_rgba(212,175,55,0.7)]' 
-            : 'text-[#BF9B30]'
-        } transition-all duration-500`}
-      >
-        بوكر تكساس عرباوي
-      </h1>
-      
       {/* شريط التحميل محسن مع العداد */}
-      <div className="w-64 md:w-80 relative mb-6">
+      <div className="w-72 md:w-96 relative mb-12">
         {/* خلفية مزخرفة للشريط */}
         <div className="absolute inset-0 bg-black/50 rounded-lg p-1.5 backdrop-blur-sm border border-[#D4AF37]/20 shadow-lg">
           {/* شريط التحميل الأساسي */}
-          <div className="relative h-5 w-full overflow-hidden rounded-md bg-gradient-to-br from-slate-900 to-slate-800 border border-[#D4AF37]/10">
+          <div className="relative h-6 w-full overflow-hidden rounded-md bg-gradient-to-br from-slate-900 to-slate-800 border border-[#D4AF37]/10">
             {/* مؤشر التقدم */}
             <div 
               className="h-full flex-1 bg-gradient-to-r from-[#D4AF37] to-[#BF9B30] transition-all relative"
@@ -178,27 +205,50 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
           </div>
         </div>
         
-        {/* رقمي الآس عند طرفي الشريط */}
-        <div className="absolute -top-4 -left-8 w-12 h-12 bg-slate-900 rounded-full border-2 border-[#D4AF37]/40 shadow-lg flex items-center justify-center text-[#D4AF37] font-bold text-lg z-10">
+        {/* رقمي الآس عند طرفي الشريط بشكل أكثر وضوحاً */}
+        <div className="absolute -top-5 -left-10 w-16 h-16 bg-slate-900 rounded-full border-2 border-[#D4AF37]/60 shadow-xl flex items-center justify-center text-[#D4AF37] font-bold text-xl z-10 animate-pulse-slow">
           A♠
         </div>
         
-        <div className="absolute -top-4 -right-8 w-12 h-12 bg-slate-900 rounded-full border-2 border-[#D4AF37]/40 shadow-lg flex items-center justify-center text-red-500 font-bold text-lg z-10">
+        <div className="absolute -top-5 -right-10 w-16 h-16 bg-slate-900 rounded-full border-2 border-[#D4AF37]/60 shadow-xl flex items-center justify-center text-red-500 font-bold text-xl z-10 animate-pulse-slow">
           A♥
         </div>
         
-        {/* العداد */}
+        {/* العداد بشكل أكثر وضوحاً */}
         <div className="flex justify-between mt-8">
-          <span className="text-[#D4AF37]/90 text-sm font-bold bg-slate-900/80 px-2 py-0.5 rounded-md border border-[#D4AF37]/20">
+          <span className="text-[#D4AF37] text-sm font-bold bg-slate-900/90 px-3 py-1 rounded-md border border-[#D4AF37]/30 shadow-lg">
             {Math.floor(progress) === 100 ? "اكتمل!" : "جاري التحميل..."}
           </span>
-          <span className="text-white font-bold bg-slate-900/80 px-2 py-0.5 rounded-md border border-[#D4AF37]/20">
+          <span className="text-white font-bold bg-slate-900/90 px-3 py-1 rounded-md border border-[#D4AF37]/30 shadow-lg">
             {Math.round(progress)}%
           </span>
         </div>
       </div>
       
-      <div className="text-[#D4AF37]/80 text-sm mt-2">
+      {/* عنوان تحت شريط التحميل بتأثير وميض محسن مع توهج متدرج */}
+      <h1 
+        className="text-6xl font-bold mt-2 mb-4 transition-all duration-100 tracking-wider"
+        style={{
+          color: `rgba(212, 175, 55, ${0.7 + (glowIntensity * 0.3)})`,
+          filter: `drop-shadow(0 0 ${2 + (glowIntensity * 8)}px rgba(212, 175, 55, ${0.4 + (glowIntensity * 0.6)}))`,
+          textShadow: `0 0 ${5 + (glowIntensity * 15)}px rgba(212, 175, 55, ${0.3 + (glowIntensity * 0.4)})`,
+          transform: `scale(${1 + (glowIntensity * 0.03)})`,
+        }}
+      >
+        بوكر تكساس عرباوي
+      </h1>
+      
+      {/* تأثير توهج إضافي تحت النص */}
+      <div 
+        className="absolute h-4 w-80 rounded-full blur-xl -z-10 bg-[#D4AF37] opacity-30 transition-all duration-100"
+        style={{
+          opacity: 0.1 + (glowIntensity * 0.3),
+          transform: `scale(${0.8 + (glowIntensity * 0.4)})`,
+          bottom: "16%"
+        }}
+      ></div>
+      
+      <div className="text-[#D4AF37] text-sm mt-2 font-bold bg-black/40 px-4 py-1 rounded-full border border-[#D4AF37]/20 shadow-inner">
         {title}...
       </div>
     </div>
