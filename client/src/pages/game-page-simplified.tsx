@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { Loader2, Users, ArrowLeft } from "lucide-react";
+import { Loader2, Users, ArrowLeft, ArrowRight, Check, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
@@ -12,6 +12,8 @@ export default function GamePageSimplified({ params }: { params?: { tableId?: st
   const [isLoading, setIsLoading] = useState(true);
   const [gameState, setGameState] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isActionLoading, setIsActionLoading] = useState(false);
+  const [raiseAmount, setRaiseAmount] = useState<number>(0);
   
   // استخراج معرف الطاولة من الباراميترات
   const tableId = params && params.tableId ? parseInt(params.tableId) : null;
@@ -109,6 +111,73 @@ export default function GamePageSimplified({ params }: { params?: { tableId?: st
     navigate("/");
   };
   
+  // دالة لتنفيذ فعل في اللعبة (انسحاب، متابعة، رفع)
+  const performGameAction = async (action: string, amount?: number) => {
+    if (!tableId) return;
+    
+    try {
+      setIsActionLoading(true);
+      
+      const response = await fetch(`/api/game/${tableId}/action`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ action, amount }),
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        throw new Error('فشل في تنفيذ الإجراء');
+      }
+      
+      const data = await response.json();
+      console.log("نتيجة الإجراء:", data);
+      
+      if (!data.success) {
+        toast({
+          title: "خطأ",
+          description: data.message || "فشل في تنفيذ الإجراء",
+          variant: "destructive"
+        });
+        setIsActionLoading(false);
+        return;
+      }
+      
+      // تحديث بيانات اللعبة إذا تم إرجاعها
+      if (data.gameState) {
+        setGameState(data.gameState);
+      }
+      
+      toast({
+        title: "تم تنفيذ الإجراء بنجاح",
+        description: action === 'fold' ? 'تم الانسحاب' : 
+                      action === 'check' || action === 'call' ? 'تم المتابعة' : 
+                      'تم الرفع',
+        variant: "default"
+      });
+      
+    } catch (error) {
+      console.error("خطأ في تنفيذ الإجراء:", error);
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ أثناء محاولة تنفيذ الإجراء",
+        variant: "destructive"
+      });
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+  
+  // دوال لأزرار التحكم
+  const handleFold = () => performGameAction('fold');
+  const handleCheck = () => performGameAction('check');
+  const handleCall = () => performGameAction('call');
+  const handleRaise = () => {
+    const defaultRaiseAmount = gameState.bigBlind * 2;
+    performGameAction('raise', defaultRaiseAmount);
+  };
+  
   // عرض حالة التحميل
   if (isLoading) {
     return (
@@ -148,7 +217,7 @@ export default function GamePageSimplified({ params }: { params?: { tableId?: st
       <div className="min-h-screen bg-gradient-to-b from-[#0A2A1E] to-black text-white py-4">
         <div className="container mx-auto px-4 h-full">
           {/* شريط العنوان */}
-          <div className="flex justify-between items-center mb-6 bg-black/50 p-4 rounded-lg">
+          <div className="flex justify-between items-center mb-2 bg-black/50 p-4 rounded-lg">
             <Button 
               onClick={handleBackToLobby}
               variant="outline" 
@@ -168,62 +237,140 @@ export default function GamePageSimplified({ params }: { params?: { tableId?: st
             </div>
           </div>
           
-          {/* بيانات الطاولة */}
-          <div className="bg-[#0A3A2A]/80 rounded-xl p-6 mb-6 shadow-lg">
-            <h2 className="text-lg font-bold mb-4 text-[#D4AF37] border-b border-[#D4AF37]/30 pb-2">
-              معلومات الطاولة
-            </h2>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-black/40 p-4 rounded-lg">
-                <p className="text-[#D4AF37] font-bold mb-1">المراهنات الإجبارية:</p>
-                <p className="text-white">{gameState.smallBlind} / {gameState.bigBlind}</p>
+          {/* طاولة البوكر */}
+          <div className="relative mb-4">
+            <div className="bg-[#0A3A2A] rounded-full w-full h-[450px] border-8 border-[#8B4513] shadow-2xl flex items-center justify-center overflow-hidden">
+              {/* لوحة الطاولة */}
+              <div className="absolute inset-0 m-10 rounded-full bg-[#1B4D3E] border-4 border-[#346F58] flex items-center justify-center">
+                {/* طقم الكروت المشتركة (الفلوب والتيرن والريفر) */}
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex gap-3">
+                  {gameState?.communityCards && gameState.communityCards.length > 0 ? (
+                    gameState.communityCards.map((card: any, index: number) => (
+                      <div key={index} className="w-14 h-20 rounded-md bg-white shadow-lg flex flex-col justify-between p-1 overflow-hidden">
+                        {!card.hidden ? (
+                          <>
+                            <div className={`text-lg font-bold ${card.suit === 'hearts' || card.suit === 'diamonds' ? 'text-red-600' : 'text-black'}`}>
+                              {card.value}
+                            </div>
+                            <div className="flex justify-center items-center flex-1">
+                              {card.suit === 'hearts' && <span className="text-2xl">♥️</span>}
+                              {card.suit === 'diamonds' && <span className="text-2xl">♦️</span>}
+                              {card.suit === 'clubs' && <span className="text-2xl">♣️</span>}
+                              {card.suit === 'spades' && <span className="text-2xl">♠️</span>}
+                            </div>
+                          </>
+                        ) : (
+                          <div className="w-full h-full rounded-md bg-[#D4AF37] flex items-center justify-center">
+                            <div className="w-10 h-14 rounded bg-[#1B4D3E] border border-[#D4AF37]"></div>
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <>
+                      {gameState?.gameStatus !== 'waiting' && (
+                        <>
+                          <div className="w-14 h-20 rounded-md bg-[#1B4D3E]/80 border border-[#D4AF37]/30"></div>
+                          <div className="w-14 h-20 rounded-md bg-[#1B4D3E]/80 border border-[#D4AF37]/30"></div>
+                          <div className="w-14 h-20 rounded-md bg-[#1B4D3E]/80 border border-[#D4AF37]/30"></div>
+                          <div className="w-14 h-20 rounded-md bg-[#1B4D3E]/80 border border-[#D4AF37]/30"></div>
+                          <div className="w-14 h-20 rounded-md bg-[#1B4D3E]/80 border border-[#D4AF37]/30"></div>
+                        </>
+                      )}
+                    </>
+                  )}
+                </div>
+                
+                {/* المبلغ في القدر */}
+                <div className="absolute top-[30%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/60 px-4 py-1 rounded-full border border-[#D4AF37]">
+                  <p className="text-[#D4AF37] font-bold">القدر: {gameState?.pot?.toLocaleString() || 0} رقاقة</p>
+                </div>
+                
+                {/* الديلر */}
+                <div className="absolute top-[27%] right-[30%] transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white shadow-lg flex items-center justify-center text-black font-bold border-2 border-black">
+                  D
+                </div>
               </div>
               
-              <div className="bg-black/40 p-4 rounded-lg">
-                <p className="text-[#D4AF37] font-bold mb-1">المبلغ في القدر:</p>
-                <p className="text-white">{gameState.pot?.toLocaleString() || 0} رقاقة</p>
-              </div>
-              
-              <div className="bg-black/40 p-4 rounded-lg">
-                <p className="text-[#D4AF37] font-bold mb-1">حالة اللعبة:</p>
-                <p className="text-white">
-                  {gameState.gameStatus === "waiting" ? "في انتظار اللاعبين" : 
-                   gameState.gameStatus === "preflop" ? "ما قبل الفلوب" : 
-                   gameState.gameStatus === "flop" ? "الفلوب" : 
-                   gameState.gameStatus === "turn" ? "التيرن" : 
-                   gameState.gameStatus === "river" ? "الريفر" : 
-                   gameState.gameStatus === "showdown" ? "كشف الأوراق" : 
-                   "غير معروفة"}
-                </p>
-              </div>
-              
-              <div className="bg-black/40 p-4 rounded-lg">
-                <p className="text-[#D4AF37] font-bold mb-1">رقاقاتك:</p>
-                <p className="text-white">{gameState.userChips?.toLocaleString() || 0} رقاقة</p>
-              </div>
-            </div>
-          </div>
-          
-          {/* قائمة اللاعبين */}
-          <div className="bg-[#0A3A2A]/80 rounded-xl p-6 shadow-lg">
-            <h2 className="text-lg font-bold mb-4 text-[#D4AF37] border-b border-[#D4AF37]/30 pb-2">
-              اللاعبون في الطاولة
-            </h2>
-            
-            <div className="space-y-4">
-              {gameState.players && gameState.players.length > 0 ? (
-                gameState.players.map((player: any, index: number) => (
-                  <div 
-                    key={index} 
-                    className={`flex justify-between items-center p-3 rounded-lg 
-                      ${player.isActive ? 'bg-[#D4AF37]/20' : 'bg-black/40'} 
-                      ${player.id === user?.id ? 'border border-[#D4AF37]' : ''}
-                      ${player.isCurrentPlayer ? 'ring-2 ring-[#D4AF37]' : ''}
-                    `}
+              {/* مواضع اللاعبين */}
+              {gameState?.players && gameState.players.map((player: any, index: number) => {
+                // تحديد موضع اللاعب على الطاولة
+                const positions: Record<string, { top: string; left: string }> = {
+                  bottom: { top: '85%', left: '50%' },
+                  bottomRight: { top: '75%', left: '75%' },
+                  topRight: { top: '30%', left: '80%' },
+                  top: { top: '15%', left: '50%' },
+                  topLeft: { top: '30%', left: '20%' },
+                  bottomLeft: { top: '75%', left: '25%' },
+                  right: { top: '50%', left: '85%' },
+                  left: { top: '50%', left: '15%' }
+                };
+                
+                const position = positions[player.position] || positions.bottom;
+                
+                return (
+                  <div
+                    key={index}
+                    className={`absolute transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center`}
+                    style={{
+                      top: position.top,
+                      left: position.left,
+                      zIndex: player.isCurrentPlayer ? 20 : 10
+                    }}
                   >
-                    <div className="flex items-center">
-                      <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center mr-3">
+                    {/* كروت اللاعب */}
+                    {player.id === user?.id && player.cards && player.cards.length > 0 && (
+                      <div className="flex -space-x-4 mb-2">
+                        {player.cards.map((card: any, cardIndex: number) => (
+                          <div 
+                            key={cardIndex} 
+                            className="w-12 h-16 rounded-md bg-white shadow-lg flex flex-col justify-between p-1 border border-black transform rotate-3 overflow-hidden"
+                            style={{ transform: cardIndex === 0 ? 'rotate(-5deg)' : 'rotate(5deg)' }}
+                          >
+                            {!card.hidden ? (
+                              <>
+                                <div className={`text-sm font-bold ${card.suit === 'hearts' || card.suit === 'diamonds' ? 'text-red-600' : 'text-black'}`}>
+                                  {card.value}
+                                </div>
+                                <div className="flex justify-center items-center flex-1">
+                                  {card.suit === 'hearts' && <span className="text-xl">♥️</span>}
+                                  {card.suit === 'diamonds' && <span className="text-xl">♦️</span>}
+                                  {card.suit === 'clubs' && <span className="text-xl">♣️</span>}
+                                  {card.suit === 'spades' && <span className="text-xl">♠️</span>}
+                                </div>
+                              </>
+                            ) : (
+                              <div className="w-full h-full rounded bg-[#D4AF37] flex items-center justify-center">
+                                <div className="w-8 h-12 rounded bg-[#1B4D3E] border border-[#D4AF37]"></div>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {/* كروت اللاعبين الآخرين (مخفية) */}
+                    {player.id !== user?.id && player.cards && player.cards.length > 0 && !player.folded && (
+                      <div className="flex -space-x-2 mb-2">
+                        <div className="w-10 h-14 rounded-md bg-[#D4AF37] flex items-center justify-center transform rotate-[-5deg]">
+                          <div className="w-8 h-10 rounded bg-[#1B4D3E] border border-[#D4AF37]"></div>
+                        </div>
+                        <div className="w-10 h-14 rounded-md bg-[#D4AF37] flex items-center justify-center transform rotate-[5deg]">
+                          <div className="w-8 h-10 rounded bg-[#1B4D3E] border border-[#D4AF37]"></div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* معلومات اللاعب */}
+                    <div 
+                      className={`
+                        relative flex items-center gap-2 px-3 py-2 rounded-full shadow-lg
+                        ${player.isCurrentPlayer ? 'bg-[#D4AF37] text-black' : 'bg-black/70 text-white'}
+                        ${player.isActive ? 'ring-2 ring-[#D4AF37]' : ''}
+                        ${player.id === user?.id ? 'border-2 border-white' : ''}
+                      `}
+                    >
+                      <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center">
                         {player.avatar ? (
                           <img
                             src={player.avatar}
@@ -231,31 +378,101 @@ export default function GamePageSimplified({ params }: { params?: { tableId?: st
                             className="w-full h-full rounded-full object-cover"
                           />
                         ) : (
-                          <span className="text-white">👤</span>
+                          <span>👤</span>
                         )}
                       </div>
-                      <div>
-                        <p className="font-bold text-white">
+                      <div className="text-xs">
+                        <p className="font-bold">
                           {player.username}
-                          {player.id === user?.id && <span className="text-[#D4AF37] ml-2">(أنت)</span>}
+                          {player.id === user?.id && <span className="mr-1"> (أنت)</span>}
                         </p>
-                        <p className="text-sm text-gray-300">الموضع: {player.position}</p>
+                        <p>{player.chips?.toLocaleString()} رقاقة</p>
                       </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-bold text-[#D4AF37]">{player.chips?.toLocaleString()} رقاقة</p>
+                      
+                      {/* رهان اللاعب الحالي */}
                       {player.betAmount > 0 && (
-                        <p className="text-sm text-white">{player.betAmount?.toLocaleString()} رهان</p>
+                        <div className="absolute -top-7 left-1/2 transform -translate-x-1/2 bg-white text-black px-2 py-1 rounded-lg text-xs font-bold">
+                          {player.betAmount?.toLocaleString()}
+                        </div>
                       )}
-                      {player.folded && <p className="text-sm text-red-400">انسحب</p>}
-                      {player.isAllIn && <p className="text-sm text-green-400">كل الرقاقات</p>}
+                      
+                      {/* حالة اللاعب */}
+                      {player.folded && (
+                        <div className="absolute -top-7 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-2 py-1 rounded-lg text-xs font-bold">
+                          انسحب
+                        </div>
+                      )}
+                      
+                      {player.isAllIn && (
+                        <div className="absolute -top-7 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-2 py-1 rounded-lg text-xs font-bold">
+                          كل الرقاقات
+                        </div>
+                      )}
                     </div>
                   </div>
-                ))
-              ) : (
-                <p className="text-center text-gray-400 py-4">لا يوجد لاعبون في الطاولة حالياً</p>
-              )}
+                );
+              })}
             </div>
+          </div>
+          
+          {/* معلومات حالة اللعبة */}
+          <div className="bg-[#0A3A2A]/80 rounded-xl p-4 mb-4 shadow-lg">
+            <div className="flex justify-between items-center">
+              <div className="bg-black/60 px-3 py-1 rounded-lg">
+                <p className="text-[#D4AF37] font-bold text-sm">المراهنات الإجبارية: <span className="text-white">{gameState?.smallBlind || 0} / {gameState?.bigBlind || 0}</span></p>
+              </div>
+              
+              <div className="bg-black/60 px-3 py-1 rounded-lg">
+                <p className="text-[#D4AF37] font-bold text-sm">حالة اللعبة: 
+                  <span className="text-white mr-1">
+                    {gameState?.gameStatus === "waiting" ? "في انتظار اللاعبين" : 
+                     gameState?.gameStatus === "preflop" ? "ما قبل الفلوب" : 
+                     gameState?.gameStatus === "flop" ? "الفلوب" : 
+                     gameState?.gameStatus === "turn" ? "التيرن" : 
+                     gameState?.gameStatus === "river" ? "الريفر" : 
+                     gameState?.gameStatus === "showdown" ? "كشف الأوراق" : 
+                     "غير معروفة"}
+                  </span>
+                </p>
+              </div>
+              
+              <div className="bg-black/60 px-3 py-1 rounded-lg">
+                <p className="text-[#D4AF37] font-bold text-sm">رقاقاتك: <span className="text-white">{gameState?.userChips?.toLocaleString() || 0}</span></p>
+              </div>
+            </div>
+          </div>
+          
+          {/* أزرار التحكم باللعبة */}
+          <div className="bg-black/60 rounded-xl p-4 shadow-lg flex justify-center gap-4">
+            <Button 
+              variant="destructive" 
+              className="bg-red-600 hover:bg-red-700"
+              onClick={handleFold}
+              disabled={isActionLoading || gameState?.gameStatus === 'waiting' || gameState?.gameStatus === 'showdown'}
+            >
+              {isActionLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <X className="mr-2 h-4 w-4" />}
+              انسحاب
+            </Button>
+            
+            <Button 
+              variant="default" 
+              className="bg-[#D4AF37] hover:bg-[#C09B26] text-black"
+              onClick={gameState?.currentBet > 0 ? handleCall : handleCheck}
+              disabled={isActionLoading || gameState?.gameStatus === 'waiting' || gameState?.gameStatus === 'showdown'}
+            >
+              {isActionLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
+              {gameState?.currentBet > 0 ? `متابعة (${gameState?.currentBet?.toLocaleString() || 0})` : 'تحقق'}
+            </Button>
+            
+            <Button 
+              variant="default" 
+              className="bg-green-600 hover:bg-green-700"
+              onClick={handleRaise}
+              disabled={isActionLoading || gameState?.gameStatus === 'waiting' || gameState?.gameStatus === 'showdown'}
+            >
+              {isActionLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ArrowRight className="mr-2 h-4 w-4" />}
+              رفع (+{(gameState?.bigBlind || 0) * 2 || 200000})
+            </Button>
           </div>
         </div>
       </div>
