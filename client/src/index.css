@@ -10,7 +10,67 @@
     background-image: radial-gradient(var(--tw-gradient-stops));
   }
   
-  /* تخصيصات أخرى للتطبيق */
+  /* تأثيرات متطورة للتطبيق */
+  
+  /* أنيميشن نبض بطيء */
+  .animate-pulse-slow {
+    animation: pulse 3s ease-in-out infinite;
+  }
+  
+  /* أنيميشن تدرج خلفية تلقائي */
+  .animate-subtle-gradient {
+    animation: subtle-gradient 10s ease-in-out infinite alternate;
+  }
+  
+  @keyframes subtle-gradient {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+  
+  /* تأثير توهج نبضي */
+  .animate-glow-pulse {
+    animation: glow-pulse 3s ease-in-out infinite;
+  }
+  
+  @keyframes glow-pulse {
+    0% {
+      filter: drop-shadow(0 0 1px rgba(212, 175, 55, 0.5));
+    }
+    50% {
+      filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.8));
+    }
+    100% {
+      filter: drop-shadow(0 0 1px rgba(212, 175, 55, 0.5));
+    }
+  }
+  
+  /* أنيميشن للعناصر العائمة */
+  @keyframes floating {
+    0% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(5deg); }
+    100% { transform: translateY(0px) rotate(0deg); }
+  }
+  
+  .animate-floating {
+    animation: floating 5s ease-in-out infinite;
+  }
+  
+  /* أنيميشن دوران البطاقة */
+  @keyframes rotateCard {
+    from { transform: rotateY(0deg); }
+    to { transform: rotateY(360deg); }
+  }
+  
+  .animate-rotate-card {
+    animation: rotateCard 5s linear infinite;
+  }
   
   /* تأثيرات رسوم متحركة لتوزيع البطاقات */
   .animate-card-deal-0 {
