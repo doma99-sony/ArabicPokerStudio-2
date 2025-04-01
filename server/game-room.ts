@@ -106,6 +106,44 @@ export function createGameRoom(table: GameTable): GameRoom {
       
       console.log(`تم انتهاء وقت اللاعب ${currentPlayer.username} - يتم تنفيذ Fold تلقائيًا`);
       
+      // حساب عدد اللاعبين النشطين (غير المنسحبين)
+      const activePlayers = Array.from(players.values()).filter(p => !p.folded);
+      
+      // إذا كان هناك لاعبين فقط في الطاولة وأحدهما سينسحب الآن، يجب إنهاء اللعبة والإعلان عن الفائز
+      if (activePlayers.length === 2) {
+        // تحديد اللاعب الآخر (المنافس الذي سيفوز)
+        const winner = activePlayers.find(p => p.id !== round.currentTurn);
+        
+        if (winner) {
+          console.log(`ينسحب ${currentPlayer.username} وبالتالي ${winner.username} يفوز تلقائياً`);
+          
+          // تنفيذ انسحاب اللاعب الحالي واستخراج النتائج
+          currentPlayer.folded = true;
+          
+          // منح الفائز الرقائق من القدر
+          winner.chips += round.pot + currentPlayer.betAmount;
+          
+          // الإعلان عن نهاية اللعبة والفائز
+          round.gameStatus = "showdown";
+          
+          // إلغاء أي مؤقت سابق
+          if (round.turnTimeoutId) {
+            clearTimeout(round.turnTimeoutId);
+            round.turnTimeoutId = undefined;
+          }
+          
+          // إعداد جولة جديدة بعد فترة قصيرة
+          setTimeout(() => {
+            if (players.size >= 2 && round.gameStatus === "showdown") {
+              startNewRound();
+            }
+          }, 3000);
+          
+          return;
+        }
+      }
+      
+      // في حالة وجود أكثر من لاعبين، نستمر بالمنطق العادي
       // تنفيذ إجراء Fold تلقائيًا للاعب
       performAction(round.currentTurn, "fold");
     }, TURN_TIMEOUT_SECONDS * 1000);
@@ -164,6 +202,12 @@ export function createGameRoom(table: GameTable): GameRoom {
   
   // Advance to the next stage of the game
   const advanceGameStage = (): void => {
+    // إلغاء أي مؤقت سابق
+    if (round.turnTimeoutId) {
+      clearTimeout(round.turnTimeoutId);
+      round.turnTimeoutId = undefined;
+    }
+  
     // Reset player bets for the new round
     for (const player of players.values()) {
       round.pot += player.betAmount;
@@ -189,6 +233,8 @@ export function createGameRoom(table: GameTable): GameRoom {
         console.log("تم توزيع بطاقات الفلوب:", flopCards);
         // Set the first active player after the dealer
         round.currentTurn = getNextPlayerTurn(round.dealer);
+        // بدء مؤقت للاعب الجديد
+        if (round.currentTurn !== -1) startTurnTimer();
         break;
       case "flop":
         // Deal the turn (fourth community card)
@@ -198,6 +244,8 @@ export function createGameRoom(table: GameTable): GameRoom {
         console.log("تم توزيع بطاقة التيرن:", turnCard);
         // Set the first active player after the dealer
         round.currentTurn = getNextPlayerTurn(round.dealer);
+        // بدء مؤقت للاعب الجديد
+        if (round.currentTurn !== -1) startTurnTimer();
         break;
       case "turn":
         // Deal the river (fifth community card)
@@ -207,6 +255,8 @@ export function createGameRoom(table: GameTable): GameRoom {
         console.log("تم توزيع بطاقة الريفر:", riverCard);
         // Set the first active player after the dealer
         round.currentTurn = getNextPlayerTurn(round.dealer);
+        // بدء مؤقت للاعب الجديد
+        if (round.currentTurn !== -1) startTurnTimer();
         break;
       case "river":
         // Go to showdown
@@ -585,6 +635,12 @@ export function createGameRoom(table: GameTable): GameRoom {
         gameStatus: "waiting",
         turnStartTime: Date.now() // إعادة تعيين وقت بدء الدور
       };
+      
+      // إلغاء أي مؤقت انتظار سابق
+      if (round.turnTimeoutId) {
+        clearTimeout(round.turnTimeoutId);
+        round.turnTimeoutId = undefined;
+      }
     }
     
     return { success: true, chips: returnedChips };

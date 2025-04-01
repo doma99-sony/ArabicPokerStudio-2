@@ -339,7 +339,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Validate the action
       const actionSchema = z.object({
-        action: z.enum(["fold", "check", "call", "raise", "allIn"]),
+        action: z.enum(["fold", "check", "call", "raise", "all_in"]),
         amount: z.number().optional(),
       });
       
