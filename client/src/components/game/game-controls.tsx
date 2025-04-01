@@ -11,7 +11,7 @@ import {
   Heart, 
   Mail, 
   Gift, 
-  Bell, 
+  /* تم إزالة Bell */ 
   User,
   Home,
   UserPlus,
@@ -131,9 +131,9 @@ export function GameControls({ gameState, onShowInstructions }: GameControlsProp
           {/* زر التعليمات (بدلاً من زر الإشعارات السفلي) */}
           <Button
             variant="ghost"
-            className="bg-yellow-500 hover:bg-yellow-600 text-black font-cairo transition-colors rounded-full w-10 h-10 p-0 flex items-center justify-center"
+            className="bg-yellow-500 hover:bg-yellow-600 text-black font-cairo transition-colors rounded-full w-10 h-10 p-0 flex items-center justify-center animate-pulse border-2 border-yellow-300"
             onClick={onShowInstructions}
-            title="تعليمات"
+            title="تعليمات اللعب"
           >
             <HelpCircle className="h-5 w-5" />
           </Button>
