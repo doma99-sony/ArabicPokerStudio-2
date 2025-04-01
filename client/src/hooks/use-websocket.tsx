@@ -11,15 +11,59 @@ export function useWebSocket() {
   const socketRef = useRef<WebSocket | null>(null);
   const messageHandlersRef = useRef<Map<string, (data: any) => void>>(new Map());
 
+  // للتتبع إذا تم إنهاء اتصال WebSocket وبحاجة لإعادة الاتصال
+  const reconnectAttemptRef = useRef<boolean>(false);
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   // Create WebSocket connection
+  // معالجة إضافية لإعادة الاتصال عند تغير حالة الاتصال
   useEffect(() => {
+    if (status === "closed" && user && !reconnectAttemptRef.current) {
+      console.log("تم اكتشاف انقطاع الاتصال، محاولة إعادة الاتصال تلقائيًا بعد 3 ثوانٍ");
+      
+      // تعيين علم أننا نحاول إعادة الاتصال
+      reconnectAttemptRef.current = true;
+      
+      // محاولة إعادة الاتصال بعد 3 ثوانٍ
+      reconnectTimeoutRef.current = setTimeout(() => {
+        console.log("إعادة تعيين اتصال WebSocket");
+        socketRef.current = null; // سيؤدي إلى تشغيل useEffect للاتصال
+        reconnectAttemptRef.current = false;
+      }, 3000);
+      
+      return () => {
+        if (reconnectTimeoutRef.current) {
+          clearTimeout(reconnectTimeoutRef.current);
+          reconnectTimeoutRef.current = null;
+        }
+      };
+    }
+  }, [status, user]);
+
+  // الاتصال الأساسي بـ WebSocket
+  useEffect(() => {
+    // عدم محاولة الاتصال إذا لم يكن هناك مستخدم
     if (!user) return;
+    
+    // عدم محاولة الاتصال إذا كان هناك بالفعل اتصال مفتوح
+    if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+      console.log("اتصال WebSocket مفتوح بالفعل، لا حاجة لإنشاء اتصال جديد");
+      return;
+    }
+
+    // التنظيف قبل إنشاء اتصال جديد
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
+      reconnectTimeoutRef.current = null;
+    }
 
     // Determine the correct host and protocol
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const host = window.location.host;
     const wsUrl = `${protocol}//${host}/ws`; // Use the explicit path we set on the server
 
+    console.log(`إنشاء اتصال WebSocket جديد: ${wsUrl}`);
+    
     // Create new WebSocket connection
     const socket = new WebSocket(wsUrl);
     socketRef.current = socket;
@@ -38,9 +82,47 @@ export function useWebSocket() {
       }
     };
 
-    socket.onclose = () => {
+    socket.onclose = (event) => {
       setStatus("closed");
-      console.log("WebSocket connection closed");
+      console.log(`WebSocket connection closed. Code: ${event.code}, Reason: ${event.reason || 'No reason provided'}`);
+      
+      // إعادة الاتصال تلقائيًا بعد فترة قصيرة إذا لم يكن الإغلاق طبيعي
+      if (event.code !== 1000) { // 1000 = normal closure
+        console.log("المحاولة لإعادة الاتصال بعد 3 ثوانٍ...");
+        
+        // تعيين العلم بأننا نحاول إعادة الاتصال
+        reconnectAttemptRef.current = true;
+        
+        // محاولة إعادة الاتصال بعد 3 ثوانٍ
+        reconnectTimeoutRef.current = setTimeout(() => {
+          console.log("جاري محاولة إعادة الاتصال...");
+          // إعادة تعيين المرجع ليقوم useEffect بإنشاء اتصال جديد
+          socketRef.current = null;
+          
+          // إعادة تشغيل useEffect
+          const retry = () => {
+            console.log("إعادة محاولة الاتصال");
+            if (user) {
+              const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+              const host = window.location.host;
+              const wsUrl = `${protocol}//${host}/ws`;
+              
+              const newSocket = new WebSocket(wsUrl);
+              socketRef.current = newSocket;
+              setStatus("connecting");
+              
+              // تكرار كل التعاملات الخاصة بالـ socket
+              newSocket.onopen = socket.onopen;
+              newSocket.onclose = socket.onclose;
+              newSocket.onerror = socket.onerror;
+              newSocket.onmessage = socket.onmessage;
+            }
+          };
+          
+          retry();
+          reconnectAttemptRef.current = false;
+        }, 3000);
+      }
     };
 
     socket.onerror = (error) => {

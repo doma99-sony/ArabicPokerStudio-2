@@ -103,7 +103,8 @@ export function PlayerComponent({ player, isTurn }: PlayerComponentProps) {
   };
 
   // Determine card visibility based on if it's the current player or showdown
-  const showCards = player.isCurrentPlayer || player.cards?.every(c => !c.hidden);
+  // يجب أن نظهر البطاقات دائماً للمستخدم الحالي بغض النظر عن خاصية 'hidden'
+  const showCards = player.isCurrentPlayer;
 
   return (
     <div 
@@ -178,7 +179,8 @@ export function PlayerComponent({ player, isTurn }: PlayerComponentProps) {
                 }}
               >
                 <CardComponent 
-                  card={showCards ? card : { ...card, hidden: true }} 
+                  // إظهار البطاقات للمستخدم الحالي دائمًا وإخفاؤها عن الآخرين
+                  card={player.isCurrentPlayer ? {...card, hidden: false} : { ...card, hidden: true }} 
                   size="sm" 
                   // إذا كان هذا اللاعب هو الفائز، استخدم تصميم ذهبي للبطاقات
                   variant={player.winner ? "gold" : "default"}

@@ -57,13 +57,27 @@ export function setupPokerGame(app: Express, httpServer: Server) {
     broadcast(message);
   };
   
-  const PING_INTERVAL = 30000;
+  const PING_INTERVAL = 30000; // 30 seconds
   
   // تحديث عدد المستخدمين المتصلين كل 5 ثوانٍ
   const UPDATE_INTERVAL = 5000; // 5 seconds
   setInterval(() => {
     broadcastOnlineUsers();
   }, UPDATE_INTERVAL);
+
+  // إرسال ping لجميع العملاء المتصلين للحفاظ على الاتصال
+  setInterval(() => {
+    console.log("إرسال ping لجميع العملاء المتصلين...");
+    clients.forEach((client, userId) => {
+      if (client.readyState === WebSocket.OPEN) {
+        try {
+          client.ping();
+        } catch (err) {
+          console.error(`خطأ أثناء إرسال ping للمستخدم ${userId}:`, err);
+        }
+      }
+    });
+  }, PING_INTERVAL);
   
   wss.on("connection", (ws: WebSocket, req: any) => {
     let userId: number | undefined;
