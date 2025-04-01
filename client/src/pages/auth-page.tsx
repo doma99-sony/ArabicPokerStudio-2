@@ -136,13 +136,216 @@ export default function AuthPage() {
   }, [user]);
   
   if (isLoading) {
+    // تعريف مرجعيات لبطاقات البوكر
+    const cardValues = ['A', 'K', 'Q', 'J'];
+    const cardSuits = ['♠', '♥', '♦', '♣'];
+
     return (
-      <div className="fixed inset-0 bg-[#0A0A0A] flex flex-col items-center justify-center">
-        <div className="relative w-24 h-24">
-          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-[#D4AF37] to-[#BF9B30] blur animate-pulse"></div>
-          <Loader2 className="absolute inset-0 h-24 w-24 animate-spin text-[#D4AF37]" />
+      <div className="fixed inset-0 overflow-hidden">
+        {/* فيديو خلفية مع طبقة داكنة */}
+        <div className="absolute inset-0 overflow-hidden z-0">
+          <video 
+            autoPlay 
+            loop 
+            muted 
+            playsInline
+            className="absolute w-full h-full object-cover opacity-20"
+          >
+            <source src="/assets/background-video.mp4" type="video/mp4" />
+          </video>
+          <div className="absolute inset-0 bg-black/70"></div>
         </div>
-        <p className="mt-4 text-[#D4AF37] animate-pulse text-lg">جاري تحميل البوكر...</p>
+        
+        {/* طبقة تأثيرات اللون */}
+        <div className="absolute inset-0 bg-gradient-radial from-[#1B4D3E]/10 via-black/80 to-black/90"></div>
+        
+        {/* أضواء وإشعاعات */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-gradient-radial from-[#D4AF37]/10 to-transparent blur-3xl"></div>
+        
+        {/* حاوية التحميل المركزية */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          {/* لوجو VIP الفاخر */}
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="relative"
+          >
+            <div className="absolute -inset-4 rounded-full bg-[#D4AF37]/10 blur-xl animate-pulse-slow"></div>
+            <img 
+              src="/assets/poker-icon-gold.png" 
+              alt="VIP بوكر" 
+              className="w-32 h-32 object-contain rounded-full border-2 border-[#D4AF37] shadow-[0_0_30px_rgba(212,175,55,0.4)]"
+            />
+          </motion.div>
+          
+          {/* عنوان متحرك */}
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.6 }}
+            className="mt-6 text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] to-[#BF9B30] animate-glow-pulse"
+          >
+            بوكر تكساس VIP
+          </motion.h1>
+          
+          {/* شريط التقدم */}
+          <motion.div 
+            className="mt-8 w-64 h-2 bg-black/50 rounded-full overflow-hidden border border-[#D4AF37]/30"
+            initial={{ width: 0, opacity: 0 }}
+            animate={{ width: "16rem", opacity: 1 }}
+            transition={{ delay: 0.5, duration: 0.8 }}
+          >
+            <motion.div 
+              className="h-full bg-gradient-to-r from-[#D4AF37] to-[#BF9B30]"
+              initial={{ width: "0%" }}
+              animate={{ width: "100%" }}
+              transition={{ 
+                duration: 3, 
+                ease: "easeInOut",
+                repeat: Infinity,
+                repeatType: "reverse" 
+              }}
+            />
+          </motion.div>
+          
+          {/* نص التحميل المتغير */}
+          <motion.div
+            className="mt-4 h-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.7, duration: 0.5 }}
+          >
+            {[
+              "جاري تجهيز طاولات اللعب...",
+              "تحضير رقاقات البوكر...",
+              "توزيع الكروت...",
+              "تجهيز صالة VIP...",
+              "جاري تسجيل الدخول..."
+            ].map((text, index) => (
+              <motion.p
+                key={index}
+                className="absolute text-center w-full text-[#D4AF37]/80 text-sm"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ 
+                  duration: 0.3,
+                  repeatDelay: 1.2,
+                  repeat: Infinity,
+                  repeatType: "loop",
+                  times: [0, 0.1, 0.9, 1],
+                  delay: index * 1.5
+                }}
+              >
+                {text}
+              </motion.p>
+            ))}
+          </motion.div>
+          
+          {/* قيمة نسبة التحميل */}
+          <motion.p 
+            className="mt-8 text-[#D4AF37] text-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: [0, 1, 1, 0] }}
+            transition={{ 
+              duration: 2,
+              repeat: Infinity,
+              repeatType: "loop"
+            }}
+          >
+            تم تحميل البرنامج بنجاح
+          </motion.p>
+        </div>
+        
+        {/* كروت بوكر تدور حول المركز */}
+        <div className="absolute inset-0 pointer-events-none">
+          {[...Array(4)].map((_, index) => {
+            const angle = index * (360 / 4);
+            const radius = 180; // نصف قطر الدائرة
+            const x = Math.cos((angle * Math.PI) / 180) * radius;
+            const y = Math.sin((angle * Math.PI) / 180) * radius;
+            
+            return (
+              <motion.div
+                key={`card-${index}`}
+                className="absolute top-1/2 left-1/2 w-16 h-24 bg-white rounded-md shadow-lg border border-[#D4AF37]/20"
+                style={{ x, y, transform: 'translate(-50%, -50%)' }}
+                initial={{ 
+                  rotate: 0,
+                  opacity: 0,
+                  x: 0,
+                  y: 0
+                }}
+                animate={{ 
+                  rotate: 360,
+                  opacity: 0.8,
+                  x,
+                  y
+                }}
+                transition={{ 
+                  duration: 8, 
+                  repeat: Infinity, 
+                  ease: "linear",
+                  delay: index * 0.5
+                }}
+              >
+                <div className="absolute inset-0 flex flex-col items-center justify-between p-2">
+                  <div className={`text-2xl font-bold self-start ${index % 2 === 0 ? 'text-black' : 'text-red-600'}`}>
+                    {cardValues[index]}
+                  </div>
+                  <div className={`text-3xl ${index % 2 === 0 ? 'text-black' : 'text-red-600'}`}>
+                    {cardSuits[index]}
+                  </div>
+                  <div className={`text-2xl font-bold self-end transform rotate-180 ${index % 2 === 0 ? 'text-black' : 'text-red-600'}`}>
+                    {cardValues[index]}
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+        
+        {/* رقائق البوكر المتحركة */}
+        <div className="absolute inset-0 pointer-events-none">
+          {[...Array(5)].map((_, index) => {
+            const colors = [
+              'bg-red-600', 'bg-blue-600', 'bg-[#1B4D3E]', 'bg-[#D4AF37]', 'bg-purple-600'
+            ];
+            const positions = [
+              { bottom: '20%', right: '20%' },
+              { top: '20%', left: '20%' },
+              { top: '30%', right: '25%' },
+              { bottom: '30%', left: '25%' },
+              { top: '50%', left: '15%' }
+            ];
+            
+            return (
+              <motion.div
+                key={`chip-${index}`}
+                className={`absolute w-10 h-10 rounded-full ${colors[index]} border-2 border-white shadow-lg flex items-center justify-center`}
+                style={positions[index]}
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ 
+                  scale: [0, 1, 1, 0],
+                  opacity: [0, 0.8, 0.8, 0],
+                  y: [0, -20, 0],
+                  rotate: [0, 180, 360]
+                }}
+                transition={{
+                  duration: 4,
+                  times: [0, 0.3, 0.7, 1],
+                  repeat: Infinity,
+                  delay: index * 0.8
+                }}
+              >
+                <div className="w-7 h-7 rounded-full border border-white/30 flex items-center justify-center text-white font-bold text-xs">
+                  {[100, 500, 1000, 5000, 10000][index]}
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
       </div>
     );
   }
