@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useAuth } from "./use-auth";
 import { useToast } from "./use-toast";
+import { useNotifications } from "@/components/ui/notifications-system";
 
 type WebSocketStatus = "connecting" | "open" | "closed" | "error";
 
 export function useWebSocket() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { addNotification } = useNotifications();
   const [status, setStatus] = useState<WebSocketStatus>("closed");
   const socketRef = useRef<WebSocket | null>(null);
   const messageHandlersRef = useRef<Map<string, (data: any) => void>>(new Map());
@@ -82,6 +84,13 @@ export function useWebSocket() {
       
       console.log("WebSocket connection established - اتصال WebSocket تم بنجاح");
       
+      // إضافة إشعار داخلي بدلاً من toast
+      addNotification({
+        title: "حالة الاتصال",
+        content: "تم الاتصال بالخادم بنجاح",
+        type: "system"
+      });
+      
       // Authenticate with the server
       if (user) {
         sendMessage({
@@ -95,6 +104,13 @@ export function useWebSocket() {
     socket.onclose = (event) => {
       setStatus("closed");
       console.log(`WebSocket connection closed. Code: ${event.code}, Reason: ${event.reason || 'No reason provided'}`);
+      
+      // إضافة إشعار عن انقطاع الاتصال باستخدام نظام الإشعارات الداخلي
+      addNotification({
+        title: "حالة الاتصال",
+        content: "انقطع الاتصال بالخادم. جاري إعادة المحاولة...",
+        type: "system"
+      });
       
       // إعادة الاتصال تلقائيًا دائمًا، بغض النظر عن سبب الإغلاق
       // حتى في حالة الإغلاق الطبيعي (1000)، سنعيد الاتصال للتأكد من استمرارية الجلسة
@@ -164,10 +180,11 @@ export function useWebSocket() {
         
         // Handle standard message types
         if (type === "error") {
-          toast({
+          // استخدام نظام الإشعارات الداخلي بدلاً من toast
+          addNotification({
             title: "خطأ",
-            description: message.message,
-            variant: "destructive",
+            content: message.message,
+            type: "system"
           });
         } else if (type === "ping") {
           // تلقي رسالة ping من الخادم، نرسل pong لإبقاء الاتصال حياً
@@ -197,7 +214,7 @@ export function useWebSocket() {
       socket.close();
       socketRef.current = null;
     };
-  }, [user, toast]);
+  }, [user, toast, addNotification]);
 
   // Send message via WebSocket
   const sendMessage = useCallback((message: any) => {
