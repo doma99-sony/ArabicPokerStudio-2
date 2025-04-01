@@ -19,17 +19,15 @@ export function useWebSocket() {
   // معالجة إضافية لإعادة الاتصال عند تغير حالة الاتصال
   useEffect(() => {
     if (status === "closed" && user && !reconnectAttemptRef.current) {
-      console.log("تم اكتشاف انقطاع الاتصال، محاولة إعادة الاتصال تلقائيًا بعد 3 ثوانٍ");
+      console.log("تم اكتشاف انقطاع الاتصال، محاولة إعادة الاتصال فورًا");
       
       // تعيين علم أننا نحاول إعادة الاتصال
       reconnectAttemptRef.current = true;
-      
-      // محاولة إعادة الاتصال بعد 3 ثوانٍ
-      reconnectTimeoutRef.current = setTimeout(() => {
-        console.log("إعادة تعيين اتصال WebSocket");
-        socketRef.current = null; // سيؤدي إلى تشغيل useEffect للاتصال
-        reconnectAttemptRef.current = false;
-      }, 3000);
+
+      // محاولة إعادة الاتصال فورًا
+      console.log("إعادة تعيين اتصال WebSocket");
+      socketRef.current = null; // سيؤدي إلى تشغيل useEffect للاتصال
+      reconnectAttemptRef.current = false;
       
       return () => {
         if (reconnectTimeoutRef.current) {
@@ -86,42 +84,38 @@ export function useWebSocket() {
       setStatus("closed");
       console.log(`WebSocket connection closed. Code: ${event.code}, Reason: ${event.reason || 'No reason provided'}`);
       
-      // إعادة الاتصال تلقائيًا بعد فترة قصيرة إذا لم يكن الإغلاق طبيعي
+      // إعادة الاتصال تلقائيًا فورًا إذا لم يكن الإغلاق طبيعي
       if (event.code !== 1000) { // 1000 = normal closure
-        console.log("المحاولة لإعادة الاتصال بعد 3 ثوانٍ...");
+        console.log("محاولة إعادة الاتصال فورًا...");
         
         // تعيين العلم بأننا نحاول إعادة الاتصال
         reconnectAttemptRef.current = true;
+
+        // محاولة إعادة الاتصال فورًا بدون تأخير
+        console.log("جاري محاولة إعادة الاتصال...");
         
-        // محاولة إعادة الاتصال بعد 3 ثوانٍ
-        reconnectTimeoutRef.current = setTimeout(() => {
-          console.log("جاري محاولة إعادة الاتصال...");
-          // إعادة تعيين المرجع ليقوم useEffect بإنشاء اتصال جديد
-          socketRef.current = null;
-          
-          // إعادة تشغيل useEffect
-          const retry = () => {
-            console.log("إعادة محاولة الاتصال");
-            if (user) {
-              const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-              const host = window.location.host;
-              const wsUrl = `${protocol}//${host}/ws`;
-              
-              const newSocket = new WebSocket(wsUrl);
-              socketRef.current = newSocket;
-              setStatus("connecting");
-              
-              // تكرار كل التعاملات الخاصة بالـ socket
-              newSocket.onopen = socket.onopen;
-              newSocket.onclose = socket.onclose;
-              newSocket.onerror = socket.onerror;
-              newSocket.onmessage = socket.onmessage;
-            }
-          };
-          
-          retry();
-          reconnectAttemptRef.current = false;
-        }, 3000);
+        // إعادة تشغيل useEffect فورًا
+        const retry = () => {
+          console.log("إعادة محاولة الاتصال");
+          if (user) {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const host = window.location.host;
+            const wsUrl = `${protocol}//${host}/ws`;
+            
+            const newSocket = new WebSocket(wsUrl);
+            socketRef.current = newSocket;
+            setStatus("connecting");
+            
+            // تكرار كل التعاملات الخاصة بالـ socket
+            newSocket.onopen = socket.onopen;
+            newSocket.onclose = socket.onclose;
+            newSocket.onerror = socket.onerror;
+            newSocket.onmessage = socket.onmessage;
+          }
+        };
+        
+        retry();
+        reconnectAttemptRef.current = false;
       }
     };
 
@@ -147,6 +141,17 @@ export function useWebSocket() {
             description: message.message,
             variant: "destructive",
           });
+        } else if (type === "ping") {
+          // تلقي رسالة ping من الخادم، نرسل pong لإبقاء الاتصال حياً
+          console.log("تم استلام ping من الخادم، إرسال pong...");
+          
+          // إرسال رسالة pong
+          if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+            socketRef.current.send(JSON.stringify({ 
+              type: "pong", 
+              timestamp: Date.now() 
+            }));
+          }
         }
         
         // Call any registered handlers for this message type

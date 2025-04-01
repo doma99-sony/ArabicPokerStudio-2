@@ -179,8 +179,8 @@ export function PlayerComponent({ player, isTurn }: PlayerComponentProps) {
                 }}
               >
                 <CardComponent 
-                  // إظهار البطاقات للمستخدم الحالي دائمًا وإخفاؤها عن الآخرين
-                  card={player.isCurrentPlayer ? {...card, hidden: false} : { ...card, hidden: true }} 
+                  // بغض النظر عن حالة الـ hidden المرسلة من الخادم، نظهر البطاقات للاعب الحالي دائمًا
+                  card={{...card, hidden: player.isCurrentPlayer ? false : true}} 
                   size="sm" 
                   // إذا كان هذا اللاعب هو الفائز، استخدم تصميم ذهبي للبطاقات
                   variant={player.winner ? "gold" : "default"}

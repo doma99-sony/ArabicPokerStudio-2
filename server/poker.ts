@@ -57,7 +57,8 @@ export function setupPokerGame(app: Express, httpServer: Server) {
     broadcast(message);
   };
   
-  const PING_INTERVAL = 30000; // 30 seconds
+  const PING_INTERVAL = 15000; // تقليل الفاصل الزمني إلى 15 ثانية لضمان استمرار الاتصال
+  const HEARTBEAT_TIMEOUT = 60000; // 60 ثانية كوقت فاصل أكبر للمهلة
   
   // تحديث عدد المستخدمين المتصلين كل 5 ثوانٍ
   const UPDATE_INTERVAL = 5000; // 5 seconds
@@ -65,15 +66,23 @@ export function setupPokerGame(app: Express, httpServer: Server) {
     broadcastOnlineUsers();
   }, UPDATE_INTERVAL);
 
-  // إرسال ping لجميع العملاء المتصلين للحفاظ على الاتصال
+  // إرسال رسالة معلوماتية (نوع: ping) بدلاً من ping الافتراضي لضمان استمرار الاتصال
+  // هذا أكثر فعالية مع بعض الوسطاء/الجدران النارية التي قد تحظر العمليات الثنائية
   setInterval(() => {
-    console.log("إرسال ping لجميع العملاء المتصلين...");
+    console.log("إرسال نبض معلوماتي لجميع العملاء المتصلين...");
     clients.forEach((client, userId) => {
       if (client.readyState === WebSocket.OPEN) {
         try {
+          // إرسال رسالة json بدلاً من ping
+          client.send(JSON.stringify({ 
+            type: "ping", 
+            timestamp: Date.now() 
+          }));
+          
+          // بالإضافة لذلك، نرسل ping عادي
           client.ping();
         } catch (err) {
-          console.error(`خطأ أثناء إرسال ping للمستخدم ${userId}:`, err);
+          console.error(`خطأ أثناء إرسال نبض للمستخدم ${userId}:`, err);
         }
       }
     });
@@ -83,11 +92,18 @@ export function setupPokerGame(app: Express, httpServer: Server) {
     let userId: number | undefined;
     let pingTimeout: NodeJS.Timeout;
 
+    // تعريف دالة heartbeat دون مؤقت انتهاء للحفاظ على الاتصال مفتوحًا
     const heartbeat = () => {
-      clearTimeout(pingTimeout);
-      pingTimeout = setTimeout(() => {
-        ws.terminate();
-      }, PING_INTERVAL + 1000);
+      // فقط تسجيل أنه تم استلام pong
+      console.log(`تم تحديث heartbeat للمستخدم ${userId || 'غير معروف'}`);
+      
+      // إلغاء أي مؤقت قديم إذا وجد
+      if (pingTimeout) {
+        clearTimeout(pingTimeout);
+        pingTimeout = null;
+      }
+      
+      // دون أي مؤقت جديد - نعتمد على آلية إعادة الاتصال في العميل
     };
 
     ws.on('pong', heartbeat);
@@ -104,7 +120,12 @@ export function setupPokerGame(app: Express, httpServer: Server) {
       try {
         const data = JSON.parse(message.toString());
         
-        if (data.type === "auth") {
+        // معالجة رسائل pong من العميل
+        if (data.type === "pong") {
+          // تلقي رسالة pong من العميل، تحديث مؤقت الاتصال
+          console.log(`تم استلام pong من المستخدم ${userId || 'غير معروف'}`);
+          heartbeat();
+        } else if (data.type === "auth") {
           // Authenticate user
           const user = await storage.getUser(data.userId);
           if (!user) {
