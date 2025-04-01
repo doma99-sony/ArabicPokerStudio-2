@@ -4,6 +4,12 @@ import { useToast } from "./use-toast";
 
 type WebSocketStatus = "connecting" | "open" | "closed" | "error";
 
+// تكوين إعادة الاتصال
+const RECONNECT_MAX_RETRIES = 100; // عدد أكبر جداً للمحاولات - لضمان استمرار الاتصال دائماً
+const RECONNECT_BASE_DELAY = 500; // تأخير أساسي 500 مللي ثانية
+const RECONNECT_MAX_DELAY = 3000; // الحد الأقصى للتأخير 3 ثوانٍ
+const PING_INTERVAL = 10000; // إرسال ping كل 10 ثوانٍ
+
 export function useWebSocket() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -11,130 +17,180 @@ export function useWebSocket() {
   const socketRef = useRef<WebSocket | null>(null);
   const messageHandlersRef = useRef<Map<string, (data: any) => void>>(new Map());
 
-  // للتتبع إذا تم إنهاء اتصال WebSocket وبحاجة لإعادة الاتصال
-  const reconnectAttemptRef = useRef<boolean>(false);
+  // مراجع لإدارة إعادة الاتصال
+  const reconnectAttemptRef = useRef<number>(0);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isReconnectingRef = useRef<boolean>(false);
+  const pingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const isManualCloseRef = useRef<boolean>(false);
 
-  // Create WebSocket connection
-  // معالجة إضافية لإعادة الاتصال عند تغير حالة الاتصال
-  useEffect(() => {
-    if (status === "closed" && user && !reconnectAttemptRef.current) {
-      console.log("تم اكتشاف انقطاع الاتصال، محاولة إعادة الاتصال فورًا");
-      
-      // تعيين علم أننا نحاول إعادة الاتصال
-      reconnectAttemptRef.current = true;
-
-      // محاولة إعادة الاتصال فورًا
-      console.log("إعادة تعيين اتصال WebSocket");
-      socketRef.current = null; // سيؤدي إلى تشغيل useEffect للاتصال
-      reconnectAttemptRef.current = false;
-      
-      return () => {
-        if (reconnectTimeoutRef.current) {
-          clearTimeout(reconnectTimeoutRef.current);
-          reconnectTimeoutRef.current = null;
-        }
-      };
-    }
-  }, [status, user]);
-
-  // الاتصال الأساسي بـ WebSocket
-  useEffect(() => {
-    // عدم محاولة الاتصال إذا لم يكن هناك مستخدم
-    if (!user) return;
-    
-    // عدم محاولة الاتصال إذا كان هناك بالفعل اتصال مفتوح
-    if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-      console.log("اتصال WebSocket مفتوح بالفعل، لا حاجة لإنشاء اتصال جديد");
-      return;
-    }
-
-    // التنظيف قبل إنشاء اتصال جديد
+  // دالة مساعدة لإيقاف جميع المؤقتات
+  const clearAllTimers = useCallback(() => {
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current);
       reconnectTimeoutRef.current = null;
     }
+    if (pingIntervalRef.current) {
+      clearInterval(pingIntervalRef.current);
+      pingIntervalRef.current = null;
+    }
+  }, []);
 
-    // Determine the correct host and protocol
+  // دالة إنشاء اتصال WebSocket
+  const createWebSocketConnection = useCallback(() => {
+    if (!user) return null;
+    
+    // بناء رابط الاتصال
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const host = window.location.host;
-    const wsUrl = `${protocol}//${host}/ws`; // Use the explicit path we set on the server
-
+    const wsUrl = `${protocol}//${host}/ws`;
+    
     console.log(`إنشاء اتصال WebSocket جديد: ${wsUrl}`);
     
-    // Create new WebSocket connection
-    const socket = new WebSocket(wsUrl);
-    socketRef.current = socket;
-    setStatus("connecting");
+    try {
+      return new WebSocket(wsUrl);
+    } catch (error) {
+      console.error("خطأ في إنشاء اتصال WebSocket:", error);
+      return null;
+    }
+  }, [user]);
 
-    socket.onopen = () => {
-      setStatus("open");
-      console.log("WebSocket connection established");
+  // دالة ping دورية للتأكد من استمرار الاتصال
+  const setupPingInterval = useCallback(() => {
+    if (pingIntervalRef.current) {
+      clearInterval(pingIntervalRef.current);
+    }
+    
+    pingIntervalRef.current = setInterval(() => {
+      if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+        try {
+          socketRef.current.send(JSON.stringify({ 
+            type: "client_ping", 
+            timestamp: Date.now() 
+          }));
+        } catch (err) {
+          console.warn("خطأ في إرسال ping:", err);
+          // لا نغلق الاتصال هنا، بل نترك آلية الخطأ العادية تتعامل معه
+        }
+      }
+    }, PING_INTERVAL);
+    
+    return () => {
+      if (pingIntervalRef.current) {
+        clearInterval(pingIntervalRef.current);
+        pingIntervalRef.current = null;
+      }
+    };
+  }, []);
+
+  // دالة إعادة الاتصال مع استراتيجية تأخير متزايد
+  const reconnect = useCallback(() => {
+    // إذا كانت هناك محاولة إعادة اتصال جارية بالفعل، لا نبدأ واحدة جديدة
+    if (isReconnectingRef.current) return;
+    
+    isReconnectingRef.current = true;
+    reconnectAttemptRef.current++;
+    
+    // حساب الوقت للمحاولة التالية (مع تأخير متزايد ولكن مع حد أقصى)
+    // استخدام min للتأكد من أن التأخير لا يتجاوز الحد الأقصى
+    // استخدام jitter (عشوائية) لتجنب "thundering herd problem"
+    const delay = Math.min(
+      RECONNECT_BASE_DELAY * Math.pow(1.5, Math.min(reconnectAttemptRef.current, 10)) + 
+      Math.random() * 100, 
+      RECONNECT_MAX_DELAY
+    );
+    
+    console.log(`محاولة إعادة الاتصال رقم ${reconnectAttemptRef.current} بعد ${delay}ms`);
+    
+    // إلغاء أي مؤقت سابق
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
+    }
+    
+    reconnectTimeoutRef.current = setTimeout(() => {
+      // تنظيف أي اتصال موجود
+      if (socketRef.current) {
+        socketRef.current.close();
+        socketRef.current = null;
+      }
       
-      // Authenticate with the server
+      // إنشاء اتصال جديد
+      const newSocket = createWebSocketConnection();
+      if (newSocket) {
+        socketRef.current = newSocket;
+        setupSocketHandlers(newSocket);
+        setStatus("connecting");
+      } else {
+        // فشل إنشاء الاتصال، نحاول مرة أخرى
+        isReconnectingRef.current = false;
+        reconnect();
+      }
+    }, delay);
+  }, [createWebSocketConnection]);
+
+  // إعداد معالجات الأحداث للـ WebSocket
+  const setupSocketHandlers = useCallback((socket: WebSocket) => {
+    socket.onopen = () => {
+      console.log("WebSocket connection established");
+      setStatus("open");
+      isReconnectingRef.current = false;
+      reconnectAttemptRef.current = 0; // إعادة ضبط عداد محاولات إعادة الاتصال
+      
+      // إعادة تأسيس الجلسة مع الخادم
       if (user) {
-        sendMessage({
+        socket.send(JSON.stringify({
           type: "auth",
           userId: user.id
+        }));
+      }
+      
+      // بدء مؤقت ping للحفاظ على الاتصال نشطاً
+      setupPingInterval();
+    };
+    
+    socket.onclose = (event) => {
+      console.log(`WebSocket connection closed. Code: ${event.code}, Reason: ${event.reason || 'No reason provided'}`);
+      setStatus("closed");
+      clearAllTimers();
+      
+      // إذا لم يكن الإغلاق طبيعياً وليس يدوياً، نحاول إعادة الاتصال
+      if (event.code !== 1000 && !isManualCloseRef.current) {
+        if (reconnectAttemptRef.current < RECONNECT_MAX_RETRIES) {
+          console.log("محاولة إعادة الاتصال تلقائياً...");
+          reconnect();
+        } else {
+          console.error("تم الوصول للحد الأقصى لمحاولات إعادة الاتصال");
+          // إعادة ضبط العداد للسماح بمحاولات جديدة في المستقبل
+          reconnectAttemptRef.current = 0;
+        }
+      }
+      
+      isManualCloseRef.current = false;
+    };
+    
+    socket.onerror = (error) => {
+      console.error("WebSocket error:", error);
+      setStatus("error");
+      
+      // لا نظهر رسائل خطأ للمستخدم عند إعادة الاتصال
+      if (!isReconnectingRef.current) {
+        toast({
+          title: "خطأ في الاتصال",
+          description: "نحاول إعادة الاتصال تلقائياً...",
+          variant: "destructive",
         });
       }
-    };
-
-    socket.onclose = (event) => {
-      setStatus("closed");
-      console.log(`WebSocket connection closed. Code: ${event.code}, Reason: ${event.reason || 'No reason provided'}`);
       
-      // إعادة الاتصال تلقائيًا فورًا إذا لم يكن الإغلاق طبيعي
-      if (event.code !== 1000) { // 1000 = normal closure
-        console.log("محاولة إعادة الاتصال فورًا...");
-        
-        // تعيين العلم بأننا نحاول إعادة الاتصال
-        reconnectAttemptRef.current = true;
-
-        // محاولة إعادة الاتصال فورًا بدون تأخير
-        console.log("جاري محاولة إعادة الاتصال...");
-        
-        // إعادة تشغيل useEffect فورًا
-        const retry = () => {
-          console.log("إعادة محاولة الاتصال");
-          if (user) {
-            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const host = window.location.host;
-            const wsUrl = `${protocol}//${host}/ws`;
-            
-            const newSocket = new WebSocket(wsUrl);
-            socketRef.current = newSocket;
-            setStatus("connecting");
-            
-            // تكرار كل التعاملات الخاصة بالـ socket
-            newSocket.onopen = socket.onopen;
-            newSocket.onclose = socket.onclose;
-            newSocket.onerror = socket.onerror;
-            newSocket.onmessage = socket.onmessage;
-          }
-        };
-        
-        retry();
-        reconnectAttemptRef.current = false;
-      }
+      // التشجيع على محاولة إعادة الاتصال في حالة الخطأ
+      // لا حاجة للتصرف هنا، سيتم التعامل معه في onclose
     };
-
-    socket.onerror = (error) => {
-      setStatus("error");
-      console.error("WebSocket error:", error);
-      toast({
-        title: "خطأ في الاتصال",
-        description: "حدث خطأ أثناء الاتصال بالخادم. يرجى المحاولة مرة أخرى.",
-        variant: "destructive",
-      });
-    };
-
+    
     socket.onmessage = (event) => {
       try {
         const message = JSON.parse(event.data);
         const { type } = message;
         
-        // Handle standard message types
+        // معالجة أنواع الرسائل القياسية
         if (type === "error") {
           toast({
             title: "خطأ",
@@ -142,10 +198,9 @@ export function useWebSocket() {
             variant: "destructive",
           });
         } else if (type === "ping") {
-          // تلقي رسالة ping من الخادم، نرسل pong لإبقاء الاتصال حياً
+          // استلام ping من الخادم، إرسال pong للرد
           console.log("تم استلام ping من الخادم، إرسال pong...");
           
-          // إرسال رسالة pong
           if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
             socketRef.current.send(JSON.stringify({ 
               type: "pong", 
@@ -154,7 +209,7 @@ export function useWebSocket() {
           }
         }
         
-        // Call any registered handlers for this message type
+        // استدعاء أي معالج مسجل لهذا النوع من الرسائل
         const handler = messageHandlersRef.current.get(type);
         if (handler) {
           handler(message);
@@ -163,13 +218,45 @@ export function useWebSocket() {
         console.error("Error parsing WebSocket message:", error);
       }
     };
+  }, [user, toast, setupPingInterval, reconnect, clearAllTimers]);
 
-    return () => {
-      console.log("Closing WebSocket connection");
-      socket.close();
+  // إعداد اتصال الـ WebSocket الأساسي
+  useEffect(() => {
+    // لا نحاول الاتصال إذا لم يكن هناك مستخدم مسجل دخوله
+    if (!user) return;
+    
+    // إذا كان هناك اتصال مفتوح حالياً، لا نقوم بإنشاء اتصال جديد
+    if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+      console.log("اتصال WebSocket مفتوح بالفعل، لا حاجة لإنشاء اتصال جديد");
+      return;
+    }
+    
+    // تنظيف أي اتصال أو مؤقت سابق
+    clearAllTimers();
+    if (socketRef.current) {
+      isManualCloseRef.current = true; // تعيين علامة الإغلاق اليدوي
+      socketRef.current.close();
       socketRef.current = null;
+    }
+    
+    // إنشاء اتصال جديد
+    const socket = createWebSocketConnection();
+    if (socket) {
+      socketRef.current = socket;
+      setupSocketHandlers(socket);
+      setStatus("connecting");
+    }
+    
+    // تنظيف عند فصل المكون
+    return () => {
+      clearAllTimers();
+      if (socketRef.current) {
+        isManualCloseRef.current = true; // تعيين علامة الإغلاق اليدوي
+        socketRef.current.close();
+        socketRef.current = null;
+      }
     };
-  }, [user, toast]);
+  }, [user, clearAllTimers, createWebSocketConnection, setupSocketHandlers]);
 
   // Send message via WebSocket
   const sendMessage = useCallback((message: any) => {

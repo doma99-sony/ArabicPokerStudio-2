@@ -5,129 +5,253 @@ import { storage } from "./storage";
 
 // Set up WebSocket server for real-time game updates
 export function setupPokerGame(app: Express, httpServer: Server) {
-  // Create WebSocket server with proper configuration
+  // تكوين متقدم لتحسين أداء الاتصال وموثوقيته
   const wss = new WebSocketServer({ 
     server: httpServer,
-    path: "/ws", // Specify explicit path for WebSocket connections
-    perMessageDeflate: false // Disable compression to avoid some connection issues
+    path: "/ws", // مسار محدد لاتصالات WebSocket
+    perMessageDeflate: false, // تعطيل الضغط لتجنب بعض مشاكل الاتصال
+    clientTracking: true, // تتبع العملاء تلقائياً
+    maxPayload: 50 * 1024 * 1024, // زيادة الحد الأقصى لحجم الرسالة (50 ميجابايت)
   });
 
-  // Broadcast message to all connected clients
+  // تحسين تتبع العملاء بإضافة معلومات حالة إضافية
+  interface ClientInfo {
+    ws: WebSocket;
+    userId: number;
+    isAlive: boolean;
+    lastPing: number;
+    reconnectCount: number;
+    tableId?: number;
+    joinedAt: number;
+  }
+  
+  // Map لتتبع الاتصالات النشطة حسب معرف المستخدم
+  const clients = new Map<number, ClientInfo>();
+  
+  // Map لتتبع الطاولات التي ينضم إليها المستخدمون
+  const userTables = new Map<number, number>();
+  
+  // Map لتتبع آخر حالة معروفة للمستخدم قبل قطع الاتصال (للاسترداد عند إعادة الاتصال)
+  const lastKnownUserStates = new Map<number, {
+    tableId?: number;
+    lastActivity: number;
+  }>();
+
+  // Broadcast message to all connected clients with improved error handling
   const broadcast = (message: any, excludeUserId?: number) => {
     const serializedMessage = JSON.stringify(message);
-    clients.forEach((client, userId) => {
-      if (userId !== excludeUserId && client.readyState === WebSocket.OPEN) {
-        client.send(serializedMessage);
+    
+    clients.forEach((clientInfo, userId) => {
+      if (userId !== excludeUserId && clientInfo.ws.readyState === WebSocket.OPEN) {
+        try {
+          clientInfo.ws.send(serializedMessage);
+        } catch (err) {
+          console.error(`خطأ أثناء البث للمستخدم ${userId}:`, err);
+          // لا يتم حذف العميل هنا، سنترك آلية heartbeat تتعامل مع ذلك
+        }
       }
     });
   };
-  
-  // Map to track active connections by user ID
-  const clients = new Map<number, WebSocket>();
-  
-  // Map to track which tables users are connected to
-  const userTables = new Map<number, number>();
 
-  // عدد افتراضي من المستخدمين المتصلين (بين 0 مستخدم) - بعد إزالة اللاعبين الوهميين
-  const getRandomOnlineCount = () => {
-    const baseUsers = clients.size; // عدد المستخدمين الحقيقيين
-    // const fakeUsers = Math.floor(Math.random() * 10) + 5; // تم تعطيل العدد الوهمي
-    const fakeUsers = 0; // لا يوجد لاعبين وهميين
-    return baseUsers + fakeUsers;
+  // عدد المستخدمين المتصلين الحقيقي (بدون لاعبين وهميين)
+  const getOnlineCount = () => {
+    return clients.size;
   };
 
   // عداد لتتبع عدد المستخدمين في وقت معين
   let activeCounter = 0;
   
-  // دالة لإرسال عدد المستخدمين المتصلين حاليًا
+  // دالة محسنة لإرسال عدد المستخدمين المتصلين حاليًا
   const broadcastOnlineUsers = () => {
-    const realCount = clients.size;
-    const onlineCount = getRandomOnlineCount();
+    const realCount = getOnlineCount();
     activeCounter++;
     
     console.log(`عدد المستخدمين المتصلين حقيقياً: ${realCount}`);
     console.log(`العداد: ${activeCounter}`);
-    console.log(`إجمالي عدد المستخدمين المتصلين مع الوهميين: ${onlineCount}`);
+    console.log(`إجمالي عدد المستخدمين المتصلين مع الوهميين: ${realCount}`);
     
     const message = {
       type: "online_users_count",
-      count: onlineCount
+      count: realCount
     };
     
     broadcast(message);
   };
   
-  const PING_INTERVAL = 15000; // تقليل الفاصل الزمني إلى 15 ثانية لضمان استمرار الاتصال
-  const HEARTBEAT_TIMEOUT = 60000; // 60 ثانية كوقت فاصل أكبر للمهلة
+  // تقليل فاصل الـ ping للحفاظ على الاتصال حياً
+  const PING_INTERVAL = 10000; // 10 ثوانٍ
+  const HEARTBEAT_TIMEOUT = 30000; // 30 ثانية قبل اعتبار الاتصال مقطوعاً
   
   // تحديث عدد المستخدمين المتصلين كل 5 ثوانٍ
-  const UPDATE_INTERVAL = 5000; // 5 seconds
-  setInterval(() => {
+  const UPDATE_INTERVAL = 5000;
+  const updateIntervalId = setInterval(() => {
     broadcastOnlineUsers();
   }, UPDATE_INTERVAL);
 
-  // إرسال رسالة معلوماتية (نوع: ping) بدلاً من ping الافتراضي لضمان استمرار الاتصال
-  // هذا أكثر فعالية مع بعض الوسطاء/الجدران النارية التي قد تحظر العمليات الثنائية
-  setInterval(() => {
+  // دالة التحقق من حالة الاتصالات وإرسال نبضات للحفاظ على الاتصال
+  const heartbeatIntervalId = setInterval(() => {
     console.log("إرسال نبض معلوماتي لجميع العملاء المتصلين...");
-    clients.forEach((client, userId) => {
-      if (client.readyState === WebSocket.OPEN) {
+    
+    const now = Date.now();
+    
+    clients.forEach((clientInfo, userId) => {
+      // التحقق إذا كان العميل قد استجاب للنبض السابق
+      if (!clientInfo.isAlive) {
+        console.log(`لم يستجب المستخدم ${userId} للنبض، قطع الاتصال`);
+        
+        // حفظ آخر حالة معروفة للمستخدم قبل قطع الاتصال
+        if (clientInfo.tableId) {
+          lastKnownUserStates.set(userId, {
+            tableId: clientInfo.tableId,
+            lastActivity: now
+          });
+        }
+        
+        // إغلاق الاتصال وإزالته من القائمة
+        clientInfo.ws.terminate();
+        clients.delete(userId);
+        return;
+      }
+      
+      // إعادة تعيين علامة الحالة للتحقق في الدورة التالية
+      clientInfo.isAlive = false;
+      
+      if (clientInfo.ws.readyState === WebSocket.OPEN) {
         try {
-          // إرسال رسالة json بدلاً من ping
-          client.send(JSON.stringify({ 
+          // إرسال رسالة معلوماتية بدلاً من ping ثنائي
+          clientInfo.ws.send(JSON.stringify({ 
             type: "ping", 
-            timestamp: Date.now() 
+            timestamp: now,
+            serverTime: new Date().toISOString()
           }));
           
-          // بالإضافة لذلك، نرسل ping عادي
-          client.ping();
+          // أيضاً إرسال ping ثنائي كاحتياط
+          clientInfo.ws.ping();
+          clientInfo.lastPing = now;
         } catch (err) {
           console.error(`خطأ أثناء إرسال نبض للمستخدم ${userId}:`, err);
+          // سيتم التعامل مع هذا تلقائياً في الدورة التالية
         }
       }
     });
+    
+    // تنظيف lastKnownUserStates القديمة (الأقدم من ساعة)
+    const oneHourAgo = now - (60 * 60 * 1000);
+    lastKnownUserStates.forEach((state, userId) => {
+      if (state.lastActivity < oneHourAgo) {
+        lastKnownUserStates.delete(userId);
+      }
+    });
   }, PING_INTERVAL);
+
+  // إرسال رسالة لجميع المستخدمين في طاولة معينة باستثناء المرسل
+  function broadcastToTable(tableId: number, message: any, excludeUserId?: number) {
+    const players = getPlayersAtTable(tableId);
+    const serializedMessage = JSON.stringify(message);
+    
+    for (const playerId of players) {
+      if (excludeUserId && playerId === excludeUserId) continue;
+      
+      const clientInfo = clients.get(playerId);
+      if (clientInfo && clientInfo.ws.readyState === WebSocket.OPEN) {
+        try {
+          clientInfo.ws.send(serializedMessage);
+        } catch (err) {
+          console.error(`خطأ أثناء البث للمستخدم ${playerId} في الطاولة ${tableId}:`, err);
+        }
+      }
+    }
+  }
   
+  // الحصول على جميع اللاعبين في طاولة معينة
+  function getPlayersAtTable(tableId: number): number[] {
+    const players: number[] = [];
+    
+    userTables.forEach((userTableId, userId) => {
+      if (userTableId === tableId) {
+        players.push(userId);
+      }
+    });
+    
+    return players;
+  }
+
+  // إعداد التنظيف عند إغلاق الخادم
+  process.on('SIGINT', cleanupServer);
+  process.on('SIGTERM', cleanupServer);
+  
+  // دالة تنظيف موارد الخادم عند الإغلاق
+  function cleanupServer() {
+    console.log('تنظيف اتصالات WebSocket قبل إغلاق الخادم...');
+    
+    // إيقاف الفواصل الزمنية
+    clearInterval(updateIntervalId);
+    clearInterval(heartbeatIntervalId);
+    
+    // إغلاق جميع الاتصالات بشكل نظيف
+    clients.forEach((clientInfo) => {
+      try {
+        clientInfo.ws.close(1000, 'Server shutdown');
+      } catch (err) {
+        // تجاهل أي أخطاء أثناء الإغلاق
+      }
+    });
+    
+    // إيقاف خادم WebSocket
+    wss.close();
+    
+    // السماح للعمليات الأخرى بالتنظيف قبل إنهاء العملية
+    setTimeout(() => {
+      process.exit(0);
+    }, 1000);
+  }
+
+  // معالجة اتصال جديد
   wss.on("connection", (ws: WebSocket, req: any) => {
     let userId: number | undefined;
-    let pingTimeout: NodeJS.Timeout;
-
-    // تعريف دالة heartbeat دون مؤقت انتهاء للحفاظ على الاتصال مفتوحًا
-    const heartbeat = () => {
-      // فقط تسجيل أنه تم استلام pong
-      console.log(`تم تحديث heartbeat للمستخدم ${userId || 'غير معروف'}`);
-      
-      // إلغاء أي مؤقت قديم إذا وجد
-      if (pingTimeout) {
-        clearTimeout(pingTimeout);
-        // استخدام undefined بدلاً من null لتوافق الأنواع
-        pingTimeout = undefined as unknown as NodeJS.Timeout;
-      }
-      
-      // دون أي مؤقت جديد - نعتمد على آلية إعادة الاتصال في العميل
+    const connectionTime = Date.now();
+    
+    // إعداد اتصال جديد بالقيم الافتراضية
+    const newClient: ClientInfo = {
+      ws,
+      userId: 0, // سيتم تحديثه لاحقاً عند المصادقة
+      isAlive: true,
+      lastPing: connectionTime,
+      reconnectCount: 0,
+      joinedAt: connectionTime
     };
 
+    // دالة heartbeat محدثة
+    const heartbeat = () => {
+      // إذا كان المستخدم مصادق عليه
+      if (userId && clients.has(userId)) {
+        const clientInfo = clients.get(userId);
+        if (clientInfo) {
+          clientInfo.isAlive = true;
+          console.log(`تم تحديث heartbeat للمستخدم ${userId}`);
+        }
+      } else {
+        // للاتصالات الجديدة غير المصادق عليها بعد
+        console.log(`تم تحديث heartbeat للمستخدم غير معروف`);
+      }
+    };
+
+    // الاستجابة لـ pong من العميل (الثنائي)
     ws.on('pong', heartbeat);
+    
+    // تفعيل الاتصال الأولي
     heartbeat();
     
-    // Parse session cookie to get user ID (simplified version)
-    const cookieString = req.headers.cookie;
-    if (cookieString) {
-      // In a real implementation, we would use the session middleware to validate the user
-      // For now, we'll expect the client to send their user ID in a message
-    }
-    
+    // معالجة الرسائل الواردة
     ws.on("message", async (message: any) => {
       try {
         const data = JSON.parse(message.toString());
         
-        // معالجة رسائل pong من العميل
-        if (data.type === "pong") {
-          // تلقي رسالة pong من العميل، تحديث مؤقت الاتصال
-          console.log(`تم استلام pong من المستخدم ${userId || 'غير معروف'}`);
+        // معالجة رسائل pong من العميل (JSON)
+        if (data.type === "pong" || data.type === "client_ping") {
           heartbeat();
         } else if (data.type === "auth") {
-          // Authenticate user
+          // مصادقة المستخدم
           const user = await storage.getUser(data.userId);
           if (!user) {
             ws.send(JSON.stringify({ type: "error", message: "مستخدم غير مصرح به" }));
@@ -135,14 +259,50 @@ export function setupPokerGame(app: Express, httpServer: Server) {
           }
           
           userId = user.id;
-          clients.set(userId, ws);
+          newClient.userId = userId;
           
-          // Send authentication success response
-          ws.send(JSON.stringify({ type: "auth", success: true }));
+          // التحقق من إذا كان المستخدم متصل بالفعل
+          if (clients.has(userId)) {
+            // إذا كان لديه اتصال قديم، نغلقه بهدوء
+            const existingClient = clients.get(userId);
+            if (existingClient && existingClient.ws !== ws) {
+              try {
+                existingClient.ws.close(1000, 'New connection established');
+              } catch (e) {
+                // تجاهل أي أخطاء أثناء الإغلاق
+              }
+            }
+            
+            // زيادة عدد إعادة الاتصال
+            newClient.reconnectCount = (existingClient?.reconnectCount || 0) + 1;
+            
+            // استعادة معرف الطاولة السابق إذا وجد
+            if (existingClient?.tableId) {
+              newClient.tableId = existingClient.tableId;
+              userTables.set(userId, existingClient.tableId);
+            } else if (lastKnownUserStates.has(userId)) {
+              // أو محاولة استعادة من الحالة الأخيرة المعروفة
+              const lastState = lastKnownUserStates.get(userId);
+              if (lastState && lastState.tableId) {
+                newClient.tableId = lastState.tableId;
+                userTables.set(userId, lastState.tableId);
+              }
+            }
+          }
+          
+          // تسجيل الاتصال الجديد
+          clients.set(userId, newClient);
+          
+          // إرسال رد نجاح المصادقة
+          ws.send(JSON.stringify({ 
+            type: "auth", 
+            success: true,
+            reconnectCount: newClient.reconnectCount,
+            serverTime: new Date().toISOString()
+          }));
           
           // بث عدد المستخدمين المتصلين بعد تسجيل الدخول
           broadcastOnlineUsers();
-          
         } else if (data.type === "chat_message") {
           // Handle chat messages - تفعيل الرسائل حتى للمستخدمين غير المصادق عليهم مسبقاً
           // استخدام معرف الرسالة المرسل من العميل، أو إنشاء واحد جديد
@@ -206,6 +366,14 @@ export function setupPokerGame(app: Express, httpServer: Server) {
           const tableId = data.tableId;
           userTables.set(userId, tableId);
           
+          // حفظ معرف الطاولة للاتصال الحالي
+          if (clients.has(userId)) {
+            const clientInfo = clients.get(userId);
+            if (clientInfo) {
+              clientInfo.tableId = tableId;
+            }
+          }
+          
           // Notify other players at the table
           broadcastToTable(tableId, {
             type: "player_joined",
@@ -229,6 +397,14 @@ export function setupPokerGame(app: Express, httpServer: Server) {
           const tableId = userTables.get(userId);
           if (tableId) {
             userTables.delete(userId);
+            
+            // إزالة معرف الطاولة من الاتصال
+            if (clients.has(userId)) {
+              const clientInfo = clients.get(userId);
+              if (clientInfo) {
+                clientInfo.tableId = undefined;
+              }
+            }
             
             // Notify other players at the table
             broadcastToTable(tableId, {
@@ -266,16 +442,20 @@ export function setupPokerGame(app: Express, httpServer: Server) {
             return;
           }
           
-          // Send updated game state to all players at the table
+          // إرسال حالة اللعبة المحدثة لجميع اللاعبين في الطاولة
           const players = getPlayersAtTable(tableId);
           for (const playerId of players) {
-            const playerWs = clients.get(playerId);
-            if (playerWs && playerWs.readyState === 1) { // WebSocket.OPEN = 1
-              const gameState = await storage.getGameState(tableId, playerId);
-              playerWs.send(JSON.stringify({ 
-                type: "game_state", 
-                gameState 
-              }));
+            const clientInfo = clients.get(playerId);
+            if (clientInfo && clientInfo.ws.readyState === WebSocket.OPEN) {
+              try {
+                const gameState = await storage.getGameState(tableId, playerId);
+                clientInfo.ws.send(JSON.stringify({ 
+                  type: "game_state", 
+                  gameState 
+                }));
+              } catch (err) {
+                console.error(`خطأ في إرسال حالة اللعبة للمستخدم ${playerId}:`, err);
+              }
             }
           }
         }
@@ -288,13 +468,20 @@ export function setupPokerGame(app: Express, httpServer: Server) {
       }
     });
     
+    // معالجة إغلاق الاتصال
     ws.on("close", () => {
       if (userId) {
         clients.delete(userId);
         
         const tableId = userTables.get(userId);
         if (tableId) {
-          userTables.delete(userId);
+          // حفظ معلومات الطاولة الأخيرة للمستخدم قبل الإغلاق (للاسترداد لاحقاً)
+          lastKnownUserStates.set(userId, {
+            tableId: tableId,
+            lastActivity: Date.now()
+          });
+          
+          // لا نحذف المستخدم من userTables حتى يمكن استعادته عند إعادة الاتصال
           
           // Notify other players at the table
           broadcastToTable(tableId, {
@@ -309,32 +496,4 @@ export function setupPokerGame(app: Express, httpServer: Server) {
       }
     });
   });
-  
-  // Broadcast message to all users at a table except the sender
-  function broadcastToTable(tableId: number, message: any, excludeUserId?: number) {
-    const players = getPlayersAtTable(tableId);
-    
-    for (const playerId of players) {
-      if (excludeUserId && playerId === excludeUserId) continue;
-      
-      const ws = clients.get(playerId);
-      if (ws && ws.readyState === 1) { // WebSocket.OPEN = 1
-        ws.send(JSON.stringify(message));
-      }
-    }
-  }
-  
-  // Get all players at a table
-  function getPlayersAtTable(tableId: number): number[] {
-    const players: number[] = [];
-    
-    // Use forEach to iterate the map instead of entries()
-    userTables.forEach((userTableId, userId) => {
-      if (userTableId === tableId) {
-        players.push(userId);
-      }
-    });
-    
-    return players;
-  }
 }
