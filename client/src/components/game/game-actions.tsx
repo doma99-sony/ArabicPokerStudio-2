@@ -20,16 +20,21 @@ export function GameActions({ gameState, onAction, isLoading = false, isCurrentT
   
   // التحقق مما إذا كانت الإجراءات ممكنة
   const isFoldEnabled = isCurrentTurn;
-  const isCheckEnabled = isCurrentTurn && gameState?.currentBet === 0;
+  const isCheckEnabled = isCurrentTurn && (gameState?.currentBet === 0 || gameState?.currentBet === undefined);
   const isCallEnabled = isCurrentTurn && gameState?.currentBet > 0;
-  const isRaiseEnabled = isCurrentTurn && gameState?.userChips && 
-                        ((gameState.userChips > gameState?.currentBet && gameState?.currentBet > 0) || 
-                         (gameState.userChips > 0 && gameState?.currentBet === 0));
-  const isAllInEnabled = isCurrentTurn && gameState?.userChips > 0;
+  
+  // الحصول على رقاقات اللاعب الحالي
+  const currentPlayer = gameState?.players?.find((p: any) => p.isCurrentPlayer);
+  const userChips = currentPlayer?.chips || gameState?.userChips || 0;
+  
+  const isRaiseEnabled = isCurrentTurn && userChips > 0 && 
+                        ((userChips > (gameState?.currentBet || 0) && (gameState?.currentBet || 0) > 0) || 
+                         (userChips > 0 && (gameState?.currentBet || 0) === 0));
+  const isAllInEnabled = isCurrentTurn && userChips > 0;
   
   // الحد الأدنى والأقصى للرفع
-  const minRaise = Math.max(gameState?.currentBet * 2 || gameState?.bigBlind || 0, gameState?.bigBlind || 0);
-  const maxRaise = gameState?.userChips || 0;
+  const minRaise = Math.max((gameState?.currentBet || 0) * 2 || (gameState?.bigBlind || 100), (gameState?.bigBlind || 100));
+  const maxRaise = userChips;
   
   const handleRaiseAmountChange = (value: number[]) => {
     setRaiseAmount(value[0]);
@@ -50,7 +55,7 @@ export function GameActions({ gameState, onAction, isLoading = false, isCurrentT
   };
   
   const handleAllIn = async () => {
-    if (!gameState?.userChips) {
+    if (!userChips || userChips <= 0) {
       toast({
         title: "خطأ في المراهنة",
         description: "لا يمكن المراهنة بكل الرقاقات، رصيدك 0",
@@ -59,7 +64,7 @@ export function GameActions({ gameState, onAction, isLoading = false, isCurrentT
       return;
     }
     
-    await onAction('allIn', gameState.userChips);
+    await onAction('allIn', userChips);
   };
   
   return (

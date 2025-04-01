@@ -116,7 +116,13 @@ export default function GamePage({ params }: { params?: { tableId?: string } }) 
           throw new Error("فشل في جلب بيانات اللعبة");
         }
         
-        return await res.json();
+        const data = await res.json();
+        // تأكد من أن معرف الطاولة موجود في البيانات المرجعة
+        return {
+          ...data,
+          id: tableId,
+          gameId: tableId
+        };
       } catch (error) {
         console.error("خطأ في جلب حالة اللعبة:", error);
         throw error;

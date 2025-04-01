@@ -32,7 +32,7 @@ export interface PlayerPosition {
   id: number;
   username: string;
   chips: number;
-  position: "bottom" | "bottomRight" | "topRight" | "topLeft" | "bottomLeft";
+  position: "bottom" | "bottomRight" | "right" | "topRight" | "top" | "topLeft" | "left" | "bottomLeft" | "dealer";
   avatar?: string;
   cards: Card[];
   folded: boolean;
@@ -65,4 +65,7 @@ export interface GameState {
   minRaise?: number;
   winningHands?: Record<number, Card[]>;
   winners?: { playerId: number, hand: string, amount: number }[];
+  tableName?: string;
+  round?: number;
+  maxRound?: number;
 }

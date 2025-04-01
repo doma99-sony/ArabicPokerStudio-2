@@ -70,7 +70,7 @@ export function GameControls({ gameState }: GameControlsProps) {
           <i className="fas fa-coins text-gold ml-2"></i>
           <span className="text-gold font-roboto">{user?.chips?.toLocaleString() || 0}</span>
         </div>
-        <span className="text-white/60 font-tajawal text-sm">الجولة: <span className="font-roboto">{gameState.round}/10</span></span>
+        <span className="text-white/60 font-tajawal text-sm">الجولة: <span className="font-roboto">{gameState.round || 1}/{gameState.maxRound || 10}</span></span>
       </div>
     </div>
   );

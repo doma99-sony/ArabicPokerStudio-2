@@ -68,7 +68,7 @@ export function PokerTable({ gameState }: PokerTableProps) {
       const positionIndex = playerPositions.indexOf(position as any);
       
       // Send request to join the table at this position
-      const res = await fetch(`/api/game/${gameState.id}/join`, {
+      const res = await fetch(`/api/game/${gameState.id || gameState.gameId}/join`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
