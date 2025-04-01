@@ -27,7 +27,8 @@ import { LandscapeNotice } from "@/components/ui/landscape-notice";
 import { NotificationsProvider } from "@/components/ui/notifications-system";
 import { HomeRedirect } from "@/components/navigation/home-redirect";
 import { initializePerformanceOptimizations } from "@/lib/performance-utils";
-import { useEffect } from "react";
+import { SplashScreen } from "@/components/ui/splash-screen";
+import { useState, useEffect } from "react";
 
 function Router() {
   return (
@@ -61,6 +62,7 @@ function Router() {
 }
 
 function App() {
+  const [showSplash, setShowSplash] = useState(true);
   const { isLoading } = useAuth();
   
   // تهيئة تحسينات الأداء عند بدء التطبيق
@@ -100,6 +102,11 @@ function App() {
         </div>
       </div>
     );
+  }
+  
+  // إذا كانت شاشة البداية مفعلة، اعرضها أولاً
+  if (showSplash) {
+    return <SplashScreen onComplete={() => setShowSplash(false)} />;
   }
   
   return (
