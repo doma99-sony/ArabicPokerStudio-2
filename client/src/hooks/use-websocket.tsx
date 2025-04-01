@@ -1,14 +1,12 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useAuth } from "./use-auth";
 import { useToast } from "./use-toast";
-import { useNotifications } from "@/components/ui/notifications-system";
 
 type WebSocketStatus = "connecting" | "open" | "closed" | "error";
 
 export function useWebSocket() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { addNotification } = useNotifications();
   const [status, setStatus] = useState<WebSocketStatus>("closed");
   const socketRef = useRef<WebSocket | null>(null);
   const messageHandlersRef = useRef<Map<string, (data: any) => void>>(new Map());
@@ -16,10 +14,6 @@ export function useWebSocket() {
   // للتتبع إذا تم إنهاء اتصال WebSocket وبحاجة لإعادة الاتصال
   const reconnectAttemptRef = useRef<boolean>(false);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  // إضافة متغير جديد لتتبع عدد محاولات إعادة الاتصال
-  const reconnectAttemptsCountRef = useRef<number>(0);
-  // وقت آخر اتصال ناجح - للإحصائيات فقط
-  const lastSuccessfulConnectionRef = useRef<number>(Date.now());
 
   // Create WebSocket connection
   // معالجة إضافية لإعادة الاتصال عند تغير حالة الاتصال
@@ -75,21 +69,7 @@ export function useWebSocket() {
 
     socket.onopen = () => {
       setStatus("open");
-      
-      // تسجيل اتصال ناجح ووقته
-      lastSuccessfulConnectionRef.current = Date.now();
-      
-      // إعادة تعيين عداد محاولات الاتصال
-      reconnectAttemptsCountRef.current = 0;
-      
-      console.log("WebSocket connection established - اتصال WebSocket تم بنجاح");
-      
-      // إضافة إشعار داخلي بدلاً من toast
-      addNotification({
-        title: "حالة الاتصال",
-        content: "تم الاتصال بالخادم بنجاح",
-        type: "system"
-      });
+      console.log("WebSocket connection established");
       
       // Authenticate with the server
       if (user) {
@@ -100,45 +80,28 @@ export function useWebSocket() {
       }
     };
 
-    // تحسين آلية إعادة الاتصال للحفاظ على استمرارية الاتصال حتى عند انقطاع الشبكة
     socket.onclose = (event) => {
       setStatus("closed");
       console.log(`WebSocket connection closed. Code: ${event.code}, Reason: ${event.reason || 'No reason provided'}`);
       
-      // إضافة إشعار عن انقطاع الاتصال باستخدام نظام الإشعارات الداخلي
-      addNotification({
-        title: "حالة الاتصال",
-        content: "انقطع الاتصال بالخادم. جاري إعادة المحاولة...",
-        type: "system"
-      });
-      
-      // إعادة الاتصال تلقائيًا دائمًا، بغض النظر عن سبب الإغلاق
-      // حتى في حالة الإغلاق الطبيعي (1000)، سنعيد الاتصال للتأكد من استمرارية الجلسة
-      console.log("محاولة إعادة الاتصال فورًا...");
-      
-      // تعيين العلم بأننا نحاول إعادة الاتصال
-      reconnectAttemptRef.current = true;
+      // إعادة الاتصال تلقائيًا فورًا إذا لم يكن الإغلاق طبيعي
+      if (event.code !== 1000) { // 1000 = normal closure
+        console.log("محاولة إعادة الاتصال فورًا...");
+        
+        // تعيين العلم بأننا نحاول إعادة الاتصال
+        reconnectAttemptRef.current = true;
 
-      // محاولة إعادة الاتصال فورًا بدون تأخير
-      console.log("جاري محاولة إعادة الاتصال...");
-      
-      const attemptReconnect = () => {
-        // فقط محاولة إعادة الاتصال إذا كان الاتصال مغلقًا وكان المستخدم متاحًا
-        if (status === "closed" && user) {
-          // زيادة عداد محاولات إعادة الاتصال
-          reconnectAttemptsCountRef.current += 1;
-          
-          // حساب المدة منذ آخر اتصال ناجح
-          const timeSinceLastConnection = Date.now() - lastSuccessfulConnectionRef.current;
-          const secondsElapsed = Math.round(timeSinceLastConnection / 1000);
-          
-          console.log(`إعادة محاولة الاتصال رقم ${reconnectAttemptsCountRef.current} (منذ ${secondsElapsed} ثانية من آخر اتصال ناجح)`);
-          
-          const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-          const host = window.location.host;
-          const wsUrl = `${protocol}//${host}/ws`;
-          
-          try {
+        // محاولة إعادة الاتصال فورًا بدون تأخير
+        console.log("جاري محاولة إعادة الاتصال...");
+        
+        // إعادة تشغيل useEffect فورًا
+        const retry = () => {
+          console.log("إعادة محاولة الاتصال");
+          if (user) {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const host = window.location.host;
+            const wsUrl = `${protocol}//${host}/ws`;
+            
             const newSocket = new WebSocket(wsUrl);
             socketRef.current = newSocket;
             setStatus("connecting");
@@ -148,29 +111,22 @@ export function useWebSocket() {
             newSocket.onclose = socket.onclose;
             newSocket.onerror = socket.onerror;
             newSocket.onmessage = socket.onmessage;
-          } catch (error) {
-            console.error("فشل في إعادة الاتصال:", error);
-            // محاولة مرة أخرى فورًا، بدون تأخير - استمرار المحاولات بشكل لانهائي
-            attemptReconnect();
           }
-        }
-      };
-      
-      // محاولة إعادة الاتصال فورًا
-      attemptReconnect();
-      reconnectAttemptRef.current = false;
+        };
+        
+        retry();
+        reconnectAttemptRef.current = false;
+      }
     };
 
-    // تحسين معالجة الأخطاء وتقليل الإشعارات المتكررة للمستخدم
     socket.onerror = (error) => {
       setStatus("error");
       console.error("WebSocket error:", error);
-      
-      // لا نعرض رسالة خطأ للمستخدم هنا، لأن الاتصال سيعاد تلقائيًا
-      // سيتم الاعتماد على آلية إعادة الاتصال التلقائي بدلاً من طلب تدخل المستخدم
-      
-      // في حالة وجود توست سابق، لا نعرض توست جديد لتجنب إزعاج المستخدم بإشعارات متكررة
-      // بدلاً من ذلك، نقوم فقط بتسجيل الخطأ في وحدة التحكم للمطورين
+      toast({
+        title: "خطأ في الاتصال",
+        description: "حدث خطأ أثناء الاتصال بالخادم. يرجى المحاولة مرة أخرى.",
+        variant: "destructive",
+      });
     };
 
     socket.onmessage = (event) => {
@@ -180,11 +136,10 @@ export function useWebSocket() {
         
         // Handle standard message types
         if (type === "error") {
-          // استخدام نظام الإشعارات الداخلي بدلاً من toast
-          addNotification({
+          toast({
             title: "خطأ",
-            content: message.message,
-            type: "system"
+            description: message.message,
+            variant: "destructive",
           });
         } else if (type === "ping") {
           // تلقي رسالة ping من الخادم، نرسل pong لإبقاء الاتصال حياً
@@ -214,7 +169,7 @@ export function useWebSocket() {
       socket.close();
       socketRef.current = null;
     };
-  }, [user, toast, addNotification]);
+  }, [user, toast]);
 
   // Send message via WebSocket
   const sendMessage = useCallback((message: any) => {

@@ -57,8 +57,8 @@ export function setupPokerGame(app: Express, httpServer: Server) {
     broadcast(message);
   };
   
-  const PING_INTERVAL = 15000; // 15 ثانية للتواصل المستمر
-  // تم إلغاء HEARTBEAT_TIMEOUT لإزالة أي مهلة زمنية محددة للاتصال
+  const PING_INTERVAL = 15000; // تقليل الفاصل الزمني إلى 15 ثانية لضمان استمرار الاتصال
+  const HEARTBEAT_TIMEOUT = 60000; // 60 ثانية كوقت فاصل أكبر للمهلة
   
   // تحديث عدد المستخدمين المتصلين كل 5 ثوانٍ
   const UPDATE_INTERVAL = 5000; // 5 seconds
@@ -92,13 +92,19 @@ export function setupPokerGame(app: Express, httpServer: Server) {
     let userId: number | undefined;
     let pingTimeout: NodeJS.Timeout;
 
-    // تعريف دالة heartbeat بدون أي مؤقت انتهاء للحفاظ على الاتصال مفتوحًا طوال الوقت
+    // تعريف دالة heartbeat دون مؤقت انتهاء للحفاظ على الاتصال مفتوحًا
     const heartbeat = () => {
-      // فقط تسجيل أنه تم استلام نبضة
+      // فقط تسجيل أنه تم استلام pong
       console.log(`تم تحديث heartbeat للمستخدم ${userId || 'غير معروف'}`);
       
-      // لا نستخدم أي مؤقت انتهاء للحفاظ على الاتصال مفتوحًا بشكل دائم
-      // لا حاجة لتعيين مؤقت للإغلاق التلقائي بعد فترة محددة
+      // إلغاء أي مؤقت قديم إذا وجد
+      if (pingTimeout) {
+        clearTimeout(pingTimeout);
+        // استخدام undefined بدلاً من null لتوافق الأنواع
+        pingTimeout = undefined as unknown as NodeJS.Timeout;
+      }
+      
+      // دون أي مؤقت جديد - نعتمد على آلية إعادة الاتصال في العميل
     };
 
     ws.on('pong', heartbeat);
