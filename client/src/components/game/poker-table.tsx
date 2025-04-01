@@ -8,6 +8,7 @@ import { Plus, HelpCircle, X, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { GameActions } from "./game-actions";
+import { GameControls } from "./game-controls";
 import { GameInstructions } from "./game-instructions";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -348,7 +349,6 @@ export function PokerTable({ gameState }: PokerTableProps) {
               maxBet={100000} /* يجب استبدالها بالحد الأقصى المحدد */
               playerChips={positionedPlayers.find(p => p.isCurrentPlayer)?.chips || 0}
               isCurrentTurn={positionedPlayers.find(p => p.isCurrentPlayer)?.id === gameState.currentTurn}
-              onShowInstructions={() => setShowInstructions(true)}
               onAction={(action, amount) => {
                 // إرسال طلب إجراء اللعب إلى الخادم
                 console.log(`Sending action ${action} with amount ${amount}`);
@@ -379,7 +379,8 @@ export function PokerTable({ gameState }: PokerTableProps) {
         )}
       </div>
       
-      {/* زر تعليمات اللعبة موجود في شريط الأدوات السفلي */}
+      {/* شريط الأدوات السفلي مع زر التعليمات في البداية */}
+      <GameControls gameState={gameState} onShowInstructions={() => setShowInstructions(true)} />
       
       {/* نافذة تعليمات اللعبة */}
       <GameInstructions showInstructions={showInstructions} onClose={() => setShowInstructions(false)} />
