@@ -2,6 +2,7 @@ import { PlayerPosition } from "@/types";
 import { Image } from "@/components/ui/image";
 import { CardComponent } from "./card-component";
 import { PlayerCards } from "./playing-card";
+import { formatChips } from "@/lib/utils";
 
 interface PlayerComponentProps {
   player: PlayerPosition;
@@ -88,7 +89,7 @@ export function PlayerComponent({ player, isTurn }: PlayerComponentProps) {
             <div className="mt-2 relative">
               {/* Chip visualization */}
               <div className="w-10 h-10 bg-red-600 rounded-full border-4 border-white shadow-xl flex items-center justify-center text-white font-bold text-xs z-20">
-                {Math.floor((player.betAmount || 0) / 1000)}K
+                {formatChips(player.betAmount || 0)}
               </div>
               
               {/* Exact bet amount */}
@@ -129,8 +130,11 @@ export function PlayerComponent({ player, isTurn }: PlayerComponentProps) {
           </span>
           
           {/* Chips amount */}
-          <span className="block text-gold text-xs">
-            {player.chips.toLocaleString()}
+          <span className="block text-gold text-xs font-medium flex items-center">
+            <span className="bg-gold/20 rounded-full w-3 h-3 flex items-center justify-center mr-1">
+              <span className="w-2 h-2 bg-gold rounded-full"></span>
+            </span>
+            {formatChips(player.chips)}
           </span>
         </div>
       </div>

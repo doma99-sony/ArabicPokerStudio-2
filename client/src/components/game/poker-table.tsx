@@ -347,6 +347,7 @@ export function PokerTable({ gameState }: PokerTableProps) {
               maxBet={100000} /* يجب استبدالها بالحد الأقصى المحدد */
               playerChips={positionedPlayers.find(p => p.isCurrentPlayer)?.chips || 0}
               isCurrentTurn={positionedPlayers.find(p => p.isCurrentPlayer)?.id === gameState.currentTurn}
+              onShowInstructions={() => setShowInstructions(true)}
               onAction={(action, amount) => {
                 // إرسال طلب إجراء اللعب إلى الخادم
                 console.log(`Sending action ${action} with amount ${amount}`);
@@ -377,18 +378,7 @@ export function PokerTable({ gameState }: PokerTableProps) {
         )}
       </div>
       
-      {/* زر تعليمات اللعبة الجديد - بارز ومميز بلون أصفر */}
-      <div className="fixed top-5 right-5 z-50">
-        <Button
-          variant="default"
-          size="lg"
-          className="bg-yellow-500 hover:bg-yellow-600 text-black font-extrabold rounded-md shadow-xl border-2 border-yellow-300 px-4 py-2 flex items-center gap-2"
-          onClick={() => setShowInstructions(true)}
-        >
-          <HelpCircle className="h-5 w-5" />
-          <span>تعليمات اللعبة</span>
-        </Button>
-      </div>
+      {/* زر تعليمات اللعبة موجود في شريط الأدوات السفلي */}
       
       {/* نافذة تعليمات اللعبة */}
       {showInstructions && (

@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { GameAction } from "@/types";
 import { BetControls } from "./bet-controls";
+import { HelpCircle } from "lucide-react";
 
 interface GameActionsProps {
   currentBet: number;
@@ -11,6 +12,7 @@ interface GameActionsProps {
   playerChips: number;
   isCurrentTurn?: boolean;
   onAction: (action: GameAction, amount?: number) => void;
+  onShowInstructions?: () => void;
 }
 
 export function GameActions({
@@ -19,7 +21,8 @@ export function GameActions({
   maxBet,
   playerChips,
   isCurrentTurn = false,
-  onAction
+  onAction,
+  onShowInstructions
 }: GameActionsProps) {
   const [betAmount, setBetAmount] = useState(minRaise || currentBet * 2 || 0);
   const [showBetControls, setShowBetControls] = useState(false);
@@ -97,6 +100,15 @@ export function GameActions({
         >
           <span>كل شيء</span>
           <span className="bg-white/20 rounded-full h-6 w-6 flex items-center justify-center text-xs">A</span>
+        </Button>
+        
+        {/* تعليمات اللعبة (Game Instructions) */}
+        <Button
+          onClick={onShowInstructions}
+          className="bg-yellow-500 text-black px-4 py-2 rounded-full hover:bg-yellow-600 shadow-lg w-28 flex items-center justify-between"
+        >
+          <span>تعليمات</span>
+          <span className="bg-white/20 rounded-full h-6 w-6 flex items-center justify-center text-xs"><HelpCircle className="h-3 w-3" /></span>
         </Button>
       </div>
 

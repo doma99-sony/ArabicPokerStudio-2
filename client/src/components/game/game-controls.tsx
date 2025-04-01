@@ -2,10 +2,11 @@ import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { GameState } from "@/types";
 import { Button } from "@/components/ui/button";
-import { LogOut, Loader2 } from "lucide-react";
+import { LogOut, Loader2, Coins } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { formatChips } from "@/lib/utils";
 
 interface GameControlsProps {
   gameState: GameState;
@@ -67,8 +68,8 @@ export function GameControls({ gameState }: GameControlsProps) {
       
       <div className="flex items-center">
         <div className="mr-4 bg-deepBlack rounded-full px-3 py-1 flex items-center border border-gold/20">
-          <i className="fas fa-coins text-gold ml-2"></i>
-          <span className="text-gold font-roboto">{user?.chips?.toLocaleString() || 0}</span>
+          <Coins className="text-gold w-4 h-4 ml-2" />
+          <span className="text-gold font-roboto">{formatChips(user?.chips || 0)}</span>
         </div>
         <span className="text-white/60 font-tajawal text-sm">الجولة: <span className="font-roboto">{gameState.round || 1}/{gameState.maxRound || 10}</span></span>
       </div>
