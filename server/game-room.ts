@@ -604,7 +604,7 @@ export function createGameRoom(table: GameTable): GameRoom {
         if (player.chips === 0) player.isAllIn = true;
         break;
         
-      case "allIn":
+      case "all_in":
         // Go all-in
         const allInAmount = player.chips;
         player.betAmount += allInAmount;

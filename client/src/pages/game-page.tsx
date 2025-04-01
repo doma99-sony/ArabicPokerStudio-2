@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "wouter";
-import { GameState } from "@/types";
+import { GameState, GameAction } from "@/types";
 import { Loader2 } from "lucide-react";
 import { PokerTable } from "@/components/game/poker-table";
 import { GameControls } from "@/components/game/game-controls";
@@ -304,7 +304,7 @@ export default function GamePage({ params }: { params?: { tableId?: string } }) 
   const isCurrentTurn = currentPlayer?.isTurn || false;
   
   // وظيفة لتنفيذ إجراء في اللعبة (مثل fold, call, raise, etc)
-  const performGameAction = async (action: 'fold' | 'check' | 'call' | 'raise' | 'allIn', amount?: number) => {
+  const performGameAction = async (action: GameAction, amount?: number) => {
     if (!tableId) {
       toast({
         title: "خطأ",
@@ -347,7 +347,7 @@ export default function GamePage({ params }: { params?: { tableId?: string } }) 
       else if (action === 'check') actionMessage = "تم المتابعة بدون مراهنة";
       else if (action === 'call') actionMessage = `تم المتابعة بمبلغ ${gameState.currentBet}`;
       else if (action === 'raise') actionMessage = `تم رفع المراهنة إلى ${amount}`;
-      else if (action === 'allIn') actionMessage = `تم المراهنة بكل الرقاقات (${amount})`;
+      else if (action === 'all_in') actionMessage = `تم المراهنة بكل الرقاقات (${amount})`;
       
       toast({
         title: "تم تنفيذ الإجراء",
