@@ -446,6 +446,16 @@ export default function LobbyPage() {
           {/* الإعدادات */}
           <div className="relative">
             <button 
+              onClick={() => navigate("/how-to-play")}
+              className="flex flex-col items-center justify-center p-2 min-w-[48px]"
+            >
+              <div className="bg-black/60 rounded-full w-11 h-11 border border-[#D4AF37] flex items-center justify-center text-[#D4AF37]">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+              </div>
+              <span className="text-[11px] text-white mt-1">تعليمات اللعب</span>
+            </button>
+            
+            <button 
               onClick={() => navigate("/settings")}
               className="flex flex-col items-center justify-center p-2 min-w-[48px]"
             >

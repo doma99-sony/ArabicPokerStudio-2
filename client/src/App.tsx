@@ -18,6 +18,7 @@ import ShopPage from "@/pages/shop-page";
 import MissionsPage from "@/pages/missions-page";
 import VIPPage from "@/pages/vip-page";
 import SettingsPage from "@/pages/settings-page";
+import HowToPlayPage from "@/pages/how-to-play-page";
 import { ProtectedRoute } from "./lib/protected-route";
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
@@ -32,6 +33,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/auth" component={AuthPage} />
+      <Route path="/how-to-play" component={HowToPlayPage} />
       <ProtectedRoute path="/" component={LobbyPage} />
       <Route path="/home" component={HomeRedirect} />
       <Route path="/lobby" component={HomeRedirect} />
