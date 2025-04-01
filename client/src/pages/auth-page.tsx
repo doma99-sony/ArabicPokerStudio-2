@@ -664,11 +664,17 @@ export default function AuthPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, type: 'spring' }}
       >
-        <img 
-          src="/assets/poker-logo-new.jpg" 
-          alt="VIP بوكر" 
-          className="w-20 h-20 object-cover rounded-full border-2 border-[#D4AF37] shadow-[0_0_20px_rgba(212,175,55,0.6)]"
-        />
+        <div className="relative w-48 h-48 overflow-hidden">
+          <img 
+            src="/assets/poker-logo-new.jpg" 
+            alt="VIP بوكر" 
+            className="w-full h-full object-contain shadow-[0_0_30px_rgba(212,175,55,0.5)]"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none"></div>
+          <div className="absolute bottom-2 left-0 right-0 text-center text-white/80 text-xs font-bold">
+            <span className="bg-[#D4AF37] text-black px-2 py-0.5 rounded-full">VIP</span> بوكر
+          </div>
+        </div>
         <h1 className="mt-3 text-4xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] to-[#BF9B30] animate-glow-pulse">
           بوكر تكساس العربي
         </h1>
@@ -869,11 +875,17 @@ export default function AuthPage() {
                   transition={{ duration: 0.5 }}
                 >
                   <div className="absolute -inset-3 rounded-full bg-[#D4AF37]/5 blur-xl animate-pulse-slow"></div>
-                  <img 
-                    src="/assets/poker-logo-new.jpg" 
-                    alt="بوكر VIP" 
-                    className="w-24 h-24 object-cover rounded-full border-2 border-[#D4AF37]/30"
-                  />
+                  <div className="relative w-32 h-32 overflow-hidden border-2 border-[#D4AF37]/30">
+                    <img 
+                      src="/assets/poker-logo-new.jpg" 
+                      alt="بوكر VIP" 
+                      className="w-full h-full object-contain"
+                    />
+                    <div className="absolute inset-0 shadow-inner"></div>
+                    <div className="absolute bottom-0 left-0 right-0 text-center bg-gradient-to-t from-black/80 to-transparent p-1">
+                      <span className="bg-[#D4AF37] text-black text-xs px-2 py-0.5 rounded">VIP</span>
+                    </div>
+                  </div>
                 </motion.div>
                 
                 <motion.h2
