@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { OnlineUsersCounter } from "@/components/ui/online-users-badge";
 import { ResetChipsButton } from "@/components/reset-chips-button";
 import { RemoveVirtualPlayersButton } from "@/components/remove-virtual-players-button";
-import { NotificationsButton } from "@/components/ui/notifications-system";
+import { NotificationsButton, GameInstructionsButton } from "@/components/ui/notifications-system";
 import { LogOut, User, ChevronRight, Loader2, ChevronLeft, ChevronUp, Bell, ShoppingBag, ShoppingCart, Download, Smartphone, ExternalLink, Coins } from "lucide-react";
 import { formatChips } from "@/lib/utils";
 
@@ -473,8 +473,8 @@ export default function LobbyPage() {
             <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-[10px] text-white flex items-center justify-center border border-black">2</span>
           </div>
           
-          {/* الإشعارات */}
-          <NotificationsButton />
+          {/* تم استبدال زر الإشعارات السفلي بزر تعليمات اللعب - والآن تعليمات اللعب متوفرة فقط في طاولات البوكر */}
+          
           
           {/* المهمات */}
           <div className="relative">
