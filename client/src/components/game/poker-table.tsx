@@ -375,19 +375,20 @@ export function PokerTable({ gameState }: PokerTableProps) {
         )}
       </div>
       
-      {/* Add the instruction button and component in the table */}
-      <div className="absolute top-4 right-4 z-50">
+      {/* تعليمات اللعبة - زر المساعدة */}
+      <div className="fixed top-4 right-4 z-[100]">
         <Button
-          variant="ghost"
-          size="icon"
-          className="bg-black/40 hover:bg-black/60 rounded-full w-10 h-10 flex items-center justify-center"
+          variant="default"
+          size="sm"
+          className="bg-yellow-600 hover:bg-yellow-700 text-white font-bold rounded-full shadow-lg border-2 border-yellow-400 px-4 py-2 flex items-center gap-2"
           onClick={() => setShowInstructions(true)}
         >
-          <HelpCircle className="h-6 w-6 text-gold" />
+          <HelpCircle className="h-5 w-5" />
+          <span>تعليمات اللعبة</span>
         </Button>
       </div>
       
-      {/* Game Instructions Component */}
+      {/* مكون تعليمات اللعبة */}
       <GameInstructions 
         showInstructions={showInstructions} 
         onClose={() => setShowInstructions(false)}
