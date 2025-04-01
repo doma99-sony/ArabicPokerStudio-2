@@ -24,6 +24,7 @@ import { Loader2 } from "lucide-react";
 import { WelcomeMessageNotification } from "@/components/ui/welcome-message";
 import { LandscapeNotice } from "@/components/ui/landscape-notice";
 import { NotificationsProvider } from "@/components/ui/notifications-system";
+import { HomeRedirect } from "@/components/navigation/home-redirect";
 import { initializePerformanceOptimizations } from "@/lib/performance-utils";
 import { useEffect } from "react";
 
@@ -32,6 +33,9 @@ function Router() {
     <Switch>
       <Route path="/auth" component={AuthPage} />
       <ProtectedRoute path="/" component={LobbyPage} />
+      <Route path="/home" component={HomeRedirect} />
+      <Route path="/lobby" component={HomeRedirect} />
+      <Route path="/main" component={HomeRedirect} />
       <ProtectedRoute path="/game/:tableId" component={GamePage} />
       <ProtectedRoute path="/game-simple/:tableId" component={GamePageSimplified} />
       <ProtectedRoute path="/direct-table/:tableId" component={DirectTablePage} />

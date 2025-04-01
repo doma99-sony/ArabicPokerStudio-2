@@ -2,6 +2,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
 import { Redirect, Route, useLocation } from "wouter";
 import { useEffect } from "react";
+import { redirectToHome } from "@/components/navigation/home-redirect";
 
 export function ProtectedRoute({
   path,
