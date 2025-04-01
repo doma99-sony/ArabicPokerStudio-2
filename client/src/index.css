@@ -406,39 +406,230 @@
   
   /* تخصيصات خاصة للوضع العمودي في الموبايل */
   @media (max-width: 767px) and (orientation: portrait) {
-    /* تصغير حجم طاولة البوكر وعناصرها */
-    .poker-table-container {
-      transform: scale(0.8);
-      transform-origin: center;
+    /* تحسينات شاملة لكل أبعاد الجوال العمودي */
+    .game-container {
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      padding: 0;
+      margin: 0;
     }
     
-    /* تصغير وإعادة تنظيم البطاقات المجتمعية */
+    /* =============== تحسينات صفحة اللوبي للوضع العمودي =============== */
+    
+    /* تحسين شريط التنقل العلوي في اللوبي */
+    .lobby-header {
+      padding: 0.5rem !important;
+      gap: 0.5rem !important;
+    }
+    
+    .lobby-logo {
+      max-width: 120px !important;
+    }
+    
+    /* تحسين عرض بطاقات الألعاب */
+    .lobby-page .grid {
+      grid-template-columns: 1fr 1fr !important;
+      gap: 0.75rem !important;
+      padding: 0.5rem !important;
+    }
+    
+    /* تعديل حجم بطاقات الألعاب */
+    .lobby-page .grid > div {
+      height: 120px !important;
+    }
+    
+    /* تحسين شريط الأدوات السفلي */
+    .bottom-nav {
+      padding-bottom: 0.5rem !important;
+      padding-top: 0.5rem !important;
+      gap: 0 !important;
+      overflow-x: auto;  /* إضافة تمرير أفقي عند الحاجة */
+      flex-wrap: nowrap; /* عدم لف الأزرار إلى السطر التالي */
+      justify-content: flex-start !important; /* محاذاة من اليمين إلى اليسار */
+    }
+    
+    .bottom-nav button {
+      scale: 0.85;
+      min-width: 44px !important;
+    }
+    
+    .bottom-nav > div {
+      flex-shrink: 0; /* منع تقلص العناصر */
+    }
+    
+    .bottom-nav span {
+      font-size: 0.65rem !important;
+    }
+    
+    /* تعديل حجم وموضع نافذة الدردشة */
+    #chat-container {
+      width: 90% !important;
+      max-width: 90% !important;
+      height: 80% !important;
+    }
+    
+    /* تحسينات جدول الطاولات */
+    .table-grid {
+      grid-template-columns: 1fr !important;
+      gap: 1rem !important;
+    }
+    
+    .table-card {
+      max-width: 100% !important;
+    }
+    
+    /* تعديل بطاقات الطاولات */
+    .table-card .card-content {
+      padding: 0.5rem !important;
+    }
+    
+    .table-card h2 {
+      font-size: 1rem !important;
+    }
+    
+    .table-card .card-footer {
+      padding: 0.5rem !important;
+    }
+    
+    /* تعديل زر الرجوع */
+    .back-button {
+      font-size: 0.8rem !important;
+      padding: 0.5rem 0.75rem !important;
+    }
+    
+    /* تصغير خيارات التصنيف */
+    .tabs-container {
+      padding: 0.5rem !important;
+    }
+    
+    .tab-button {
+      padding: 0.4rem 0.6rem !important;
+      font-size: 0.8rem !important;
+    }
+    
+    /* =============== تحسينات صفحة اللعب للوضع العمودي =============== */
+    
+    /* ضبط حجم طاولة البوكر وعناصرها للوضع العمودي */
+    .poker-table-container {
+      transform: scale(0.65);
+      transform-origin: center;
+      margin-top: -40px;
+    }
+    
+    /* جعل الطاولة أكثر إهليلجية للوضع العمودي */
+    .poker-table {
+      border-radius: 40%/50% !important;
+    }
+
+    /* تصغير وتحسين عرض البطاقات المجتمعية */
     .community-cards {
-      transform: scale(0.85);
+      transform: scale(0.7);
       justify-content: center;
-      gap: 5px !important;
+      gap: 1px !important;
+      margin-top: -20px;
+    }
+    
+    /* ضبط مواقع اللاعبين لتناسب الشاشة العمودية */
+    [position="bottom"] {
+      bottom: 0 !important;
+    }
+    
+    [position="bottomRight"] {
+      bottom: 20% !important;
+      right: 5% !important;
+    }
+    
+    [position="right"] {
+      right: 0 !important;
+      top: 45% !important;
+    }
+    
+    [position="topRight"] {
+      top: 15% !important;
+      right: 5% !important;
+    }
+    
+    [position="top"] {
+      top: 5% !important;
+    }
+    
+    [position="topLeft"] {
+      top: 15% !important;
+      left: 5% !important;
+    }
+    
+    [position="left"] {
+      left: 0 !important;
+      top: 45% !important;
+    }
+    
+    [position="bottomLeft"] {
+      bottom: 20% !important;
+      left: 5% !important;
     }
     
     /* تقليل حجم بطاقات اللاعبين */
     .player-cards {
-      transform: scale(0.8);
+      transform: scale(0.75);
+      margin: -10px;
+    }
+    
+    /* تقليل حجم صور اللاعبين وعناصر التعريف */
+    .player-avatar {
+      width: 30px !important;
+      height: 30px !important;
     }
     
     /* تحسين توزيع الأزرار في الوضع العمودي */
     .action-buttons {
       flex-wrap: wrap;
       justify-content: center;
-      gap: 8px !important;
+      gap: 4px !important;
+      padding: 0.5rem !important;
+      bottom: 0;
+      position: fixed;
+      width: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
     }
     
-    /* تقليل حجم رقائق المراهنة */
-    .betting-chips {
-      transform: scale(0.8);
+    /* ضبط حجم وشكل الأزرار */
+    .action-buttons button {
+      font-size: 0.85rem;
+      padding: 0.35rem 0.75rem;
+      height: auto;
+      min-height: 40px;
+    }
+    
+    /* تقليل حجم رقائق المراهنة ووعاء اللعبة */
+    .betting-chips, .pot {
+      transform: scale(0.7);
     }
     
     /* جعل النص مقروء في الوضع العمودي */
     .player-info {
-      font-size: 80%;
+      font-size: 75%;
+      line-height: 1.2;
+    }
+    
+    /* تحسين رؤية معلومات اللاعبين */
+    .player-name, .player-chips {
+      text-shadow: 0 0 3px black, 0 0 5px black;
+      background-color: rgba(0, 0, 0, 0.6);
+      padding: 2px 4px;
+      border-radius: 3px;
+    }
+    
+    /* تعديل شريط أدوات التحكم في اللعبة */
+    .game-controls {
+      height: auto;
+      padding: 0.5rem;
+    }
+    
+    /* تصغير حجم موزع البطاقات */
+    .dealer-avatar {
+      transform: scale(0.7);
+      margin-top: 10px;
     }
   }
   

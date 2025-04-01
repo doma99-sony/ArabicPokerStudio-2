@@ -196,33 +196,33 @@ export default function PokerTablesPage() {
               defaultValue="نوب" 
               value={activePokerLevel}
               onValueChange={setActivePokerLevel}
-              className="w-full"
+              className="w-full tabs-container"
             >
               <TabsList className="grid w-full grid-cols-4 h-auto mb-6">
                 <TabsTrigger 
                   value="نوب" 
-                  className={`py-4 text-lg ${canPlayLevel(20000) ? '' : 'opacity-70'}`}
+                  className={`py-4 text-lg ${canPlayLevel(20000) ? '' : 'opacity-70'} tab-button`}
                   disabled={!canPlayLevel(20000)}
                 >
                   نوب <Coins className="ml-2 h-5 w-5" /> 20,000
                 </TabsTrigger>
                 <TabsTrigger 
                   value="لسه بتعلم" 
-                  className={`py-3 ${canPlayLevel(100000) ? '' : 'opacity-70'}`}
+                  className={`py-3 ${canPlayLevel(100000) ? '' : 'opacity-70'} tab-button`}
                   disabled={!canPlayLevel(100000)}
                 >
                   لسه بتعلم <Coins className="ml-2 h-4 w-4" /> 100,000
                 </TabsTrigger>
                 <TabsTrigger 
                   value="محترف" 
-                  className={`py-3 ${canPlayLevel(500000) ? '' : 'opacity-70'}`}
+                  className={`py-3 ${canPlayLevel(500000) ? '' : 'opacity-70'} tab-button`}
                   disabled={!canPlayLevel(500000)}
                 >
                   محترف <Coins className="ml-2 h-4 w-4" /> 500,000
                 </TabsTrigger>
                 <TabsTrigger 
                   value="الفاجر" 
-                  className={`py-3 ${canPlayLevel(1000000) ? '' : 'opacity-70'}`}
+                  className={`py-3 ${canPlayLevel(1000000) ? '' : 'opacity-70'} tab-button`}
                   disabled={!canPlayLevel(1000000)}
                 >
                   الفاجر <Coins className="ml-2 h-4 w-4" /> 1,000,000

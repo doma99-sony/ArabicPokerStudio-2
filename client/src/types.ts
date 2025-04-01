@@ -26,6 +26,7 @@ export interface GameTable {
   password?: string;
   ownerId?: number;
   tableSettings?: Record<string, any>;
+  category?: string; // فئة الطاولة: نوب، لسه بتعلم، محترف، الفاجر 
 }
 
 // تفاصيل اليد الفائزة
