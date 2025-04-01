@@ -443,9 +443,9 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
         <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#0A1C1A] to-black border-8 border-[#D4AF37] shadow-[0_0_35px_rgba(212,175,55,0.7)] overflow-hidden animate-pulse-slow">
           <div className="absolute inset-0 bg-black/50"></div>
           <img 
-            src="/assets/poker-icon-gold.png" 
+            src="/assets/poker-logo-new.jpg" 
             alt="Poker Logo" 
-            className="w-full h-full object-contain p-2 filter drop-shadow-lg" 
+            className="w-full h-full object-cover filter drop-shadow-lg" 
           />
         </div>
         

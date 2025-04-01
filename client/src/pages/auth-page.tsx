@@ -265,9 +265,9 @@ export default function AuthPage() {
                   <div className="relative w-36 h-36">
                     <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#D4AF37] to-[#BF9B30] opacity-20 animate-pulse-slow"></div>
                     <img 
-                      src="/assets/poker-icon-gold.png"
+                      src="/assets/poker-logo-new.jpg"
                       alt="VIP Poker" 
-                      className="absolute inset-0 w-full h-full object-contain p-2"
+                      className="absolute inset-0 w-full h-full object-cover rounded-full"
                     />
                   </div>
                 </div>
@@ -665,9 +665,9 @@ export default function AuthPage() {
         transition={{ duration: 0.8, type: 'spring' }}
       >
         <img 
-          src="/assets/poker-icon-gold.png" 
+          src="/assets/poker-logo-new.jpg" 
           alt="VIP بوكر" 
-          className="w-20 h-20 object-contain rounded-full border-2 border-[#D4AF37] shadow-[0_0_20px_rgba(212,175,55,0.6)]"
+          className="w-20 h-20 object-cover rounded-full border-2 border-[#D4AF37] shadow-[0_0_20px_rgba(212,175,55,0.6)]"
         />
         <h1 className="mt-3 text-4xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] to-[#BF9B30] animate-glow-pulse">
           بوكر تكساس العربي
@@ -870,9 +870,9 @@ export default function AuthPage() {
                 >
                   <div className="absolute -inset-3 rounded-full bg-[#D4AF37]/5 blur-xl animate-pulse-slow"></div>
                   <img 
-                    src="/assets/poker-icon-gold.png" 
+                    src="/assets/poker-logo-new.jpg" 
                     alt="بوكر VIP" 
-                    className="w-24 h-24 object-contain rounded-full border-2 border-[#D4AF37]/30 p-1"
+                    className="w-24 h-24 object-cover rounded-full border-2 border-[#D4AF37]/30"
                   />
                 </motion.div>
                 
