@@ -9,6 +9,51 @@
   .bg-gradient-radial {
     background-image: radial-gradient(var(--tw-gradient-stops));
   }
+  
+  /* تأثيرات رسوم متحركة لتوزيع البطاقات */
+  .animate-card-deal-0 {
+    animation: dealCard0 0.8s ease-out;
+  }
+  
+  .animate-card-deal-1 {
+    animation: dealCard1 0.8s ease-out;
+  }
+  
+  @keyframes dealCard0 {
+    0% {
+      transform: translate(-100px, -50px) scale(0.3) rotate(-90deg);
+      opacity: 0;
+    }
+    100% {
+      transform: rotate(10deg);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes dealCard1 {
+    0% {
+      transform: translate(-100px, -50px) scale(0.3) rotate(-90deg);
+      opacity: 0;
+    }
+    100% {
+      transform: rotate(-10deg);
+      opacity: 1;
+    }
+  }
+  
+  /* تأثير مرئي للفائز */
+  .winner-glow {
+    animation: winnerGlow 1.5s infinite alternate;
+  }
+  
+  @keyframes winnerGlow {
+    0% {
+      box-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+    }
+    100% {
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+    }
+  }
 }
 
 :root {

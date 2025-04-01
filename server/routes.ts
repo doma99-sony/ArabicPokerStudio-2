@@ -253,6 +253,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`نجاح انضمام المستخدم ${req.user.id} إلى الطاولة ${tableId}`);
       
+      // إرسال إشعار للاعبين الآخرين عن طريق WebSocket (إذا كان متاحاً)
+      try {
+        const { poker } = require('./poker');
+        if (poker && poker.broadcastToTable) {
+          poker.broadcastToTable(tableId, {
+            type: "player_joined",
+            userId: req.user.id,
+            username: req.user.username,
+            avatar: req.user.avatar || "",
+            tableId: tableId,
+            timestamp: Date.now(),
+            message: `انضم ${req.user.username} إلى الطاولة`
+          }, req.user.id);
+          
+          // تحديث حالة الطاولة في userTables
+          if (poker.userTables) {
+            poker.userTables.set(req.user.id, tableId);
+          }
+        }
+      } catch (err) {
+        console.log("لا يمكن إرسال إشعار الانضمام عبر WebSocket:", err.message);
+      }
+      
       // تأكيد أن المستخدم ليس في وضع المشاهدة
       res.json({ 
         success: true, 

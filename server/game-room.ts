@@ -294,12 +294,39 @@ export function createGameRoom(table: GameTable): GameRoom {
       round.dealer = getNextPlayerTurn(round.dealer);
     }
     
-    // Deal cards to players (just once)
+    // Deal cards to players with a more exciting sequence
     const playerArray = Array.from(players.values());
-    for (let i = 0; i < playerArray.length; i++) {
-      const player = playerArray[i];
-      player.cards = dealCardsToPlayer(round.deck, 2).map(card => ({ ...card, hidden: false }));
-      console.log(`تم توزيع البطاقات للاعب ${player.username}`);
+    
+    // توزيع البطاقات مع إعلانات أفضل وتسلسل أبطأ
+    let dealerIndex = playerArray.findIndex(p => p.id === round.dealer);
+    if (dealerIndex === -1) dealerIndex = 0;
+    
+    // إعادة ترتيب المصفوفة لتبدأ من اللاعب الأول بعد الديلر
+    const orderedPlayers = [
+      ...playerArray.slice(dealerIndex + 1),
+      ...playerArray.slice(0, dealerIndex + 1)
+    ];
+    
+    // أولاً توزيع البطاقة الأولى لكل لاعب
+    for (const player of orderedPlayers) {
+      const firstCard = dealCardsToPlayer(round.deck, 1)[0];
+      // البطاقة الأولى مكشوفة للاعب نفسه فقط
+      player.cards = [{...firstCard, hidden: player.id !== round.currentTurn}];
+      console.log(`تم توزيع البطاقة الأولى للاعب ${player.username}`);
+      
+      // مسح الكاش لتحديث حالة اللعبة في الإطار التالي
+      gameStateCache.clear();
+    }
+    
+    // ثم توزيع البطاقة الثانية لكل لاعب
+    for (const player of orderedPlayers) {
+      const secondCard = dealCardsToPlayer(round.deck, 1)[0];
+      // البطاقة الثانية مكشوفة للاعب نفسه فقط
+      player.cards.push({...secondCard, hidden: player.id !== round.currentTurn});
+      console.log(`تم توزيع البطاقة الثانية للاعب ${player.username}`);
+      
+      // مسح الكاش لتحديث حالة اللعبة في الإطار التالي
+      gameStateCache.clear();
     }
     
     // Set small and big blinds

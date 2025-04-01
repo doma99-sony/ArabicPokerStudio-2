@@ -12,8 +12,32 @@ interface PlayerComponentProps {
 }
 
 export function PlayerComponent({ player, isTurn }: PlayerComponentProps) {
-  // إضافة حالة لتتبع مؤقت الانتظار
+  // حالات لتتبع تأثيرات المرئية المختلفة
   const [turnTimeLeft, setTurnTimeLeft] = useState<number>(12);
+  const [isNewPlayer, setIsNewPlayer] = useState<boolean>(false);
+  const [isCardAnimating, setIsCardAnimating] = useState<boolean>(false);
+  
+  // تأثير عند انضمام لاعب جديد لإظهار تأثير الانضمام
+  useEffect(() => {
+    setIsNewPlayer(true);
+    const timer = setTimeout(() => {
+      setIsNewPlayer(false);
+    }, 2000);
+    
+    return () => clearTimeout(timer);
+  }, [player.id]);
+  
+  // تأثير عند توزيع البطاقات
+  useEffect(() => {
+    if (player.cards && player.cards.length > 0) {
+      setIsCardAnimating(true);
+      const timer = setTimeout(() => {
+        setIsCardAnimating(false);
+      }, 1000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [player.cards?.length]);
   
   // مؤقت للعد التنازلي عندما يكون دور اللاعب
   useEffect(() => {
@@ -46,6 +70,12 @@ export function PlayerComponent({ player, isTurn }: PlayerComponentProps) {
     return "bg-blue-600";
   };
   
+  // أصوات تنبيه مختلفة (يمكن تفعيلها في نسخة لاحقة)
+  const playTurnSound = () => {
+    // يمكن تفعيل الصوت هنا
+    console.log("صوت دور اللاعب");
+  };
+  
   // Position classes based on player position - adjusted for the 9-seat table layout
   const positionClasses: Record<string, string> = {
     bottom: "absolute bottom-4 left-1/2 transform -translate-x-1/2 flex-col items-center",
@@ -76,13 +106,35 @@ export function PlayerComponent({ player, isTurn }: PlayerComponentProps) {
   const showCards = player.isCurrentPlayer || player.cards?.every(c => !c.hidden);
 
   return (
-    <div className={`flex ${positionClasses[player.position]} z-30`}>
+    <div 
+      className={`flex ${positionClasses[player.position]} z-30 transition-all duration-500`}
+      style={{
+        // تأثير ظهور تدريجي للاعب جديد
+        opacity: isNewPlayer ? 0.7 : 1,
+        transform: isNewPlayer ? `scale(1.05) ${player.position === 'bottom' ? 'translateY(10px)' : ''}` : 'scale(1)',
+        // إضافة حدود متوهجة للاعب الحالي
+        boxShadow: player.isCurrentPlayer ? '0 0 15px rgba(255, 215, 0, 0.5)' : 'none',
+      }}
+    >
       {/* Player status indicators - top of player area */}
       <div className="flex flex-col items-center mb-1">
+        {/* إشارة إلى اللاعب الجديد */}
+        {isNewPlayer && (
+          <div className="mb-1.5 bg-green-600 rounded-full px-3 py-1 text-white text-sm font-bold shadow-lg animate-pulse">
+            لاعب جديد
+          </div>
+        )}
+        
         {/* Player's turn indicator with countdown timer */}
         {isTurn && (
-          <div className={`${getTimerColor()}/80 rounded-full px-3 py-1 text-white mb-1.5 shadow-lg transition-colors duration-300 flex items-center gap-1`}>
-            <Clock className="w-4 h-4" />
+          <div 
+            className={`${getTimerColor()}/80 rounded-full px-3 py-1 text-white mb-1.5 shadow-lg transition-all duration-300 flex items-center gap-1`}
+            style={{
+              // تأثير نبض عندما يكون الوقت أقل من 5 ثوان
+              animation: turnTimeLeft <= 5 ? 'pulse 1s infinite' : 'none',
+            }}
+          >
+            <Clock className={`w-4 h-4 ${turnTimeLeft <= 3 ? 'animate-spin' : ''}`} />
             <span className="text-sm font-bold">
               {player.isCurrentPlayer ? "دورك للعب" : "جاري اللعب..."} ({turnTimeLeft})
             </span>
@@ -91,7 +143,7 @@ export function PlayerComponent({ player, isTurn }: PlayerComponentProps) {
         
         {/* Folded indicator */}
         {player.folded && (
-          <div className="mb-1.5 bg-red-600/80 rounded-full px-3 py-1 text-white text-sm font-bold shadow-lg">
+          <div className="mb-1.5 bg-red-600/80 rounded-full px-3 py-1 text-white text-sm font-bold shadow-lg animate-bounce">
             تخلى
           </div>
         )}
@@ -104,13 +156,25 @@ export function PlayerComponent({ player, isTurn }: PlayerComponentProps) {
             {player.cards.map((card, index) => (
               <div
                 key={`player-card-${index}`}
-                className={`card transform transition-all duration-300 ${player.winner ? 'animate-pulse' : ''}`}
+                className={`card transform transition-all duration-500 ${
+                  player.winner ? 'animate-pulse shadow-xl' : ''
+                } ${
+                  isCardAnimating ? `animate-card-deal-${index}` : ''
+                }`}
                 style={{ 
                   transform: `rotate(${cardRotations[player.position][index]}deg)`,
                   marginLeft: index === 0 ? '-5px' : '0',
                   marginRight: index === 1 ? '-5px' : '0',
                   position: 'relative',
-                  zIndex: 20 + index
+                  zIndex: 20 + index,
+                  // تأثير توزيع البطاقات
+                  animationDelay: `${index * 0.15}s`,
+                  // تأثير فائز اللعبة
+                  boxShadow: player.winner 
+                    ? '0 0 15px rgba(255, 215, 0, 0.7)' 
+                    : player.isCurrentPlayer 
+                      ? '0 0 5px rgba(255, 255, 255, 0.3)' 
+                      : 'none',
                 }}
               >
                 <CardComponent 
