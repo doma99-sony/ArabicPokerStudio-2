@@ -61,13 +61,13 @@ export function PlayerComponent({ player, isTurn }: PlayerComponentProps) {
       </div>
       
       {/* Display player's cards if they have them */}
-      {player.cards && (
+      {player.cards && player.cards.length > 0 && (
         <div className="flex flex-col items-center mb-2">
           <div className="flex space-x-1 rtl:space-x-reverse">
             {player.cards.map((card, index) => (
               <div
                 key={`player-card-${index}`}
-                className="card transform"
+                className={`card transform transition-all duration-300 ${player.winner ? 'animate-pulse' : ''}`}
                 style={{ 
                   transform: `rotate(${cardRotations[player.position][index]}deg)`,
                   marginLeft: index === 0 ? '-5px' : '0',
@@ -79,21 +79,47 @@ export function PlayerComponent({ player, isTurn }: PlayerComponentProps) {
                 <CardComponent 
                   card={showCards ? card : { ...card, hidden: true }} 
                   size="sm" 
+                  // إذا كان هذا اللاعب هو الفائز، استخدم تصميم ذهبي للبطاقات
+                  variant={player.winner ? "gold" : "default"}
+                  // إذا كانت هذه البطاقة جزء من يد الفائز النهائية
+                  isWinning={player.winner && player.handDetails?.bestHand?.some((winCard) => 
+                    winCard.suit === card.suit && winCard.value === card.value
+                  )}
                 />
               </div>
             ))}
           </div>
           
+          {/* Winner badge */}
+          {player.winner && (
+            <div className="mb-1 mt-1">
+              <div className="bg-gradient-to-r from-amber-500 to-yellow-300 text-black px-3 py-1 rounded-full text-xs font-bold animate-pulse shadow-lg">
+                {player.handName || "فائز!"}
+              </div>
+            </div>
+          )}
+          
           {/* Player's bet amount if any - shown below cards */}
           {player.betAmount && player.betAmount > 0 && (
             <div className="mt-2 relative">
-              {/* Chip visualization */}
-              <div className="w-10 h-10 bg-red-600 rounded-full border-4 border-white shadow-xl flex items-center justify-center text-white font-bold text-xs z-20">
+              {/* Chip visualization - different color based on bet size */}
+              <div 
+                className={`
+                  w-10 h-10 rounded-full border-4 border-white shadow-xl 
+                  flex items-center justify-center text-white font-bold text-xs z-20
+                  ${player.betAmount > 1000 ? 'bg-purple-600' : 
+                    player.betAmount > 500 ? 'bg-red-600' : 
+                    player.betAmount > 200 ? 'bg-amber-600' : 'bg-green-600'}
+                `}
+              >
                 {formatChips(player.betAmount || 0)}
               </div>
               
-              {/* Exact bet amount */}
-              <div className="absolute -bottom-5 left-1/2 transform -translate-x-1/2 bg-black/60 rounded-full px-2 py-0.5 text-white text-xs min-w-[40px] text-center">
+              {/* Show exact bet amount with tooltip */}
+              <div 
+                className="absolute -bottom-5 left-1/2 transform -translate-x-1/2 bg-black/60 rounded-full px-2 py-0.5 text-white text-xs min-w-[40px] text-center"
+                title={`${player.betAmount} رقاقة`}
+              >
                 {(player.betAmount || 0).toLocaleString()}
               </div>
             </div>

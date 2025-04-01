@@ -48,7 +48,7 @@ const cardSizes: Record<CardSize, { width: string, height: string, textSize: str
 };
 
 // ألوان الحواف حسب نوع البطاقة
-const cardVariants: Record<CardVariant, { border: string, glow: string, bg: string }> = {
+const cardVariants: Record<CardVariant, { border: string, glow: string, bg: string, textEffect?: string }> = {
   default: { 
     border: 'border-slate-300', 
     glow: 'shadow-md', 
@@ -57,7 +57,8 @@ const cardVariants: Record<CardVariant, { border: string, glow: string, bg: stri
   gold: { 
     border: 'border-amber-400', 
     glow: 'shadow-[0_0_15px_rgba(251,191,36,0.5)]', 
-    bg: 'bg-gradient-to-br from-amber-50 to-amber-100' 
+    bg: 'bg-gradient-to-br from-amber-50 to-amber-100',
+    textEffect: 'text-amber-800'
   },
   platinum: { 
     border: 'border-slate-400', 
@@ -82,10 +83,14 @@ export function CardComponent({
   }, [card.hidden]);
 
   const { width, height, textSize } = cardSizes[size];
-  const { border, glow, bg } = cardVariants[variant];
+  const { border, glow, bg, textEffect } = cardVariants[variant];
   
   // تأثير التوهج للبطاقات الرابحة
-  const winningGlow = isWinning ? 'animate-pulse shadow-[0_0_15px_rgba(59,130,246,0.7)]' : '';
+  const winningEffect = isWinning 
+    ? variant === 'gold' 
+        ? 'animate-pulse shadow-[0_0_20px_rgba(251,191,36,0.8)] border-amber-500 z-30' 
+        : 'animate-pulse shadow-[0_0_20px_rgba(59,130,246,0.7)] border-blue-500 z-30' 
+    : '';
   
   return (
     <div 
@@ -96,7 +101,7 @@ export function CardComponent({
         glow, 
         bg,
         'rounded-md relative overflow-hidden transition-all duration-300 cursor-pointer',
-        winningGlow,
+        winningEffect,
         className
       )}
       onClick={onClick}
@@ -113,7 +118,11 @@ export function CardComponent({
           
           {/* الرمز الرئيسي في منتصف البطاقة */}
           <div className={`absolute inset-0 flex items-center justify-center ${suitColors[card.suit]}`}>
-            <span className={`${size === 'sm' ? 'text-2xl' : size === 'md' ? 'text-4xl' : 'text-6xl'}`}>
+            <span className={`
+              ${size === 'sm' ? 'text-2xl' : size === 'md' ? 'text-4xl' : 'text-6xl'}
+              ${textEffect ? textEffect : ''}
+              ${isWinning ? 'drop-shadow-lg filter blur-[0.2px]' : ''}
+            `}>
               {suitSymbols[card.suit]}
             </span>
           </div>
@@ -127,12 +136,18 @@ export function CardComponent({
           </div>
         </>
       ) : (
-        // ظهر البطاقة عندما تكون مخفية
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-700 to-blue-900 flex items-center justify-center">
-          <div className="absolute inset-0 bg-opacity-30 bg-blue-900 pattern-dots pattern-size-2 pattern-white"></div>
-          <div className="h-full w-full flex items-center justify-center">
-            <div className="w-2/3 h-2/3 border-2 border-blue-400 rounded-full flex items-center justify-center">
-              <span className="font-bold text-white text-xs">الملك</span>
+        // ظهر البطاقة عندما تكون مخفية - تصميم ذهبي وأنيق
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center">
+          <div className="absolute inset-0 bg-opacity-20 pattern-grid-lg pattern-gold/20"></div>
+          
+          {/* Pattern decoration */}
+          <div className="absolute inset-[3px] border border-gold/30 rounded-sm"></div>
+          
+          {/* Card back center decoration */}
+          <div className="flex flex-col items-center justify-center gap-1">
+            <div className="text-gold text-xl font-bold">♠</div>
+            <div className="text-gold/80 text-xs">
+              {variant === 'gold' ? 'VIP' : 'BOYA'}
             </div>
           </div>
         </div>

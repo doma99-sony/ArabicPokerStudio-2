@@ -28,6 +28,13 @@ export interface GameTable {
   tableSettings?: Record<string, any>;
 }
 
+// تفاصيل اليد الفائزة
+export interface HandDetails {
+  cards: Card[]; // الأوراق المستخدمة لتكوين اليد
+  handName: string; // اسم اليد بالعربية
+  bestHand?: Card[]; // أفضل 5 أوراق تشكل اليد
+}
+
 export interface PlayerPosition {
   id: number;
   username: string;
@@ -42,6 +49,19 @@ export interface PlayerPosition {
   isActive?: boolean;
   isCurrentPlayer?: boolean;
   isTurn?: boolean;
+  // إضافات لدعم حالة الفائز وتفاصيل اليد
+  winner?: boolean; // هل هذا اللاعب هو الفائز
+  handName?: string; // اسم يد اللاعب مثل "فلاش ملكي"
+  handDetails?: HandDetails; // تفاصيل اليد الفائزة
+  winAmount?: number; // مقدار الفوز
+}
+
+// تعريف الفائز في اللعبة
+export interface Winner {
+  playerId: number; // معرف اللاعب
+  handName: string; // اسم اليد الفائزة
+  amount: number; // مقدار الفوز
+  handDetails?: HandDetails; // تفاصيل اليد (الأوراق المستخدمة)
 }
 
 // إجراءات اللعب المختلفة 
@@ -64,8 +84,15 @@ export interface GameState {
   isSpectator?: boolean;
   minRaise?: number;
   winningHands?: Record<number, Card[]>;
-  winners?: { playerId: number, hand: string, amount: number }[];
+  winners?: Winner[]; // قائمة الفائزين مع تفاصيل الفوز
   tableName?: string;
   round?: number;
   maxRound?: number;
+  // إضافات لمعلومات إضافية
+  message?: string; // رسالة النظام
+  lastAction?: { // آخر إجراء تم تنفيذه
+    playerId: number;
+    action: GameAction;
+    amount?: number;
+  };
 }

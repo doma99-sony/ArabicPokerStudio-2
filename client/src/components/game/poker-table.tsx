@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { GameState } from "@/types";
+import { GameState, Card as CardType } from "@/types";
 import { PlayerComponent } from "./player-component";
 import { CardComponent } from "./card-component";
 import { Chips } from "./chips";
@@ -297,7 +297,16 @@ export function PokerTable({ gameState }: PokerTableProps) {
                 transform: `rotate(${-10 + index * 5}deg)`
               }}
             >
-              <CardComponent card={card} size="lg" />
+              <CardComponent 
+                card={card} 
+                size="lg" 
+                // إذا كانت هذه الورقة جزءًا من يد الفائز، أضف تأثير توهج
+                isWinning={gameState.winners?.some(winner => 
+                  winner.handDetails?.bestHand?.some((winCard: CardType) => 
+                    winCard.suit === card.suit && winCard.value === card.value
+                  )
+                )}
+              />
             </motion.div>
           ))}
           
@@ -313,6 +322,43 @@ export function PokerTable({ gameState }: PokerTableProps) {
             ></div>
           ))}
         </div>
+        
+        {/* Winner Announcement - Show only during showdown */}
+        {gameState.gameStatus === "showdown" && gameState.winners && gameState.winners.length > 0 && (
+          <motion.div 
+            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 mt-[-60px]"
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, type: "spring" }}
+          >
+            <div className="bg-black/80 backdrop-blur-xl px-6 py-4 rounded-xl border-2 border-[#D4AF37] shadow-[0_0_20px_rgba(212,175,55,0.6)]">
+              <div className="text-center">
+                <h2 className="text-[#D4AF37] text-2xl font-bold mb-2">
+                  {positionedPlayers.find(p => p.id === gameState.winners![0].playerId)?.isCurrentPlayer 
+                    ? "لقد فزت! 🎉" 
+                    : `الفائز: ${positionedPlayers.find(p => p.id === gameState.winners![0].playerId)?.username}`}
+                </h2>
+                <div className="text-white mb-3">
+                  بواسطة <span className="text-[#D4AF37] font-bold">{gameState.winners[0].handName}</span>
+                </div>
+                <div className="flex justify-center items-center gap-1">
+                  {gameState.winners[0].handDetails?.bestHand?.map((card: CardType, idx: number) => (
+                    <div 
+                      key={`winner-card-${idx}`}
+                      className="transform transition-all duration-300 hover:scale-110"
+                      style={{ margin: '0 -4px' }}
+                    >
+                      <CardComponent card={card} size="sm" variant="gold" isWinning={true} />
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-3 text-xl font-bold text-green-500">
+                  +{gameState.winners[0].amount.toLocaleString()} رقاقة
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
         
         {/* Players */}
         {positionedPlayers.map(player => (
