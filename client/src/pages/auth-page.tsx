@@ -418,14 +418,12 @@ export default function AuthPage() {
               }}
             >
               <motion.span
-                animate={{
-                  text: ["0%", "25%", "50%", "75%", "99%", "100%"]
-                }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
                 transition={{
-                  duration: 15,
+                  duration: 0.5,
                   repeat: Infinity,
-                  repeatType: "loop",
-                  times: [0, 0.2, 0.4, 0.6, 0.8, 1]
+                  repeatType: "loop"
                 }}
               >
                 100%
