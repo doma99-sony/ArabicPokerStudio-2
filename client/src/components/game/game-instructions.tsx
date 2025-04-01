@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { HelpCircle, X, ArrowLeft } from "lucide-react";
@@ -16,10 +16,15 @@ export function GameInstructions({ showInstructions = false, onClose }: GameInst
   const [internalOpen, setInternalOpen] = useState(false);
   const [tab, setTab] = useState("general");
   
+  // For debugging
+  useEffect(() => {
+    console.log("GameInstructions - showInstructions:", showInstructions);
+  }, [showInstructions]);
+  
   // Use either external or internal state for controlling dialog open state
   const open = onClose ? showInstructions : internalOpen;
   const setOpen = onClose ? (value: boolean) => {
-    if (!value) onClose();
+    if (!value && onClose) onClose();
   } : setInternalOpen;
 
   // ترتيبات اليد

@@ -4,12 +4,14 @@ import { GameState } from "@/types";
 import { PlayerComponent } from "./player-component";
 import { CardComponent } from "./card-component";
 import { Chips } from "./chips";
-import { Plus, HelpCircle } from "lucide-react";
+import { Plus, HelpCircle, X, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
-import { GameInstructions } from "./game-instructions";
 import { GameActions } from "./game-actions";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card } from "@/components/ui/card";
 import pokerTableBg from "@assets/gradient-poker-table-background_23-2151085419 (1).jpg";
 
 interface PokerTableProps {
@@ -375,24 +377,165 @@ export function PokerTable({ gameState }: PokerTableProps) {
         )}
       </div>
       
-      {/* تعليمات اللعبة - زر المساعدة */}
-      <div className="fixed top-4 right-4 z-[100]">
+      {/* تعليمات اللعبة - زر المساعدة بارز */}
+      <div className="absolute top-4 right-4 z-50">
         <Button
           variant="default"
           size="sm"
-          className="bg-yellow-600 hover:bg-yellow-700 text-white font-bold rounded-full shadow-lg border-2 border-yellow-400 px-4 py-2 flex items-center gap-2"
+          className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold rounded-md shadow-md border-2 border-yellow-300 px-3 py-1 flex items-center gap-1 animate-pulse"
           onClick={() => setShowInstructions(true)}
         >
-          <HelpCircle className="h-5 w-5" />
-          <span>تعليمات اللعبة</span>
+          <HelpCircle className="h-4 w-4" />
+          <span>تعليمات</span>
         </Button>
       </div>
       
-      {/* مكون تعليمات اللعبة */}
-      <GameInstructions 
-        showInstructions={showInstructions} 
-        onClose={() => setShowInstructions(false)}
-      />
+      {/* مكون تعليمات اللعبة المدمج مباشرة في الملف */}
+      <Dialog open={showInstructions} onOpenChange={setShowInstructions}>
+        <DialogContent className="max-h-[85vh] overflow-y-auto bg-slate-900 text-white border-gold/30 w-full max-w-4xl">
+          <DialogHeader>
+            <div className="flex items-center justify-between">
+              <DialogTitle className="text-2xl font-bold text-gold font-tajawal">تعليمات لعبة البوكر</DialogTitle>
+              <Button variant="ghost" size="icon" onClick={() => setShowInstructions(false)} className="absolute top-2 left-2">
+                <X className="h-5 w-5 text-white" />
+              </Button>
+            </div>
+            <DialogDescription className="text-slate-300">تعلم قواعد وأساسيات لعبة تكساس هولدم</DialogDescription>
+          </DialogHeader>
+
+          <Tabs defaultValue="general" className="w-full">
+            <TabsList className="w-full bg-slate-800">
+              <TabsTrigger value="general" className="text-white data-[state=active]:bg-slate-700">أساسيات اللعبة</TabsTrigger>
+              <TabsTrigger value="hand-rankings" className="text-white data-[state=active]:bg-slate-700">ترتيب الأيدي</TabsTrigger>
+              <TabsTrigger value="game-flow" className="text-white data-[state=active]:bg-slate-700">مراحل اللعب</TabsTrigger>
+              <TabsTrigger value="actions" className="text-white data-[state=active]:bg-slate-700">الإجراءات المتاحة</TabsTrigger>
+            </TabsList>
+
+            {/* أساسيات اللعبة */}
+            <TabsContent value="general" className="border-none p-0 mt-4">
+              <div className="space-y-4 text-white">
+                <div className="bg-slate-800 rounded-md p-4">
+                  <h3 className="text-xl font-bold mb-2 text-gold">نظرة عامة</h3>
+                  <p className="mb-3">البوكر هي لعبة بطاقات شهيرة تجمع بين المهارة والحظ. الهدف هو الفوز بالرقائق (الشيبس) من اللاعبين الآخرين.</p>
+                  <p>في لعبة تكساس هولدم، يحصل كل لاعب على بطاقتين خاصتين (غير مرئية للاعبين الآخرين)، ويتم وضع خمس بطاقات مكشوفة على الطاولة. يستخدم اللاعبون أفضل 5 بطاقات من أصل 7 (البطاقتين الخاصتين + البطاقات المكشوفة) لتكوين أفضل يد بوكر.</p>
+                </div>
+
+                <div className="bg-slate-800 rounded-md p-4">
+                  <h3 className="text-xl font-bold mb-2 text-gold">الهدف</h3>
+                  <p>الفوز بمجمع الرهان (البوت) عن طريق:</p>
+                  <ul className="list-disc list-inside mt-2 space-y-1">
+                    <li>امتلاك أفضل يد عند المواجهة النهائية (الشوداون)</li>
+                    <li>دفع اللاعبين الآخرين للتخلي (الفولد) قبل المواجهة النهائية</li>
+                  </ul>
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* ترتيب الأيدي */}
+            <TabsContent value="hand-rankings" className="border-none p-0 mt-4">
+              <div className="space-y-4">
+                <p className="text-white">ترتيب الأيدي من الأعلى قيمة إلى الأقل:</p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Card className="bg-slate-800 border-slate-700">
+                    <div className="p-4">
+                      <div className="flex justify-between items-center mb-2">
+                        <h3 className="text-lg font-bold text-gold">الرويال فلاش</h3>
+                        <span className="text-xs bg-slate-700 px-2 py-1 rounded-full text-white">10</span>
+                      </div>
+                      <p className="text-sm text-gray-300 mb-3">خمس بطاقات متتالية من نفس النوع تبدأ بالآس</p>
+                      <div className="flex justify-center">
+                        <div className="bg-slate-700 rounded-md p-2 text-center">
+                          <span className="text-xl font-mono text-gold">A K Q J 10 ♥</span>
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                  
+                  <Card className="bg-slate-800 border-slate-700">
+                    <div className="p-4">
+                      <div className="flex justify-between items-center mb-2">
+                        <h3 className="text-lg font-bold text-gold">ستريت فلاش</h3>
+                        <span className="text-xs bg-slate-700 px-2 py-1 rounded-full text-white">9</span>
+                      </div>
+                      <p className="text-sm text-gray-300 mb-3">خمس بطاقات متتالية من نفس النوع</p>
+                      <div className="flex justify-center">
+                        <div className="bg-slate-700 rounded-md p-2 text-center">
+                          <span className="text-xl font-mono text-white">9 8 7 6 5 ♠</span>
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* مراحل اللعب */}
+            <TabsContent value="game-flow" className="border-none p-0 mt-4">
+              <div className="space-y-4 text-white">
+                <div className="bg-slate-800 rounded-md p-4">
+                  <h3 className="text-xl font-bold mb-2 text-gold">مراحل جولة البوكر</h3>
+                  <div className="space-y-3 mt-3">
+                    <div className="rounded-md bg-slate-700 p-3">
+                      <h4 className="font-bold text-lg mb-1">1. الرهانات الإجبارية</h4>
+                      <p>قبل توزيع البطاقات، يقوم اللاعبان على يسار الموزع بوضع رهانات إجبارية</p>
+                    </div>
+
+                    <div className="rounded-md bg-slate-700 p-3">
+                      <h4 className="font-bold text-lg mb-1">2. توزيع البطاقات الشخصية</h4>
+                      <p>يحصل كل لاعب على بطاقتين مخفيتين</p>
+                    </div>
+
+                    <div className="rounded-md bg-slate-700 p-3">
+                      <h4 className="font-bold text-lg mb-1">3. جولة المراهنة الأولى (Pre-flop)</h4>
+                      <p>يبدأ اللاعب على يسار الرهان الكبير</p>
+                    </div>
+
+                    <div className="rounded-md bg-slate-700 p-3">
+                      <h4 className="font-bold text-lg mb-1">4. الفلوب (Flop)</h4>
+                      <p>يتم كشف ثلاث بطاقات مجتمعية</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* الإجراءات المتاحة */}
+            <TabsContent value="actions" className="border-none p-0 mt-4">
+              <div className="space-y-4 text-white">
+                <div className="bg-slate-800 rounded-md p-4">
+                  <h3 className="text-xl font-bold mb-3 text-gold">الإجراءات المتاحة خلال اللعب</h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-red-900/30 rounded-md p-3 border border-red-500/30">
+                      <div className="flex items-center mb-2">
+                        <div className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center text-white mr-2">F</div>
+                        <h4 className="font-bold text-lg">التخلي (Fold)</h4>
+                      </div>
+                      <p className="text-sm">التخلي عن اللعب في هذه الجولة</p>
+                    </div>
+
+                    <div className="bg-green-900/30 rounded-md p-3 border border-green-500/30">
+                      <div className="flex items-center mb-2">
+                        <div className="w-8 h-8 rounded-full bg-green-600 flex items-center justify-center text-white mr-2">C</div>
+                        <h4 className="font-bold text-lg">المتابعة (Check/Call)</h4>
+                      </div>
+                      <p className="text-sm">المتابعة بدون رهان أو المجاراة</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
+
+          <DialogFooter className="flex justify-between mt-4">
+            <Button variant="outline" onClick={() => setShowInstructions(false)} className="bg-slate-800 hover:bg-slate-700 text-white border-slate-600">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              العودة للعبة
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
