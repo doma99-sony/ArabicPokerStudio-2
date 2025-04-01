@@ -119,76 +119,11 @@ function App() {
   // عرض شاشة التحميل العامة أثناء التحقق من حالة المصادقة
   if (isLoading) {
     return (
-      <div className="fixed inset-0 overflow-hidden bg-black z-50">
-        {/* فيديو خلفية كازينو حقيقي */}
-        <div className="absolute inset-0 overflow-hidden z-0">
-          <video 
-            autoPlay 
-            loop 
-            muted 
-            playsInline
-            className="absolute w-full h-full object-cover"
-            style={{ filter: "brightness(0.3) contrast(1.2)" }}
-          >
-            <source src="/assets/loading-background.mp4" type="video/mp4" />
-          </video>
-          <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black"></div>
+      <div className="flex items-center justify-center min-h-screen bg-black">
+        <div className="text-center">
+          <Loader2 className="h-16 w-16 animate-spin text-[#D4AF37] mx-auto mb-4" />
+          <h2 className="text-[#D4AF37] text-xl font-bold">جاري تحميل بوكر تكساس عرباوي...</h2>
         </div>
-        
-        {/* إضافة طبقة من الفلاتر */}
-        <div className="absolute inset-0 bg-[#0a0f18]/50 mix-blend-overlay"></div>
-        
-        {/* توهج مركزي */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-gradient-radial from-[#D4AF37]/20 to-transparent blur-3xl animate-pulse-slow"></div>
-        
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <div className="relative w-32 h-32 mb-8">
-            <div className="absolute inset-0 bg-gradient-to-r from-[#D4AF37]/10 to-[#BF9B30]/10 rounded-full blur-2xl animate-pulse-slow"></div>
-            <Loader2 className="absolute inset-0 h-32 w-32 animate-spin text-[#D4AF37]" />
-            <div className="absolute inset-8 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center">
-              <img 
-                src="/assets/poker-icon-gold.png"
-                alt="VIP Poker" 
-                className="w-full h-full object-contain p-1 animate-pulse-slow"
-              />
-            </div>
-          </div>
-          
-          <h2 className="text-[#D4AF37] text-2xl font-bold mt-4 animate-pulse-slow bg-gradient-to-r from-[#D4AF37] to-[#BF9B30] bg-clip-text text-transparent">
-            جاري تحميل بوكر تكساس عرباوي...
-          </h2>
-        </div>
-        
-        {/* بطاقات وعناصر متحركة في الخلفية */}
-        {[...Array(4)].map((_, index) => {
-          const positionData = [
-            { bottom: '10%', right: '10%', rotateVal: 15 },
-            { top: '10%', left: '10%', rotateVal: -20 },
-            { top: '15%', right: '20%', rotateVal: 10 },
-            { bottom: '15%', left: '20%', rotateVal: -15 }
-          ];
-          const suits = ['♠', '♥', '♦', '♣'];
-          const isRed = index % 2 === 1 || index % 2 === 2;
-          const position = positionData[index];
-          
-          return (
-            <div
-              key={`floating-${index}`}
-              className="absolute w-16 h-16 flex items-center justify-center text-5xl pointer-events-none animate-pulse-slow"
-              style={{ 
-                top: position.top,
-                bottom: position.bottom,
-                left: position.left,
-                right: position.right,
-                color: isRed ? 'rgba(220, 53, 69, 0.2)' : 'rgba(212, 175, 55, 0.2)',
-                transform: `rotate(${position.rotateVal}deg)`,
-                animationDelay: `${index * 0.5}s`
-              }}
-            >
-              {suits[index]}
-            </div>
-          );
-        })}
       </div>
     );
   }

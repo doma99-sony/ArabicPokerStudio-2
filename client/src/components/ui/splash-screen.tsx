@@ -23,44 +23,136 @@ const motivationalTexts = [
 export function SplashScreen({ onComplete }: SplashScreenProps) {
   const [progress, setProgress] = useState(0);
   const [title, setTitle] = useState('تحميل الموارد');
+  const [rotationAngle, setRotationAngle] = useState(0);
   const [motivationalText, setMotivationalText] = useState(motivationalTexts[0]);
   const [textIndex, setTextIndex] = useState(0);
   const [showMotivational, setShowMotivational] = useState(false);
-  const [glowIntensity, setGlowIntensity] = useState(0.5);
   
-  // مرجع للأنيميشن والكانفاس
+  // مرجع لعنصر الكونفاس للرسم عليه
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const cardRef = useRef<HTMLDivElement>(null);
-  const [cardRotation, setCardRotation] = useState({ x: 0, y: 0 });
-
-  // تأثير تحريك البطاقة بناءً على حركة الماوس
+  
+  // إعداد تأثير رسم الكانفاس المتحرك
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!cardRef.current) return;
-      
-      const rect = cardRef.current.getBoundingClientRect();
-      const x = e.clientX - rect.left - rect.width / 2;
-      const y = e.clientY - rect.top - rect.height / 2;
-      
-      // تحويل الإحداثيات إلى درجات دوران
-      // كلما كان الماوس أبعد عن المركز، كان الدوران أكبر
-      const rotateY = -(x / 10);
-      const rotateX = y / 10;
-      
-      setCardRotation({ x: rotateX, y: rotateY });
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    // ضبط حجم الكانفاس ليناسب الشاشة
+    const updateCanvasSize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
     };
     
-    const handleMouseLeave = () => {
-      // إعادة البطاقة تدريجياً إلى وضعها الطبيعي
-      setCardRotation({ x: 0, y: 0 });
+    updateCanvasSize();
+    window.addEventListener('resize', updateCanvasSize);
+    
+    // إعداد معاملات الرسم
+    const particleCount = 100;
+    const particles: {
+      x: number;
+      y: number;
+      size: number;
+      color: string;
+      speedX: number;
+      speedY: number;
+      opacity: number;
+      glowing: boolean;
+    }[] = [];
+    
+    // تهيئة الجسيمات
+    for (let i = 0; i < particleCount; i++) {
+      const size = Math.random() * 3 + 1;
+      const opacity = Math.random() * 0.5 + 0.1;
+      const isGolden = Math.random() > 0.7; // 30% احتمالية أن تكون ذهبية
+      
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        size,
+        color: isGolden ? '#D4AF37' : '#ffffff',
+        speedX: (Math.random() - 0.5) * 0.5,
+        speedY: (Math.random() - 0.5) * 0.5,
+        opacity,
+        glowing: isGolden && Math.random() > 0.5,
+      });
+    }
+    
+    // وظيفة رسم الجسيمات
+    const drawParticles = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // رسم الخطوط بين الجسيمات المتقاربة
+      ctx.lineWidth = 0.3;
+      ctx.strokeStyle = 'rgba(212, 175, 55, 0.03)';
+      
+      for (let i = 0; i < particles.length; i++) {
+        const p1 = particles[i];
+        
+        for (let j = i + 1; j < particles.length; j++) {
+          const p2 = particles[j];
+          const dx = p1.x - p2.x;
+          const dy = p1.y - p2.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          
+          // رسم خط بين الجسيمات إذا كانت قريبة من بعضها
+          if (distance < 100) {
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            
+            // جعل الخط أكثر شفافية كلما زادت المسافة
+            ctx.globalAlpha = 0.05 * (1 - distance / 100);
+            ctx.stroke();
+          }
+        }
+      }
+      
+      // رسم الجسيمات
+      for (const particle of particles) {
+        ctx.beginPath();
+        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+        
+        // إضافة تأثير توهج للجسيمات الذهبية
+        if (particle.glowing) {
+          const glow = ctx.createRadialGradient(
+            particle.x, particle.y, 0,
+            particle.x, particle.y, particle.size * 3
+          );
+          
+          glow.addColorStop(0, `rgba(212, 175, 55, ${particle.opacity * 1.5})`);
+          glow.addColorStop(1, 'rgba(212, 175, 55, 0)');
+          
+          ctx.fillStyle = glow;
+          ctx.globalAlpha = 0.3;
+          ctx.fill();
+        }
+        
+        // رسم الجسيم نفسه
+        ctx.globalAlpha = particle.opacity;
+        ctx.fillStyle = particle.color;
+        ctx.fill();
+        
+        // تحديث موقع الجسيم
+        particle.x += particle.speedX;
+        particle.y += particle.speedY;
+        
+        // إعادة الجسيم إلى الجانب المقابل إذا خرج من حدود الشاشة
+        if (particle.x > canvas.width) particle.x = 0;
+        else if (particle.x < 0) particle.x = canvas.width;
+        
+        if (particle.y > canvas.height) particle.y = 0;
+        else if (particle.y < 0) particle.y = canvas.height;
+      }
     };
     
-    window.addEventListener('mousemove', handleMouseMove);
-    cardRef.current?.addEventListener('mouseleave', handleMouseLeave);
+    // بدء حلقة الرسم
+    const animationId = setInterval(drawParticles, 30);
     
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      cardRef.current?.removeEventListener('mouseleave', handleMouseLeave);
+      clearInterval(animationId);
+      window.removeEventListener('resize', updateCanvasSize);
     };
   }, []);
   
@@ -79,11 +171,20 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
     return () => clearInterval(textTimer);
   }, [textIndex]);
   
+  // تأثير دوران الشعار
+  useEffect(() => {
+    const rotationInterval = setInterval(() => {
+      setRotationAngle(prev => (prev + 0.1) % 360);
+    }, 50);
+    
+    return () => clearInterval(rotationInterval);
+  }, []);
+  
   // متغير لتتبع ما إذا كان الانتقال قيد التنفيذ
   const [isTransitioning, setIsTransitioning] = useState(false);
   
-  // تنفيذ عداد التقدم
   useEffect(() => {
+    // إنشاء عداد يزداد تدريجياً
     let interval: NodeJS.Timeout;
     const timer = setTimeout(() => {
       interval = setInterval(() => {
@@ -128,6 +229,34 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
       if (interval) clearInterval(interval);
     };
   }, [onComplete]);
+
+  // تأثير النص المضيء بشكل متموج وطبيعي
+  const [glowIntensity, setGlowIntensity] = useState(0.5);
+  const [isTextGlowing, setIsTextGlowing] = useState(true);
+  
+  useEffect(() => {
+    let direction = 1; // 1 للزيادة، -1 للنقصان
+    let value = 0.5;
+    
+    // إنشاء تأثير نبض متموج بدلاً من تبديل ثنائي بسيط
+    const pulseInterval = setInterval(() => {
+      value += 0.03 * direction;
+      
+      // عكس الاتجاه عند الوصول للحدود
+      if (value >= 1) {
+        direction = -1;
+        value = 1;
+      } else if (value <= 0) {
+        direction = 1;
+        value = 0;
+      }
+      
+      setGlowIntensity(value);
+      setIsTextGlowing(value > 0.5); // لإبقاء التأثير الموجود للاحتفاظ بالتوافق
+    }, 30); // تحديث أكثر تواتراً للحصول على انتقال أكثر سلاسة
+    
+    return () => clearInterval(pulseInterval);
+  }, []);
 
   return (
     <div className={`fixed inset-0 flex flex-col items-center justify-center bg-black z-50 ${isTransitioning ? 'blur-in fade-transition fade-transition-exit-active' : 'blur-in'}`}>
@@ -398,10 +527,10 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
       <h1 
         className="text-6xl font-bold mt-2 mb-4 transition-all duration-100 tracking-wider"
         style={{
-          color: 'rgba(212, 175, 55, 0.85)',
-          filter: 'drop-shadow(0 0 6px rgba(212, 175, 55, 0.7))',
-          textShadow: '0 0 12px rgba(212, 175, 55, 0.5)',
-          transform: 'scale(1.015)',
+          color: `rgba(212, 175, 55, ${0.7 + (glowIntensity * 0.3)})`,
+          filter: `drop-shadow(0 0 ${2 + (glowIntensity * 8)}px rgba(212, 175, 55, ${0.4 + (glowIntensity * 0.6)}))`,
+          textShadow: `0 0 ${5 + (glowIntensity * 15)}px rgba(212, 175, 55, ${0.3 + (glowIntensity * 0.4)})`,
+          transform: `scale(${1 + (glowIntensity * 0.03)})`,
         }}
       >
         بوكر تكساس عرباوي
@@ -411,8 +540,8 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
       <div 
         className="absolute h-4 w-80 rounded-full blur-xl -z-10 bg-[#D4AF37] opacity-30 transition-all duration-100"
         style={{
-          opacity: 0.3,
-          transform: 'scale(1.0)',
+          opacity: 0.1 + (glowIntensity * 0.3),
+          transform: `scale(${0.8 + (glowIntensity * 0.4)})`,
           bottom: "16%"
         }}
       ></div>
