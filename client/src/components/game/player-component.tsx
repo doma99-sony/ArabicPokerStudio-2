@@ -9,9 +9,10 @@ import { Clock } from "lucide-react";
 interface PlayerComponentProps {
   player: PlayerPosition;
   isTurn: boolean;
+  gameStatus?: string; // معلومات حالة اللعبة
 }
 
-export function PlayerComponent({ player, isTurn }: PlayerComponentProps) {
+export function PlayerComponent({ player, isTurn, gameStatus = "" }: PlayerComponentProps) {
   // حالات لتتبع تأثيرات المرئية المختلفة
   const [turnTimeLeft, setTurnTimeLeft] = useState<number>(12);
   const [isNewPlayer, setIsNewPlayer] = useState<boolean>(false);
@@ -104,7 +105,7 @@ export function PlayerComponent({ player, isTurn }: PlayerComponentProps) {
 
   // Determine card visibility based on if it's the current player or showdown
   // يجب أن نظهر البطاقات دائماً للمستخدم الحالي بغض النظر عن خاصية 'hidden'
-  const showCards = player.isCurrentPlayer;
+  const showCards = player.isCurrentPlayer || player.winner || gameStatus === 'showdown';
 
   return (
     <div 
@@ -179,8 +180,14 @@ export function PlayerComponent({ player, isTurn }: PlayerComponentProps) {
                 }}
               >
                 <CardComponent 
-                  // بغض النظر عن حالة الـ hidden المرسلة من الخادم، نظهر البطاقات للاعب الحالي دائمًا
-                  card={{...card, hidden: player.isCurrentPlayer ? false : true}} 
+                  // كشف البطاقات في الحالات التالية:
+                  // 1. إذا كان اللاعب هو اللاعب الحالي
+                  // 2. إذا انتهت الجولة (showdown) وكشفت الأوراق للجميع
+                  // 3. إذا كان اللاعب هو الفائز
+                  card={{
+                    ...card, 
+                    hidden: player.isCurrentPlayer || player.winner || gameStatus === 'showdown' ? false : true
+                  }} 
                   size="sm" 
                   // إذا كان هذا اللاعب هو الفائز، استخدم تصميم ذهبي للبطاقات
                   variant={player.winner ? "gold" : "default"}

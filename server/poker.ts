@@ -100,7 +100,8 @@ export function setupPokerGame(app: Express, httpServer: Server) {
       // إلغاء أي مؤقت قديم إذا وجد
       if (pingTimeout) {
         clearTimeout(pingTimeout);
-        pingTimeout = null;
+        // استخدام undefined بدلاً من null لتوافق الأنواع
+        pingTimeout = undefined as unknown as NodeJS.Timeout;
       }
       
       // دون أي مؤقت جديد - نعتمد على آلية إعادة الاتصال في العميل

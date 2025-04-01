@@ -366,6 +366,7 @@ export function PokerTable({ gameState }: PokerTableProps) {
             key={player.id} 
             player={player} 
             isTurn={gameState.currentTurn === player.id}
+            gameStatus={gameState.gameStatus} // إضافة حالة اللعبة لعرض الأوراق بشكل صحيح
           />
         ))}
         
