@@ -343,31 +343,15 @@
     }
   }
   
-  /* تم عكس التوجيه - نريد أن نعمل في الوضع الأفقي على الموبايل */
+  /* إشعار توصية لتدوير الجهاز (اختياري) */
   .mobile-portrait-notice {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.9);
     z-index: 9999;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    padding: 20px;
   }
   
-  /* إظهار إشعار للمستخدم في وضع البورتريه */
-  @media screen and (max-width: 767px) and (orientation: portrait) {
-    .mobile-portrait-notice {
-      display: flex;
-    }
-  }
+  /* إضافة أنماط لتحسين الوضع العمودي */
+  /* لم نعد نحتاج لإخفاء المحتوى في الوضع العمودي */
   
-  /* تخصيص الموقع للوضع الأفقي في الموبايل */
+  /* تخصيصات لجميع أجهزة الجوال (أفقي أو عمودي) */
   @media (max-width: 767px) {
     /* تقليل الحجم للعناصر لتناسب الشاشات الصغيرة */
     h1, h2, h3 {
@@ -417,6 +401,44 @@
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior: contain;
+    }
+  }
+  
+  /* تخصيصات خاصة للوضع العمودي في الموبايل */
+  @media (max-width: 767px) and (orientation: portrait) {
+    /* تصغير حجم طاولة البوكر وعناصرها */
+    .poker-table-container {
+      transform: scale(0.8);
+      transform-origin: center;
+    }
+    
+    /* تصغير وإعادة تنظيم البطاقات المجتمعية */
+    .community-cards {
+      transform: scale(0.85);
+      justify-content: center;
+      gap: 5px !important;
+    }
+    
+    /* تقليل حجم بطاقات اللاعبين */
+    .player-cards {
+      transform: scale(0.8);
+    }
+    
+    /* تحسين توزيع الأزرار في الوضع العمودي */
+    .action-buttons {
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px !important;
+    }
+    
+    /* تقليل حجم رقائق المراهنة */
+    .betting-chips {
+      transform: scale(0.8);
+    }
+    
+    /* جعل النص مقروء في الوضع العمودي */
+    .player-info {
+      font-size: 80%;
     }
   }
   
