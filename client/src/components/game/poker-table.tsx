@@ -4,11 +4,12 @@ import { GameState } from "@/types";
 import { PlayerComponent } from "./player-component";
 import { CardComponent } from "./card-component";
 import { Chips } from "./chips";
-import { Plus } from "lucide-react";
+import { Plus, HelpCircle } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { GameInstructions } from "./game-instructions";
 import { GameActions } from "./game-actions";
+import { Button } from "@/components/ui/button";
 import pokerTableBg from "@assets/gradient-poker-table-background_23-2151085419 (1).jpg";
 
 interface PokerTableProps {
@@ -20,6 +21,7 @@ export function PokerTable({ gameState }: PokerTableProps) {
   const { toast } = useToast();
   const [isJoining, setIsJoining] = useState(false);
   const [isSpectator, setIsSpectator] = useState(false);
+  const [showInstructions, setShowInstructions] = useState(false);
   
   // Positions for players based on their slot - updated for 9-seat oval table layout
   const playerPositions = [
@@ -372,6 +374,24 @@ export function PokerTable({ gameState }: PokerTableProps) {
           </div>
         )}
       </div>
+      
+      {/* Add the instruction button and component in the table */}
+      <div className="absolute top-4 right-4 z-50">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="bg-black/40 hover:bg-black/60 rounded-full w-10 h-10 flex items-center justify-center"
+          onClick={() => setShowInstructions(true)}
+        >
+          <HelpCircle className="h-6 w-6 text-gold" />
+        </Button>
+      </div>
+      
+      {/* Game Instructions Component */}
+      <GameInstructions 
+        showInstructions={showInstructions} 
+        onClose={() => setShowInstructions(false)}
+      />
     </div>
   );
 }

@@ -5,9 +5,22 @@ import { HelpCircle, X, ArrowLeft } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-export function GameInstructions() {
-  const [open, setOpen] = useState(false);
+// Adding props interface to control visibility from parent
+interface GameInstructionsProps {
+  showInstructions?: boolean;
+  onClose?: () => void;
+}
+
+export function GameInstructions({ showInstructions = false, onClose }: GameInstructionsProps) {
+  // Using internal state only when no external control is provided
+  const [internalOpen, setInternalOpen] = useState(false);
   const [tab, setTab] = useState("general");
+  
+  // Use either external or internal state for controlling dialog open state
+  const open = onClose ? showInstructions : internalOpen;
+  const setOpen = onClose ? (value: boolean) => {
+    if (!value) onClose();
+  } : setInternalOpen;
 
   // ترتيبات اليد
   const handRankings = [
@@ -75,15 +88,17 @@ export function GameInstructions() {
 
   return (
     <>
-      {/* زر المعلومات في الطاولة */}
-      <Button
-        variant="ghost"
-        size="icon"
-        className="absolute top-4 right-4 z-50 bg-black/40 hover:bg-black/60 rounded-full w-10 h-10 flex items-center justify-center"
-        onClick={() => setOpen(true)}
-      >
-        <HelpCircle className="h-6 w-6 text-gold" />
-      </Button>
+      {/* زر المعلومات في الطاولة - يظهر فقط عندما نستخدم الحالة الداخلية */}
+      {!onClose && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute top-4 right-4 z-50 bg-black/40 hover:bg-black/60 rounded-full w-10 h-10 flex items-center justify-center"
+          onClick={() => setOpen(true)}
+        >
+          <HelpCircle className="h-6 w-6 text-gold" />
+        </Button>
+      )}
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-h-[85vh] overflow-y-auto bg-slate-900 text-white border-gold/30 w-full max-w-4xl">
