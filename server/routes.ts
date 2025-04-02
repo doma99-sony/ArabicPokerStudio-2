@@ -2,7 +2,7 @@ import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, hashPassword } from "./auth";
-import { setupPokerGame } from "./poker";
+import { setupPokerGame, pokerModule } from "./poker";
 import { z } from "zod";
 import fileUpload from "express-fileupload";
 
@@ -255,9 +255,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // إرسال إشعار للاعبين الآخرين عن طريق WebSocket (إذا كان متاحاً)
       try {
-        const { poker } = require('./poker');
-        if (poker && poker.broadcastToTable) {
-          poker.broadcastToTable(tableId, {
+        if (pokerModule.broadcastToTable) {
+          pokerModule.broadcastToTable(tableId, {
             type: "player_joined",
             userId: req.user.id,
             username: req.user.username,
@@ -268,12 +267,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }, req.user.id);
           
           // تحديث حالة الطاولة في userTables
-          if (poker.userTables) {
-            poker.userTables.set(req.user.id, tableId);
+          if (pokerModule.userTables) {
+            pokerModule.userTables.set(req.user.id, tableId);
           }
         }
-      } catch (err) {
-        console.log("لا يمكن إرسال إشعار الانضمام عبر WebSocket:", err.message);
+      } catch (err: any) {
+        console.log("لا يمكن إرسال إشعار الانضمام عبر WebSocket:", err?.message || "خطأ غير معروف");
       }
       
       // تأكيد أن المستخدم ليس في وضع المشاهدة

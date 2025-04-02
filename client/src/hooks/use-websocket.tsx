@@ -4,12 +4,14 @@ import { useToast } from "./use-toast";
 
 type WebSocketStatus = "connecting" | "open" | "closed" | "error";
 
-// تكوين إعادة الاتصال - محسن
-const RECONNECT_MAX_RETRIES = Infinity; // عدد غير محدود من المحاولات - لضمان استمرار الاتصال دائماً
-const RECONNECT_BASE_DELAY = 200; // تأخير أساسي أقل (200 مللي ثانية) للاستجابة السريعة
-const RECONNECT_MAX_DELAY = 2000; // الحد الأقصى للتأخير 2 ثوانٍ للاستجابة السريعة
-const PING_INTERVAL = 5000; // إرسال ping كل 5 ثوانٍ لضمان استمرار الاتصال
-const BACKOFF_RESET_TIMEOUT = 30000; // إعادة ضبط معامل التأخير المتزايد بعد 30 ثانية من الاتصال الناجح
+// تكوين محسن لإعادة الاتصال بخوارزمية متكيفة
+const RECONNECT_MAX_RETRIES = Infinity; // عدد غير محدود من المحاولات لاستمرارية الاتصال
+const RECONNECT_BASE_DELAY = 150; // تأخير أساسي أقل (150 مللي ثانية) للاستجابة الأسرع
+const RECONNECT_MAX_DELAY = 5000; // زيادة الحد الأقصى للتأخير (5 ثوانٍ) لتجنب الضغط على الخادم
+const PING_INTERVAL = 3000; // تقليل فاصل الـ ping (3 ثوانٍ) للكشف السريع عن انقطاع الاتصال
+const BACKOFF_RESET_TIMEOUT = 15000; // تقليل وقت إعادة ضبط معامل التأخير لاستجابة أسرع
+const CONNECTION_QUALITY_WINDOW = 60000; // نافذة قياس جودة الاتصال (60 ثانية)
+const NETWORK_QUALITY_THRESHOLD = 0.8; // عتبة جودة الاتصال (80% نجاح)
 
 // اسم التخزين المحلي لتتبع معرف الجلسة
 const CONNECTION_SESSION_KEY = 'websocket_session_id';
@@ -51,11 +53,15 @@ export function useWebSocket() {
     lastPingTime: number;
     lastPongTime: number;
     missedPings: number;
+    connectionAttempts: {timestamp: number, success: boolean}[]; // سجل محاولات الاتصال لقياس جودة الشبكة
+    lastNetworkQuality: number; // مقياس جودة الشبكة (0-1)
   }>({
     lastMessageTime: 0,
     lastPingTime: 0,
     lastPongTime: 0,
-    missedPings: 0
+    missedPings: 0,
+    connectionAttempts: [],
+    lastNetworkQuality: 1
   });
 
   // دالة مساعدة لإيقاف جميع المؤقتات
@@ -81,13 +87,43 @@ export function useWebSocket() {
   }, []);
 
   // إعادة ضبط حالة الاتصال لإعادة بدء حساب معاملات التأخير المتزايد
+  // دالة محسنة لإعادة ضبط حالة الاتصال مع المحافظة على سجل الاتصالات السابقة
   const resetConnectionState = useCallback(() => {
     const now = Date.now();
+    
+    // نسخ المرجع الحالي لتجنب تغييرات غير مقصودة
+    const currentState = { ...connectionStateRef.current };
+    
+    // تأكد من وجود المتغيرات المطلوبة
+    if (!currentState.connectionAttempts) {
+      currentState.connectionAttempts = [];
+    }
+    
+    // إضافة النجاح الحالي إلى سجل محاولات الاتصال
+    const updatedAttempts = [
+      ...currentState.connectionAttempts, 
+      { timestamp: now, success: true }
+    ];
+    
+    // إزالة المحاولات القديمة للحفاظ على حجم السجل صغيراً
+    const recentAttempts = updatedAttempts.filter(attempt => 
+      (now - attempt.timestamp) < CONNECTION_QUALITY_WINDOW
+    );
+    
+    // حساب جودة الشبكة المحدثة
+    const successCount = recentAttempts.filter(a => a.success).length;
+    const networkQuality = recentAttempts.length > 0 
+      ? successCount / recentAttempts.length 
+      : 1;
+    
+    // تحديث حالة الاتصال بالقيم الجديدة
     connectionStateRef.current = {
       lastMessageTime: now,
       lastPingTime: now,
       lastPongTime: now,
-      missedPings: 0
+      missedPings: 0,
+      connectionAttempts: recentAttempts,
+      lastNetworkQuality: networkQuality
     };
     
     // إعادة ضبط معامل التأخير المتزايد بعد فترة من الاتصال الناجح
@@ -244,13 +280,45 @@ export function useWebSocket() {
     };
     
     socket.onclose = (event: CloseEvent) => {
+      const now = Date.now();
       const closeTime = new Date().toLocaleTimeString();
       console.log(`WebSocket connection closed at ${closeTime}. Code: ${event.code}, Reason: ${event.reason || 'No reason provided'}`);
       setStatus("closed");
       clearAllTimers();
       
+      // تسجيل حالة الاتصال - فشل للاتصالات غير المتعمدة
+      const isNormalClosure = event.code === 1000 || isManualCloseRef.current;
+      
+      // تحديث سجل محاولات الاتصال للمساعدة في تكييف خوارزمية إعادة الاتصال
+      const oldConnectionAttempts = connectionStateRef.current.connectionAttempts || [];
+      const updatedAttempts = [...oldConnectionAttempts, { 
+        timestamp: now, 
+        success: isNormalClosure // نجاح فقط إذا كان الإغلاق طبيعياً
+      }];
+      
+      // إزالة المحاولات القديمة خارج نافذة القياس
+      const recentAttempts = updatedAttempts.filter(attempt => 
+        (now - attempt.timestamp) < CONNECTION_QUALITY_WINDOW
+      );
+      
+      // حساب جودة الشبكة المحدثة
+      const successCount = recentAttempts.filter(a => a.success).length;
+      const networkQuality = recentAttempts.length > 0 
+        ? successCount / recentAttempts.length 
+        : 1;
+      
+      // تحديث حالة الاتصال
+      connectionStateRef.current.connectionAttempts = recentAttempts;
+      connectionStateRef.current.lastNetworkQuality = networkQuality;
+      
       // إذا لم يكن الإغلاق طبيعياً وليس يدوياً، نحاول إعادة الاتصال
-      if (event.code !== 1000 && !isManualCloseRef.current) {
+      if (!isNormalClosure) {
+        // تعديل إستراتيجية إعادة الاتصال بناءً على جودة الشبكة
+        if (networkQuality < NETWORK_QUALITY_THRESHOLD) {
+          // في حالة جودة الشبكة الضعيفة، نزيد مدة الانتظار قبل إعادة المحاولة
+          console.log(`جودة الشبكة منخفضة (${(networkQuality * 100).toFixed(0)}%)، تعديل استراتيجية إعادة الاتصال`);
+        }
+        
         if (reconnectAttemptRef.current < RECONNECT_MAX_RETRIES) {
           console.log("محاولة إعادة الاتصال تلقائياً...");
           reconnect();
@@ -347,11 +415,32 @@ export function useWebSocket() {
     isReconnectingRef.current = true;
     reconnectAttemptRef.current++;
     
-    // حساب الوقت للمحاولة التالية (مع تأخير متزايد ولكن مع حد أقصى)
+    // حساب الوقت للمحاولة التالية مع استراتيجية متكيفة تعتمد على جودة الشبكة
+    // تعديل الاستراتيجية بناءً على تاريخ جودة الاتصال
+    const networkQuality = connectionStateRef.current.lastNetworkQuality || 1;
+    
+    // عامل التأخير الإضافي - زيادة التأخير عندما تكون جودة الشبكة سيئة لتجنب محاولات كثيرة فاشلة
+    const qualityFactor = networkQuality < NETWORK_QUALITY_THRESHOLD 
+      ? (2.0 - networkQuality) // زيادة التأخير بشكل عكسي مع انخفاض جودة الشبكة
+      : 1.0; // لا تغيير عندما تكون جودة الشبكة جيدة
+    
     // إضافة jitter (عشوائية) لتجنب "thundering herd problem"
     const jitter = Math.random() * 0.3 - 0.15; // ±15% عشوائية
-    const baseDelay = RECONNECT_BASE_DELAY * Math.min(Math.pow(1.5, Math.min(reconnectAttemptRef.current, 10)), RECONNECT_MAX_DELAY / RECONNECT_BASE_DELAY);
+    
+    // حساب التأخير الأساسي مع أقصى 10 محاولات متزايدة
+    const powerFactor = Math.min(reconnectAttemptRef.current, 10);
+    const baseDelay = RECONNECT_BASE_DELAY * 
+      Math.min(
+        Math.pow(1.5, powerFactor), 
+        RECONNECT_MAX_DELAY / RECONNECT_BASE_DELAY
+      ) * qualityFactor;
+      
+    // تطبيق الحد الأقصى للتأخير وإضافة عشوائية
     const delay = Math.min(baseDelay * (1 + jitter), RECONNECT_MAX_DELAY);
+    
+    if (networkQuality < NETWORK_QUALITY_THRESHOLD) {
+      console.log(`استراتيجية تكيفية: جودة الشبكة = ${(networkQuality * 100).toFixed(0)}%، عامل التأخير = ${qualityFactor.toFixed(2)}x`)
+    }
     
     console.log(`محاولة إعادة الاتصال رقم ${reconnectAttemptRef.current} بعد ${delay.toFixed(0)}ms`);
     

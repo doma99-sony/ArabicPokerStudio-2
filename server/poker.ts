@@ -3,15 +3,38 @@ import { Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 
+// متغيرات عامة للاستخدام في ملفات أخرى
+export const pokerModule = {
+  broadcastToTable: null as any,
+  userTables: null as Map<number, number> | null,
+  clients: null as Map<number, any> | null
+};
+
 // Set up WebSocket server for real-time game updates
 export function setupPokerGame(app: Express, httpServer: Server) {
   // تكوين متقدم لتحسين أداء الاتصال وموثوقيته
   const wss = new WebSocketServer({ 
     server: httpServer,
     path: "/ws", // مسار محدد لاتصالات WebSocket
-    perMessageDeflate: false, // تعطيل الضغط لتجنب بعض مشاكل الاتصال
+    perMessageDeflate: {
+      // تكوين الضغط بشكل أمثل:
+      zlibDeflateOptions: {
+        // See zlib defaults: https://nodejs.org/api/zlib.html#zlib_class_options
+        chunkSize: 1024,
+        memLevel: 7,
+        level: 3
+      },
+      zlibInflateOptions: {
+        chunkSize: 10 * 1024
+      },
+      // تعطيل الضغط للرسائل الصغيرة < 1024 بايت
+      threshold: 1024,
+      // تجنب مشاكل التوافق مع بعض العملاء
+      serverNoContextTakeover: true,
+      clientNoContextTakeover: true
+    },
     clientTracking: true, // تتبع العملاء تلقائياً
-    maxPayload: 50 * 1024 * 1024, // زيادة الحد الأقصى لحجم الرسالة (50 ميجابايت)
+    maxPayload: 10 * 1024 * 1024, // تعديل الحد الأقصى لحجم الرسالة (10 ميجابايت)
   });
 
   // تحسين تتبع العملاء بإضافة معلومات حالة إضافية
@@ -162,6 +185,11 @@ export function setupPokerGame(app: Express, httpServer: Server) {
       }
     }
   }
+  
+  // تصدير الدوال والمتغيرات للاستخدام في ملفات أخرى
+  pokerModule.broadcastToTable = broadcastToTable;
+  pokerModule.userTables = userTables;
+  pokerModule.clients = clients;
   
   // الحصول على جميع اللاعبين في طاولة معينة
   function getPlayersAtTable(tableId: number): number[] {

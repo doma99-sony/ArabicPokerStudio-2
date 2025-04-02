@@ -10,12 +10,15 @@ if (!process.env.DATABASE_URL) {
   throw new Error('DATABASE_URL environment variable is not set');
 }
 
-// تهيئة مجموعة الاتصالات
+// تهيئة مجموعة الاتصالات مع تكوين محسن للأداء
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  max: 10, // الحد الأقصى لعدد الاتصالات
-  idleTimeoutMillis: 30000, // وقت انتهاء الاتصال الخامل بالميلي ثانية
-  connectionTimeoutMillis: 5000, // وقت انتظار الاتصال قبل الفشل
+  max: 20, // زيادة الحد الأقصى لعدد الاتصالات المتزامنة
+  idleTimeoutMillis: 60000, // زيادة وقت انتهاء الاتصال الخامل لتقليل عمليات إعادة الاتصال
+  connectionTimeoutMillis: 10000, // زيادة مهلة الاتصال لتحسين الموثوقية
+  allowExitOnIdle: false, // منع إغلاق الاتصالات عند الخمول لتحسين الأداء
+  keepAlive: true, // إبقاء الاتصال حياً
+  keepAliveInitialDelayMillis: 10000, // تأخير أولي لإرسال حزم keep-alive
 });
 
 // معالجة أخطاء الاتصال بقاعدة البيانات
@@ -27,36 +30,82 @@ pool.on('error', (err) => {
 // تهيئة عميل Drizzle للتعامل مع قاعدة البيانات
 export const db = drizzle(pool, { schema });
 
-// وظيفة لتنفيذ الترحيلات التلقائية عند بدء التشغيل
-export async function initializeDatabase() {
-  try {
-    log('Connecting to database...', 'database');
-    
-    // التحقق من الاتصال بقاعدة البيانات
-    const client = await pool.connect();
-    client.release();
-    log('Database connection successful', 'database');
-    
-    // تنفيذ الترحيلات تلقائيًا
-    log('Running migrations...', 'database');
-    await migrate(db, { migrationsFolder: './migrations' });
-    log('Migrations completed successfully', 'database');
-    
-    return true;
-  } catch (error: any) {
-    log(`Database initialization error: ${error.message || 'Unknown error'}`, 'database');
-    console.error('Full error:', error);
-    return false;
+// وظيفة لتنفيذ الترحيلات التلقائية عند بدء التشغيل مع دعم إعادة المحاولة
+export async function initializeDatabase(maxRetries = 5, retryDelay = 2000) {
+  let retryCount = 0;
+  
+  while (retryCount < maxRetries) {
+    try {
+      log(`Connecting to database (attempt ${retryCount + 1}/${maxRetries})...`, 'database');
+      
+      // التحقق من الاتصال بقاعدة البيانات
+      const client = await pool.connect();
+      
+      // التحقق من صلاحية الاتصال عن طريق استعلام بسيط
+      const result = await client.query('SELECT NOW()');
+      if (!result || !result.rows || result.rows.length === 0) {
+        throw new Error('Database connection validation failed');
+      }
+      
+      client.release();
+      log('Database connection successful and validated', 'database');
+      
+      // تنفيذ الترحيلات تلقائيًا
+      log('Running migrations...', 'database');
+      await migrate(db, { migrationsFolder: './migrations' });
+      log('Migrations completed successfully', 'database');
+      
+      // إجراء عملية تنظيف للاتصالات غير المستخدمة
+      await pool.query('SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE state = \'idle\' AND state_change < NOW() - INTERVAL \'1 hour\'');
+      log('Cleaned up idle connections', 'database');
+      
+      return true;
+    } catch (error: any) {
+      retryCount++;
+      log(`Database initialization error (attempt ${retryCount}/${maxRetries}): ${error.message || 'Unknown error'}`, 'database');
+      
+      if (retryCount < maxRetries) {
+        log(`Retrying database initialization in ${retryDelay}ms...`, 'database');
+        // انتظار قبل إعادة المحاولة
+        await new Promise(resolve => setTimeout(resolve, retryDelay));
+        
+        // زيادة وقت الانتظار بشكل تدريجي
+        retryDelay = Math.min(retryDelay * 1.5, 30000);
+      } else {
+        log('Maximum retries reached. Database initialization failed.', 'database');
+        console.error('Full error:', error);
+        return false;
+      }
+    }
   }
+  
+  return false;
 }
 
-// وظيفة لإغلاق اتصالات قاعدة البيانات بشكل آمن
-export async function closeDatabase() {
-  try {
-    log('Closing database connections...', 'database');
-    await pool.end();
-    log('Database connections closed', 'database');
-  } catch (error: any) {
-    log(`Error closing database connections: ${error.message || 'Unknown error'}`, 'database');
+// وظيفة لإغلاق اتصالات قاعدة البيانات بشكل آمن مع محاولات إعادة المحاولة
+export async function closeDatabase(maxRetries = 3, retryDelay = 1000) {
+  let retryCount = 0;
+  
+  while (retryCount < maxRetries) {
+    try {
+      log('Closing database connections...', 'database');
+      await pool.end();
+      log('Database connections closed successfully', 'database');
+      return true;
+    } catch (error: any) {
+      retryCount++;
+      log(`Error closing database connections (attempt ${retryCount}/${maxRetries}): ${error.message || 'Unknown error'}`, 'database');
+      
+      if (retryCount < maxRetries) {
+        log(`Retrying database connection close in ${retryDelay}ms...`, 'database');
+        // انتظار قبل إعادة المحاولة
+        await new Promise(resolve => setTimeout(resolve, retryDelay));
+      } else {
+        log('Maximum retries reached. Database connections may not have closed properly.', 'database');
+        return false;
+      }
+    }
   }
+  
+  return false;
 }
