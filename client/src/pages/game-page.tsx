@@ -14,6 +14,9 @@ import { CommunityCards } from "@/components/game/community-cards";
 import { PlayerNotifications } from "@/components/game/player-notification";
 import { TableChat } from "@/components/game/table-chat";
 import { GameHistory } from "@/components/game/game-history";
+import { SoundEffectsManager } from "@/components/game/sound-effects-manager";
+import { SoundSettings } from "@/components/ui/sound-settings";
+import { useSoundSystem } from "@/hooks/use-sound-system";
 import { useToast } from "@/hooks/use-toast";
 
 export default function GamePage({ params }: { params?: { tableId?: string } }) {
@@ -23,6 +26,7 @@ export default function GamePage({ params }: { params?: { tableId?: string } }) 
   const [isSpectator, setIsSpectator] = useState(false);
   const [tableName, setTableName] = useState<string>("");
   const [maxPlayers, setMaxPlayers] = useState<number>(9);
+  const [previousGameState, setPreviousGameState] = useState<GameState | null>(null);
   
   // التأكد من وجود معرف الطاولة - استخدام localStorage كاحتياطي
   useEffect(() => {
@@ -439,6 +443,13 @@ export default function GamePage({ params }: { params?: { tableId?: string } }) 
     }
   }, [gameState]);
   
+  // تحديث حالة اللعبة السابقة للمؤثرات الصوتية
+  useEffect(() => {
+    if (gameState) {
+      setPreviousGameState(gameState);
+    }
+  }, [gameState]);
+  
   // استخدام WebSocket لاتصال مستمر مع الخادم
   const ws = useWebSocket();
   
@@ -477,7 +488,7 @@ export default function GamePage({ params }: { params?: { tableId?: string } }) 
         <PokerTable gameState={gameState} />
         
         {/* Game history component - always show, even if no history yet */}
-        <GameHistory history={gameState?.gameHistory || []} />
+        <GameHistory history={(gameState as any)?.gameHistory || []} />
         
         {/* أزرار إجراءات اللعب - تظهر فقط في وضع اللعب النشط */}
         {!isSpectator && gameState && (
@@ -506,6 +517,12 @@ export default function GamePage({ params }: { params?: { tableId?: string } }) 
 
       {/* دردشة الطاولة */}
       {tableId && <TableChat tableId={Number(tableId)} />}
+
+      {/* مدير المؤثرات الصوتية */}
+      {gameState && <SoundEffectsManager gameState={gameState as any} previousGameState={previousGameState as any} />}
+
+      {/* إعدادات الصوت */}
+      <SoundSettings />
 
       {/* شريط الأدوات السفلي */}
       <GameControls 

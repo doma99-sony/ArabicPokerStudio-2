@@ -49,8 +49,9 @@ export type GameAction = "fold" | "check" | "call" | "bet" | "raise" | "all_in" 
 export interface GameRoundAction {
   id: string;
   round: number;
-  action: string;
+  action: string | "fold" | "check" | "call" | "bet" | "raise" | "all_in" | "timeout" | "start_round" | "end_round" | "deal_cards" | "flop" | "turn" | "river" | "showdown" | "win";
   player: string;
+  playerId?: number;
   amount?: number;
   timestamp: number;
 }

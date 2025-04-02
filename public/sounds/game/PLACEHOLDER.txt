@@ -1,0 +1,14 @@
+This directory should contain game action sound effects such as:
+- card_deal.mp3
+- card_flip.mp3
+- chip_stack.mp3
+- chip_toss.mp3
+- check.mp3
+- fold.mp3
+- raise.mp3
+- call.mp3
+- all_in.mp3
+- turn_start.mp3
+- shuffle.mp3
+
+Game sounds should clearly indicate player actions and game state changes.

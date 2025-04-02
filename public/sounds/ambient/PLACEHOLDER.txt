@@ -1,0 +1,8 @@
+This directory should contain ambient background sounds such as:
+- casino_ambient.mp3
+- arabic_music.mp3
+- table_ambient.mp3
+
+These sounds should be loopable, and provide cultural context and immersive atmosphere.
+The arabic_music.mp3 should be an appropriate Arabic/Middle Eastern background music
+that enhances the cultural theme of the application.

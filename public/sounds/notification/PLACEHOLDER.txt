@@ -1,0 +1,7 @@
+This directory should contain notification and alert sound effects such as:
+- message.mp3
+- alert.mp3
+- time_warning.mp3
+
+These sounds should be attention-grabbing but not overly disruptive.
+The time_warning.mp3 should indicate that a player's turn time is running out.

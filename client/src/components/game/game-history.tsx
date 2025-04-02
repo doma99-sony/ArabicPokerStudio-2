@@ -18,7 +18,7 @@ interface GameHistoryProps {
 
 export function GameHistory({ history }: GameHistoryProps) {
   // حالة لعرض/إخفاء قائمة السجل
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
 
   // تحويل الإجراء إلى وصف عربي
   const translateAction = (action: string): string => {
@@ -53,7 +53,7 @@ export function GameHistory({ history }: GameHistoryProps) {
   };
 
   return (
-    <div className="fixed top-24 left-0 z-40 w-60 bg-black/80 border-r border-t border-[#D4AF37]/60 rounded-tr-lg shadow-lg transition-all duration-300 transform">
+    <div className="fixed top-24 right-0 z-40 w-60 bg-black/80 border-l border-t border-[#D4AF37]/60 rounded-tl-lg shadow-lg transition-all duration-300 transform">
       {/* رأس القائمة */}
       <div 
         className="bg-gradient-to-r from-[#0A3A2A] to-[#1A5B4A] p-2 flex items-center justify-between border-b border-[#D4AF37] cursor-pointer"

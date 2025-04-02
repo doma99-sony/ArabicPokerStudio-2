@@ -1,0 +1,6 @@
+This directory should contain UI sound effects such as:
+- button_click.mp3
+- menu_open.mp3
+- menu_close.mp3
+
+UI sounds should be short, subtle, and non-intrusive.

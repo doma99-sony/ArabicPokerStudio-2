@@ -1,0 +1,7 @@
+This directory should contain celebration and winning sound effects such as:
+- win_hand.mp3
+- lose_hand.mp3
+- win_pot.mp3
+- celebration.mp3
+
+These sounds should be exciting and convey the emotional impact of winning or losing.
