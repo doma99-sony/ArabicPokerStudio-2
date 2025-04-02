@@ -44,7 +44,16 @@ export interface Card {
   hidden?: boolean;
 }
 
-export type GameAction = "fold" | "check" | "call" | "bet" | "raise" | "all_in";
+export type GameAction = "fold" | "check" | "call" | "bet" | "raise" | "all_in" | "timeout";
+
+export interface GameRoundAction {
+  id: string;
+  round: number;
+  action: string;
+  player: string;
+  amount?: number;
+  timestamp: number;
+}
 
 export interface GameState {
   id: number;
@@ -61,6 +70,8 @@ export interface GameState {
   userChips: number;
   gameStatus: "waiting" | "preflop" | "flop" | "turn" | "river" | "showdown";
   minRaise?: number; // الحد الأدنى للزيادة (اختياري)
+  turnTimeLeft?: number; // الوقت المتبقي للدور الحالي بالثواني
+  gameHistory?: GameRoundAction[]; // سجل أحداث اللعبة
 }
 
 export interface Achievement {

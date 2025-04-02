@@ -13,6 +13,7 @@ import { GameActions } from "@/components/game/game-actions";
 import { CommunityCards } from "@/components/game/community-cards";
 import { PlayerNotifications } from "@/components/game/player-notification";
 import { TableChat } from "@/components/game/table-chat";
+import { GameHistory } from "@/components/game/game-history";
 import { useToast } from "@/hooks/use-toast";
 
 export default function GamePage({ params }: { params?: { tableId?: string } }) {
@@ -474,6 +475,11 @@ export default function GamePage({ params }: { params?: { tableId?: string } }) 
         
         {/* Poker table (middle) */}
         <PokerTable gameState={gameState} />
+        
+        {/* Game history component */}
+        {gameState?.gameHistory && gameState.gameHistory.length > 0 && (
+          <GameHistory history={gameState.gameHistory} />
+        )}
         
         {/* أزرار إجراءات اللعب - تظهر فقط في وضع اللعب النشط */}
         {!isSpectator && gameState && (

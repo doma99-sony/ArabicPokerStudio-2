@@ -15,6 +15,16 @@ interface GamePlayer {
 }
 
 // Interface for game round
+interface GameRoundAction {
+  id: string;
+  round: number;
+  action: string;
+  player: string;
+  playerId: number;
+  amount?: number;
+  timestamp: number;
+}
+
 interface GameRound {
   roundNumber: number;
   deck: Card[];
@@ -30,6 +40,7 @@ interface GameRound {
   // إضافة متغيرات لتتبع وقت اللاعب الحالي
   turnStartTime: number; // وقت بدء دور اللاعب الحالي (timestamp)
   turnTimeoutId?: NodeJS.Timeout; // معرف مؤقت انتهاء الوقت
+  gameHistory: GameRoundAction[]; // سجل أحداث اللعبة
 }
 
 // Result interface for player actions
@@ -78,7 +89,8 @@ export function createGameRoom(table: GameTable): GameRoom {
     currentTurn: 0,
     lastRaisePosition: 0,
     gameStatus: "waiting",
-    turnStartTime: Date.now() // تهيئة وقت بدء الدور
+    turnStartTime: Date.now(), // تهيئة وقت بدء الدور
+    gameHistory: [] // تهيئة سجل أحداث اللعبة
   };
   
   // مدة مؤقت انتظار اللاعب (12 ثانية)
@@ -216,6 +228,21 @@ export function createGameRoom(table: GameTable): GameRoom {
     
     round.currentBet = 0;
     
+    // إضافة سجل بتقدم مرحلة اللعبة
+    const stageAction = {
+      id: `${Date.now()}-${Math.floor(Math.random()*1000)}`,
+      round: round.roundNumber,
+      action: round.gameStatus === "preflop" ? "flop" : 
+              round.gameStatus === "flop" ? "turn" : 
+              round.gameStatus === "turn" ? "river" : 
+              round.gameStatus === "river" ? "showdown" : "start_round",
+      player: "النظام",
+      playerId: -1,
+      timestamp: Date.now()
+    };
+    
+    round.gameHistory.push(stageAction);
+    
     switch (round.gameStatus) {
       case "waiting":
       case "showdown":
@@ -278,6 +305,18 @@ export function createGameRoom(table: GameTable): GameRoom {
     round.communityCards = [];
     round.pot = 0;
     round.currentBet = 0;
+    
+    // إضافة حدث بدء جولة جديدة إلى سجل الأحداث
+    const startRoundAction: GameRoundAction = {
+      id: `${Date.now()}-${Math.floor(Math.random()*1000)}`,
+      round: round.roundNumber,
+      action: "start_round",
+      player: "النظام",
+      playerId: -1,
+      timestamp: Date.now()
+    };
+    
+    round.gameHistory.push(startRoundAction);
     
     // تعيين حالة اللعبة إلى preflop (بداية الجولة)
     round.gameStatus = "preflop";
@@ -466,6 +505,13 @@ export function createGameRoom(table: GameTable): GameRoom {
       };
     });
     
+    // حساب الوقت المتبقي للاعب الحالي (إذا كان دوره)
+    let turnTimeLeft: number | undefined = undefined;
+    if (round.currentTurn !== -1 && round.gameStatus !== "waiting" && round.gameStatus !== "showdown") {
+      const elapsedTime = Math.floor((Date.now() - round.turnStartTime) / 1000);
+      turnTimeLeft = Math.max(0, TURN_TIMEOUT_SECONDS - elapsedTime);
+    }
+    
     return {
       id: table.id,
       tableName: table.name,
@@ -479,7 +525,9 @@ export function createGameRoom(table: GameTable): GameRoom {
       round: round.roundNumber,
       currentBet: round.currentBet,
       userChips: currentPlayer?.chips || 0,
-      gameStatus: round.gameStatus
+      gameStatus: round.gameStatus,
+      turnTimeLeft, // إضافة الوقت المتبقي
+      gameHistory: round.gameHistory // إرسال سجل الأحداث للواجهة
     };
   };
   
@@ -660,7 +708,8 @@ export function createGameRoom(table: GameTable): GameRoom {
         currentTurn: 0,
         lastRaisePosition: 0,
         gameStatus: "waiting",
-        turnStartTime: Date.now() // إعادة تعيين وقت بدء الدور
+        turnStartTime: Date.now(), // إعادة تعيين وقت بدء الدور
+        gameHistory: [] // إعادة تعيين سجل الأحداث
       };
       
       // إلغاء أي مؤقت انتظار سابق
@@ -688,6 +737,19 @@ export function createGameRoom(table: GameTable): GameRoom {
     if (!player) {
       return { success: false, message: "اللاعب غير موجود في اللعبة" };
     }
+    
+    // إضافة الإجراء إلى سجل الأحداث
+    const actionHistoryItem: GameRoundAction = {
+      id: `${Date.now()}-${Math.floor(Math.random()*1000)}`,
+      round: round.roundNumber,
+      action: action,
+      player: player.username,
+      playerId: player.id,
+      amount: action === "bet" || action === "raise" || action === "call" ? amount : undefined,
+      timestamp: Date.now()
+    };
+    
+    round.gameHistory.push(actionHistoryItem);
     
     // Handle actions
     switch (action) {
