@@ -6,7 +6,7 @@ type WebSocketStatus = "connecting" | "open" | "closed" | "error";
 
 // نظام إدارة WebSocket عالمي - يحافظ على الاتصال بين الصفحات
 // تعريف متغير عالمي لحفظ حالة الاتصال WebSocket عبر التنقلات بين الصفحات
-let globalWebSocket: {
+interface GlobalWebSocketState {
   socket: WebSocket | null;
   reference: number; 
   handlers: Map<string, (data: any) => void>;
@@ -14,7 +14,10 @@ let globalWebSocket: {
   sessionId: string;
   reconnectAttempt: number;
   isConnecting: boolean;
-} = {
+}
+
+// استخدام متغير عالمي خارج React للحفاظ على حالة الاتصال بين الصفحات
+let globalWebSocket: GlobalWebSocketState = {
   socket: null,
   reference: 0, // عدد المراجع النشطة
   handlers: new Map(),

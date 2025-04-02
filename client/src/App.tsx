@@ -31,29 +31,7 @@ import { initializePerformanceOptimizations } from "@/lib/performance-utils";
 import { SplashScreen } from "@/components/ui/splash-screen";
 import { useState, useEffect, useRef } from "react";
 
-// مكون بسيط للحفاظ على اتصال WebSocket مستمر بين الصفحات
-function PersistentConnectionManager() {
-  const { user } = useAuth();
-  const ws = useWebSocket();
-  
-  // اتصال مرة واحدة فقط عند تحميل المكون
-  useEffect(() => {
-    // تنفيذ عملية الاتصال مرة واحدة فقط عند تسجيل دخول المستخدم
-    if (!user) return;
-    
-    // استدعاء دالة الاتصال مع العلم أن النمط العالمي منفذ داخل hook
-    console.log("بدء اتصال WebSocket عالمي...");
-    ws.connect();
-    
-    // عند إلغاء تحميل المكون - عدم فصل الاتصال للحفاظ عليه بين الصفحات
-    return () => {
-      // لا نفصل الاتصال عند التنقل بين الصفحات
-      console.log("الإبقاء على اتصال WebSocket أثناء التنقل");
-    };
-  }, [user, ws]);
-  
-  return null; // مكون وظيفي لا يعرض أي عناصر
-}
+
 
 function Router() {
   return (
@@ -164,8 +142,7 @@ function App() {
   
   return (
     <NotificationsProvider>
-      {/* مدير الاتصال العالمي للحفاظ على استمرارية الاتصال خلال التنقل بين الصفحات */}
-      {user && <PersistentConnectionManager />}
+
       <Router />
       <WelcomeMessageNotification />
       <LandscapeNotice />

@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "wouter";
+import { useWebSocket } from "@/hooks/use-websocket";
 import { GameState, GameAction, PlayerPosition } from "@/types";
 import { Loader2 } from "lucide-react";
 import { PokerTable } from "@/components/game/poker-table";
@@ -435,6 +436,22 @@ export default function GamePage({ params }: { params?: { tableId?: string } }) 
       setPreviousPlayers([...gameState.players]);
     }
   }, [gameState]);
+  
+  // استخدام WebSocket لاتصال مستمر مع الخادم
+  const ws = useWebSocket();
+  
+  // تأكد من إنشاء اتصال WebSocket جديد عند تحميل الصفحة
+  useEffect(() => {
+    if (user && tableId && ws.status !== 'open') {
+      console.log('إنشاء اتصال WebSocket في صفحة اللعبة');
+      ws.connect();
+    }
+    
+    // تنظيف عند مغادرة الصفحة، نحتفظ بالاتصال مفتوحاً
+    return () => {
+      console.log('الاحتفاظ باتصال WebSocket عند مغادرة صفحة اللعبة');
+    };
+  }, [user, tableId, ws]);
   
   return (
     <div className="min-h-screen bg-deepBlack text-white py-2 pb-16 flex flex-col">

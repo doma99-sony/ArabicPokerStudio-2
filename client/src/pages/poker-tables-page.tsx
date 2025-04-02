@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
+import { useWebSocket } from "@/hooks/use-websocket";
 import { GameTable } from "@/types";
 import { TableCard } from "@/components/lobby/table-card";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,22 @@ export default function PokerTablesPage() {
   const { user } = useAuth();
   const [activePokerLevel, setActivePokerLevel] = useState("نوب");
   const [showRankPopup, setShowRankPopup] = useState(false); // Added state for popup
+  
+  // استخدام WebSocket لاتصال مستمر مع الخادم
+  const ws = useWebSocket();
+  
+  // تأكد من إنشاء اتصال WebSocket جديد عند تحميل الصفحة
+  useEffect(() => {
+    if (user && ws.status !== 'open') {
+      console.log('إنشاء اتصال WebSocket في صفحة طاولات البوكر');
+      ws.connect();
+    }
+    
+    // تنظيف عند مغادرة الصفحة، نحتفظ بالاتصال مفتوحاً
+    return () => {
+      console.log('الاحتفاظ باتصال WebSocket عند مغادرة صفحة طاولات البوكر');
+    };
+  }, [user, ws]);
 
   const { data: tables, isLoading: tablesLoading, refetch } = useQuery<GameTable[]>({
     queryKey: ["/api/tables", "poker"],

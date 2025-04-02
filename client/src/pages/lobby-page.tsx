@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
+import { useWebSocket } from "@/hooks/use-websocket";
 import { GameType } from "@shared/types";
 import { ChatBox } from "@/components/lobby/chat-box";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,22 @@ export default function LobbyPage() {
   const [videoMuted, setVideoMuted] = useState(true);
   const [directTableId, setDirectTableId] = useState<string>("");
   const videoRef = useRef<HTMLVideoElement>(null);
+  
+  // استخدام WebSocket لاتصال مستمر مع الخادم
+  const ws = useWebSocket();
+  
+  // تأكد من إنشاء اتصال WebSocket جديد عند تحميل الصفحة
+  useEffect(() => {
+    if (user && ws.status !== 'open') {
+      console.log('إنشاء اتصال WebSocket في الصفحة الرئيسية');
+      ws.connect();
+    }
+    
+    // تنظيف عند مغادرة الصفحة، نحتفظ بالاتصال مفتوحاً
+    return () => {
+      console.log('الاحتفاظ باتصال WebSocket عند مغادرة الصفحة الرئيسية');
+    };
+  }, [user, ws]);
 
   // التحكم في كتم/تشغيل الصوت
   const toggleMute = () => {
