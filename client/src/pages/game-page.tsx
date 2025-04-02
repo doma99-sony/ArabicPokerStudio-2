@@ -476,10 +476,8 @@ export default function GamePage({ params }: { params?: { tableId?: string } }) 
         {/* Poker table (middle) */}
         <PokerTable gameState={gameState} />
         
-        {/* Game history component */}
-        {gameState?.gameHistory && gameState.gameHistory.length > 0 && (
-          <GameHistory history={gameState.gameHistory} />
-        )}
+        {/* Game history component - always show, even if no history yet */}
+        <GameHistory history={gameState?.gameHistory || []} />
         
         {/* أزرار إجراءات اللعب - تظهر فقط في وضع اللعب النشط */}
         {!isSpectator && gameState && (

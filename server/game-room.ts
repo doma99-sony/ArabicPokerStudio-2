@@ -96,6 +96,22 @@ export function createGameRoom(table: GameTable): GameRoom {
   // مدة مؤقت انتظار اللاعب (12 ثانية)
   const TURN_TIMEOUT_SECONDS = 12;
   
+  // إضافة حدث إلى سجل اللعبة
+  const addEventToHistory = (action: string, player: string, playerId: number, amount?: number) => {
+    const historyItem: GameRoundAction = {
+      id: Math.random().toString(36).substring(2, 10), // إنشاء معرف فريد
+      round: round.roundNumber,
+      action: action,
+      player: player,
+      playerId: playerId,
+      amount: amount,
+      timestamp: Date.now()
+    };
+    
+    round.gameHistory.push(historyItem);
+    console.log(`تم إضافة حدث للسجل: ${player} - ${action}${amount ? ` (${amount})` : ''}`);
+  };
+  
   // وظيفة لبدء مؤقت الانتظار للاعب الحالي
   const startTurnTimer = () => {
     // إلغاء أي مؤقت سابق
@@ -118,6 +134,9 @@ export function createGameRoom(table: GameTable): GameRoom {
       
       console.log(`تم انتهاء وقت اللاعب ${currentPlayer.username} - يتم تنفيذ Fold تلقائيًا`);
       
+      // إضافة حدث انتهاء الوقت إلى سجل اللعبة
+      addEventToHistory("timeout", currentPlayer.username, currentPlayer.id);
+      
       // حساب عدد اللاعبين النشطين (غير المنسحبين)
       const activePlayers = Array.from(players.values()).filter(p => !p.folded);
       
@@ -131,6 +150,12 @@ export function createGameRoom(table: GameTable): GameRoom {
           
           // تنفيذ انسحاب اللاعب الحالي واستخراج النتائج
           currentPlayer.folded = true;
+          
+          // إضافة حدث الانسحاب إلى سجل اللعبة
+          addEventToHistory("fold", currentPlayer.username, currentPlayer.id);
+          
+          // إضافة حدث الفوز إلى سجل اللعبة
+          addEventToHistory("win", winner.username, winner.id, round.pot + currentPlayer.betAmount);
           
           // منح الفائز الرقائق من القدر
           winner.chips += round.pot + currentPlayer.betAmount;

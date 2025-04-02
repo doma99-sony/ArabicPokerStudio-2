@@ -71,7 +71,7 @@ export interface GameState {
   gameStatus: "waiting" | "preflop" | "flop" | "turn" | "river" | "showdown";
   minRaise?: number; // الحد الأدنى للزيادة (اختياري)
   turnTimeLeft?: number; // الوقت المتبقي للدور الحالي بالثواني
-  gameHistory?: GameRoundAction[]; // سجل أحداث اللعبة
+  gameHistory: GameRoundAction[]; // سجل أحداث اللعبة
 }
 
 export interface Achievement {
