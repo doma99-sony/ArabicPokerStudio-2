@@ -133,6 +133,12 @@ export function useWebSocket() {
     }
   }, [user]);
 
+  // إعلان مسبق لدالة reconnect
+  const reconnect = useCallback(() => {
+    // سيتم تعريفها لاحقًا بشكل كامل
+    console.log("وظيفة إعادة الاتصال الأولية");
+  }, []);
+
   // دالة ping دورية محسنة للتأكد من استمرار الاتصال
   const setupPingInterval = useCallback(() => {
     if (pingIntervalRef.current) {
@@ -203,10 +209,133 @@ export function useWebSocket() {
       pingTimeoutsRef.current.forEach(timeout => clearTimeout(timeout));
       pingTimeoutsRef.current = [];
     };
-  }, []);
+  }, [reconnect]);
 
-  // دالة إعادة الاتصال مع استراتيجية تأخير متزايد - محسنة
-  const reconnect = useCallback(() => {
+  // تعريف setupSocketHandlers
+  const setupSocketHandlers = useCallback((socket: WebSocket) => {
+    // تصفية معالجات الأحداث الحالية
+    socket.onopen = null;
+    socket.onclose = null;
+    socket.onerror = null;
+    socket.onmessage = null;
+    
+    // إعداد المعالجات الجديدة
+    socket.onopen = () => {
+      console.log("WebSocket connection established");
+      setStatus("open");
+      isReconnectingRef.current = false;
+      lastSuccessfulConnectionRef.current = Date.now();
+      
+      // إعادة ضبط حالة الاتصال
+      resetConnectionState();
+      
+      // إعادة تأسيس الجلسة مع الخادم
+      if (user) {
+        socket.send(JSON.stringify({
+          type: "auth",
+          userId: user.id,
+          sessionId: sessionIdRef.current,
+          reconnectCount: reconnectAttemptRef.current
+        }));
+      }
+      
+      // بدء مؤقت ping للحفاظ على الاتصال نشطاً
+      setupPingInterval();
+    };
+    
+    socket.onclose = (event: CloseEvent) => {
+      const closeTime = new Date().toLocaleTimeString();
+      console.log(`WebSocket connection closed at ${closeTime}. Code: ${event.code}, Reason: ${event.reason || 'No reason provided'}`);
+      setStatus("closed");
+      clearAllTimers();
+      
+      // إذا لم يكن الإغلاق طبيعياً وليس يدوياً، نحاول إعادة الاتصال
+      if (event.code !== 1000 && !isManualCloseRef.current) {
+        if (reconnectAttemptRef.current < RECONNECT_MAX_RETRIES) {
+          console.log("محاولة إعادة الاتصال تلقائياً...");
+          reconnect();
+        } else {
+          console.error("تم الوصول للحد الأقصى لمحاولات إعادة الاتصال");
+          // إعادة ضبط العداد للسماح بمحاولات جديدة في المستقبل
+          reconnectAttemptRef.current = 0;
+          setTimeout(() => reconnect(), RECONNECT_MAX_DELAY);
+        }
+      }
+      
+      isManualCloseRef.current = false;
+    };
+    
+    socket.onerror = (error: Event) => {
+      console.error("WebSocket error:", error);
+      setStatus("error");
+      
+      // لا نظهر رسائل خطأ للمستخدم عند إعادة الاتصال
+      if (!isReconnectingRef.current) {
+        toast({
+          title: "خطأ في الاتصال",
+          description: "نحاول إعادة الاتصال تلقائياً...",
+          variant: "destructive",
+        });
+      }
+      
+      // تحفيز محاولة إعادة الاتصال المبكرة (بدون انتظار onclose)
+      // فقط إذا كان الاتصال مفتوحاً بالفعل
+      if (socket.readyState === WebSocket.OPEN && !isReconnectingRef.current) {
+        reconnect();
+      }
+    };
+    
+    socket.onmessage = (event: MessageEvent) => {
+      try {
+        // تسجيل استلام رسالة
+        connectionStateRef.current.lastMessageTime = Date.now();
+        
+        const message = JSON.parse(event.data);
+        const { type } = message;
+        
+        // معالجة أنواع الرسائل القياسية
+        if (type === "error") {
+          toast({
+            title: "خطأ",
+            description: message.message,
+            variant: "destructive",
+          });
+        } else if (type === "ping") {
+          // استلام ping من الخادم، إرسال pong للرد
+          console.log("تم استلام ping من الخادم، إرسال pong...");
+          
+          if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+            socketRef.current.send(JSON.stringify({ 
+              type: "pong", 
+              timestamp: Date.now(),
+              sessionId: sessionIdRef.current,
+              serverTimestamp: message.timestamp // إعادة طابع الوقت للقياس
+            }));
+          }
+          
+          // إعادة ضبط عداد الـ ping المفقودة
+          connectionStateRef.current.lastPongTime = Date.now();
+          connectionStateRef.current.missedPings = 0;
+        } else if (type === "pong") {
+          // استلام pong من الخادم (استجابة للـ client_ping)
+          connectionStateRef.current.lastPongTime = Date.now();
+          connectionStateRef.current.missedPings = 0;
+        }
+        
+        // استدعاء أي معالج مسجل لهذا النوع من الرسائل
+        const handler = messageHandlersRef.current.get(type);
+        if (handler) {
+          handler(message);
+        }
+      } catch (error) {
+        console.error("Error parsing WebSocket message:", error);
+      }
+    };
+  }, [user, toast, setupPingInterval, clearAllTimers, resetConnectionState, reconnect]);
+
+  // تحديث تعريف دالة reconnect الكامل
+  // التعريف الكامل لدالة reconnect
+  const reconnectImpl = useCallback(() => {
     // إذا كانت هناك محاولة إعادة اتصال جارية بالفعل، لا نبدأ واحدة جديدة
     if (isReconnectingRef.current) return;
     
@@ -260,136 +389,23 @@ export function useWebSocket() {
         isReconnectingRef.current = false;
         
         // الانتظار لفترة قصيرة قبل المحاولة مرة أخرى
-        setTimeout(() => {
-          reconnect();
-        }, RECONNECT_BASE_DELAY);
+        setTimeout(() => reconnectImpl(), RECONNECT_BASE_DELAY);
       }
       
       reconnectTimeoutRef.current = null;
     }, delay);
   }, [createWebSocketConnection, setupSocketHandlers]);
 
-  // إعداد معالجات الأحداث للـ WebSocket
-  const setupSocketHandlers = useCallback((socket: WebSocket) => {
-    // تصفية معالجات الأحداث الحالية
-    socket.onopen = null;
-    socket.onclose = null;
-    socket.onerror = null;
-    socket.onmessage = null;
-    
-    // إعداد المعالجات الجديدة
-    socket.onopen = () => {
-      console.log("WebSocket connection established");
-      setStatus("open");
-      isReconnectingRef.current = false;
-      lastSuccessfulConnectionRef.current = Date.now();
-      
-      // إعادة ضبط حالة الاتصال
-      resetConnectionState();
-      
-      // إعادة تأسيس الجلسة مع الخادم
-      if (user) {
-        socket.send(JSON.stringify({
-          type: "auth",
-          userId: user.id,
-          sessionId: sessionIdRef.current,
-          reconnectCount: reconnectAttemptRef.current
-        }));
-      }
-      
-      // بدء مؤقت ping للحفاظ على الاتصال نشطاً
-      setupPingInterval();
+  // تحديث دالة reconnect بالتنفيذ الكامل لها
+  useEffect(() => {
+    // تعريف دالة جديدة تستخدم reconnectImpl
+    const reconnectFunction = () => {
+      reconnectImpl();
     };
     
-    socket.onclose = (event) => {
-      const closeTime = new Date().toLocaleTimeString();
-      console.log(`WebSocket connection closed at ${closeTime}. Code: ${event.code}, Reason: ${event.reason || 'No reason provided'}`);
-      setStatus("closed");
-      clearAllTimers();
-      
-      // إذا لم يكن الإغلاق طبيعياً وليس يدوياً، نحاول إعادة الاتصال
-      if (event.code !== 1000 && !isManualCloseRef.current) {
-        if (reconnectAttemptRef.current < RECONNECT_MAX_RETRIES) {
-          console.log("محاولة إعادة الاتصال تلقائياً...");
-          reconnect();
-        } else {
-          console.error("تم الوصول للحد الأقصى لمحاولات إعادة الاتصال");
-          // إعادة ضبط العداد للسماح بمحاولات جديدة في المستقبل
-          reconnectAttemptRef.current = 0;
-          setTimeout(() => reconnect(), RECONNECT_MAX_DELAY);
-        }
-      }
-      
-      isManualCloseRef.current = false;
-    };
-    
-    socket.onerror = (error) => {
-      console.error("WebSocket error:", error);
-      setStatus("error");
-      
-      // لا نظهر رسائل خطأ للمستخدم عند إعادة الاتصال
-      if (!isReconnectingRef.current) {
-        toast({
-          title: "خطأ في الاتصال",
-          description: "نحاول إعادة الاتصال تلقائياً...",
-          variant: "destructive",
-        });
-      }
-      
-      // تحفيز محاولة إعادة الاتصال المبكرة (بدون انتظار onclose)
-      // فقط إذا كان الاتصال مفتوحاً بالفعل
-      if (socket.readyState === WebSocket.OPEN && !isReconnectingRef.current) {
-        reconnect();
-      }
-    };
-    
-    socket.onmessage = (event) => {
-      try {
-        // تسجيل استلام رسالة
-        connectionStateRef.current.lastMessageTime = Date.now();
-        
-        const message = JSON.parse(event.data);
-        const { type } = message;
-        
-        // معالجة أنواع الرسائل القياسية
-        if (type === "error") {
-          toast({
-            title: "خطأ",
-            description: message.message,
-            variant: "destructive",
-          });
-        } else if (type === "ping") {
-          // استلام ping من الخادم، إرسال pong للرد
-          console.log("تم استلام ping من الخادم، إرسال pong...");
-          
-          if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-            socketRef.current.send(JSON.stringify({ 
-              type: "pong", 
-              timestamp: Date.now(),
-              sessionId: sessionIdRef.current,
-              serverTimestamp: message.timestamp // إعادة طابع الوقت للقياس
-            }));
-          }
-          
-          // إعادة ضبط عداد الـ ping المفقودة
-          connectionStateRef.current.lastPongTime = Date.now();
-          connectionStateRef.current.missedPings = 0;
-        } else if (type === "pong") {
-          // استلام pong من الخادم (استجابة للـ client_ping)
-          connectionStateRef.current.lastPongTime = Date.now();
-          connectionStateRef.current.missedPings = 0;
-        }
-        
-        // استدعاء أي معالج مسجل لهذا النوع من الرسائل
-        const handler = messageHandlersRef.current.get(type);
-        if (handler) {
-          handler(message);
-        }
-      } catch (error) {
-        console.error("Error parsing WebSocket message:", error);
-      }
-    };
-  }, [user, toast, setupPingInterval, reconnect, clearAllTimers, resetConnectionState]);
+    // استبدال دالة reconnect بالدالة الجديدة
+    Object.assign(reconnect, reconnectFunction);
+  }, [reconnect, reconnectImpl]);
 
   // إعداد اتصال الـ WebSocket الأساسي - محسن
   useEffect(() => {
