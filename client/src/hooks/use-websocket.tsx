@@ -6,6 +6,8 @@ type WebSocketStatus = "connecting" | "open" | "closed" | "error";
 
 // نظام إدارة WebSocket عالمي - يحافظ على الاتصال بين الصفحات
 // تعريف متغير عالمي لحفظ حالة الاتصال WebSocket عبر التنقلات بين الصفحات
+// تحديث: تبسيط نظام الاتصال ليعتبر المستخدم متصلاً بمجرد تسجيل الدخول
+// وفقد الاتصال فقط عند تسجيل الخروج أو قفل التطبيق
 interface GlobalWebSocketState {
   socket: WebSocket | null;
   reference: number; 
@@ -14,6 +16,7 @@ interface GlobalWebSocketState {
   sessionId: string;
   reconnectAttempt: number;
   isConnecting: boolean;
+  isLoggedIn: boolean; // إضافة: هل المستخدم مسجل الدخول
 }
 
 // استخدام متغير عالمي خارج React للحفاظ على حالة الاتصال بين الصفحات
@@ -24,7 +27,8 @@ let globalWebSocket: GlobalWebSocketState = {
   lastPingTime: 0,
   sessionId: '',
   reconnectAttempt: 0,
-  isConnecting: false
+  isConnecting: false,
+  isLoggedIn: false // القيمة الافتراضية: غير مسجل الدخول
 };
 
 // إعدادات إعادة الاتصال المتكيفة المحسنة - النسخة النهائية لحل مشكلة انقطاع الاتصال
@@ -352,6 +356,9 @@ export function useWebSocket() {
       
       // إعادة تأسيس الجلسة مع الخادم (مع معلومات إضافية)
       if (user) {
+        // تعيين حالة تسجيل الدخول العالمية
+        globalWebSocket.isLoggedIn = true;
+        
         const lastState = localStorage.getItem('last_game_state_' + user.id);
         const authMessage = {
           type: "auth",

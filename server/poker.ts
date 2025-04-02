@@ -49,12 +49,15 @@ export function setupPokerGame(app: Express, httpServer: Server) {
   }
   
   // Map لتتبع الاتصالات النشطة حسب معرف المستخدم
+  // تبسيط نظام الاتصال: جعل المستخدم متصلاً بمجرد تسجيل الدخول
+  // وفقد الاتصال عند تسجيل الخروج أو إغلاق التطبيق فقط
   const clients = new Map<number, ClientInfo>();
   
   // Map لتتبع الطاولات التي ينضم إليها المستخدمون
   const userTables = new Map<number, number>();
   
   // Map لتتبع آخر حالة معروفة للمستخدم قبل قطع الاتصال (للاسترداد عند إعادة الاتصال)
+  // هذا ضروري للحفاظ على توافق الكود الحالي مع باقي الملف
   const lastKnownUserStates = new Map<number, {
     tableId?: number;
     lastActivity: number;
@@ -113,33 +116,14 @@ export function setupPokerGame(app: Express, httpServer: Server) {
   }, UPDATE_INTERVAL);
 
   // دالة التحقق من حالة الاتصالات وإرسال نبضات للحفاظ على الاتصال
+  // تبسيط نظام معالجة الاتصال: المستخدم متصل عند تسجيل الدخول، غير متصل عند الخروج
   const heartbeatIntervalId = setInterval(() => {
     console.log("إرسال نبض معلوماتي لجميع العملاء المتصلين...");
     
     const now = Date.now();
     
     clients.forEach((clientInfo, userId) => {
-      // التحقق إذا كان العميل قد استجاب للنبض السابق
-      if (!clientInfo.isAlive) {
-        console.log(`لم يستجب المستخدم ${userId} للنبض، قطع الاتصال`);
-        
-        // حفظ آخر حالة معروفة للمستخدم قبل قطع الاتصال
-        if (clientInfo.tableId) {
-          lastKnownUserStates.set(userId, {
-            tableId: clientInfo.tableId,
-            lastActivity: now
-          });
-        }
-        
-        // إغلاق الاتصال وإزالته من القائمة
-        clientInfo.ws.terminate();
-        clients.delete(userId);
-        return;
-      }
-      
-      // إعادة تعيين علامة الحالة للتحقق في الدورة التالية
-      clientInfo.isAlive = false;
-      
+      // نرسل فقط نبضات للحفاظ على الاتصال دون إنهاءه تلقائياً
       if (clientInfo.ws.readyState === WebSocket.OPEN) {
         try {
           // إرسال رسالة معلوماتية بدلاً من ping ثنائي
@@ -154,16 +138,7 @@ export function setupPokerGame(app: Express, httpServer: Server) {
           clientInfo.lastPing = now;
         } catch (err) {
           console.error(`خطأ أثناء إرسال نبض للمستخدم ${userId}:`, err);
-          // سيتم التعامل مع هذا تلقائياً في الدورة التالية
         }
-      }
-    });
-    
-    // تنظيف lastKnownUserStates القديمة (الأقدم من ساعة)
-    const oneHourAgo = now - (60 * 60 * 1000);
-    lastKnownUserStates.forEach((state, userId) => {
-      if (state.lastActivity < oneHourAgo) {
-        lastKnownUserStates.delete(userId);
       }
     });
   }, PING_INTERVAL);
@@ -533,17 +508,17 @@ export function setupPokerGame(app: Express, httpServer: Server) {
         // إضافة معلومات عن حالة الاتصال المحتملة
         const isCleanClose = code === 1000 || code === 1001;
         
-        // حفظ حالة المستخدم لتسهيل إعادة الاتصال
+        // تبسيط معالجة حالة الاتصال: الاعتبار أن المستخدم متصل طالما هو مسجل الدخول
+        // وإذا قام بتسجيل خروج أو إغلاق التطبيق، سيكون قطع الاتصال نظيفاً ومتعمداً
+        
+        // حفظ حالة المستخدم لتسهيل إعادة الاتصال عند الحاجة
         if (tableId) {
           lastKnownUserStates.set(userId, {
             tableId: tableId,
             lastActivity: now
           });
           
-          // انتظار فترة قصيرة قبل إعلام اللاعبين الآخرين بقطع الاتصال
-          // للسماح للعميل بإعادة الاتصال بسرعة في حال انقطاع مؤقت
-          
-          // إذا كان الإغلاق نظيفاً ومتعمداً، نبلغ اللاعبين الآخرين على الفور
+          // إذا كان الإغلاق نظيفاً ومتعمداً (تسجيل خروج أو إغلاق التطبيق)
           if (isCleanClose) {
             if (tableId !== undefined) {
               // تحويل tableId إلى رقم للتأكد
@@ -561,26 +536,12 @@ export function setupPokerGame(app: Express, httpServer: Server) {
             // إزالة المستخدم من قائمة العملاء على الفور
             clients.delete(userId);
           } else {
-            // للانقطاعات غير المتعمدة، ننتظر قليلاً قبل الإبلاغ
-            // للسماح بإعادة الاتصال السريع بدون إزعاج اللاعبين الآخرين
-            setTimeout(() => {
-              // التحقق مما إذا كان المستخدم قد أعاد الاتصال بالفعل وأن معرف الطاولة موجود
-              if (!clients.has(userId) && userTables.has(userId)) {
-                // الحصول على معرف الطاولة من خريطة userTables بدلاً من استخدام tableId غير المؤكد
-                const safeTableId = userTables.get(userId);
-                if (safeTableId !== undefined && !isNaN(Number(safeTableId))) {
-                  // تحويل معرف الطاولة إلى رقم للتأكد من سلامته
-                  const numericTableId = Number(safeTableId);
-                  broadcastToTable(numericTableId, {
-                    type: "player_disconnected",
-                    userId: userId,
-                    tableId: numericTableId,
-                    isCleanDisconnect: false,
-                    isTemporary: true
-                  }, userId);
-                }
-              }
-            }, 5000); // انتظار 5 ثوانٍ للسماح بإعادة الاتصال السريع
+            // في حالة قطع الاتصال غير النظيف (انقطاع شبكة مثلاً)
+            // نعامله كأنه ما زال متصلاً ونحاول إعادة الاتصال تلقائياً على مستوى العميل
+            console.log(`قطع اتصال غير نظيف للمستخدم ${userId} - سيتم إبقائه كمتصل`);
+            
+            // لا نزيل المستخدم من clients ليبقى متصلاً في نظر النظام
+            // ونسمح للعميل بإعادة استخدام نفس الجلسة حين يعود
             
             // نؤجل حذف المستخدم من قائمة العملاء للسماح بإعادة الاتصال السريع
             setTimeout(() => {
