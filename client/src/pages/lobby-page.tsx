@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
-import { useWebSocket } from "@/hooks/use-websocket";
+import { useWebSocket } from "@/hooks/use-websocket-simplified";
 import { GameType } from "@shared/types";
 import { ChatBox } from "@/components/lobby/chat-box";
 import { Button } from "@/components/ui/button";
@@ -29,7 +29,7 @@ export default function LobbyPage() {
   useEffect(() => {
     if (user && ws.status !== 'open') {
       console.log('إنشاء اتصال WebSocket في الصفحة الرئيسية');
-      ws.connect();
+      ws.reconnect(); // استخدام reconnect من النسخة المبسطة
     }
     
     // تنظيف عند مغادرة الصفحة، نحتفظ بالاتصال مفتوحاً

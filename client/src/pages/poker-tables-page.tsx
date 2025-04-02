@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
-import { useWebSocket } from "@/hooks/use-websocket";
+import { useWebSocket } from "@/hooks/use-websocket-simplified";
 import { GameTable } from "@/types";
 import { TableCard } from "@/components/lobby/table-card";
 import { Button } from "@/components/ui/button";
@@ -24,7 +24,7 @@ export default function PokerTablesPage() {
   useEffect(() => {
     if (user && ws.status !== 'open') {
       console.log('إنشاء اتصال WebSocket في صفحة طاولات البوكر');
-      ws.connect();
+      ws.reconnect();
     }
     
     // تنظيف عند مغادرة الصفحة، نحتفظ بالاتصال مفتوحاً

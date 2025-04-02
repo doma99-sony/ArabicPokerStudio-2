@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/use-auth";
-import { useWebSocket } from "@/hooks/use-websocket";
+import { useWebSocket } from "@/hooks/use-websocket-simplified";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -36,7 +36,7 @@ const systemMessages: ChatMessage[] = [
 
 export function ChatBox() {
   const { user } = useAuth();
-  const { registerHandler, sendMessage, socket, status } = useWebSocket();
+  const { registerMessageHandler: registerHandler, sendMessage, status } = useWebSocket();
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [isExpanded, setIsExpanded] = useState(true);
   const [messages, setMessages] = useState<ChatMessage[]>(systemMessages);
@@ -93,8 +93,7 @@ export function ChatBox() {
   const handleSendMessage = () => {
     if (!newMessage.trim() || !user) return;
 
-    sendMessage({
-      type: "chat_message",
+    sendMessage("chat_message", {
       message: newMessage.trim()
     });
 

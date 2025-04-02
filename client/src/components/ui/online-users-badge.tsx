@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useWebSocket } from "@/hooks/use-websocket";
+import { useWebSocket } from "@/hooks/use-websocket-simplified";
 import { User, Users } from "lucide-react";
 
 /**
@@ -7,7 +7,7 @@ import { User, Users } from "lucide-react";
  */
 export function OnlineUsersCounter() {
   const [onlineUsers, setOnlineUsers] = useState<number>(0);
-  const { registerHandler, status } = useWebSocket();
+  const { registerMessageHandler: registerHandler, status } = useWebSocket();
 
   useEffect(() => {
     // تسجيل للاستماع إلى تحديثات عدد المستخدمين
