@@ -45,7 +45,8 @@ export function PlayingCard({
   isWinning = false
 }: PlayingCardProps) {
   // التعامل مع حالة hidden لتوافق مع الواجهة المستخدمة في المكونات الأخرى
-  const effectiveIsHidden = isHidden || hidden;
+  // إذا كان card.hidden موجوداً، نعطيه الأولوية
+  const effectiveIsHidden = card?.hidden || isHidden || hidden;
   
   // استخدم الخصائص المستقلة إذا تم تمريرها، وإلا استخدم الخصائص من كائن card
   const effectiveSuit = suit || (card ? card.suit : undefined);

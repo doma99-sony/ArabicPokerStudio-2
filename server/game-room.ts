@@ -503,8 +503,8 @@ export function createGameRoom(table: GameTable): GameRoom {
     // أولاً توزيع البطاقة الأولى لكل لاعب
     for (const player of orderedPlayers) {
       const firstCard = dealCardsToPlayer(round.deck, 1)[0];
-      // البطاقة الأولى مكشوفة للاعب نفسه فقط
-      player.cards = [{...firstCard, hidden: player.id !== round.currentTurn}];
+      // تهيئة كروت اللاعب، سيتم إظهارها أو إخفاؤها في getGameStateForPlayer
+      player.cards = [{...firstCard, hidden: false}];
       console.log(`تم توزيع البطاقة الأولى للاعب ${player.username}`);
       
       // مسح الكاش لتحديث حالة اللعبة في الإطار التالي
@@ -514,8 +514,8 @@ export function createGameRoom(table: GameTable): GameRoom {
     // ثم توزيع البطاقة الثانية لكل لاعب
     for (const player of orderedPlayers) {
       const secondCard = dealCardsToPlayer(round.deck, 1)[0];
-      // البطاقة الثانية مكشوفة للاعب نفسه فقط
-      player.cards.push({...secondCard, hidden: player.id !== round.currentTurn});
+      // إضافة البطاقة الثانية
+      player.cards.push({...secondCard, hidden: false});
       console.log(`تم توزيع البطاقة الثانية للاعب ${player.username}`);
       
       // مسح الكاش لتحديث حالة اللعبة في الإطار التالي
