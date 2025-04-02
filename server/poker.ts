@@ -169,9 +169,9 @@ export function setupPokerGame(app: Express, httpServer: Server) {
   }, PING_INTERVAL);
 
   // إرسال رسالة لجميع المستخدمين في طاولة معينة باستثناء المرسل
-  function broadcastToTable(tableId: number, message: any, excludeUserId?: number) {
-    // التحقق من صحة معرف الطاولة قبل المتابعة - لم نعد نقبل قيم undefined
-    if (typeof tableId !== 'number' || isNaN(tableId)) {
+  function broadcastToTable(tableId: number | undefined, message: any, excludeUserId?: number) {
+    // التحقق من صحة معرف الطاولة قبل المتابعة - التعامل مع قيم undefined
+    if (tableId === undefined || typeof tableId !== 'number' || isNaN(tableId)) {
       console.warn("محاولة بث رسالة لطاولة غير صالحة:", tableId, message);
       return;
     }
@@ -200,11 +200,11 @@ export function setupPokerGame(app: Express, httpServer: Server) {
   pokerModule.clients = clients;
   
   // الحصول على جميع اللاعبين في طاولة معينة
-  function getPlayersAtTable(tableId: number): number[] {
+  function getPlayersAtTable(tableId: number | undefined): number[] {
     const players: number[] = [];
     
     // التحقق من صحة معرف الطاولة
-    if (typeof tableId !== 'number' || isNaN(tableId)) {
+    if (tableId === undefined || typeof tableId !== 'number' || isNaN(tableId)) {
       return players;
     }
     
@@ -564,11 +564,11 @@ export function setupPokerGame(app: Express, httpServer: Server) {
             // للانقطاعات غير المتعمدة، ننتظر قليلاً قبل الإبلاغ
             // للسماح بإعادة الاتصال السريع بدون إزعاج اللاعبين الآخرين
             setTimeout(() => {
-              // التحقق مما إذا كان المستخدم قد أعاد الاتصال بالفعل وأن معرف الطاولة غير فارغ
-              if (!clients.has(userId) && userTables.has(userId) && tableId !== undefined) {
-                // تحويل tableId إلى رقم للتأكد
-                const safeTableId = Number(tableId);
-                if (!isNaN(safeTableId)) {
+              // التحقق مما إذا كان المستخدم قد أعاد الاتصال بالفعل وأن معرف الطاولة موجود
+              if (!clients.has(userId) && userTables.has(userId)) {
+                // الحصول على معرف الطاولة من خريطة userTables بدلاً من استخدام tableId غير المؤكد
+                const safeTableId = userTables.get(userId);
+                if (safeTableId !== undefined && !isNaN(safeTableId)) {
                   broadcastToTable(safeTableId, {
                     type: "player_disconnected",
                     userId: userId,
@@ -582,11 +582,11 @@ export function setupPokerGame(app: Express, httpServer: Server) {
             
             // نؤجل حذف المستخدم من قائمة العملاء للسماح بإعادة الاتصال السريع
             setTimeout(() => {
-              // التحقق مما إذا كان المستخدم لم يعد متصلاً بعد وأن معرف الطاولة صالح
-              if (!clients.has(userId) && tableId !== undefined) {
-                // تحويل tableId إلى رقم للتأكد
-                const safeTableId = Number(tableId);
-                if (!isNaN(safeTableId)) {
+              // التحقق مما إذا كان المستخدم لم يعد متصلاً بعد وموجود في خريطة الطاولات
+              if (!clients.has(userId) && userTables.has(userId)) {
+                // الحصول على معرف الطاولة من خريطة userTables بدلاً من استخدام tableId غير المؤكد
+                const safeTableId = userTables.get(userId);
+                if (safeTableId !== undefined && !isNaN(safeTableId)) {
                   // إذا تجاوزت المهلة ولم يعد المستخدم، نحذف من قائمة الطاولات
                   // ونبلغ اللاعبين الآخرين بالخروج الكامل
                   broadcastToTable(safeTableId, {
@@ -597,9 +597,7 @@ export function setupPokerGame(app: Express, httpServer: Server) {
                   }, userId);
                   
                   // حذف بيانات اللاعب من الطاولة بعد فترة الانتظار
-                  if (userTables.has(userId)) {
-                    userTables.delete(userId);
-                  }
+                  userTables.delete(userId);
                 }
               }
             }, 30000); // انتظار 30 ثانية قبل اعتبار الانقطاع دائماً

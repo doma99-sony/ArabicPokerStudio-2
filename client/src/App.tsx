@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 import AuthPage from "@/pages/auth-page";
@@ -21,6 +21,7 @@ import SettingsPage from "@/pages/settings-page";
 import HowToPlayPage from "@/pages/how-to-play-page";
 import { ProtectedRoute } from "./lib/protected-route";
 import { useAuth } from "@/hooks/use-auth";
+import { useWebSocket } from "@/hooks/use-websocket";
 import { Loader2 } from "lucide-react";
 import { WelcomeMessageNotification } from "@/components/ui/welcome-message";
 import { LandscapeNotice } from "@/components/ui/landscape-notice";
@@ -28,7 +29,60 @@ import { NotificationsProvider } from "@/components/ui/notifications-system";
 import { HomeRedirect } from "@/components/navigation/home-redirect";
 import { initializePerformanceOptimizations } from "@/lib/performance-utils";
 import { SplashScreen } from "@/components/ui/splash-screen";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+
+// مكون للحفاظ على اتصال WebSocket مستمر بين الصفحات
+function PersistentConnectionManager() {
+  const { user } = useAuth();
+  const ws = useWebSocket();
+  const [location] = useLocation();
+  const locationRef = useRef(location);
+  const hasConnectedRef = useRef(false);
+
+  // تتبع التغييرات في المسار
+  useEffect(() => {
+    locationRef.current = location;
+  }, [location]);
+
+  // مدير الاتصال المستمر
+  useEffect(() => {
+    if (!user) return;
+
+    // إذا لم نكن قد اتصلنا بعد أو كان الاتصال مغلقًا، قم بالاتصال
+    if (!hasConnectedRef.current || ws.status === 'closed') {
+      console.log("إنشاء اتصال WebSocket عالمي مستمر");
+      ws.connect();
+      hasConnectedRef.current = true;
+    }
+
+    // لا نقوم بالفصل عند إعادة تحميل المكون - نريد أن يستمر الاتصال عند التنقل
+    return () => {
+      // لا نقوم بفصل الاتصال عند التنقل بين الصفحات
+      console.log("المحافظة على اتصال WebSocket خلال التنقل بين الصفحات");
+    };
+  }, [user, ws]);
+
+  // إعادة الاتصال إذا تم فقد الاتصال
+  useEffect(() => {
+    if (ws.status === 'closed' && user && hasConnectedRef.current) {
+      console.log("إعادة الاتصال بعد فقدان الاتصال");
+      ws.connect();
+    }
+  }, [ws.status, user, ws]);
+
+  // استخدام اتصال ثابت للتشخيص
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (ws.status === 'open' && user) {
+        console.log(`اتصال WebSocket مستمر نشط (${ws.isGlobalConnection ? 'عالمي' : 'محلي'}) - عدد المراجع: ${ws.globalConnectionRefs}`);
+      }
+    }, 30000); // كل 30 ثانية
+
+    return () => clearInterval(interval);
+  }, [ws, user]);
+
+  return null; // هذا مكون وظيفي - لا يعرض أي عناصر
+}
 
 function Router() {
   return (
@@ -139,6 +193,8 @@ function App() {
   
   return (
     <NotificationsProvider>
+      {/* مدير الاتصال العالمي للحفاظ على استمرارية الاتصال خلال التنقل بين الصفحات */}
+      {user && <PersistentConnectionManager />}
       <Router />
       <WelcomeMessageNotification />
       <LandscapeNotice />

@@ -4,17 +4,39 @@ import { useToast } from "./use-toast";
 
 type WebSocketStatus = "connecting" | "open" | "closed" | "error";
 
-// إعدادات إعادة الاتصال المتكيفة المعززة - حل نهائي لمشكلة انقطاع الاتصال
-const RECONNECT_MAX_RETRIES = Infinity; // عدد غير محدود من المحاولات لاستمرارية الاتصال
-const RECONNECT_BASE_DELAY = 100; // تأخير أساسي أقل (100 مللي ثانية) للاستجابة الأسرع
-const RECONNECT_MAX_DELAY = 3000; // تقليل الحد الأقصى للتأخير (3 ثوانٍ) للاستجابة السريعة
-const PING_INTERVAL = 2000; // تقليل فاصل الـ ping (2 ثوانٍ) للكشف الفوري عن انقطاع الاتصال
-const PING_TIMEOUT = 5000; // الوقت المسموح لانتظار رد ping قبل اعتبار الاتصال مقطوعاً
-const BACKOFF_RESET_TIMEOUT = 10000; // تقليل وقت إعادة ضبط معامل التأخير لاستجابة أسرع
-const CONNECTION_QUALITY_WINDOW = 30000; // نافذة قياس جودة الاتصال (30 ثانية - أكثر دقة للحالة الحالية)
-const NETWORK_QUALITY_THRESHOLD = 0.7; // تعديل عتبة جودة الاتصال إلى 70%
-const PENDING_MESSAGES_CACHE_SIZE = 50; // عدد الرسائل التي يمكن تخزينها مؤقتاً أثناء الانقطاع
+// نظام إدارة WebSocket عالمي - يحافظ على الاتصال بين الصفحات
+// تعريف متغير عالمي لحفظ حالة الاتصال WebSocket عبر التنقلات بين الصفحات
+let globalWebSocket: {
+  socket: WebSocket | null;
+  reference: number; 
+  handlers: Map<string, (data: any) => void>;
+  lastPingTime: number;
+  sessionId: string;
+  reconnectAttempt: number;
+  isConnecting: boolean;
+} = {
+  socket: null,
+  reference: 0, // عدد المراجع النشطة
+  handlers: new Map(),
+  lastPingTime: 0,
+  sessionId: '',
+  reconnectAttempt: 0,
+  isConnecting: false
+};
+
+// إعدادات إعادة الاتصال المتكيفة المحسنة - النسخة النهائية لحل مشكلة انقطاع الاتصال
+const RECONNECT_MAX_RETRIES = Infinity; // عدد غير محدود من المحاولات لضمان استمرارية الاتصال
+const RECONNECT_BASE_DELAY = 20; // تقليل التأخير الأساسي لاستجابة أسرع (20 مللي ثانية)
+const RECONNECT_MAX_DELAY = 1000; // تقليل الحد الأقصى للتأخير إلى ثانية واحدة فقط
+const PING_INTERVAL = 1000; // تقليل فاصل الـ ping إلى 1 ثانية للكشف السريع
+const PING_TIMEOUT = 3000; // تقليل مهلة الانتظار إلى 3 ثوان
+const BACKOFF_RESET_TIMEOUT = 3000; // تقليل وقت إعادة ضبط معامل التأخير إلى 3 ثوان فقط
+const CONNECTION_QUALITY_WINDOW = 5000; // تقليل نافذة قياس جودة الاتصال لاستجابة أسرع للظروف الحالية
+const NETWORK_QUALITY_THRESHOLD = 0.4; // تخفيض عتبة جودة الاتصال لتعديل استراتيجية إعادة الاتصال
+const PENDING_MESSAGES_CACHE_SIZE = 200; // زيادة حجم التخزين المؤقت للرسائل أثناء الانقطاع
 const AUTO_RECONNECT_ON_UNMOUNT = true; // إعادة الاتصال تلقائياً عند إعادة تحميل الصفحة
+const MAX_MISSED_PINGS = 2; // تقليل عدد الـ pings المفقودة
+const KEEP_SOCKET_ALIVE = true; // الاحتفاظ بالاتصال WebSocket حياً حتى عند التنقل بين الصفحات
 const CONNECTION_STATE_STORAGE_KEY = 'websocket_connection_state'; // مفتاح تخزين حالة الاتصال
 
 // اسم التخزين المحلي لتتبع معرف الجلسة
@@ -145,15 +167,28 @@ export function useWebSocket() {
     }, BACKOFF_RESET_TIMEOUT);
   }, []);
 
-  // دالة إنشاء اتصال WebSocket محسنة
+  // دالة إنشاء اتصال WebSocket محسنة مع دعم الـ WebSocket العالمي
   const createWebSocketConnection = useCallback(() => {
     if (!user) return null;
+    
+    // تحقق أولاً إذا كان هناك اتصال عالمي متاح
+    if (KEEP_SOCKET_ALIVE && globalWebSocket.socket && globalWebSocket.socket.readyState === WebSocket.OPEN) {
+      console.log("استخدام اتصال WebSocket العالمي الموجود");
+      
+      // زيادة عدد المراجع للاتصال العالمي
+      globalWebSocket.reference++;
+      
+      // استخدام الاتصال العالمي المفتوح
+      return globalWebSocket.socket;
+    }
+    
+    // إعداد معرف الجلسة
+    const sessionId = sessionIdRef.current;
+    const userId = user.id.toString();
     
     // بناء رابط الاتصال مع معلومات إضافية للتتبع
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const host = window.location.host;
-    const sessionId = sessionIdRef.current;
-    const userId = user.id.toString();
     
     // إضافة معلومات كاستعلام للمساعدة في تتبع الاتصال على جانب الخادم
     const wsUrl = `${protocol}//${host}/ws?sid=${sessionId}&uid=${userId}&ts=${Date.now()}`;
@@ -161,14 +196,45 @@ export function useWebSocket() {
     console.log(`إنشاء اتصال WebSocket جديد: ${wsUrl}`);
     
     try {
+      // إنشاء اتصال WebSocket جديد
       const socket = new WebSocket(wsUrl);
       
       // تحديد مهلة زمنية أطول للاتصال (30 ثانية بدلاً من القيمة الافتراضية)
       socket.binaryType = 'arraybuffer'; // لتحسين الأداء
       
+      // حفظ الاتصال في النظام العالمي عند استخدام KEEP_SOCKET_ALIVE
+      if (KEEP_SOCKET_ALIVE) {
+        // إذا كان هناك اتصال قديم، نغلقه أولاً
+        if (globalWebSocket.socket) {
+          try {
+            globalWebSocket.socket.close(1000, "New connection established");
+          } catch (e) {
+            // تجاهل الأخطاء
+          }
+        }
+        
+        // حفظ الاتصال الجديد كاتصال عالمي
+        globalWebSocket.socket = socket;
+        globalWebSocket.reference = 1;
+        globalWebSocket.sessionId = sessionId;
+        globalWebSocket.lastPingTime = Date.now();
+        globalWebSocket.reconnectAttempt = reconnectAttemptRef.current;
+        globalWebSocket.isConnecting = true;
+        
+        // نسخ المعالجات الحالية إلى المعالجات العالمية
+        messageHandlersRef.current.forEach((handler, type) => {
+          globalWebSocket.handlers.set(type, handler);
+        });
+      }
+      
       return socket;
     } catch (error) {
       console.error("خطأ في إنشاء اتصال WebSocket:", error);
+      
+      if (KEEP_SOCKET_ALIVE) {
+        globalWebSocket.isConnecting = false;
+      }
+      
       return null;
     }
   }, [user]);
@@ -569,6 +635,42 @@ export function useWebSocket() {
   }, [reconnect, reconnectImpl]);
 
   // إعداد اتصال الـ WebSocket الأساسي - محسن
+  // دالة جديدة للاتصال بـ WebSocket باستخدام النظام العالمي
+  const connect = useCallback(() => {
+    // التحقق من صحة المستخدم
+    if (!user) {
+      return;
+    }
+    
+    // استخدام الاتصال العالمي إذا كان موجوداً ومفتوحاً (حل مشكلة فقدان الاتصال عند التنقل)
+    if (KEEP_SOCKET_ALIVE && globalWebSocket.socket && globalWebSocket.socket.readyState === WebSocket.OPEN) {
+      console.log("استخدام اتصال WebSocket العالمي الموجود");
+      
+      // استخدام الاتصال الموجود
+      socketRef.current = globalWebSocket.socket;
+      setStatus("open");
+      
+      // زيادة عدد المراجع للاتصال العالمي
+      globalWebSocket.reference++;
+      
+      // تحديث معرف الجلسة
+      globalWebSocket.sessionId = sessionIdRef.current;
+      
+      // تحديث معالجات الرسائل
+      setupSocketHandlers(socketRef.current);
+      
+      // نسخ المعالجات الحالية إلى المعالجات العالمية للمشاركة بين جميع المستخدمين
+      messageHandlersRef.current.forEach((handler, type) => {
+        globalWebSocket.handlers.set(type, handler);
+      });
+      
+      return;
+    }
+    
+    // تنظيف أي اتصال أو مؤقت سابق
+    clearAllTimers();
+  }, [user, setupSocketHandlers, clearAllTimers]);
+  
   useEffect(() => {
     // لا نحاول الاتصال إذا لم يكن هناك مستخدم مسجل دخوله
     if (!user) return;
@@ -834,6 +936,60 @@ export function useWebSocket() {
     });
   }, [sendMessage]);
 
+  // دالة لقطع الاتصال والتنظيف مع مراعاة الاتصال العالمي
+  const disconnect = useCallback(() => {
+    // عند استخدام الاتصال العالمي، نقلل عدد المراجع فقط
+    if (KEEP_SOCKET_ALIVE && globalWebSocket.socket && globalWebSocket.reference > 0) {
+      console.log("تقليل عدد مراجع الاتصال العالمي");
+      globalWebSocket.reference--;
+      
+      // إذا لم يعد هناك مراجع، نترك الاتصال مفتوحاً لكن نصنف الجلسة كغير نشطة
+      // سيتم تنظيفها من جانب الخادم
+      if (globalWebSocket.reference === 0) {
+        console.log("لم يعد هناك مستخدمين للاتصال العالمي، لكن نحتفظ به مفتوحاً للاستخدام اللاحق");
+        
+        // إرسال رسالة للخادم تفيد بتصنيف هذا الاتصال كغير نشط مؤقتاً
+        try {
+          if (globalWebSocket.socket && globalWebSocket.socket.readyState === WebSocket.OPEN) {
+            globalWebSocket.socket.send(JSON.stringify({
+              type: "client_inactive",
+              sessionId: globalWebSocket.sessionId,
+              timestamp: Date.now()
+            }));
+          }
+        } catch (e) {
+          // تجاهل الأخطاء
+        }
+      }
+      
+      // إلغاء المرجع المحلي بدون إغلاق الاتصال العالمي
+      socketRef.current = null;
+      setStatus("closed");
+      clearAllTimers();
+      
+      return;
+    }
+    
+    // في حالة عدم استخدام الاتصال العالمي، نغلق الاتصال تماماً
+    clearAllTimers();
+    
+    if (socketRef.current) {
+      // إعلام onclose بأن هذا إغلاق متعمد
+      isManualCloseRef.current = true;
+      
+      try {
+        if (socketRef.current.readyState === WebSocket.OPEN) {
+          socketRef.current.close(1000, "Manual disconnect");
+        }
+      } catch (err) {
+        // تجاهل الأخطاء
+      }
+      
+      socketRef.current = null;
+      setStatus("closed");
+    }
+  }, [clearAllTimers]);
+
   // إضافة تحديث محلي للاتصال عند استعادة الاتصال
   useEffect(() => {
     // تنفيذ العمليات المطلوبة عند استعادة الاتصال
@@ -880,9 +1036,14 @@ export function useWebSocket() {
     joinTable,
     leaveTable,
     performGameAction,
+    connect,
+    disconnect,
     // إتاحة دوال إضافية متقدمة للاستخدام في الحالات الخاصة
     reconnect,
     processPendingMessages,
-    connectionQuality: connectionStateRef.current.lastNetworkQuality
+    connectionQuality: connectionStateRef.current.lastNetworkQuality,
+    // معلومات متقدمة عن الاتصال
+    isGlobalConnection: KEEP_SOCKET_ALIVE && socketRef.current === globalWebSocket.socket,
+    globalConnectionRefs: KEEP_SOCKET_ALIVE ? globalWebSocket.reference : 0
   };
 }
