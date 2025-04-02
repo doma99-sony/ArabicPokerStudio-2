@@ -669,7 +669,16 @@ export function useWebSocket() {
     
     // تنظيف أي اتصال أو مؤقت سابق
     clearAllTimers();
-  }, [user, setupSocketHandlers, clearAllTimers]);
+    
+    // إذا لم يكن هناك اتصال عالمي، إنشاء اتصال جديد
+    console.log("إنشاء اتصال جديد حيث لا يوجد اتصال عالمي متاح");
+    const socket = createWebSocketConnection();
+    if (socket) {
+      socketRef.current = socket;
+      setupSocketHandlers(socket);
+      setStatus("connecting");
+    }
+  }, [user, setupSocketHandlers, clearAllTimers, createWebSocketConnection]);
   
   useEffect(() => {
     // لا نحاول الاتصال إذا لم يكن هناك مستخدم مسجل دخوله
