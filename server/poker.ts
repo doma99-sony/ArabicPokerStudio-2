@@ -278,8 +278,8 @@ export function setupPokerGame(app: Express, httpServer: Server) {
           
           // بث عدد المستخدمين المتصلين بعد تسجيل الدخول
           broadcastOnlineUsers();
-        } else if (data.type === "chat_message") {
-          // معالجة رسائل الدردشة
+        } else if (data.type === "chat_message" || data.type === "table_chat_message") {
+          // معالجة رسائل الدردشة (العامة أو دردشة الطاولة)
           const messageId = data.id || `msg_${Date.now()}`;
           
           let username = data.username;
@@ -301,21 +301,29 @@ export function setupPokerGame(app: Express, httpServer: Server) {
           
           if (username && data.message && data.message.trim().length > 0) {
             const chatMessage = {
-              type: "chat_message",
+              type: data.type, // استخدم نوع الرسالة الذي تم استلامه
               id: messageId,
               username: username,
               message: data.message.trim(),
               avatar: avatar,
-              timestamp: timestamp
+              timestamp: timestamp,
+              tableId: data.tableId // معرف الطاولة للرسائل الخاصة بالطاولة
             };
             
-            console.log(`رسالة جديدة من ${username}: ${data.message.substring(0, 30)}${data.message.length > 30 ? '...' : ''}`);
+            const messageType = data.type === "table_chat_message" ? "دردشة الطاولة" : "الدردشة العامة";
+            console.log(`رسالة جديدة في ${messageType} من ${username}: ${data.message.substring(0, 30)}${data.message.length > 30 ? '...' : ''}`);
             
             if (!data.clientHandled) {
               ws.send(JSON.stringify(chatMessage));
             }
             
-            broadcast(chatMessage, userId);
+            // إذا كانت رسالة خاصة بالطاولة، قم بإرسالها فقط للاعبين في نفس الطاولة
+            if (data.type === "table_chat_message" && data.tableId) {
+              broadcastToTable(data.tableId, chatMessage, userId);
+            } else {
+              // وإلا، أرسلها لجميع المستخدمين (الدردشة العامة)
+              broadcast(chatMessage, userId);
+            }
           } else {
             ws.send(JSON.stringify({ 
               type: "error", 

@@ -12,6 +12,7 @@ import { SpectatorBar } from "@/components/game/spectator-bar";
 import { GameActions } from "@/components/game/game-actions";
 import { CommunityCards } from "@/components/game/community-cards";
 import { PlayerNotifications } from "@/components/game/player-notification";
+import { TableChat } from "@/components/game/table-chat";
 import { useToast } from "@/hooks/use-toast";
 
 export default function GamePage({ params }: { params?: { tableId?: string } }) {
@@ -498,6 +499,9 @@ export default function GamePage({ params }: { params?: { tableId?: string } }) 
           />
         )}
       </div>
+
+      {/* دردشة الطاولة */}
+      {tableId && <TableChat tableId={Number(tableId)} />}
 
       {/* شريط الأدوات السفلي */}
       <GameControls 

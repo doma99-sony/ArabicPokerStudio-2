@@ -190,16 +190,17 @@ export function useWebSocket() {
         return; // تم استلام pong بنجاح
       }
       
-      // البحث عن معالج للنوع
+      // البحث عن معالج للنوع - نستخدم فقط معالج واحد لمنع ازدواجية المعالجة
+      // إذا كان هناك معالج محلي نستخدمه، وإلا نبحث عن معالج عالمي
       const handler = messageHandlersRef.current.get(data.type);
       if (handler) {
         handler(data);
-      }
-      
-      // البحث في المعالجات العالمية
-      const globalHandler = globalStore.messageHandlers.get(data.type);
-      if (globalHandler) {
-        globalHandler(data);
+      } else {
+        // البحث في المعالجات العالمية فقط إذا لم يكن هناك معالج محلي
+        const globalHandler = globalStore.messageHandlers.get(data.type);
+        if (globalHandler) {
+          globalHandler(data);
+        }
       }
       
     } catch (err) {
@@ -230,14 +231,25 @@ export function useWebSocket() {
     }
   }, []);
   
-  // تسجيل معالج رسائل
+  // تسجيل معالج رسائل - تم إصلاحه لمنع الازدواجية
   const registerMessageHandler = useCallback((type: string, handler: (data: any) => void) => {
+    // نضيف المعالج محلياً فقط إذا كان المكون الحالي نشطاً
     messageHandlersRef.current.set(type, handler);
-    globalStore.messageHandlers.set(type, handler);
+    
+    // إذا لم يكن هناك معالج عالمي لهذا النوع، نضيفه
+    // هذا يمنع الازدواجية في معالجة الرسائل
+    if (!globalStore.messageHandlers.has(type)) {
+      globalStore.messageHandlers.set(type, handler);
+    }
     
     return () => {
+      // إزالة المعالج المحلي
       messageHandlersRef.current.delete(type);
-      globalStore.messageHandlers.delete(type);
+      
+      // إزالة المعالج العالمي فقط إذا كان هو نفس المعالج المحلي
+      if (globalStore.messageHandlers.get(type) === handler) {
+        globalStore.messageHandlers.delete(type);
+      }
     };
   }, []);
   
