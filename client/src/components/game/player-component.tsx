@@ -4,19 +4,38 @@ import { CardComponent } from "./card-component";
 import { PlayerCards } from "./playing-card";
 import { formatChips } from "@/lib/utils";
 import { useState, useEffect } from "react";
-import { Clock } from "lucide-react";
+import { Clock, Check, ArrowLeftRight, TrendingUp, X } from "lucide-react";
 
 interface PlayerComponentProps {
   player: PlayerPosition;
   isTurn: boolean;
   gameStatus?: string; // معلومات حالة اللعبة
+  lastAction?: { // إضافة معلومات آخر حركة قام بها اللاعب
+    playerId: number;
+    action: string;
+    amount?: number;
+  };
+  showActionBadge?: boolean; // متغير للتحكم في إظهار شارة الإجراء
 }
 
-export function PlayerComponent({ player, isTurn, gameStatus = "" }: PlayerComponentProps) {
+export function PlayerComponent({ player, isTurn, gameStatus = "", lastAction, showActionBadge = true }: PlayerComponentProps) {
   // حالات لتتبع تأثيرات المرئية المختلفة
   const [turnTimeLeft, setTurnTimeLeft] = useState<number>(12);
   const [isNewPlayer, setIsNewPlayer] = useState<boolean>(false);
   const [isCardAnimating, setIsCardAnimating] = useState<boolean>(false);
+  const [showActionBadgeLocal, setShowActionBadgeLocal] = useState<boolean>(false);
+  
+  // تأثير لإظهار شارة الإجراء الأخير ثم إخفائها بعد فترة
+  useEffect(() => {
+    if (lastAction && lastAction.playerId === player.id && showActionBadge) {
+      setShowActionBadgeLocal(true);
+      const timer = setTimeout(() => {
+        setShowActionBadgeLocal(false);
+      }, 3000); // إظهار لمدة 3 ثواني
+      
+      return () => clearTimeout(timer);
+    }
+  }, [lastAction, player.id, showActionBadge]);
   
   // تأثير عند انضمام لاعب جديد لإظهار تأثير الانضمام
   useEffect(() => {
@@ -147,6 +166,36 @@ export function PlayerComponent({ player, isTurn, gameStatus = "" }: PlayerCompo
         {player.folded && (
           <div className="mb-1.5 bg-red-600/80 rounded-full px-3 py-1 text-white text-sm font-bold shadow-lg animate-bounce">
             تخلى
+          </div>
+        )}
+        
+        {/* إشارة إلى آخر إجراء قام به اللاعب */}
+        {showActionBadgeLocal && lastAction && lastAction.playerId === player.id && (
+          <div 
+            className={`
+              mb-1.5 rounded-full px-3 py-1 text-white text-sm font-bold shadow-lg animate-fadeIn
+              ${lastAction.action === 'fold' ? 'bg-red-600/80' : 
+                lastAction.action === 'check' ? 'bg-blue-600/80' :
+                lastAction.action === 'call' ? 'bg-green-600/80' :
+                lastAction.action === 'raise' ? 'bg-amber-600/80' :
+                'bg-purple-600/80'}
+            `}
+          >
+            {/* آيقونة مناسبة لنوع الإجراء */}
+            <div className="flex items-center gap-1">
+              {lastAction.action === 'fold' && <X className="w-4 h-4" />}
+              {lastAction.action === 'check' && <Check className="w-4 h-4" />}
+              {lastAction.action === 'call' && <ArrowLeftRight className="w-4 h-4" />}
+              {lastAction.action === 'raise' && <TrendingUp className="w-4 h-4" />}
+              
+              <span>
+                {lastAction.action === 'fold' ? 'تخلى' :
+                  lastAction.action === 'check' ? 'متابعة' :
+                  lastAction.action === 'call' ? 'مجاراة' :
+                  lastAction.action === 'raise' ? `رفع (${lastAction.amount})` :
+                  lastAction.action === 'all_in' ? 'كل الرقائق' : 'إجراء'}
+              </span>
+            </div>
           </div>
         )}
       </div>

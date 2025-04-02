@@ -27,6 +27,16 @@ export function PokerTable({ gameState }: PokerTableProps) {
   const [isSpectator, setIsSpectator] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
   
+  // تتبع آخر إجراء قام به اللاعبون
+  const [lastAction, setLastAction] = useState<{
+    playerId: number;
+    action: string;
+    amount?: number;
+  } | undefined>();
+  
+  // متغير لعرض/إخفاء شارة الإجراء
+  const [showActionBadge, setShowActionBadge] = useState(true);
+  
   // Positions for players based on their slot - updated for 9-seat oval table layout
   const playerPositions = [
     "bottom", // current user (0) - دائما في الوسط أسفل
@@ -367,6 +377,8 @@ export function PokerTable({ gameState }: PokerTableProps) {
             player={player} 
             isTurn={gameState.currentTurn === player.id}
             gameStatus={gameState.gameStatus} // إضافة حالة اللعبة لعرض الأوراق بشكل صحيح
+            lastAction={lastAction} // إضافة معلومات آخر إجراء
+            showActionBadge={showActionBadge} // متغير لإظهار/إخفاء شارة الإجراء
           />
         ))}
         
@@ -399,6 +411,23 @@ export function PokerTable({ gameState }: PokerTableProps) {
               onAction={(action, amount) => {
                 // إرسال طلب إجراء اللعب إلى الخادم
                 console.log(`Sending action ${action} with amount ${amount}`);
+                
+                // تعيين معلومات آخر إجراء قام به اللاعب الحالي
+                const currentPlayer = positionedPlayers.find(p => p.isCurrentPlayer);
+                if (currentPlayer) {
+                  setLastAction({
+                    playerId: currentPlayer.id,
+                    action,
+                    amount
+                  });
+                  
+                  // تشغيل مؤقت لإخفاء شارة الإجراء بعد 4 ثواني
+                  setTimeout(() => {
+                    setShowActionBadge(false);
+                    // إعادة تفعيل عرض الشارة بعد 500 مللي ثانية للإجراء التالي
+                    setTimeout(() => setShowActionBadge(true), 500);
+                  }, 4000);
+                }
                 
                 // يمكن إضافة الكود هنا لإرسال طلب إلى نقطة نهاية API
                 fetch(`/api/game/${gameState.id || gameState.gameId}/action`, {
