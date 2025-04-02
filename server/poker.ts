@@ -101,9 +101,10 @@ export function setupPokerGame(app: Express, httpServer: Server) {
     broadcast(message);
   };
   
-  // تقليل فاصل الـ ping للحفاظ على الاتصال حياً
-  const PING_INTERVAL = 10000; // 10 ثوانٍ
-  const HEARTBEAT_TIMEOUT = 30000; // 30 ثانية قبل اعتبار الاتصال مقطوعاً
+  // تعديل فاصل الـ ping للحفاظ على الاتصال حياً - مرة كل 5 ثوانٍ
+  const PING_INTERVAL = 5000; // 5 ثوانٍ
+  const HEARTBEAT_TIMEOUT = 15000; // 15 ثانية فقط قبل اعتبار الاتصال مقطوعاً
+  const CONNECTION_RETRY_WINDOW = 2 * 60 * 1000; // نافذة 2 دقيقة لمحاولة إعادة الاتصال التلقائي
   
   // تحديث عدد المستخدمين المتصلين كل 5 ثوانٍ
   const UPDATE_INTERVAL = 5000;
@@ -169,11 +170,18 @@ export function setupPokerGame(app: Express, httpServer: Server) {
 
   // إرسال رسالة لجميع المستخدمين في طاولة معينة باستثناء المرسل
   function broadcastToTable(tableId: number, message: any, excludeUserId?: number) {
+    // التحقق من صحة معرف الطاولة قبل المتابعة - لم نعد نقبل قيم undefined
+    if (typeof tableId !== 'number' || isNaN(tableId)) {
+      console.warn("محاولة بث رسالة لطاولة غير صالحة:", tableId, message);
+      return;
+    }
+    
+    // إذا وصلنا إلى هنا، فإن معرف الطاولة صالح
     const players = getPlayersAtTable(tableId);
     const serializedMessage = JSON.stringify(message);
     
     for (const playerId of players) {
-      if (excludeUserId && playerId === excludeUserId) continue;
+      if (excludeUserId !== undefined && playerId === excludeUserId) continue;
       
       const clientInfo = clients.get(playerId);
       if (clientInfo && clientInfo.ws.readyState === WebSocket.OPEN) {
@@ -195,6 +203,12 @@ export function setupPokerGame(app: Express, httpServer: Server) {
   function getPlayersAtTable(tableId: number): number[] {
     const players: number[] = [];
     
+    // التحقق من صحة معرف الطاولة
+    if (typeof tableId !== 'number' || isNaN(tableId)) {
+      return players;
+    }
+    
+    // الحصول على جميع اللاعبين في الطاولة المحددة
     userTables.forEach((userTableId, userId) => {
       if (userTableId === tableId) {
         players.push(userId);
@@ -402,12 +416,16 @@ export function setupPokerGame(app: Express, httpServer: Server) {
             }
           }
           
-          // Notify other players at the table
-          broadcastToTable(tableId, {
-            type: "player_joined",
-            userId: userId,
-            tableId: tableId
-          }, userId);
+          // تحويل tableId إلى رقم للتأكد
+          const safeTableId = Number(tableId);
+          if (!isNaN(safeTableId)) {
+            // Notify other players at the table
+            broadcastToTable(safeTableId, {
+              type: "player_joined",
+              userId: userId,
+              tableId: safeTableId
+            }, userId);
+          }
           
           // Send initial game state
           const gameState = await storage.getGameState(tableId, userId);
@@ -434,12 +452,16 @@ export function setupPokerGame(app: Express, httpServer: Server) {
               }
             }
             
-            // Notify other players at the table
-            broadcastToTable(tableId, {
-              type: "player_left",
-              userId: userId,
-              tableId: tableId
-            }, userId);
+            // تحويل tableId إلى رقم للتأكد
+            const safeLeaveTableId = Number(tableId);
+            if (!isNaN(safeLeaveTableId)) {
+              // Notify other players at the table
+              broadcastToTable(safeLeaveTableId, {
+                type: "player_left",
+                userId: userId,
+                tableId: safeLeaveTableId
+              }, userId);
+            }
           }
         } else if (data.type === "game_action") {
           // User making a game action
@@ -471,18 +493,22 @@ export function setupPokerGame(app: Express, httpServer: Server) {
           }
           
           // إرسال حالة اللعبة المحدثة لجميع اللاعبين في الطاولة
-          const players = getPlayersAtTable(tableId);
-          for (const playerId of players) {
-            const clientInfo = clients.get(playerId);
-            if (clientInfo && clientInfo.ws.readyState === WebSocket.OPEN) {
-              try {
-                const gameState = await storage.getGameState(tableId, playerId);
-                clientInfo.ws.send(JSON.stringify({ 
-                  type: "game_state", 
-                  gameState 
-                }));
-              } catch (err) {
-                console.error(`خطأ في إرسال حالة اللعبة للمستخدم ${playerId}:`, err);
+          // تحويل tableId إلى رقم للتأكد
+          const safeGameActionTableId = Number(tableId);
+          if (!isNaN(safeGameActionTableId)) {
+            const players = getPlayersAtTable(safeGameActionTableId);
+            for (const playerId of players) {
+              const clientInfo = clients.get(playerId);
+              if (clientInfo && clientInfo.ws.readyState === WebSocket.OPEN) {
+                try {
+                  const gameState = await storage.getGameState(tableId, playerId);
+                  clientInfo.ws.send(JSON.stringify({ 
+                    type: "game_state", 
+                    gameState 
+                  }));
+                } catch (err) {
+                  console.error(`خطأ في إرسال حالة اللعبة للمستخدم ${playerId}:`, err);
+                }
               }
             }
           }
@@ -496,27 +522,91 @@ export function setupPokerGame(app: Express, httpServer: Server) {
       }
     });
     
-    // معالجة إغلاق الاتصال
-    ws.on("close", () => {
+    // معالجة إغلاق الاتصال مع آلية محسنة للتعامل مع حالات انقطاع الاتصال
+    ws.on("close", (code: number, reason: string) => {
+      console.log(`إغلاق اتصال WebSocket للمستخدم ${userId || 'غير معروف'} (كود: ${code}, سبب: ${reason || 'غير محدد'})`);
+      
       if (userId) {
-        clients.delete(userId);
-        
+        const now = Date.now();
         const tableId = userTables.get(userId);
+        
+        // إضافة معلومات عن حالة الاتصال المحتملة
+        const isCleanClose = code === 1000 || code === 1001;
+        
+        // حفظ حالة المستخدم لتسهيل إعادة الاتصال
         if (tableId) {
-          // حفظ معلومات الطاولة الأخيرة للمستخدم قبل الإغلاق (للاسترداد لاحقاً)
           lastKnownUserStates.set(userId, {
             tableId: tableId,
-            lastActivity: Date.now()
+            lastActivity: now
           });
           
-          // لا نحذف المستخدم من userTables حتى يمكن استعادته عند إعادة الاتصال
+          // انتظار فترة قصيرة قبل إعلام اللاعبين الآخرين بقطع الاتصال
+          // للسماح للعميل بإعادة الاتصال بسرعة في حال انقطاع مؤقت
           
-          // Notify other players at the table
-          broadcastToTable(tableId, {
-            type: "player_disconnected",
-            userId: userId,
-            tableId: tableId
-          }, userId);
+          // إذا كان الإغلاق نظيفاً ومتعمداً، نبلغ اللاعبين الآخرين على الفور
+          if (isCleanClose) {
+            if (tableId !== undefined) {
+              // تحويل tableId إلى رقم للتأكد
+              const safeDisconnectTableId = Number(tableId);
+              if (!isNaN(safeDisconnectTableId)) {
+                broadcastToTable(safeDisconnectTableId, {
+                  type: "player_disconnected",
+                  userId: userId,
+                  tableId: safeDisconnectTableId,
+                  isCleanDisconnect: true
+                }, userId);
+              }
+            }
+            
+            // إزالة المستخدم من قائمة العملاء على الفور
+            clients.delete(userId);
+          } else {
+            // للانقطاعات غير المتعمدة، ننتظر قليلاً قبل الإبلاغ
+            // للسماح بإعادة الاتصال السريع بدون إزعاج اللاعبين الآخرين
+            setTimeout(() => {
+              // التحقق مما إذا كان المستخدم قد أعاد الاتصال بالفعل وأن معرف الطاولة غير فارغ
+              if (!clients.has(userId) && userTables.has(userId) && tableId !== undefined) {
+                // تحويل tableId إلى رقم للتأكد
+                const safeTableId = Number(tableId);
+                if (!isNaN(safeTableId)) {
+                  broadcastToTable(safeTableId, {
+                    type: "player_disconnected",
+                    userId: userId,
+                    tableId: safeTableId,
+                    isCleanDisconnect: false,
+                    isTemporary: true
+                  }, userId);
+                }
+              }
+            }, 5000); // انتظار 5 ثوانٍ للسماح بإعادة الاتصال السريع
+            
+            // نؤجل حذف المستخدم من قائمة العملاء للسماح بإعادة الاتصال السريع
+            setTimeout(() => {
+              // التحقق مما إذا كان المستخدم لم يعد متصلاً بعد وأن معرف الطاولة صالح
+              if (!clients.has(userId) && tableId !== undefined) {
+                // تحويل tableId إلى رقم للتأكد
+                const safeTableId = Number(tableId);
+                if (!isNaN(safeTableId)) {
+                  // إذا تجاوزت المهلة ولم يعد المستخدم، نحذف من قائمة الطاولات
+                  // ونبلغ اللاعبين الآخرين بالخروج الكامل
+                  broadcastToTable(safeTableId, {
+                    type: "player_left",
+                    userId: userId,
+                    tableId: safeTableId,
+                    reason: "انقطاع اتصال لفترة طويلة"
+                  }, userId);
+                  
+                  // حذف بيانات اللاعب من الطاولة بعد فترة الانتظار
+                  if (userTables.has(userId)) {
+                    userTables.delete(userId);
+                  }
+                }
+              }
+            }, 30000); // انتظار 30 ثانية قبل اعتبار الانقطاع دائماً
+          }
+        } else {
+          // إذا لم يكن اللاعب في طاولة، يمكننا إزالته على الفور
+          clients.delete(userId);
         }
         
         // تحديث عدد المستخدمين المتصلين بعد قطع الاتصال

@@ -4,14 +4,18 @@ import { useToast } from "./use-toast";
 
 type WebSocketStatus = "connecting" | "open" | "closed" | "error";
 
-// تكوين محسن لإعادة الاتصال بخوارزمية متكيفة
+// إعدادات إعادة الاتصال المتكيفة المعززة - حل نهائي لمشكلة انقطاع الاتصال
 const RECONNECT_MAX_RETRIES = Infinity; // عدد غير محدود من المحاولات لاستمرارية الاتصال
-const RECONNECT_BASE_DELAY = 150; // تأخير أساسي أقل (150 مللي ثانية) للاستجابة الأسرع
-const RECONNECT_MAX_DELAY = 5000; // زيادة الحد الأقصى للتأخير (5 ثوانٍ) لتجنب الضغط على الخادم
-const PING_INTERVAL = 3000; // تقليل فاصل الـ ping (3 ثوانٍ) للكشف السريع عن انقطاع الاتصال
-const BACKOFF_RESET_TIMEOUT = 15000; // تقليل وقت إعادة ضبط معامل التأخير لاستجابة أسرع
-const CONNECTION_QUALITY_WINDOW = 60000; // نافذة قياس جودة الاتصال (60 ثانية)
-const NETWORK_QUALITY_THRESHOLD = 0.8; // عتبة جودة الاتصال (80% نجاح)
+const RECONNECT_BASE_DELAY = 100; // تأخير أساسي أقل (100 مللي ثانية) للاستجابة الأسرع
+const RECONNECT_MAX_DELAY = 3000; // تقليل الحد الأقصى للتأخير (3 ثوانٍ) للاستجابة السريعة
+const PING_INTERVAL = 2000; // تقليل فاصل الـ ping (2 ثوانٍ) للكشف الفوري عن انقطاع الاتصال
+const PING_TIMEOUT = 5000; // الوقت المسموح لانتظار رد ping قبل اعتبار الاتصال مقطوعاً
+const BACKOFF_RESET_TIMEOUT = 10000; // تقليل وقت إعادة ضبط معامل التأخير لاستجابة أسرع
+const CONNECTION_QUALITY_WINDOW = 30000; // نافذة قياس جودة الاتصال (30 ثانية - أكثر دقة للحالة الحالية)
+const NETWORK_QUALITY_THRESHOLD = 0.7; // تعديل عتبة جودة الاتصال إلى 70%
+const PENDING_MESSAGES_CACHE_SIZE = 50; // عدد الرسائل التي يمكن تخزينها مؤقتاً أثناء الانقطاع
+const AUTO_RECONNECT_ON_UNMOUNT = true; // إعادة الاتصال تلقائياً عند إعادة تحميل الصفحة
+const CONNECTION_STATE_STORAGE_KEY = 'websocket_connection_state'; // مفتاح تخزين حالة الاتصال
 
 // اسم التخزين المحلي لتتبع معرف الجلسة
 const CONNECTION_SESSION_KEY = 'websocket_session_id';
@@ -255,7 +259,7 @@ export function useWebSocket() {
     socket.onerror = null;
     socket.onmessage = null;
     
-    // إعداد المعالجات الجديدة
+    // إعداد المعالجات الجديدة مع دعم معزز لإعادة الاتصال
     socket.onopen = () => {
       console.log("WebSocket connection established");
       setStatus("open");
@@ -265,18 +269,86 @@ export function useWebSocket() {
       // إعادة ضبط حالة الاتصال
       resetConnectionState();
       
-      // إعادة تأسيس الجلسة مع الخادم
+      // تخزين حالة الاتصال في التخزين المحلي (لاستخدامها في إعادة تحميل الصفحة)
+      try {
+        localStorage.setItem(CONNECTION_STATE_STORAGE_KEY, JSON.stringify({
+          timestamp: Date.now(),
+          sessionId: sessionIdRef.current,
+          connectionQuality: connectionStateRef.current.lastNetworkQuality,
+          hasConnection: true
+        }));
+      } catch (err) {
+        // تجاهل أخطاء التخزين المحلي
+      }
+      
+      // إعادة تأسيس الجلسة مع الخادم (مع معلومات إضافية)
       if (user) {
-        socket.send(JSON.stringify({
+        const lastState = localStorage.getItem('last_game_state_' + user.id);
+        const authMessage = {
           type: "auth",
           userId: user.id,
           sessionId: sessionIdRef.current,
-          reconnectCount: reconnectAttemptRef.current
-        }));
+          reconnectCount: reconnectAttemptRef.current,
+          // معلومات إضافية للمساعدة في الاسترداد
+          lastActiveState: lastState ? JSON.parse(lastState) : null,
+          clientInfo: {
+            timestamp: Date.now(),
+            windowWidth: window.innerWidth,
+            windowHeight: window.innerHeight,
+            userAgent: navigator.userAgent,
+            language: navigator.language,
+            platform: navigator.platform,
+            connectionType: (navigator as any).connection?.effectiveType || 'unknown'
+          }
+        };
+        
+        socket.send(JSON.stringify(authMessage));
+        
+        // تخزين إحصائيات إعادة الاتصال
+        if (reconnectAttemptRef.current > 0) {
+          const reconnectStats = {
+            timestamp: Date.now(),
+            attempts: reconnectAttemptRef.current,
+            totalDuration: Date.now() - lastSuccessfulConnectionRef.current,
+            networkQuality: connectionStateRef.current.lastNetworkQuality
+          };
+          
+          console.log("إحصائيات إعادة الاتصال:", reconnectStats);
+          
+          // يمكن إرسال هذه الإحصائيات إلى التحليلات أو حفظها للتشخيص
+          try {
+            const stats = JSON.parse(localStorage.getItem('reconnect_stats') || '[]');
+            stats.push(reconnectStats);
+            
+            // حفظ آخر 10 إحصائيات فقط
+            if (stats.length > 10) {
+              stats.shift();
+            }
+            
+            localStorage.setItem('reconnect_stats', JSON.stringify(stats));
+          } catch (err) {
+            // تجاهل أخطاء التخزين المحلي
+          }
+          
+          // إظهار إشعار للمستخدم فقط إذا استغرقت إعادة الاتصال وقتاً طويلاً (> 5 ثوانٍ)
+          if (reconnectStats.totalDuration > 5000) {
+            toast({
+              title: "تم إعادة الاتصال بنجاح",
+              description: `استغرقت إعادة الاتصال ${Math.round(reconnectStats.totalDuration / 1000)} ثانية. جودة الاتصال: ${Math.round(reconnectStats.networkQuality * 100)}%`,
+              variant: "default"
+            });
+          }
+        }
       }
       
       // بدء مؤقت ping للحفاظ على الاتصال نشطاً
       setupPingInterval();
+      
+      // هام: معالجة الرسائل المؤجلة بعد إعادة الاتصال
+      // نؤخر قليلاً لضمان معالجة رسالة المصادقة أولاً
+      setTimeout(() => {
+        processPendingMessages();
+      }, 1000);
     };
     
     socket.onclose = (event: CloseEvent) => {
@@ -555,36 +627,177 @@ export function useWebSocket() {
     };
   }, [user, clearAllTimers, createWebSocketConnection, setupSocketHandlers]);
 
-  // Send message via WebSocket
+  // قائمة الرسائل المؤجلة للإرسال عند إعادة الاتصال
+  const pendingMessagesRef = useRef<{message: any, timestamp: number, retries: number}[]>([]);
+  
+  // معالجة الرسائل المؤجلة بعد إعادة الاتصال
+  const processPendingMessages = useCallback(() => {
+    if (socketRef.current?.readyState !== WebSocket.OPEN || pendingMessagesRef.current.length === 0) {
+      return;
+    }
+    
+    console.log(`معالجة ${pendingMessagesRef.current.length} رسالة مؤجلة بعد إعادة الاتصال`);
+    
+    // نسخة من الرسائل المؤجلة لتجنب التعديل أثناء التكرار
+    const pendingMessages = [...pendingMessagesRef.current];
+    
+    // إفراغ قائمة الرسائل المؤجلة لتجنب الإرسال المزدوج
+    pendingMessagesRef.current = [];
+    
+    // إرسال الرسائل المؤجلة بالترتيب
+    for (const { message } of pendingMessages) {
+      // إضافة علامة لتمييز الرسائل المعاد إرسالها
+      const messageWithResendFlag = {
+        ...message,
+        isResent: true,
+        originalTimestamp: message.timestamp,
+        timestamp: Date.now() // تحديث الطابع الزمني للرسالة
+      };
+      
+      // إرسال الرسالة
+      if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+        try {
+          socketRef.current.send(JSON.stringify(messageWithResendFlag));
+        } catch (error) {
+          console.error("خطأ أثناء إرسال رسالة مؤجلة:", error);
+          // إعادة الرسالة إلى القائمة المؤجلة في حالة الفشل
+          pendingMessagesRef.current.push({
+            message: messageWithResendFlag,
+            timestamp: Date.now(),
+            retries: 0
+          });
+        }
+      }
+    }
+  }, []);
+  
+  // دالة محسّنة لإرسال الرسائل مع معالجة انقطاع الاتصال
   const sendMessage = useCallback((message: any) => {
+    // إذا كان الاتصال مفتوحاً، نرسل الرسالة كالمعتاد
     if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-      // إذا كان نوع الرسالة هو رسالة دردشة، نقوم بإضافة بيانات المستخدم وإنشاء معرف فريد
+      // معالجة رسائل الدردشة بشكل خاص
       if (message.type === "chat_message" && user) {
-        // إضافة معرف الرسالة واسم المستخدم والصورة الرمزية إذا لم يكونوا موجودين
+        // إنشاء نسخة كاملة من رسالة الدردشة
         const chatMessage = {
           ...message,
           id: message.id || `msg_${Date.now()}`,
           username: user.username,
           avatar: user.avatar,
           timestamp: Date.now(),
-          clientHandled: true // إعلام الخادم بأننا قمنا بمعالجة الرسالة في العميل
+          clientHandled: true // إعلام العميل بمعالجة الرسالة محلياً
         };
         
-        // إشارة للمعالج المحلي بالرسالة (لضمان ظهور الرسائل المرسلة حتى لو لم ترجع من الخادم)
+        // معالجة الرسالة محلياً أولاً (للعرض الفوري)
         const handler = messageHandlersRef.current.get("chat_message");
         if (handler) {
           handler(chatMessage);
         }
         
-        socketRef.current.send(JSON.stringify(chatMessage));
-        return true;
+        // محاولة إرسال الرسالة
+        try {
+          socketRef.current.send(JSON.stringify(chatMessage));
+          return true;
+        } catch (error) {
+          console.warn("فشل إرسال رسالة الدردشة، إضافتها للانتظار:", error);
+          // تخزين الرسالة للإرسال لاحقاً
+          pendingMessagesRef.current.push({
+            message: chatMessage,
+            timestamp: Date.now(),
+            retries: 0
+          });
+          
+          // إبقاء حجم قائمة الانتظار تحت السيطرة
+          if (pendingMessagesRef.current.length > PENDING_MESSAGES_CACHE_SIZE) {
+            pendingMessagesRef.current.shift(); // إزالة أقدم رسالة
+          }
+          
+          // لا نعتبر هذا فشلاً من منظور المستخدم لأننا سنرسلها لاحقاً
+          return true;
+        }
       }
       
-      socketRef.current.send(JSON.stringify(message));
-      return true;
+      // محاولة إرسال الرسائل الأخرى
+      try {
+        socketRef.current.send(JSON.stringify(message));
+        return true;
+      } catch (error) {
+        console.warn("فشل إرسال رسالة، إضافتها للانتظار:", error);
+        
+        // لا نخزن رسائل game_action إلا إذا طلب ذلك صراحة
+        if (message.type !== "game_action" || message.queueOnFailure) {
+          pendingMessagesRef.current.push({
+            message,
+            timestamp: Date.now(),
+            retries: 0
+          });
+          
+          // إبقاء حجم قائمة الانتظار تحت السيطرة
+          if (pendingMessagesRef.current.length > PENDING_MESSAGES_CACHE_SIZE) {
+            pendingMessagesRef.current.shift();
+          }
+        }
+        
+        return false;
+      }
+    } else {
+      // إذا كان الاتصال مغلقاً أو في حالة إعادة الاتصال، نخزن الرسالة للإرسال لاحقاً
+      console.log("الاتصال غير متاح، تخزين الرسالة للإرسال لاحقاً");
+      
+      // لا نخزن رسائل game_action إلا إذا طلب ذلك صراحة
+      if (message.type === "chat_message" || message.queueOnFailure) {
+        // بالنسبة لرسائل الدردشة، نقوم بمعالجتها محلياً أيضاً
+        if (message.type === "chat_message" && user) {
+          const chatMessage = {
+            ...message,
+            id: message.id || `msg_${Date.now()}`,
+            username: user.username,
+            avatar: user.avatar,
+            timestamp: Date.now(),
+            clientHandled: true,
+            pendingDelivery: true // علامة توضح أن الرسالة في انتظار التسليم
+          };
+          
+          // معالجة محلية
+          const handler = messageHandlersRef.current.get("chat_message");
+          if (handler) {
+            handler(chatMessage);
+          }
+          
+          pendingMessagesRef.current.push({
+            message: chatMessage,
+            timestamp: Date.now(),
+            retries: 0
+          });
+          
+          // إبقاء حجم قائمة الانتظار تحت السيطرة
+          if (pendingMessagesRef.current.length > PENDING_MESSAGES_CACHE_SIZE) {
+            pendingMessagesRef.current.shift();
+          }
+          
+          return true; // نعتبرها نجاحاً من منظور المستخدم
+        } else {
+          pendingMessagesRef.current.push({
+            message,
+            timestamp: Date.now(),
+            retries: 0
+          });
+          
+          // إبقاء حجم قائمة الانتظار تحت السيطرة
+          if (pendingMessagesRef.current.length > PENDING_MESSAGES_CACHE_SIZE) {
+            pendingMessagesRef.current.shift();
+          }
+        }
+      }
+      
+      // بدء محاولة إعادة الاتصال إذا كان الاتصال مغلقاً ولم تكن هناك محاولة جارية
+      if (status === "closed" && !isReconnectingRef.current) {
+        console.log("محاولة إعادة الاتصال تلقائياً بسبب محاولة إرسال رسالة");
+        reconnect();
+      }
+      
+      return message.type === "chat_message"; // نعتبر رسائل الدردشة فقط كنجاح من وجهة نظر المستخدم
     }
-    return false;
-  }, [user]);
+  }, [user, status, reconnect]);
 
   // Register a message handler
   const registerHandler = useCallback((type: string, handler: (data: any) => void) => {
@@ -621,6 +834,44 @@ export function useWebSocket() {
     });
   }, [sendMessage]);
 
+  // إضافة تحديث محلي للاتصال عند استعادة الاتصال
+  useEffect(() => {
+    // تنفيذ العمليات المطلوبة عند استعادة الاتصال
+    if (status === "open" && user && pendingMessagesRef.current.length > 0) {
+      console.log("تم استعادة الاتصال، معالجة الرسائل المؤجلة...");
+      // نؤخر قليلاً للتأكد من استقرار الاتصال
+      setTimeout(() => {
+        processPendingMessages();
+      }, 1000);
+    }
+  }, [status, user, processPendingMessages]);
+  
+  // إضافة دالة معالجة الاتصال الضعيف أو غير المستقر
+  const handleUnstableConnection = useCallback(() => {
+    const networkQuality = connectionStateRef.current.lastNetworkQuality || 1;
+    
+    // إذا كانت جودة الاتصال ضعيفة (أقل من 50%)، أظهر تحذيراً للمستخدم
+    if (networkQuality < 0.5 && status === "open") {
+      toast({
+        title: "تحذير: اتصال غير مستقر",
+        description: `جودة اتصالك ضعيفة (${Math.round(networkQuality * 100)}%)، قد تواجه تأخيراً أو انقطاعات في اللعب`,
+        variant: "destructive",
+        duration: 5000
+      });
+    }
+  }, [status, toast]);
+  
+  // تتبع جودة الاتصال كل 60 ثانية
+  useEffect(() => {
+    if (status === "open") {
+      const intervalId = setInterval(() => {
+        handleUnstableConnection();
+      }, 60000); // فحص كل دقيقة
+      
+      return () => clearInterval(intervalId);
+    }
+  }, [status, handleUnstableConnection]);
+  
   return {
     status,
     socket: socketRef.current,
@@ -628,6 +879,10 @@ export function useWebSocket() {
     registerHandler,
     joinTable,
     leaveTable,
-    performGameAction
+    performGameAction,
+    // إتاحة دوال إضافية متقدمة للاستخدام في الحالات الخاصة
+    reconnect,
+    processPendingMessages,
+    connectionQuality: connectionStateRef.current.lastNetworkQuality
   };
 }
