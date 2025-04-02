@@ -243,14 +243,42 @@ export default function GamePageSimplified({ params }: { params?: { tableId?: st
             <div className="bg-[#0A3A2A] rounded-full w-full h-[450px] border-8 border-[#8B4513] shadow-2xl flex items-center justify-center overflow-hidden">
               {/* لوحة الطاولة */}
               <div className="absolute inset-0 m-10 rounded-full bg-[#1B4D3E] border-4 border-[#346F58] flex items-center justify-center">
-                {/* طقم الكروت المشتركة (الفلوب والتيرن والريفر) باستخدام مكون CommunityCards */}
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                  {gameState?.communityCards && (
-                    <CommunityCards 
-                      cards={gameState.communityCards}
-                      size="md"
-                      className="gap-1"
-                    />
+                {/* طقم الكروت المشتركة (الفلوب والتيرن والريفر) */}
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex gap-3">
+                  {gameState?.communityCards && gameState.communityCards.length > 0 ? (
+                    gameState.communityCards.map((card: any, index: number) => (
+                      <div key={index} className="w-14 h-20 rounded-md bg-white shadow-lg flex flex-col justify-between p-1 overflow-hidden">
+                        {!card.hidden ? (
+                          <>
+                            <div className={`text-lg font-bold ${card.suit === 'hearts' || card.suit === 'diamonds' ? 'text-red-600' : 'text-black'}`}>
+                              {card.value}
+                            </div>
+                            <div className="flex justify-center items-center flex-1">
+                              {card.suit === 'hearts' && <span className="text-2xl">♥️</span>}
+                              {card.suit === 'diamonds' && <span className="text-2xl">♦️</span>}
+                              {card.suit === 'clubs' && <span className="text-2xl">♣️</span>}
+                              {card.suit === 'spades' && <span className="text-2xl">♠️</span>}
+                            </div>
+                          </>
+                        ) : (
+                          <div className="w-full h-full rounded-md bg-[#D4AF37] flex items-center justify-center">
+                            <div className="w-10 h-14 rounded bg-[#1B4D3E] border border-[#D4AF37]"></div>
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <>
+                      {gameState?.gameStatus !== 'waiting' && (
+                        <>
+                          <div className="w-14 h-20 rounded-md bg-[#1B4D3E]/80 border border-[#D4AF37]/30"></div>
+                          <div className="w-14 h-20 rounded-md bg-[#1B4D3E]/80 border border-[#D4AF37]/30"></div>
+                          <div className="w-14 h-20 rounded-md bg-[#1B4D3E]/80 border border-[#D4AF37]/30"></div>
+                          <div className="w-14 h-20 rounded-md bg-[#1B4D3E]/80 border border-[#D4AF37]/30"></div>
+                          <div className="w-14 h-20 rounded-md bg-[#1B4D3E]/80 border border-[#D4AF37]/30"></div>
+                        </>
+                      )}
+                    </>
                   )}
                 </div>
                 
