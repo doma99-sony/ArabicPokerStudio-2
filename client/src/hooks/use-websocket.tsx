@@ -4,31 +4,31 @@ import { useToast } from "./use-toast";
 
 type WebSocketStatus = "connecting" | "open" | "closed" | "error";
 
-// نظام إدارة WebSocket عالمي - يحافظ على الاتصال بين الصفحات
-// تعريف متغير عالمي لحفظ حالة الاتصال WebSocket عبر التنقلات بين الصفحات
-// تحديث: تبسيط نظام الاتصال ليعتبر المستخدم متصلاً بمجرد تسجيل الدخول
-// وفقد الاتصال فقط عند تسجيل الخروج أو قفل التطبيق
-interface GlobalWebSocketState {
-  socket: WebSocket | null;
-  reference: number; 
-  handlers: Map<string, (data: any) => void>;
-  lastPingTime: number;
-  sessionId: string;
-  reconnectAttempt: number;
-  isConnecting: boolean;
-  isLoggedIn: boolean; // إضافة: هل المستخدم مسجل الدخول
+// نهج جديد - نظام WebSocket مباشر وبسيط
+// نموذج مبسط - هوك WEBSOCKET (الإصدار الثالث - نسخة عربي)
+// تبسيط قصوي لآلية إدارة WebSocket حسب طلب المستخدم
+// التعامل فقط مع الرسائل ومعالجتها - بدون تعقيدات زائدة
+//
+// التفاصيل:
+// - المستخدم يعتبر متصلاً بمجرد تسجيل الدخول حتى تسجيل الخروج
+// - أي إشارة حية من المستخدم تعني أنه نشط ومتصل
+// - لا يتم إغلاق الاتصال إلا عند تسجيل الخروج أو إغلاق التطبيق فعلياً
+
+// تعريف بسيط للمخزن العالمي - يحتفظ بالحالة بين الصفحات
+interface GlobalStore {
+  // تبسيط - فقط البيانات الضرورية
+  connection: WebSocket | null;
+  messageHandlers: Map<string, (data: any) => void>;
+  ready: boolean;
+  userId?: number;
 }
 
-// استخدام متغير عالمي خارج React للحفاظ على حالة الاتصال بين الصفحات
-let globalWebSocket: GlobalWebSocketState = {
-  socket: null,
-  reference: 0, // عدد المراجع النشطة
-  handlers: new Map(),
-  lastPingTime: 0,
-  sessionId: '',
-  reconnectAttempt: 0,
-  isConnecting: false,
-  isLoggedIn: false // القيمة الافتراضية: غير مسجل الدخول
+// تخزين الاتصال عالمياً خارج دورة حياة React
+// يجب أن يكون متاحاً لجميع مكونات التطبيق
+const globalStore: GlobalStore = {
+  connection: null,   // اتصال WebSocket الفعلي
+  messageHandlers: new Map(), // معالجات الرسائل
+  ready: false,       // هل الاتصال جاهز؟
 };
 
 // إعدادات إعادة الاتصال المتكيفة المحسنة - النسخة النهائية لحل مشكلة انقطاع الاتصال

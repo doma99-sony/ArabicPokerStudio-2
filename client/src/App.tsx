@@ -21,7 +21,7 @@ import SettingsPage from "@/pages/settings-page";
 import HowToPlayPage from "@/pages/how-to-play-page";
 import { ProtectedRoute } from "./lib/protected-route";
 import { useAuth } from "@/hooks/use-auth";
-import { useWebSocket } from "@/hooks/use-websocket";
+import { useWebSocket } from "@/hooks/use-websocket-simplified"; // استخدام النسخة المبسطة من WebSocket
 import { Loader2 } from "lucide-react";
 import { WelcomeMessageNotification } from "@/components/ui/welcome-message";
 import { LandscapeNotice } from "@/components/ui/landscape-notice";

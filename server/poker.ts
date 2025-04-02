@@ -12,12 +12,18 @@ export const pokerModule = {
 
 // Set up WebSocket server for real-time game updates
 export function setupPokerGame(app: Express, httpServer: Server) {
-  // تبسيط تكوين خادم WebSocket
+  // تكوين أبسط قدر ممكن لخادم WebSocket (VERSION 3)
+  // يعالج مشكلات التوافق المعروفة عبر المتصفحات المختلفة
+  // لا يوجد ضغط أو تعقيدات إضافية
   const wss = new WebSocketServer({ 
     server: httpServer,
     path: "/ws", // مسار محدد لاتصالات WebSocket
-    perMessageDeflate: false, // تعطيل الضغط لتحسين التوافق
+    perMessageDeflate: false, // تعطيل الضغط لتعزيز التوافق والأداء
     clientTracking: true, // تتبع العملاء تلقائياً
+    // الإعدادات التالية تم حذفها لتبسيط التكوين
+    // backlog: undefined,
+    // maxPayload: 104857600, // 100 ميجابايت
+    // skipUTF8Validation: false,
   });
 
   // تحسين تتبع العملاء بإضافة معلومات حالة إضافية
