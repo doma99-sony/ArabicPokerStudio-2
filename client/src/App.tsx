@@ -31,57 +31,28 @@ import { initializePerformanceOptimizations } from "@/lib/performance-utils";
 import { SplashScreen } from "@/components/ui/splash-screen";
 import { useState, useEffect, useRef } from "react";
 
-// مكون للحفاظ على اتصال WebSocket مستمر بين الصفحات
+// مكون بسيط للحفاظ على اتصال WebSocket مستمر بين الصفحات
 function PersistentConnectionManager() {
   const { user } = useAuth();
   const ws = useWebSocket();
-  const [location] = useLocation();
-  const locationRef = useRef(location);
-  const hasConnectedRef = useRef(false);
-
-  // تتبع التغييرات في المسار
+  
+  // اتصال مرة واحدة فقط عند تحميل المكون
   useEffect(() => {
-    locationRef.current = location;
-  }, [location]);
-
-  // مدير الاتصال المستمر
-  useEffect(() => {
+    // تنفيذ عملية الاتصال مرة واحدة فقط عند تسجيل دخول المستخدم
     if (!user) return;
-
-    // إذا لم نكن قد اتصلنا بعد أو كان الاتصال مغلقًا، قم بالاتصال
-    if (!hasConnectedRef.current || ws.status === 'closed') {
-      console.log("إنشاء اتصال WebSocket عالمي مستمر");
-      ws.connect();
-      hasConnectedRef.current = true;
-    }
-
-    // لا نقوم بالفصل عند إعادة تحميل المكون - نريد أن يستمر الاتصال عند التنقل
+    
+    // استدعاء دالة الاتصال مع العلم أن النمط العالمي منفذ داخل hook
+    console.log("بدء اتصال WebSocket عالمي...");
+    ws.connect();
+    
+    // عند إلغاء تحميل المكون - عدم فصل الاتصال للحفاظ عليه بين الصفحات
     return () => {
-      // لا نقوم بفصل الاتصال عند التنقل بين الصفحات
-      console.log("المحافظة على اتصال WebSocket خلال التنقل بين الصفحات");
+      // لا نفصل الاتصال عند التنقل بين الصفحات
+      console.log("الإبقاء على اتصال WebSocket أثناء التنقل");
     };
   }, [user, ws]);
-
-  // إعادة الاتصال إذا تم فقد الاتصال
-  useEffect(() => {
-    if (ws.status === 'closed' && user && hasConnectedRef.current) {
-      console.log("إعادة الاتصال بعد فقدان الاتصال");
-      ws.connect();
-    }
-  }, [ws.status, user, ws]);
-
-  // استخدام اتصال ثابت للتشخيص
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (ws.status === 'open' && user) {
-        console.log(`اتصال WebSocket مستمر نشط (${ws.isGlobalConnection ? 'عالمي' : 'محلي'}) - عدد المراجع: ${ws.globalConnectionRefs}`);
-      }
-    }, 30000); // كل 30 ثانية
-
-    return () => clearInterval(interval);
-  }, [ws, user]);
-
-  return null; // هذا مكون وظيفي - لا يعرض أي عناصر
+  
+  return null; // مكون وظيفي لا يعرض أي عناصر
 }
 
 function Router() {
