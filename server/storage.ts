@@ -569,6 +569,53 @@ export class MemStorage implements IStorage {
       updatedGameState = gameRoom.getGameStateForPlayer(userId);
       console.log(`عدد اللاعبين في الطاولة ${tableId}: ${updatedGameState.players.length}`);
       
+      // إذا كان اللاعب وحيداً في الطاولة، نضيف لاعب وهمي تلقائياً بعد فترة قصيرة
+      if (updatedGameState.players.length === 1 && updatedGameState.gameStatus === "waiting") {
+        console.log(`لاعب وحيد في الطاولة ${tableId}، سيتم إضافة لاعب وهمي بعد 3 ثوانٍ...`);
+        
+        // إضافة تأخير 3 ثوانٍ قبل إضافة اللاعب الوهمي
+        setTimeout(async () => {
+          try {
+            // التحقق مرة أخرى من عدد اللاعبين (في حال انضم لاعب آخر خلال فترة الانتظار)
+            const currentState = gameRoom.getGameStateForPlayer(userId);
+            if (currentState.players.length === 1 && currentState.gameStatus === "waiting") {
+              // إنشاء معرف فريد للاعب الوهمي (سالب لتمييزه عن اللاعبين الحقيقيين)
+              const aiId = -Math.floor(Math.random() * 1000) - 1; // -1, -2, -3, ... , -1000
+              
+              // اختيار اسم عشوائي للاعب الوهمي
+              const aiNames = ["روبوت ذكي", "لاعب آلي", "جيمي بوت", "بوت الفاجر", "ذكاء اصطناعي", "بوكر بوت"];
+              const aiName = aiNames[Math.floor(Math.random() * aiNames.length)];
+              
+              // إضافة اللاعب الوهمي مع رقاقات مساوية للحد الأدنى للدخول
+              console.log(`إضافة لاعب وهمي (${aiName}) إلى الطاولة ${tableId}...`);
+              
+              // موقع عشوائي للاعب الوهمي
+              const aiPosition = Math.floor(Math.random() * (table.maxPlayers - 1)) + 1;
+              const aiResult = gameRoom.addPlayer(aiId, aiName, table.minBuyIn * 2, "/images/ai-avatar.png", aiPosition, true);
+              
+              if (aiResult.success) {
+                console.log(`تم إضافة اللاعب الوهمي بنجاح إلى الطاولة ${tableId}`);
+                
+                // تحديث حالة الطاولة
+                table.currentPlayers = Math.min(table.currentPlayers + 1, table.maxPlayers);
+                if (table.currentPlayers >= table.maxPlayers) {
+                  table.status = "full";
+                } else {
+                  table.status = "busy";
+                }
+                this.tables.set(tableId, table);
+              } else {
+                console.error(`فشل إضافة اللاعب الوهمي: ${aiResult.message}`);
+              }
+            } else {
+              console.log(`تم إلغاء إضافة اللاعب الوهمي لأن الطاولة ${tableId} أصبحت تحتوي على أكثر من لاعب واحد`);
+            }
+          } catch (error) {
+            console.error(`خطأ عند محاولة إضافة لاعب وهمي: ${error}`);
+          }
+        }, 3000); // انتظار 3 ثوانٍ قبل إضافة اللاعب الوهمي
+      }
+      
       // التأكد من وجود اللاعب في قائمة اللاعبين
       if (updatedGameState.players.some(p => p.id === userId)) {
         joinSuccess = true;

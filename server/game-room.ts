@@ -12,6 +12,7 @@ interface GamePlayer {
   folded: boolean;
   betAmount: number;
   isAllIn: boolean;
+  isAI?: boolean; // إضافة خاصية للاعبين الوهميين
 }
 
 // Interface for game round
@@ -132,10 +133,138 @@ export function createGameRoom(table: GameTable): GameRoom {
       const currentPlayer = players.get(round.currentTurn);
       if (!currentPlayer) return;
       
-      console.log(`تم انتهاء وقت اللاعب ${currentPlayer.username} - يتم تنفيذ Fold تلقائيًا`);
+      console.log(`تم انتهاء وقت اللاعب ${currentPlayer.username} - يتم تنفيذ إجراء تلقائي`);
       
       // إضافة حدث انتهاء الوقت إلى سجل اللعبة
       addEventToHistory("timeout", currentPlayer.username, currentPlayer.id);
+      
+      // معالجة خاصة للاعبين الوهميين (AI)
+      if (currentPlayer.isAI) {
+        console.log(`اللاعب ${currentPlayer.username} هو لاعب وهمي (AI)، سيتم اتخاذ قرار ذكي...`);
+        
+        // حساب قوة اليد (قيمة افتراضية متوسطة)
+        let handStrength = 0.5;
+              
+        // تقييم قوة اليد إذا كانت هناك بطاقات
+        if (currentPlayer.cards && currentPlayer.cards.length > 0) {
+          // حساب بسيط لقوة اليد بناءً على رتبة البطاقات والتطابق في اللون
+          const ranks = currentPlayer.cards.map(card => card.rank);
+          const suits = currentPlayer.cards.map(card => card.suit);
+          
+          // زيادة قوة اليد إذا كان هناك بطاقات مرتفعة (A, K, Q, J, 10)
+          const highCards = ranks.filter(r => ["A", "K", "Q", "J", "10"].includes(r));
+          handStrength += highCards.length * 0.1;
+          
+          // زيادة قوة اليد إذا كان هناك زوج (نفس الرتبة)
+          if (ranks[0] === ranks[1]) {
+            handStrength += 0.3;
+          }
+          
+          // زيادة قوة اليد إذا كان اللون متطابقًا
+          if (suits[0] === suits[1]) {
+            handStrength += 0.2;
+          }
+          
+          // تعديل قوة اليد بناءً على البطاقات المكشوفة على الطاولة
+          if (round.communityCards.length > 0) {
+            // زيادة قوة اليد إذا كانت هناك بطاقات تكمل زوجًا
+            for (const card of round.communityCards) {
+              if (ranks.includes(card.rank)) {
+                handStrength += 0.2;
+              }
+              // زيادة قوة اليد إذا كان هناك احتمال لتكوين لون
+              if (suits.includes(card.suit)) {
+                handStrength += 0.1;
+              }
+            }
+          }
+          
+          // تأكد من أن قوة اليد بين 0 و 1
+          handStrength = Math.max(0, Math.min(1, handStrength));
+        }
+              
+        // قرار اللاعب الوهمي بناءً على قوة اليد والمرحلة الحالية
+        let aiAction: GameAction;
+        let aiAmount: number | undefined;
+                
+        if (round.currentBet > 0 && round.currentBet > currentPlayer.betAmount) {
+          // إذا كان هناك رهان، فإن الخيارات هي المطابقة أو الزيادة أو الطي
+          const randomFactor = Math.random() * 0.3; // عامل عشوائي للتنويع
+          
+          if (handStrength + randomFactor > 0.7) {
+            // يد قوية - زيادة أو مطابقة
+            if (Math.random() < 0.6) {
+              aiAction = "raise";
+              // تحديد مقدار الزيادة بناءً على قوة اليد
+              const maxRaise = Math.min(currentPlayer.chips, round.currentBet * 3);
+              const minRaise = round.currentBet * 2;
+              aiAmount = Math.floor(minRaise + (maxRaise - minRaise) * handStrength);
+            } else {
+              aiAction = "call";
+            }
+          } else if (handStrength + randomFactor > 0.4) {
+            // يد متوسطة - مطابقة غالبًا
+            if (Math.random() < 0.2) {
+              aiAction = "raise";
+              aiAmount = Math.floor(round.currentBet * 1.5);
+            } else if (Math.random() < 0.7) {
+              aiAction = "call";
+            } else {
+              aiAction = "fold";
+            }
+          } else {
+            // يد ضعيفة - طي غالبًا أو مخادعة أحيانًا
+            if (Math.random() < 0.2 && round.gameStatus === "preflop") {
+              // في بداية اللعبة، قد يخادع اللاعب الوهمي
+              aiAction = "raise";
+              aiAmount = Math.floor(round.currentBet * 2);
+            } else if (Math.random() < 0.3) {
+              aiAction = "call";
+            } else {
+              aiAction = "fold";
+            }
+          }
+        } else {
+          // لا يوجد رهان، فالخيارات هي التحقق أو الرهان
+          const randomFactor = Math.random() * 0.3; // عامل عشوائي للتنويع
+          
+          if (handStrength + randomFactor > 0.6) {
+            // يد قوية - رهان غالبًا
+            if (Math.random() < 0.8) {
+              aiAction = "bet";
+              // تحديد مقدار الرهان بناءً على قوة اليد
+              const minBet = round.bigBlind;
+              const maxBet = Math.min(currentPlayer.chips, round.pot * 0.7);
+              aiAmount = Math.floor(minBet + (maxBet - minBet) * handStrength);
+            } else {
+              aiAction = "check";
+            }
+          } else if (handStrength + randomFactor > 0.3) {
+            // يد متوسطة - تحقق غالبًا
+            if (Math.random() < 0.3) {
+              aiAction = "bet";
+              aiAmount = Math.floor(round.bigBlind * 2);
+            } else {
+              aiAction = "check";
+            }
+          } else {
+            // يد ضعيفة - تحقق غالبًا أو مخادعة أحيانًا
+            if (Math.random() < 0.1) {
+              // مخادعة نادرة
+              aiAction = "bet";
+              aiAmount = Math.floor(round.bigBlind * 3);
+            } else {
+              aiAction = "check";
+            }
+          }
+        }
+        
+        console.log(`اللاعب الوهمي ${currentPlayer.username} يتخذ قرارًا: ${aiAction} (قوة اليد: ${handStrength.toFixed(2)})`);
+        
+        // تنفيذ الإجراء (بدون تأخير إضافي لأن المؤقت قد انتهى بالفعل)
+        performAction(currentPlayer.id, aiAction, aiAmount);
+        return;
+      }
       
       // حساب عدد اللاعبين النشطين (غير المنسحبين)
       const activePlayers = Array.from(players.values()).filter(p => !p.folded);
@@ -608,7 +737,8 @@ export function createGameRoom(table: GameTable): GameRoom {
       cards: [],
       folded: false,
       betAmount: 0,
-      isAllIn: false
+      isAllIn: false,
+      isAI: isAI || false // تعيين حالة اللاعب الوهمي
     };
     
     players.set(playerId, player);
