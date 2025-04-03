@@ -371,116 +371,281 @@ export default function LobbyPage() {
                 </div>
               </div>
 
-              {/* اختيار نوع اللعبة - قسم عرضي كامل */}
+              {/* واجهة اختيار الألعاب - قسم عرضي كامل على غرار تصميم الدومينو */}
               <div className="md:col-span-3">
-                <div className="rounded-xl bg-gradient-to-b from-black/80 to-[#0A3A2A]/60 border-2 border-[#D4AF37]/20 p-4 backdrop-blur-sm shadow-xl">
-                  <div className="text-center mb-4 flex items-center justify-center">
-                    <div className="relative flex items-center gap-3">
-                      <div className="absolute -left-10 -top-6 opacity-30 rotate-12">
-                        <span className="text-[#D4AF37] text-6xl">♥️</span>
+                <div className="rounded-xl bg-gradient-to-b from-[#6b21a8]/90 to-[#4c1d95]/70 border-2 border-[#c084fc]/40 p-4 backdrop-blur-sm shadow-2xl">
+                  <div className="text-center mb-6 flex items-center justify-center">
+                    <div className="relative">
+                      <div className="absolute -top-12 left-1/2 transform -translate-x-1/2">
+                        <div className="bg-gradient-to-r from-[#c026d3] to-[#7e22ce] text-white text-xl font-bold py-2 px-8 rounded-full shadow-lg border-2 border-white/20">
+                          ألعابنا المميزة
+                        </div>
                       </div>
-                      <div className="absolute -right-10 -bottom-6 opacity-30 -rotate-12">
-                        <span className="text-[#D4AF37] text-6xl">♠️</span>
-                      </div>
-                      <img 
-                        src="/assets/poker-logo-alt.jpeg" 
-                        alt="بوكر عرباوي" 
-                        className="w-16 h-16 rounded-full border-2 border-[#D4AF37] object-cover shadow-md shadow-[#D4AF37]/30"
-                      />
-                      <div>
-                        <h2 className="text-2xl font-bold text-[#D4AF37]">ألعابنا المميزة</h2>
-                        <p className="text-gray-300 text-sm">اختر نوع اللعبة التي ترغب باللعب فيها</p>
+                      <div className="mt-8 mb-1 flex items-center justify-center">
+                        <div className="h-1 w-32 bg-gradient-to-r from-[#f0abfc]/10 via-[#f0abfc] to-[#f0abfc]/10 rounded-full"></div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {/* بوكر عرباوي */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    {/* بوكر عرباوي - تصميم جديد */}
                     <div 
-                      className={`flex flex-col h-40 rounded-lg overflow-hidden border-2 ${activeGameCategory === 'poker' ? 'ring-2 ring-[#D4AF37]' : ''} border-[#D4AF37]/80 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer`}
+                      className={`group relative flex flex-col h-52 rounded-2xl overflow-hidden shadow-xl hover:shadow-[#D4AF37]/30 transition-all duration-300 hover:scale-105 cursor-pointer ${activeGameCategory === 'poker' ? 'ring-4 ring-[#D4AF37]' : ''}`}
                       onClick={() => {
                         setActiveGameCategory('poker');
                         navigateToGameTables('poker');
                       }}
                     >
-                      <div className="bg-gradient-to-br from-[#1B4D3E] to-[#0A3A2A] flex-1 flex items-center justify-center">
-                        <span className="text-[#D4AF37] text-3xl font-bold">♠️ ♥️</span>
+                      {/* خلفية اللعبة - صورة */}
+                      <div className="absolute inset-0 bg-gradient-to-b from-[#1B4D3E] to-[#0A3A2A]">
+                        <img 
+                          src="/assets/poker-table-bg.jpg" 
+                          alt="بوكر عرباوي" 
+                          className="w-full h-full object-cover opacity-60"
+                        />
                       </div>
-                      <div className="p-1 bg-[#D4AF37]/10 border-t border-[#D4AF37]/30">
-                        <h3 className="text-[#D4AF37] font-bold text-sm">بوكر عرباوي</h3>
+                      
+                      {/* تراكب شفاف */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-[#0A3A2A]/50 to-[#0A3A2A]/30"></div>
+                      
+                      {/* محتوى البطاقة */}
+                      <div className="relative flex flex-col h-full z-10 p-3">
+                        {/* أيقونة مميزة */}
+                        <div className="flex justify-between items-center">
+                          <div className="flex gap-1">
+                            <div className="bg-[#D4AF37] text-black font-bold text-xs p-1 px-2 rounded">VIP</div>
+                            <div className="bg-[#22c55e] text-black font-bold text-xs p-1 px-2 rounded">HOT</div>
+                          </div>
+                          <div className="w-10 h-10 bg-[#0A3A2A] rounded-full border-2 border-[#D4AF37] flex items-center justify-center">
+                            <span className="text-[#D4AF37] text-xl">♠️</span>
+                          </div>
+                        </div>
+                        
+                        {/* عنوان اللعبة */}
+                        <div className="mt-2 mb-1">
+                          <h3 className="text-[#D4AF37] font-bold text-xl">بوكر عرباوي</h3>
+                          <div className="mt-1 w-full h-0.5 bg-gradient-to-r from-[#D4AF37]/0 via-[#D4AF37] to-[#D4AF37]/0"></div>
+                        </div>
+                        
+                        {/* تفاصيل إضافية */}
+                        <div className="my-2 text-xs text-gray-300 flex gap-2">
+                          <div className="bg-black/30 rounded px-2 py-1 border border-[#D4AF37]/20">
+                            <span className="text-[#D4AF37]">٤٢٠</span> لاعب نشط
+                          </div>
+                          <div className="bg-black/30 rounded px-2 py-1 border border-[#D4AF37]/20">
+                            <span className="text-[#D4AF37]">٢٣</span> طاولة
+                          </div>
+                        </div>
+                        
+                        {/* زر الدخول */}
+                        <div className="mt-auto">
+                          <button 
+                            className="w-full py-2 px-3 bg-gradient-to-r from-[#D4AF37] to-[#B8860B] text-black font-bold text-sm hover:from-[#E5C04B] hover:to-[#C09526] rounded-lg transition-colors flex items-center justify-center gap-2 group-hover:scale-105 transform transition-transform duration-200"
+                          >
+                            <div className="w-6 h-6 rounded-full bg-black/20 flex items-center justify-center">
+                              <span className="text-black">♣</span>
+                            </div>
+                            ابدأ اللعب الآن
+                            <ChevronRight className="mr-1 h-4 w-4" />
+                          </button>
+                        </div>
                       </div>
-                      <button 
-                        className="py-1 px-2 bg-[#D4AF37] text-[#0A0A0A] font-bold text-xs hover:bg-[#E5C04B] transition-colors flex items-center justify-center"
-                        onClick={() => navigateToGameTables('poker')}
-                      >
-                        دخول طاولات البوكر
-                        <ChevronRight className="mr-1 h-3 w-3" />
-                      </button>
                     </div>
 
-                    {/* نارتو */}
+                    {/* نارتو - تصميم جديد */}
                     <div 
-                      className={`flex flex-col h-40 rounded-lg overflow-hidden border-2 ${activeGameCategory === 'naruto' ? 'ring-2 ring-orange-500' : ''} border-orange-500/80 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer`}
+                      className={`group relative flex flex-col h-52 rounded-2xl overflow-hidden shadow-xl hover:shadow-orange-500/30 transition-all duration-300 hover:scale-105 cursor-pointer ${activeGameCategory === 'naruto' ? 'ring-4 ring-orange-500' : ''}`}
                       onClick={() => {
                         setActiveGameCategory('naruto');
                         navigateToGameTables('naruto');
                       }}
                     >
-                      <div className="bg-gradient-to-br from-[#FF8C00] to-[#FF4500] flex-1 flex items-center justify-center">
-                        <span className="text-white text-3xl font-bold">忍</span>
+                      {/* خلفية اللعبة - صورة */}
+                      <div className="absolute inset-0 bg-gradient-to-b from-[#FF8C00] to-[#FF4500]">
+                        <img 
+                          src="/assets/naruto-video.mp4" 
+                          alt="نارتو" 
+                          className="w-full h-full object-cover opacity-60"
+                        />
                       </div>
-                      <div className="p-1 bg-orange-500/10 border-t border-orange-500/30">
-                        <h3 className="text-orange-400 font-bold text-sm">نارتو</h3>
+                      
+                      {/* تراكب شفاف */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-[#FF4500]/40 to-[#FF8C00]/30"></div>
+                      
+                      {/* محتوى البطاقة */}
+                      <div className="relative flex flex-col h-full z-10 p-3">
+                        {/* أيقونة مميزة */}
+                        <div className="flex justify-between items-center">
+                          <div className="flex gap-1">
+                            <div className="bg-orange-500 text-white font-bold text-xs p-1 px-2 rounded">جديد</div>
+                          </div>
+                          <div className="w-10 h-10 bg-orange-800 rounded-full border-2 border-orange-400 flex items-center justify-center">
+                            <span className="text-white text-xl">忍</span>
+                          </div>
+                        </div>
+                        
+                        {/* عنوان اللعبة */}
+                        <div className="mt-2 mb-1">
+                          <h3 className="text-orange-400 font-bold text-xl">ناروتو</h3>
+                          <div className="mt-1 w-full h-0.5 bg-gradient-to-r from-orange-500/0 via-orange-500 to-orange-500/0"></div>
+                        </div>
+                        
+                        {/* تفاصيل إضافية */}
+                        <div className="my-2 text-xs text-gray-300 flex gap-2">
+                          <div className="bg-black/30 rounded px-2 py-1 border border-orange-500/20">
+                            <span className="text-orange-400">١٨٥</span> لاعب نشط
+                          </div>
+                          <div className="bg-black/30 rounded px-2 py-1 border border-orange-500/20">
+                            <span className="text-orange-400">١٢</span> غرفة
+                          </div>
+                        </div>
+                        
+                        {/* زر الدخول */}
+                        <div className="mt-auto">
+                          <button 
+                            className="w-full py-2 px-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm hover:from-orange-400 hover:to-orange-500 rounded-lg transition-colors flex items-center justify-center gap-2 group-hover:scale-105 transform transition-transform duration-200"
+                          >
+                            <div className="w-6 h-6 rounded-full bg-black/20 flex items-center justify-center">
+                              <span className="text-white">⚔️</span>
+                            </div>
+                            استكشف عالم ناروتو
+                            <ChevronRight className="mr-1 h-4 w-4" />
+                          </button>
+                        </div>
                       </div>
-                      <button 
-                        className="py-1 px-2 bg-orange-500 text-white font-bold text-xs hover:bg-orange-400 transition-colors flex items-center justify-center"
-                        onClick={() => navigateToGameTables('naruto')}
-                      >
-                        دخول عالم نارتو
-                        <ChevronRight className="mr-1 h-3 w-3" />
-                      </button>
                     </div>
 
-                    {/* تيكن */}
+                    {/* دومينو - تصميم جديد */}
                     <div 
-                      className={`flex flex-col h-40 rounded-lg overflow-hidden border-2 ${activeGameCategory === 'tekken' ? 'ring-2 ring-red-600' : ''} border-red-600/80 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer`}
-                      onClick={() => setActiveGameCategory('tekken')}
-                    >
-                      <div className="bg-gradient-to-br from-[#9A1212] to-[#5F0000] flex-1 flex items-center justify-center">
-                        <span className="text-white text-3xl font-bold">鉄</span>
-                      </div>
-                      <div className="p-1 bg-red-500/10 border-t border-red-500/30">
-                        <h3 className="text-red-400 font-bold text-sm">تيكن</h3>
-                      </div>
-                      <div className="py-1 px-2 bg-gray-700/50 text-white/50 font-bold text-xs flex items-center justify-center">
-                        قريباً...
-                      </div>
-                    </div>
-                    
-                    {/* دومينو */}
-                    <div 
-                      className={`flex flex-col h-40 rounded-lg overflow-hidden border-2 ${activeGameCategory === 'domino' ? 'ring-2 ring-blue-600' : ''} border-blue-600/80 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer`}
+                      className={`group relative flex flex-col h-52 rounded-2xl overflow-hidden shadow-xl hover:shadow-blue-500/30 transition-all duration-300 hover:scale-105 cursor-pointer ${activeGameCategory === 'domino' ? 'ring-4 ring-blue-500' : ''}`}
                       onClick={() => {
                         setActiveGameCategory('domino');
                         navigateToGameTables('domino');
                       }}
                     >
-                      <div className="bg-gradient-to-br from-[#1E3A8A] to-[#0F172A] flex-1 flex items-center justify-center">
-                        <span className="text-white text-3xl font-bold">🎲</span>
+                      {/* خلفية اللعبة - صورة */}
+                      <div className="absolute inset-0 bg-gradient-to-b from-[#1E3A8A] to-[#0F172A]">
+                        <div className="w-full h-full flex items-center justify-center">
+                          <div className="absolute top-1/4 left-1/4 transform -translate-x-1/2 -translate-y-1/2 rotate-12 text-white/20 text-8xl font-bold">
+                            🎲
+                          </div>
+                          <div className="absolute bottom-1/4 right-1/4 transform translate-x-1/2 translate-y-1/2 -rotate-12 text-white/20 text-8xl font-bold">
+                            🎲
+                          </div>
+                        </div>
                       </div>
-                      <div className="p-1 bg-blue-500/10 border-t border-blue-500/30">
-                        <h3 className="text-blue-400 font-bold text-sm">دومينو</h3>
+                      
+                      {/* تراكب شفاف */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-[#0F172A]/50 to-[#1E3A8A]/30"></div>
+                      
+                      {/* محتوى البطاقة */}
+                      <div className="relative flex flex-col h-full z-10 p-3">
+                        {/* أيقونة مميزة */}
+                        <div className="flex justify-between items-center">
+                          <div className="flex gap-1">
+                            <div className="bg-blue-500 text-white font-bold text-xs p-1 px-2 rounded">شائع</div>
+                            <div className="bg-red-500 text-white font-bold text-xs p-1 px-2 rounded">٪٥٠+</div>
+                          </div>
+                          <div className="w-10 h-10 bg-blue-900 rounded-full border-2 border-blue-400 flex items-center justify-center">
+                            <span className="text-white text-base">🎲</span>
+                          </div>
+                        </div>
+                        
+                        {/* عنوان اللعبة */}
+                        <div className="mt-2 mb-1">
+                          <h3 className="text-blue-400 font-bold text-xl">دومينو</h3>
+                          <div className="mt-1 w-full h-0.5 bg-gradient-to-r from-blue-500/0 via-blue-500 to-blue-500/0"></div>
+                        </div>
+                        
+                        {/* تفاصيل إضافية */}
+                        <div className="my-2 text-xs text-gray-300 flex gap-2">
+                          <div className="bg-black/30 rounded px-2 py-1 border border-blue-500/20">
+                            <span className="text-blue-400">٢٥٠</span> لاعب نشط
+                          </div>
+                          <div className="bg-black/30 rounded px-2 py-1 border border-blue-500/20">
+                            <span className="text-blue-400">٤٥</span> طاولة
+                          </div>
+                        </div>
+                        
+                        {/* زر الدخول */}
+                        <div className="mt-auto">
+                          <button 
+                            className="w-full py-2 px-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold text-sm hover:from-blue-400 hover:to-blue-500 rounded-lg transition-colors flex items-center justify-center gap-2 group-hover:scale-105 transform transition-transform duration-200"
+                          >
+                            <div className="w-6 h-6 rounded-full bg-black/20 flex items-center justify-center">
+                              <span className="text-white text-xs">١•٢</span>
+                            </div>
+                            العب الدومينو الآن
+                            <ChevronRight className="mr-1 h-4 w-4" />
+                          </button>
+                        </div>
                       </div>
-                      <button 
-                        className="py-1 px-2 bg-blue-500 text-white font-bold text-xs hover:bg-blue-400 transition-colors flex items-center justify-center"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigateToGameTables('domino');
-                        }}
-                      >
-                        العب الدومينو الآن
-                        <ChevronRight className="mr-1 h-3 w-3" />
-                      </button>
+                    </div>
+
+                    {/* تيكن - قريباً */}
+                    <div 
+                      className={`group relative flex flex-col h-52 rounded-2xl overflow-hidden shadow-xl hover:shadow-red-500/30 transition-all duration-300 hover:scale-105 cursor-pointer ${activeGameCategory === 'tekken' ? 'ring-4 ring-red-600' : ''}`}
+                      onClick={() => setActiveGameCategory('tekken')}
+                    >
+                      {/* خلفية اللعبة - صورة */}
+                      <div className="absolute inset-0 bg-gradient-to-b from-[#9A1212] to-[#5F0000]">
+                        <div className="w-full h-full flex items-center justify-center">
+                          <div className="absolute opacity-20 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white/50 text-9xl font-bold">
+                            鉄
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* تراكب شفاف */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-[#5F0000]/50 to-[#9A1212]/30"></div>
+                      
+                      {/* محتوى البطاقة */}
+                      <div className="relative flex flex-col h-full z-10 p-3">
+                        {/* أيقونة مميزة */}
+                        <div className="flex justify-between items-center">
+                          <div className="flex gap-1">
+                            <div className="bg-yellow-500 text-black font-bold text-xs p-1 px-2 rounded">قريباً</div>
+                          </div>
+                          <div className="w-10 h-10 bg-red-900 rounded-full border-2 border-red-400 flex items-center justify-center">
+                            <span className="text-white text-xl">鉄</span>
+                          </div>
+                        </div>
+                        
+                        {/* عنوان اللعبة */}
+                        <div className="mt-2 mb-1">
+                          <h3 className="text-red-400 font-bold text-xl">تيكن</h3>
+                          <div className="mt-1 w-full h-0.5 bg-gradient-to-r from-red-500/0 via-red-500 to-red-500/0"></div>
+                        </div>
+                        
+                        {/* تفاصيل إضافية */}
+                        <div className="my-2 text-xs text-gray-300 flex gap-2">
+                          <div className="bg-black/30 rounded px-2 py-1 border border-red-500/20">
+                            <span className="text-red-400">٠</span> لاعب نشط
+                          </div>
+                          <div className="bg-black/30 rounded px-2 py-1 border border-red-500/20">
+                            <span className="text-red-400">٠</span> غرفة
+                          </div>
+                        </div>
+                        
+                        {/* زر الدخول */}
+                        <div className="mt-auto relative overflow-hidden">
+                          <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-20 rounded-lg backdrop-blur-sm">
+                            <div className="bg-yellow-500/80 text-black font-bold px-4 py-1 rounded-lg animate-pulse">
+                              قريباً - متاح قريباً
+                            </div>
+                          </div>
+                          <button 
+                            disabled
+                            className="w-full py-2 px-3 bg-gradient-to-r from-red-600 to-red-700 text-white font-bold text-sm rounded-lg flex items-center justify-center gap-2 opacity-50"
+                          >
+                            <div className="w-6 h-6 rounded-full bg-black/20 flex items-center justify-center">
+                              <span className="text-white">👊</span>
+                            </div>
+                            استعد للقتال
+                            <ChevronRight className="mr-1 h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
