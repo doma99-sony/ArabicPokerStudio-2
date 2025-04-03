@@ -155,47 +155,45 @@ export default function LobbyPage() {
               </div>
             </div>
 
-            {/* أزرار الوصول السريع - عمودية */}
-            <div className="flex flex-col items-end gap-2">
+            {/* أزرار الوصول السريع */}
+            <div className="flex items-center gap-2">
               {/* زر إعادة تعيين الرصيد - وضع للاختبار فقط */}
               <div className="hidden md:flex gap-1 scale-75 origin-right">
                 <ResetChipsButton />
                 <RemoveVirtualPlayersButton />
               </div>
               
-              <div className="flex flex-col items-end gap-1.5">
-                <Button 
-                  variant="outline" 
-                  className="border-[#D4AF37]/50 text-[#D4AF37] hover:bg-[#D4AF37]/10 h-9 w-full py-0 px-3 text-xs bg-black/30 backdrop-blur-sm"
-                  onClick={() => navigate("/notifications")}
-                >
-                  <Bell size={16} className="ml-1" />
-                  <span className="inline">الإشعارات</span>
-                </Button>
+              <Button 
+                variant="outline" 
+                className="border-[#D4AF37]/50 text-[#D4AF37] hover:bg-[#D4AF37]/10 h-9 py-0 px-3 text-xs bg-black/30 backdrop-blur-sm"
+                onClick={() => navigate("/notifications")}
+              >
+                <Bell size={16} className="ml-1" />
+                <span className="hidden md:inline">الإشعارات</span>
+              </Button>
 
-                <Button 
-                  variant="outline" 
-                  className="border-[#D4AF37]/50 text-[#D4AF37] hover:bg-[#D4AF37]/10 h-9 w-full py-0 px-3 text-xs bg-black/30 backdrop-blur-sm"
-                  onClick={navigateToProfile}
-                >
-                  <User size={16} className="ml-1" />
-                  <span className="inline">الملف</span>
-                </Button>
+              <Button 
+                variant="outline" 
+                className="border-[#D4AF37]/50 text-[#D4AF37] hover:bg-[#D4AF37]/10 h-9 py-0 px-3 text-xs bg-black/30 backdrop-blur-sm"
+                onClick={navigateToProfile}
+              >
+                <User size={16} className="ml-1" />
+                <span className="hidden md:inline">الملف</span>
+              </Button>
 
-                <Button 
-                  variant="outline" 
-                  className="border-red-500/50 text-red-400 hover:bg-red-500/10 h-9 w-full py-0 px-3 text-xs bg-black/30 backdrop-blur-sm"
-                  onClick={handleLogout}
-                  disabled={logoutMutation.isPending}
-                >
-                  {logoutMutation.isPending ? (
-                    <Loader2 className="h-4 w-4 animate-spin ml-1" />
-                  ) : (
-                    <LogOut size={16} className="ml-1" />
-                  )}
-                  <span className="inline">خروج</span>
-                </Button>
-              </div>
+              <Button 
+                variant="outline" 
+                className="border-red-500/50 text-red-400 hover:bg-red-500/10 h-9 py-0 px-3 text-xs bg-black/30 backdrop-blur-sm"
+                onClick={handleLogout}
+                disabled={logoutMutation.isPending}
+              >
+                {logoutMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin ml-1" />
+                ) : (
+                  <LogOut size={16} className="ml-1" />
+                )}
+                <span className="hidden md:inline">خروج</span>
+              </Button>
             </div>
           </div>
         </div>
