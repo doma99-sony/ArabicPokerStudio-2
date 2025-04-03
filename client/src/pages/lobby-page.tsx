@@ -254,25 +254,7 @@ export default function LobbyPage() {
                           <p className="text-[#D4AF37] font-bold text-lg">{formatChips(user?.chips || 0)}</p>
                         </div>
                       </div>
-                      <div className="bg-[#0A3A2A]/70 p-2 rounded-lg border border-[#D4AF37]/30 shadow-inner">
-                        <div className="flex items-center space-x-2 mb-1">
-                          <p className="text-xs text-gray-300">مستوى VIP</p>
-                          <div className="h-3 w-16 bg-gray-700 rounded-full overflow-hidden">
-                            <div className="h-full bg-gradient-to-r from-[#D4AF37] to-[#E5C04B] w-1/4"></div>
-                          </div>
-                        </div>
-                        <div className="flex items-center">
-                          <span className="text-[#D4AF37] text-xs font-bold">25/100</span>
-                          <Button
-                            variant="link"
-                            className="text-[#D4AF37] text-xs p-0 h-auto ml-2"
-                            onClick={() => navigate("/vip")}
-                          >
-                            ترقية
-                            <ChevronUp className="h-3 w-3 mr-1" />
-                          </Button>
-                        </div>
-                      </div>
+                      {/* تم حذف مربع مميزات VIP بناءً على طلب المستخدم */}
                     </div>
 
                     {/* أزرار الوصول السريع */}
