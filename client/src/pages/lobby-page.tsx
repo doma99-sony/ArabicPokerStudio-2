@@ -252,7 +252,7 @@ export default function LobbyPage() {
                   <div className="mb-3">
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-4 w-full max-w-sm mr-0 ml-auto">
                     {/* بوكر عرباوي - تصميم جديد */}
                     <div 
                       className={`group relative flex flex-col h-48 w-full rounded-2xl overflow-hidden shadow-xl hover:shadow-[#D4AF37]/30 transition-all duration-300 hover:scale-105 cursor-pointer ${activeGameCategory === 'poker' ? 'ring-4 ring-[#D4AF37]' : ''}`}
