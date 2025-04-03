@@ -110,70 +110,91 @@ export default function LobbyPage() {
       
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
 
-      {/* Header Bar */}
-      <header className="relative z-10 bg-black/80 text-white p-2 shadow-xl border-b border-[#D4AF37]/30">
-        <div className="container mx-auto flex justify-between items-center">
+      {/* Header Bar - تصميم جديد احترافي */}
+      <header className="relative z-10 bg-gradient-to-r from-[#0A3A2A] to-black py-3 shadow-xl border-b-2 border-[#D4AF37]/50">
+        <div className="container mx-auto flex justify-between items-center px-4">
+          {/* القسم الأيسر - الشعار ومعلومات اللعبة */}
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <img 
-                src="/assets/poker-logo.jpeg" 
-                alt="بوكر عرباوي" 
-                className="w-10 h-10 rounded-full border-2 border-[#D4AF37] object-cover shadow-md shadow-[#D4AF37]/30" 
-              />
-              <h1 className="text-xl font-bold text-[#D4AF37]">بوكر تكساس عرباوي</h1>
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <img 
+                  src="/assets/poker-logo.jpeg" 
+                  alt="بوكر عرباوي" 
+                  className="w-12 h-12 rounded-full border-2 border-[#D4AF37] object-cover shadow-md shadow-[#D4AF37]/30" 
+                />
+                <div className="absolute -bottom-1 -right-1 bg-green-500 w-4 h-4 rounded-full border border-black"></div>
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-[#D4AF37] drop-shadow-md">بوكر تكساس عرباوي</h1>
+                <div className="flex items-center mt-0.5">
+                  <OnlineUsersCounter />
+                </div>
+              </div>
             </div>
-            {/* عداد المستخدمين المتصلين */}
-            <OnlineUsersCounter />
           </div>
 
-          <div className="flex items-center gap-2">
-            <div className="text-right">
-              <p className="text-[#D4AF37] text-sm">مرحباً، {user?.username}</p>
+          {/* القسم الأيمن - معلومات المستخدم والأزرار */}
+          <div className="flex items-center gap-3">
+            {/* معلومات المستخدم والرصيد */}
+            <div className="bg-[#0A3A2A]/60 rounded-lg border border-[#D4AF37]/30 py-1 px-3 mr-2">
               <div className="flex items-center gap-2">
-                <p className="text-white/80 text-xs flex items-center">الرصيد: <span className="text-[#D4AF37] font-bold flex items-center mr-1"><Coins className="ml-1 h-3.5 w-3.5" /> {formatChips(user?.chips || 0)}</span></p>
-                {/* زر إعادة تعيين الرصيد - وضع للاختبار فقط */}
-                <div className="flex gap-1 scale-75 origin-right">
-                  <ResetChipsButton />
-                  <RemoveVirtualPlayersButton />
+                <div className="relative w-8 h-8 rounded-full overflow-hidden border border-[#D4AF37]/70">
+                  <img 
+                    src={user?.avatar || "/assets/poker-icon-gold.png"} 
+                    alt="صورة المستخدم" 
+                    className="w-full h-full object-cover" 
+                  />
+                </div>
+                <div className="text-right">
+                  <p className="text-[#D4AF37] text-sm font-bold leading-tight">{user?.username}</p>
+                  <div className="flex items-center">
+                    <Coins className="h-3.5 w-3.5 text-[#D4AF37] ml-1" />
+                    <span className="text-[#D4AF37] text-xs font-bold">{formatChips(user?.chips || 0)}</span>
+                  </div>
                 </div>
               </div>
             </div>
 
+            {/* أزرار الوصول السريع */}
+            <div className="flex items-center gap-2">
+              {/* زر إعادة تعيين الرصيد - وضع للاختبار فقط */}
+              <div className="hidden md:flex gap-1 scale-75 origin-right">
+                <ResetChipsButton />
+                <RemoveVirtualPlayersButton />
+              </div>
+              
+              <Button 
+                variant="outline" 
+                className="border-[#D4AF37]/50 text-[#D4AF37] hover:bg-[#D4AF37]/10 h-9 py-0 px-3 text-xs bg-black/30 backdrop-blur-sm"
+                onClick={() => navigate("/notifications")}
+              >
+                <Bell size={16} className="ml-1" />
+                <span className="hidden md:inline">الإشعارات</span>
+              </Button>
 
-            
-            <Button 
-              variant="outline" 
-              className="border-[#D4AF37]/50 text-[#D4AF37] hover:bg-[#D4AF37]/10 h-8 py-0 px-2 text-xs"
-              onClick={() => navigate("/notifications")}
-            >
-              <Bell size={14} className="ml-1" />
-              الإشعارات
-            </Button>
+              <Button 
+                variant="outline" 
+                className="border-[#D4AF37]/50 text-[#D4AF37] hover:bg-[#D4AF37]/10 h-9 py-0 px-3 text-xs bg-black/30 backdrop-blur-sm"
+                onClick={navigateToProfile}
+              >
+                <User size={16} className="ml-1" />
+                <span className="hidden md:inline">الملف</span>
+              </Button>
 
-            <Button 
-              variant="outline" 
-              className="border-[#D4AF37]/50 text-[#D4AF37] hover:bg-[#D4AF37]/10 h-8 py-0 px-2 text-xs"
-              onClick={navigateToProfile}
-            >
-              <User size={14} className="ml-1" />
-              الملف
-            </Button>
-
-
-            
-            <Button 
-              variant="outline" 
-              className="border-red-500/50 text-red-400 hover:bg-red-500/10 h-8 py-0 px-2 text-xs"
-              onClick={handleLogout}
-              disabled={logoutMutation.isPending}
-            >
-              {logoutMutation.isPending ? (
-                <Loader2 className="h-3 w-3 animate-spin ml-1" />
-              ) : (
-                <LogOut size={14} className="ml-1" />
-              )}
-              خروج
-            </Button>
+              <Button 
+                variant="outline" 
+                className="border-red-500/50 text-red-400 hover:bg-red-500/10 h-9 py-0 px-3 text-xs bg-black/30 backdrop-blur-sm"
+                onClick={handleLogout}
+                disabled={logoutMutation.isPending}
+              >
+                {logoutMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin ml-1" />
+                ) : (
+                  <LogOut size={16} className="ml-1" />
+                )}
+                <span className="hidden md:inline">خروج</span>
+              </Button>
+            </div>
           </div>
         </div>
       </header>
