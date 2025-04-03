@@ -200,7 +200,7 @@ export default function LobbyPage() {
       </header>
 
       {/* Main Content */}
-      <main className="relative z-10 flex-1 overflow-hidden h-[calc(100vh-8rem)]">
+      <main className="relative z-10 flex-1 overflow-hidden">
         {/* Chat Section - Fixed to left */}
         <div 
           className="fixed top-16 left-0 h-[calc(100%-8rem)] z-20 transition-all duration-300" 
@@ -240,8 +240,8 @@ export default function LobbyPage() {
         </div>
 
         {/* المحتوى الرئيسي */}
-        <div className="container mx-auto p-4 h-full overflow-hidden">
-          <div className="flex flex-col h-full overflow-hidden">
+        <div className="container mx-auto p-4">
+          <div className="flex flex-col">
             {/* العناصر الرئيسية */}
             <div className="grid grid-cols-1 overflow-hidden">
               {/* تم حذف قسم معلومات اللاعب بناءً على طلب المستخدم */}
@@ -252,7 +252,7 @@ export default function LobbyPage() {
                   <div className="mb-3">
                   </div>
 
-                  <div className="flex flex-col gap-3 w-full max-w-xs mr-0 ml-auto">
+                  <div className="flex flex-col gap-3 w-full max-w-sm mr-0 ml-0">
                     {/* بوكر عرباوي - تصميم جديد */}
                     <div 
                       className={`relative flex flex-col h-40 w-full rounded-xl overflow-hidden shadow-xl ${activeGameCategory === 'poker' ? 'ring-2 ring-[#D4AF37]' : ''}`}
