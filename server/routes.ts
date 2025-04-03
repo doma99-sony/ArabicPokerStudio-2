@@ -402,6 +402,100 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "حدث خطأ أثناء مغادرة الطاولة" });
     }
   });
+  
+  // نقطة نهاية لبدء جولة جديدة
+  app.post("/api/game/:tableId/start-round", ensureAuthenticated, async (req, res) => {
+    const tableId = parseInt(req.params.tableId);
+    
+    try {
+      if (!req.user) {
+        return res.status(401).json({ success: false, message: "غير مصرح" });
+      }
+      
+      // التحقق من أن المستخدم جالس على الطاولة
+      const gameState = await storage.getGameState(tableId, req.user.id);
+      if (!gameState) {
+        return res.status(404).json({ success: false, message: "لم يتم العثور على الطاولة" });
+      }
+      
+      // التحقق من أن المستخدم لاعب في هذه الطاولة
+      const isPlayer = gameState.players.some(p => 
+        p.id === req.user?.id && p.isCurrentPlayer === true);
+      
+      if (!isPlayer) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "يجب أن تكون لاعباً على هذه الطاولة لبدء جولة جديدة" 
+        });
+      }
+      
+      // استخدام طريقة startNewRound المضافة مسبقًا
+      try {
+        const result = await storage.startNewRound(tableId);
+        
+        if (!result || !result.success) {
+          return res.status(400).json({ 
+            success: false, 
+            message: result?.message || "فشل في بدء جولة جديدة" 
+          });
+        }
+        
+        // استخدام طريقة performGameAction بدلاً من ذلك (تصحيح مؤقت)
+        const actionResult = await storage.performGameAction(tableId, req.user.id, "restart_round");
+        
+        // البث إلى جميع اللاعبين عن إعادة بدء الجولة
+        if (pokerModule.broadcastToTable) {
+          pokerModule.broadcastToTable(tableId, {
+            type: "round_restarted",
+            timestamp: Date.now(),
+            tableId,
+            initiator: req.user.username,
+            message: `تم بدء جولة جديدة بواسطة ${req.user.username}`
+          });
+        }
+        
+        console.log(`بدء جولة جديدة في الطاولة ${tableId} بواسطة اللاعب ${req.user.id}`);
+        
+        res.json({ 
+          success: true, 
+          message: "تم بدء جولة جديدة بنجاح", 
+          gameState: actionResult.gameState 
+        });
+      } catch (error) {
+        // إذا فشلت startNewRound، جرّب performGameAction مباشرة
+        try {
+          const actionResult = await storage.performGameAction(tableId, req.user.id, "restart_round");
+          
+          if (!actionResult.success) {
+            return res.status(400).json({ 
+              success: false, 
+              message: actionResult.message || "فشل في بدء جولة جديدة" 
+            });
+          }
+          
+          console.log(`بدء جولة جديدة (طريقة بديلة) في الطاولة ${tableId} بواسطة اللاعب ${req.user.id}`);
+          
+          res.json({ 
+            success: true, 
+            message: "تم بدء جولة جديدة بنجاح (استخدام طريقة بديلة)", 
+            gameState: actionResult.gameState 
+          });
+        } catch (innerError) {
+          console.error("فشل في كلا الطريقتين لبدء جولة جديدة:", innerError);
+          res.status(500).json({ 
+            success: false, 
+            message: "حدث خطأ أثناء بدء جولة جديدة" 
+          });
+        }
+      }
+    } catch (error) {
+      console.error("خطأ في بدء جولة جديدة:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "حدث خطأ أثناء بدء جولة جديدة" 
+      });
+    }
+  });
 
   // مسار جديد لإزالة جميع اللاعبين الوهميين (يتطلب كلمة مرور)
   app.post("/api/system/remove-virtual-players", async (req, res) => {

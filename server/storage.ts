@@ -44,6 +44,7 @@ export interface IStorage {
     action: GameAction,
     amount?: number
   ): Promise<{ success: boolean; message?: string; gameState?: GameState }>;
+  startNewRound?(tableId: number): Promise<{ success: boolean; message?: string; gameState?: GameState }>; // إضافة وظيفة اختيارية لبدء جولة جديدة
   
   // Player profile operations
   getPlayerProfile(userId: number): Promise<PlayerProfile | undefined>;
@@ -59,14 +60,56 @@ export interface IStorage {
 }
 
 export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private tables: Map<number, GameTable>;
-  private gameRooms: Map<number, GameRoom>;
-  private playerProfiles: Map<number, PlayerProfile>;
+  // تحويل إلى عام للسماح بالوصول من routes.ts
+  public users: Map<number, User>;
+  public tables: Map<number, GameTable>;
+  public gameRooms: Map<number, GameRoom>;
+  public playerProfiles: Map<number, PlayerProfile>;
   sessionStore: any; // Express session store
   currentId: number;
   currentTableId: number;
   currentGameHistoryId: number;
+  
+  // إضافة وظيفة لبدء جولة جديدة
+  public startNewRound = async (tableId: number): Promise<{ success: boolean; message?: string; gameState?: GameState }> => {
+    console.log(`بدء جولة جديدة في الطاولة ${tableId}`);
+    const gameRoom = this.gameRooms.get(tableId);
+    if (!gameRoom) {
+      return { success: false, message: "الطاولة غير موجودة" };
+    }
+    
+    try {
+      // الحصول على حالة اللعبة الحالية
+      const users = Array.from(this.users.values());
+      
+      // البحث عن أول مستخدم متاح لاستخدامه للحصول على حالة اللعبة
+      let anyPlayerId = -1;
+      for (const user of users) {
+        const gameState = gameRoom.getGameStateForPlayer(user.id);
+        if (gameState.players.some(p => p.isCurrentPlayer)) {
+          anyPlayerId = user.id;
+          break;
+        }
+      }
+      
+      if (anyPlayerId === -1) {
+        return { success: false, message: "لا يوجد لاعبين متاحين على الطاولة" };
+      }
+      
+      // محاولة إعادة تشغيل الجولة بإرسال رسالة خاصة
+      // هذا سيؤدي إلى إعادة ضبط حالة اللاعبين (folded = false)
+      const result = await this.performGameAction(tableId, anyPlayerId, "restart_round");
+      
+      return {
+        success: true,
+        message: "تم بدء جولة جديدة بنجاح",
+        gameState: result.gameState
+      };
+    } catch (error) {
+      console.error("خطأ في بدء جولة جديدة:", error);
+      return { success: false, message: "حدث خطأ أثناء بدء جولة جديدة" };
+    }
+  };
 
   constructor() {
     this.users = new Map();

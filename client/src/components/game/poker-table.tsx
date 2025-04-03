@@ -648,8 +648,74 @@ export function PokerTable({ gameState }: PokerTableProps) {
                   });
                 });
               }}
+              tableId={gameState.id}
+              gameStatus={gameState.gameStatus}
             />
           </div>
+        )}
+        
+        {/* زر بدء جولة جديدة - يظهر في الأعلى */}
+        {(gameState.gameStatus === "showdown" || gameState.gameStatus === "waiting" || 
+         (positionedPlayers.find(p => p.isCurrentPlayer)?.folded && gameState.currentTurn === -1)) && (
+          <motion.div 
+            className="absolute top-6 left-1/2 transform -translate-x-1/2 z-40"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5, duration: 0.3 }}
+          >
+            <Button
+              onClick={() => {
+                // إرسال طلب لبدء جولة جديدة
+                fetch(`/api/game/${gameState.id || gameState.gameId}/start-round`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  credentials: 'include'
+                })
+                .then(response => {
+                  if (!response.ok) {
+                    throw new Error('فشل في بدء جولة جديدة');
+                  }
+                  return response.json();
+                })
+                .then(data => {
+                  toast({
+                    title: "تم بدء جولة جديدة",
+                    description: "استعد للعب!",
+                    variant: "default",
+                  });
+                })
+                .catch(error => {
+                  toast({
+                    title: "خطأ في بدء جولة جديدة",
+                    description: error.message,
+                    variant: "destructive",
+                  });
+                });
+              }}
+              className="bg-gradient-to-r from-gold to-amber-600 hover:from-gold/90 hover:to-amber-500 text-black font-bold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 border-2 border-gold/50 animate-pulse"
+            >
+              <div className="flex items-center gap-2">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-5 h-5">
+                  <path d="M12 5V19M12 5L18 11M12 5L6 11" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <span>بدء جولة جديدة</span>
+              </div>
+            </Button>
+          </motion.div>
+        )}
+        
+        {/* رسالة تنبيه في حالة الانسحاب من الجولة */}
+        {positionedPlayers.find(p => p.isCurrentPlayer)?.folded && gameState.gameStatus !== "showdown" && (
+          <motion.div 
+            className="absolute top-6 left-1/2 transform -translate-x-1/2 z-30"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="bg-black/70 backdrop-blur-sm text-white px-4 py-2 rounded-full border border-red-500/30 text-sm">
+              لقد انسحبت من هذه الجولة. انتظر الجولة القادمة للانضمام للعب مرة أخرى.
+            </div>
+          </motion.div>
         )}
       </div>
       

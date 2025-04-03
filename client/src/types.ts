@@ -80,7 +80,7 @@ export interface Winner {
 }
 
 // إجراءات اللعب المختلفة 
-export type GameAction = 'fold' | 'check' | 'call' | 'raise' | 'all_in';
+export type GameAction = 'fold' | 'check' | 'call' | 'raise' | 'all_in' | 'restart_round';
 
 // حالة اللعبة الحالية
 export interface GameState {

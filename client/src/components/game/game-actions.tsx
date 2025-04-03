@@ -158,7 +158,8 @@ export function GameActions({
         check: "متابعة بدون رهان",
         call: `مجاراة بمبلغ ${currentBet}`,
         raise: `زيادة الرهان إلى ${amount}`,
-        all_in: "المراهنة بكل الرقائق"
+        all_in: "المراهنة بكل الرقائق",
+        restart_round: "تم بدء جولة جديدة"
       };
       
       toast({

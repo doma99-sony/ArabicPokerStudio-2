@@ -14,7 +14,7 @@ export type GameType = "poker" | "naruto" | "domino" | "tekken";
 export type TableStatus = "available" | "full" | "in_progress" | "maintenance";
 
 // إجراءات اللعب
-export type GameAction = "fold" | "check" | "call" | "bet" | "raise" | "all_in";
+export type GameAction = "fold" | "check" | "call" | "bet" | "raise" | "all_in" | "restart_round";
 
 // واجهة طاولة اللعب
 export interface GameTable {
