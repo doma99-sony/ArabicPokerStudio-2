@@ -271,7 +271,7 @@ export default function LobbyPage() {
                       </div>
                       
                       {/* تراكب شفاف */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-[#0A3A2A]/50 to-[#0A3A2A]/30"></div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-[#0A3A2A]/50 to-[#0A3A2A]/30 animate-subtle-gradient"></div>
                       
                       {/* محتوى البطاقة */}
                       <div className="relative flex flex-col h-full z-10 p-3">
@@ -305,7 +305,7 @@ export default function LobbyPage() {
                         {/* زر الدخول */}
                         <div className="mt-auto">
                           <button 
-                            className="w-full py-2 px-3 bg-[#D4AF37] text-black font-bold text-sm rounded-lg flex items-center justify-center gap-2"
+                            className="w-full py-2 px-3 bg-[#D4AF37] text-black font-bold text-sm rounded-lg flex items-center justify-center gap-2 animate-card-shadow"
                           >
                             <div className="w-6 h-6 rounded-full bg-black/20 flex items-center justify-center">
                               <span className="text-black">♣</span>
@@ -335,7 +335,7 @@ export default function LobbyPage() {
                       </div>
                       
                       {/* تراكب شفاف */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-[#FF4500]/40 to-[#FF8C00]/30"></div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-[#FF4500]/40 to-[#FF8C00]/30 animate-subtle-gradient"></div>
                       
                       {/* محتوى البطاقة */}
                       <div className="relative flex flex-col h-full z-10 p-3">
@@ -368,7 +368,7 @@ export default function LobbyPage() {
                         {/* زر الدخول */}
                         <div className="mt-auto">
                           <button 
-                            className="w-full py-2 px-3 bg-orange-500 text-white font-bold text-sm rounded-lg flex items-center justify-center gap-2"
+                            className="w-full py-2 px-3 bg-orange-500 text-white font-bold text-sm rounded-lg flex items-center justify-center gap-2 animate-card-shadow"
                           >
                             <div className="w-6 h-6 rounded-full bg-black/20 flex items-center justify-center">
                               <span className="text-white">⚔️</span>
@@ -401,7 +401,7 @@ export default function LobbyPage() {
                       </div>
                       
                       {/* تراكب شفاف */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-[#0F172A]/50 to-[#1E3A8A]/30"></div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-[#0F172A]/50 to-[#1E3A8A]/30 animate-subtle-gradient"></div>
                       
                       {/* محتوى البطاقة */}
                       <div className="relative flex flex-col h-full z-10 p-3">
@@ -435,7 +435,7 @@ export default function LobbyPage() {
                         {/* زر الدخول */}
                         <div className="mt-auto">
                           <button 
-                            className="w-full py-2 px-3 bg-blue-500 text-white font-bold text-sm rounded-lg flex items-center justify-center gap-2"
+                            className="w-full py-2 px-3 bg-blue-500 text-white font-bold text-sm rounded-lg flex items-center justify-center gap-2 animate-card-shadow"
                           >
                             <div className="w-6 h-6 rounded-full bg-black/20 flex items-center justify-center">
                               <span className="text-white text-xs">١•٢</span>
@@ -462,7 +462,7 @@ export default function LobbyPage() {
                       </div>
                       
                       {/* تراكب شفاف */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-[#5F0000]/50 to-[#9A1212]/30"></div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-[#5F0000]/50 to-[#9A1212]/30 animate-subtle-gradient"></div>
                       
                       {/* محتوى البطاقة */}
                       <div className="relative flex flex-col h-full z-10 p-3">
