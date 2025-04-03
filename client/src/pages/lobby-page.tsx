@@ -474,9 +474,50 @@ export default function LobbyPage() {
               </div>
             </div>
 
-            {/* القسم الثاني - الألعاب الإضافية (4 صفوف، كل صف 4 مربعات) */}
+            {/* القسم الثاني */}
             <div className="w-full md:w-3/4 order-1 md:order-2">
-              <div className="grid grid-cols-1 gap-6">
+              {/* شريط الأيقونات السفلي */}
+              <div className="fixed bottom-0 left-0 right-0 bg-black/80 border-t border-[#D4AF37]/30 p-2 z-50">
+                <div className="container mx-auto">
+                  <div className="flex justify-between items-center">
+                    <button className="flex flex-col items-center justify-center w-16 h-16">
+                      <div className="w-8 h-8 bg-[#1B4D3E] rounded-full border-2 border-[#D4AF37] flex items-center justify-center">
+                        <span className="text-[#D4AF37] text-sm">♠️</span>
+                      </div>
+                      <span className="text-[#D4AF37] text-xs mt-1">بوكر</span>
+                    </button>
+                    
+                    <button className="flex flex-col items-center justify-center w-16 h-16">
+                      <div className="w-8 h-8 bg-blue-800 rounded-full border-2 border-blue-300 flex items-center justify-center">
+                        <span className="text-white text-[10px]">🎲</span>
+                      </div>
+                      <span className="text-white/80 text-xs mt-1">طاولة</span>
+                    </button>
+                    
+                    <button className="flex flex-col items-center justify-center w-16 h-16">
+                      <div className="w-8 h-8 bg-red-700 rounded-full border-2 border-red-300 flex items-center justify-center">
+                        <span className="text-white text-[10px]">♥</span>
+                      </div>
+                      <span className="text-white/80 text-xs mt-1">ورق</span>
+                    </button>
+                    
+                    <button className="flex flex-col items-center justify-center w-16 h-16">
+                      <div className="w-8 h-8 bg-emerald-700 rounded-full border-2 border-emerald-300 flex items-center justify-center">
+                        <span className="text-white text-[10px]">♟️</span>
+                      </div>
+                      <span className="text-white/80 text-xs mt-1">استراتيجية</span>
+                    </button>
+                    
+                    <button className="flex flex-col items-center justify-center w-16 h-16">
+                      <div className="w-8 h-8 bg-purple-700 rounded-full border-2 border-purple-300 flex items-center justify-center">
+                        <span className="text-white text-[10px]">🎮</span>
+                      </div>
+                      <span className="text-white/80 text-xs mt-1">المزيد</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div className="hidden grid-cols-1 gap-6">
                 {/* الصف الأول - ألعاب الطاولات */}
                 <div className="rounded-xl bg-gradient-to-b from-[#1d4ed8]/90 to-[#172554]/70 border-2 border-[#93c5fd]/40 p-4 backdrop-blur-sm shadow-2xl">
                   <div className="text-center mb-4">
