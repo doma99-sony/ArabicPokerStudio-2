@@ -249,27 +249,13 @@ export default function LobbyPage() {
               {/* واجهة اختيار الألعاب - قسم عرضي كامل */}
               <div className="w-full">
                 <div className="rounded-xl bg-gradient-to-b from-[#0A3A2A]/90 to-black/80 border-2 border-[#D4AF37]/40 p-4 backdrop-blur-sm shadow-2xl">
-                  <div className="text-center mb-8 flex items-center justify-center">
-                    <div className="relative">
-                      <div className="absolute -top-12 left-1/2 transform -translate-x-1/2">
-                        <div className="bg-gradient-to-r from-[#0A3A2A] to-[#1B4D3E] text-[#D4AF37] text-xl font-bold py-2 px-10 rounded-full shadow-lg border-2 border-[#D4AF37]/30">
-                          <span className="flex items-center justify-center gap-3">
-                            <span className="text-xl">♣</span>
-                            ألعابنا المميزة
-                            <span className="text-xl">♠</span>
-                          </span>
-                        </div>
-                      </div>
-                      <div className="mt-8 mb-2 flex items-center justify-center">
-                        <div className="h-0.5 w-60 bg-gradient-to-r from-[#D4AF37]/0 via-[#D4AF37] to-[#D4AF37]/0 rounded-full"></div>
-                      </div>
-                    </div>
+                  <div className="mb-3">
                   </div>
 
-                  <div className="grid grid-cols-2 gap-6">
+                  <div className="grid grid-cols-2 gap-4">
                     {/* بوكر عرباوي - تصميم جديد */}
                     <div 
-                      className={`group relative flex flex-col h-64 w-full rounded-2xl overflow-hidden shadow-xl hover:shadow-[#D4AF37]/30 transition-all duration-300 hover:scale-105 cursor-pointer ${activeGameCategory === 'poker' ? 'ring-4 ring-[#D4AF37]' : ''}`}
+                      className={`group relative flex flex-col h-48 w-full rounded-2xl overflow-hidden shadow-xl hover:shadow-[#D4AF37]/30 transition-all duration-300 hover:scale-105 cursor-pointer ${activeGameCategory === 'poker' ? 'ring-4 ring-[#D4AF37]' : ''}`}
                       onClick={() => {
                         setActiveGameCategory('poker');
                         navigateToGameTables('poker');
@@ -333,7 +319,7 @@ export default function LobbyPage() {
 
                     {/* نارتو - تصميم جديد */}
                     <div 
-                      className={`group relative flex flex-col h-64 w-full rounded-2xl overflow-hidden shadow-xl hover:shadow-orange-500/30 transition-all duration-300 hover:scale-105 cursor-pointer ${activeGameCategory === 'naruto' ? 'ring-4 ring-orange-500' : ''}`}
+                      className={`group relative flex flex-col h-48 w-full rounded-2xl overflow-hidden shadow-xl hover:shadow-orange-500/30 transition-all duration-300 hover:scale-105 cursor-pointer ${activeGameCategory === 'naruto' ? 'ring-4 ring-orange-500' : ''}`}
                       onClick={() => {
                         setActiveGameCategory('naruto');
                         navigateToGameTables('naruto');
@@ -396,7 +382,7 @@ export default function LobbyPage() {
 
                     {/* دومينو - تصميم جديد */}
                     <div 
-                      className={`group relative flex flex-col h-64 w-full rounded-2xl overflow-hidden shadow-xl hover:shadow-blue-500/30 transition-all duration-300 hover:scale-105 cursor-pointer ${activeGameCategory === 'domino' ? 'ring-4 ring-blue-500' : ''}`}
+                      className={`group relative flex flex-col h-48 w-full rounded-2xl overflow-hidden shadow-xl hover:shadow-blue-500/30 transition-all duration-300 hover:scale-105 cursor-pointer ${activeGameCategory === 'domino' ? 'ring-4 ring-blue-500' : ''}`}
                       onClick={() => {
                         setActiveGameCategory('domino');
                         navigateToGameTables('domino');
@@ -463,7 +449,7 @@ export default function LobbyPage() {
 
                     {/* تيكن - قريباً */}
                     <div 
-                      className={`group relative flex flex-col h-64 w-full rounded-2xl overflow-hidden shadow-xl hover:shadow-red-500/30 transition-all duration-300 hover:scale-105 cursor-pointer ${activeGameCategory === 'tekken' ? 'ring-4 ring-red-600' : ''}`}
+                      className={`group relative flex flex-col h-48 w-full rounded-2xl overflow-hidden shadow-xl hover:shadow-red-500/30 transition-all duration-300 hover:scale-105 cursor-pointer ${activeGameCategory === 'tekken' ? 'ring-4 ring-red-600' : ''}`}
                       onClick={() => setActiveGameCategory('tekken')}
                     >
                       {/* خلفية اللعبة - صورة */}
