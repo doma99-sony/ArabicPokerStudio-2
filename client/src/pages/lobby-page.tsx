@@ -248,14 +248,14 @@ export default function LobbyPage() {
 
               {/* واجهة اختيار الألعاب - قسم عرضي كامل */}
               <div className="w-full">
-                <div className="rounded-xl bg-gradient-to-b from-[#0A3A2A]/90 to-black/80 border-2 border-[#D4AF37]/40 p-4 backdrop-blur-sm shadow-2xl">
+                <div className="rounded-xl bg-[#0A3A2A] border-2 border-[#D4AF37]/40 p-4 shadow-xl">
                   <div className="mb-3">
                   </div>
 
-                  <div className="flex flex-col gap-4 w-full max-w-sm mr-0 ml-auto">
+                  <div className="flex flex-col gap-3 w-full max-w-xs mr-0 ml-auto">
                     {/* بوكر عرباوي - تصميم جديد */}
                     <div 
-                      className={`group relative flex flex-col h-48 w-full rounded-2xl overflow-hidden shadow-xl hover:shadow-[#D4AF37]/30 transition-all duration-300 hover:scale-105 cursor-pointer ${activeGameCategory === 'poker' ? 'ring-4 ring-[#D4AF37]' : ''}`}
+                      className={`relative flex flex-col h-40 w-full rounded-xl overflow-hidden shadow-xl ${activeGameCategory === 'poker' ? 'ring-2 ring-[#D4AF37]' : ''}`}
                       onClick={() => {
                         setActiveGameCategory('poker');
                         navigateToGameTables('poker');
@@ -305,7 +305,7 @@ export default function LobbyPage() {
                         {/* زر الدخول */}
                         <div className="mt-auto">
                           <button 
-                            className="w-full py-2 px-3 bg-gradient-to-r from-[#D4AF37] to-[#B8860B] text-black font-bold text-sm hover:from-[#E5C04B] hover:to-[#C09526] rounded-lg transition-colors flex items-center justify-center gap-2 group-hover:scale-105 transform transition-transform duration-200"
+                            className="w-full py-2 px-3 bg-[#D4AF37] text-black font-bold text-sm rounded-lg flex items-center justify-center gap-2"
                           >
                             <div className="w-6 h-6 rounded-full bg-black/20 flex items-center justify-center">
                               <span className="text-black">♣</span>
@@ -319,7 +319,7 @@ export default function LobbyPage() {
 
                     {/* نارتو - تصميم جديد */}
                     <div 
-                      className={`group relative flex flex-col h-48 w-full rounded-2xl overflow-hidden shadow-xl hover:shadow-orange-500/30 transition-all duration-300 hover:scale-105 cursor-pointer ${activeGameCategory === 'naruto' ? 'ring-4 ring-orange-500' : ''}`}
+                      className={`relative flex flex-col h-40 w-full rounded-xl overflow-hidden shadow-xl ${activeGameCategory === 'naruto' ? 'ring-2 ring-orange-500' : ''}`}
                       onClick={() => {
                         setActiveGameCategory('naruto');
                         navigateToGameTables('naruto');
@@ -368,7 +368,7 @@ export default function LobbyPage() {
                         {/* زر الدخول */}
                         <div className="mt-auto">
                           <button 
-                            className="w-full py-2 px-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm hover:from-orange-400 hover:to-orange-500 rounded-lg transition-colors flex items-center justify-center gap-2 group-hover:scale-105 transform transition-transform duration-200"
+                            className="w-full py-2 px-3 bg-orange-500 text-white font-bold text-sm rounded-lg flex items-center justify-center gap-2"
                           >
                             <div className="w-6 h-6 rounded-full bg-black/20 flex items-center justify-center">
                               <span className="text-white">⚔️</span>
@@ -382,7 +382,7 @@ export default function LobbyPage() {
 
                     {/* دومينو - تصميم جديد */}
                     <div 
-                      className={`group relative flex flex-col h-48 w-full rounded-2xl overflow-hidden shadow-xl hover:shadow-blue-500/30 transition-all duration-300 hover:scale-105 cursor-pointer ${activeGameCategory === 'domino' ? 'ring-4 ring-blue-500' : ''}`}
+                      className={`relative flex flex-col h-40 w-full rounded-xl overflow-hidden shadow-xl ${activeGameCategory === 'domino' ? 'ring-2 ring-blue-500' : ''}`}
                       onClick={() => {
                         setActiveGameCategory('domino');
                         navigateToGameTables('domino');
@@ -435,7 +435,7 @@ export default function LobbyPage() {
                         {/* زر الدخول */}
                         <div className="mt-auto">
                           <button 
-                            className="w-full py-2 px-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold text-sm hover:from-blue-400 hover:to-blue-500 rounded-lg transition-colors flex items-center justify-center gap-2 group-hover:scale-105 transform transition-transform duration-200"
+                            className="w-full py-2 px-3 bg-blue-500 text-white font-bold text-sm rounded-lg flex items-center justify-center gap-2"
                           >
                             <div className="w-6 h-6 rounded-full bg-black/20 flex items-center justify-center">
                               <span className="text-white text-xs">١•٢</span>
@@ -449,7 +449,7 @@ export default function LobbyPage() {
 
                     {/* تيكن - قريباً */}
                     <div 
-                      className={`group relative flex flex-col h-48 w-full rounded-2xl overflow-hidden shadow-xl hover:shadow-red-500/30 transition-all duration-300 hover:scale-105 cursor-pointer ${activeGameCategory === 'tekken' ? 'ring-4 ring-red-600' : ''}`}
+                      className={`relative flex flex-col h-40 w-full rounded-xl overflow-hidden shadow-xl ${activeGameCategory === 'tekken' ? 'ring-2 ring-red-600' : ''}`}
                       onClick={() => setActiveGameCategory('tekken')}
                     >
                       {/* خلفية اللعبة - صورة */}
@@ -501,7 +501,7 @@ export default function LobbyPage() {
                           </div>
                           <button 
                             disabled
-                            className="w-full py-2 px-3 bg-gradient-to-r from-red-600 to-red-700 text-white font-bold text-sm rounded-lg flex items-center justify-center gap-2 opacity-50"
+                            className="w-full py-2 px-3 bg-red-600 text-white font-bold text-sm rounded-lg flex items-center justify-center gap-2 opacity-50"
                           >
                             <div className="w-6 h-6 rounded-full bg-black/20 flex items-center justify-center">
                               <span className="text-white">👊</span>
