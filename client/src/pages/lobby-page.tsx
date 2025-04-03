@@ -252,7 +252,7 @@ export default function LobbyPage() {
                   <div className="flex flex-col w-full max-w-sm mr-0 ml-auto">
                     {/* بوكر عرباوي - تصميم واضح */}
                     <div 
-                      className={`relative flex flex-col h-[130px] w-full rounded-xl overflow-hidden shadow-lg mb-4 mt-2 ${activeGameCategory === 'poker' ? 'ring-2 ring-[#D4AF37]' : 'ring-1 ring-[#D4AF37]'} hover:scale-[1.02] transition-all duration-300 cursor-pointer`}
+                      className={`relative flex flex-col h-[160px] w-full rounded-xl overflow-hidden shadow-lg mb-4 mt-2 ${activeGameCategory === 'poker' ? 'ring-2 ring-[#D4AF37]' : 'ring-1 ring-[#D4AF37]'} hover:scale-[1.02] transition-all duration-300 cursor-pointer`}
                       onClick={() => {
                         setActiveGameCategory('poker');
                         navigateToGameTables('poker');
@@ -307,7 +307,7 @@ export default function LobbyPage() {
 
                     {/* نارتو - تصميم واضح */}
                     <div 
-                      className={`relative flex flex-col h-[130px] w-full rounded-xl overflow-hidden shadow-lg mb-4 ${activeGameCategory === 'naruto' ? 'ring-2 ring-orange-500' : 'ring-1 ring-orange-500'} hover:scale-[1.02] transition-all duration-300 cursor-pointer`}
+                      className={`relative flex flex-col h-[160px] w-full rounded-xl overflow-hidden shadow-lg mb-4 ${activeGameCategory === 'naruto' ? 'ring-2 ring-orange-500' : 'ring-1 ring-orange-500'} hover:scale-[1.02] transition-all duration-300 cursor-pointer`}
                       onClick={() => {
                         setActiveGameCategory('naruto');
                         navigateToGameTables('naruto');
@@ -361,7 +361,7 @@ export default function LobbyPage() {
 
                     {/* دومينو - تصميم واضح */}
                     <div 
-                      className={`relative flex flex-col h-[130px] w-full rounded-xl overflow-hidden shadow-lg mb-4 ${activeGameCategory === 'domino' ? 'ring-2 ring-blue-500' : 'ring-1 ring-blue-500'} hover:scale-[1.02] transition-all duration-300 cursor-pointer`}
+                      className={`relative flex flex-col h-[160px] w-full rounded-xl overflow-hidden shadow-lg mb-4 ${activeGameCategory === 'domino' ? 'ring-2 ring-blue-500' : 'ring-1 ring-blue-500'} hover:scale-[1.02] transition-all duration-300 cursor-pointer`}
                       onClick={() => {
                         setActiveGameCategory('domino');
                         navigateToGameTables('domino');
@@ -416,7 +416,7 @@ export default function LobbyPage() {
 
                     {/* تيكن - قريباً - تصميم واضح */}
                     <div 
-                      className={`relative flex flex-col h-[130px] w-full rounded-xl overflow-hidden shadow-lg mb-4 ${activeGameCategory === 'tekken' ? 'ring-2 ring-red-600' : 'ring-1 ring-red-600'} hover:scale-[1.02] transition-all duration-300 cursor-pointer`}
+                      className={`relative flex flex-col h-[160px] w-full rounded-xl overflow-hidden shadow-lg mb-4 ${activeGameCategory === 'tekken' ? 'ring-2 ring-red-600' : 'ring-1 ring-red-600'} hover:scale-[1.02] transition-all duration-300 cursor-pointer`}
                       onClick={() => setActiveGameCategory('tekken')}
                     >
                       {/* خلفية اللعبة - لون ثابت */}
