@@ -290,7 +290,35 @@ export function PlayerComponent({ player, isTurn, gameStatus = "", lastAction, s
       <div className="flex items-center">
         {/* Avatar with VIP indicator if applicable */}
         <div className="relative">
-          <div className={`w-12 h-12 rounded-full overflow-hidden border-2 ${player.isCurrentPlayer ? "border-white shadow-[0_0_15px_rgba(255,215,0,0.7)]" : "border-white/70"}`}>
+          {/* إضافة عداد تنازلي للاعب الحالي */}
+          {isTurn && (
+            <svg className="absolute -inset-1 z-0" width="60" height="60" viewBox="0 0 60 60">
+              <circle 
+                cx="30" 
+                cy="30" 
+                r="28" 
+                fill="none" 
+                strokeWidth="3" 
+                stroke="rgba(0,0,0,0.5)" 
+              />
+              <circle 
+                cx="30" 
+                cy="30" 
+                r="28" 
+                fill="none" 
+                strokeWidth="3" 
+                stroke={turnTimeLeft <= 3 ? 'rgba(239, 68, 68, 0.9)' : turnTimeLeft <= 6 ? 'rgba(245, 158, 11, 0.9)' : 'rgba(59, 130, 246, 0.9)'} 
+                strokeDasharray="175.9" 
+                strokeDashoffset={175.9 * (1 - turnTimeLeft / 12)} 
+                transform="rotate(-90 30 30)" 
+                style={{ 
+                  transition: 'stroke-dashoffset 1s linear, stroke 0.5s ease-in-out',
+                  filter: 'drop-shadow(0 0 5px rgba(255, 215, 0, 0.5))'
+                }}
+              />
+            </svg>
+          )}
+          <div className={`w-12 h-12 rounded-full overflow-hidden border-2 ${player.isCurrentPlayer ? "border-white shadow-[0_0_15px_rgba(255,215,0,0.7)]" : "border-white/70"} relative z-10`}>
             <Image 
               src={player.avatar} 
               alt={player.username} 
@@ -301,7 +329,7 @@ export function PlayerComponent({ player, isTurn, gameStatus = "", lastAction, s
           
           {/* VIP badge if player is VIP */}
           {player.isVIP && (
-            <div className="absolute -top-1 -right-1 bg-gold rounded-full w-5 h-5 flex items-center justify-center text-deepBlack text-xs font-bold">
+            <div className="absolute -top-1 -right-1 bg-gold rounded-full w-5 h-5 flex items-center justify-center text-deepBlack text-xs font-bold z-20">
               VIP
             </div>
           )}

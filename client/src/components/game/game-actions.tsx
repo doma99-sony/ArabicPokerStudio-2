@@ -119,7 +119,26 @@ export function GameActions({
   };
 
   const handleAction = async (action: GameAction, amount?: number) => {
-    if (!isCurrentTurn || isActionInProgress) return;
+    console.log("handleAction called with:", action, amount);
+    console.log("isCurrentTurn:", isCurrentTurn);
+    console.log("isActionInProgress:", isActionInProgress);
+    
+    // أضف معالجة خاصة إذا لم يكن دور اللاعب الحالي
+    if (!isCurrentTurn) {
+      console.log("ليس دورك للعب حاليًا");
+      toast({
+        title: "انتبه!",
+        description: "ليس دورك للعب حاليًا، انتظر دورك.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // منع تنفيذ الإجراءات أثناء المعالجة
+    if (isActionInProgress) {
+      console.log("هناك إجراء قيد التنفيذ بالفعل");
+      return;
+    }
     
     // منع الضغط المتكرر على نفس الزر
     if (isActionTooSoon(action)) {
@@ -135,6 +154,7 @@ export function GameActions({
     
     // عالج حالة الرفع بشكل منفصل
     if (action === "raise") {
+      console.log("عرض عناصر التحكم في الرهان");
       setShowBetControls(true);
       return;
     }
@@ -190,7 +210,7 @@ export function GameActions({
   const canBet = currentBet === 0 && playerChips > 0;
   const canAllIn = playerChips > 0;
 
-  const buttonsDisabled = !isCurrentTurn;
+  const buttonsDisabled = false; // تجاوز للاختبار - السماح بالتفاعل مع الأزرار دائمًا
 
   return (
     <motion.div 

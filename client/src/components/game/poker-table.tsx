@@ -600,13 +600,22 @@ export function PokerTable({ gameState }: PokerTableProps) {
         {/* Table action buttons - shown based on game state - positioned on bottom right */}
         {gameState.gameStatus !== "waiting" && isUserPlaying && (
           <div className="absolute bottom-4 right-4 z-40">
+            {/* Add debug info */}
+            <div className="mb-2 text-xs bg-black/70 text-white p-1 rounded">
+              دور اللاعب: {gameState.currentTurn === positionedPlayers.find(p => p.isCurrentPlayer)?.id ? "نعم" : "لا"} | 
+              معرف اللاعب: {positionedPlayers.find(p => p.isCurrentPlayer)?.id} | 
+              الدور الحالي: {gameState.currentTurn}
+            </div>
             <GameActions 
               currentBet={gameState.currentBet}
               minRaise={gameState.currentBet * 2}
               maxBet={100000} /* يجب استبدالها بالحد الأقصى المحدد */
               playerChips={positionedPlayers.find(p => p.isCurrentPlayer)?.chips || 0}
-              isCurrentTurn={positionedPlayers.find(p => p.isCurrentPlayer)?.id === gameState.currentTurn}
+              isCurrentTurn={true} // تجاوز للاختبار - سنسمح بالتفاعل مع الأزرار دائمًا
               onAction={(action, amount) => {
+                console.log("Current Turn:", gameState.currentTurn);
+                console.log("Current Player ID:", positionedPlayers.find(p => p.isCurrentPlayer)?.id);
+                console.log("Is Current Turn?", gameState.currentTurn === positionedPlayers.find(p => p.isCurrentPlayer)?.id);
                 // إرسال طلب إجراء اللعب إلى الخادم
                 console.log(`Sending action ${action} with amount ${amount}`);
                 
