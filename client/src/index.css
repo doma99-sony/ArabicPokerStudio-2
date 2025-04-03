@@ -5,6 +5,14 @@
 @tailwind components;
 @tailwind utilities;
 
+body {
+  overflow: hidden;
+}
+
+html {
+  overflow: hidden;
+}
+
 @layer utilities {
   .bg-gradient-radial {
     background-image: radial-gradient(var(--tw-gradient-stops));
