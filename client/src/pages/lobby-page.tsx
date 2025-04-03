@@ -136,21 +136,33 @@ export default function LobbyPage() {
 
           {/* القسم الأيمن - معلومات المستخدم والأزرار */}
           <div className="flex items-center gap-3">
-            {/* معلومات المستخدم والرصيد */}
-            <div className="bg-gradient-to-r from-[#0A3A2A]/90 to-black/80 rounded-lg border border-[#D4AF37] py-1.5 px-3 mr-2 shadow-lg hover:shadow-[#D4AF37]/20 transition-all duration-300">
-              <div className="flex items-center gap-2">
-                <div className="relative w-9 h-9 rounded-full overflow-hidden border-2 border-[#D4AF37] shadow-inner">
-                  <img 
-                    src={user?.avatar || "/assets/poker-icon-gold.png"} 
-                    alt="صورة المستخدم" 
-                    className="w-full h-full object-cover" 
-                  />
+            {/* معلومات المستخدم والرصيد - تم تكبير الحجم */}
+            <div className="bg-gradient-to-r from-[#0A3A2A]/90 to-black/80 rounded-lg border-2 border-[#D4AF37] py-2 px-4 mr-2 shadow-xl hover:shadow-[#D4AF37]/30 transition-all duration-300">
+              <div className="flex items-center gap-3">
+                {/* صورة المستخدم مع زر التعديل */}
+                <div className="relative group">
+                  <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-[#D4AF37] shadow-inner">
+                    <img 
+                      src={user?.avatar || "/assets/poker-icon-gold.png"} 
+                      alt="صورة المستخدم" 
+                      className="w-full h-full object-cover" 
+                    />
+                  </div>
+                  {/* زر تعديل الصورة */}
+                  <button 
+                    className="absolute inset-0 w-full h-full bg-black/50 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-300"
+                    onClick={() => navigate("/profile")}
+                  >
+                    <span className="text-white text-xs">تغيير</span>
+                  </button>
+                  {/* مؤشر الحالة */}
+                  <div className="absolute -bottom-1 -right-1 bg-green-500 w-4 h-4 rounded-full border border-black animate-pulse"></div>
                 </div>
                 <div className="text-right">
-                  <p className="text-[#D4AF37] text-sm font-bold leading-tight">{user?.username}</p>
-                  <div className="flex items-center bg-[#0A3A2A]/80 px-2 py-0.5 rounded-full border border-[#D4AF37]/30">
-                    <Coins className="h-3.5 w-3.5 text-[#D4AF37] ml-1" />
-                    <span className="text-[#D4AF37] text-xs font-bold">{formatChips(user?.chips || 0)}</span>
+                  <p className="text-[#D4AF37] text-base font-bold leading-tight mb-1">{user?.username}</p>
+                  <div className="flex items-center bg-[#0A3A2A]/80 px-3 py-1 rounded-full border border-[#D4AF37]/30">
+                    <Coins className="h-4 w-4 text-[#D4AF37] ml-2" />
+                    <span className="text-[#D4AF37] text-sm font-bold">{formatChips(user?.chips || 0)}</span>
                   </div>
                 </div>
               </div>
