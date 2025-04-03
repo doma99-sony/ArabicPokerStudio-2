@@ -10,7 +10,7 @@ import { OnlineUsersCounter } from "@/components/ui/online-users-badge";
 import { ResetChipsButton } from "@/components/reset-chips-button";
 import { RemoveVirtualPlayersButton } from "@/components/remove-virtual-players-button";
 import { NotificationsButton, GameInstructionsButton } from "@/components/ui/notifications-system";
-import { LogOut, User, ChevronRight, Loader2, ChevronLeft, ChevronUp, Bell, ShoppingBag, ShoppingCart, Download, Smartphone, ExternalLink, Coins } from "lucide-react";
+import { LogOut, User, ChevronRight, Loader2, ChevronLeft, ChevronUp, Bell, ShoppingBag, ShoppingCart, Download, Smartphone, ExternalLink, Coins, Trophy } from "lucide-react";
 import { formatChips } from "@/lib/utils";
 
 export default function LobbyPage() {
@@ -251,20 +251,117 @@ export default function LobbyPage() {
           </div>
         </div>
 
-        {/* Contenido principal */}
+        {/* المحتوى الرئيسي */}
         <div className="container mx-auto p-4">
-          <div className="flex flex-col gap-3">
-            {/* Game Categories */}
+          <div className="flex flex-col gap-6">
+            {/* شريط الترحيب */}
+            <div className="bg-gradient-to-r from-[#0A3A2A]/90 to-black/80 rounded-xl p-4 border-2 border-[#D4AF37]/30 shadow-lg backdrop-blur-md">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                <div className="col-span-2 flex flex-col gap-2">
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <img 
+                        src={user?.avatar || "/assets/poker-icon-gold.png"}
+                        alt="Avatar" 
+                        className="w-16 h-16 rounded-full object-cover border-2 border-[#D4AF37]" 
+                      />
+                      <div className="absolute -bottom-1 -right-1 bg-green-500 p-1 rounded-full w-5 h-5 flex items-center justify-center border border-black">
+                        <span className="text-[8px] text-black font-bold">متصل</span>
+                      </div>
+                    </div>
+                    <div>
+                      <h2 className="text-[#D4AF37] text-xl font-bold">أهلاً بك، {user?.username}!</h2>
+                      <p className="text-gray-300 text-sm">آخر تواجد: اليوم {new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4 mt-2">
+                    <div className="bg-[#0A3A2A]/70 p-2 rounded-lg border border-[#D4AF37]/30 shadow flex items-center">
+                      <Coins className="h-5 w-5 text-[#D4AF37] mr-2" />
+                      <div>
+                        <p className="text-xs text-gray-300">رصيدك الحالي</p>
+                        <p className="text-[#D4AF37] font-bold text-lg">{formatChips(user?.chips || 0)}</p>
+                      </div>
+                    </div>
+                    <div className="bg-[#0A3A2A]/70 p-2 rounded-lg border border-[#D4AF37]/30 shadow-inner">
+                      <div className="flex items-center space-x-2 mb-1">
+                        <p className="text-xs text-gray-300">مستوى VIP</p>
+                        <div className="h-3 w-16 bg-gray-700 rounded-full overflow-hidden">
+                          <div className="h-full bg-gradient-to-r from-[#D4AF37] to-[#E5C04B] w-1/4"></div>
+                        </div>
+                      </div>
+                      <div className="flex items-center">
+                        <span className="text-[#D4AF37] text-xs font-bold">25/100</span>
+                        <Button
+                          variant="link"
+                          className="text-[#D4AF37] text-xs p-0 h-auto ml-2"
+                          onClick={() => navigate("/vip")}
+                        >
+                          ترقية
+                          <ChevronUp className="h-3 w-3 mr-1" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex flex-col md:items-end gap-2">
+                  <div className="flex items-center gap-2 flex-wrap justify-center md:justify-end">
+                    <Button 
+                      variant="outline" 
+                      className="border-[#D4AF37]/50 text-[#D4AF37] hover:bg-[#D4AF37]/10 h-9 py-0"
+                      onClick={() => navigate("/profile")}
+                    >
+                      <User size={16} className="ml-2" />
+                      الملف الشخصي
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="border-green-500/50 text-green-400 hover:bg-green-500/10 h-9 py-0"
+                      onClick={() => navigate("/shop")}
+                    >
+                      <ShoppingBag size={16} className="ml-2" />
+                      المتجر
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10 h-9 py-0"
+                      onClick={() => navigate("/rankings")}
+                    >
+                      <Trophy size={16} className="ml-2" />
+                      التصنيفات
+                    </Button>
+                  </div>
+                  <div className="mt-2 flex items-center justify-center md:justify-end gap-2">
+                    <div className="scale-90 origin-right">
+                      <ResetChipsButton />
+                    </div>
+                    <div className="scale-90 origin-right">
+                      <RemoveVirtualPlayersButton />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* اختيار نوع اللعبة */}
             <div className="w-full">
-              <div className="rounded-xl bg-black/60 border border-[#D4AF37]/20 p-3 backdrop-blur-sm mb-4">
-                <div className="text-center mb-6 flex flex-col items-center">
-                  <div className="flex items-center gap-3 mb-2">
+              <div className="rounded-xl bg-gradient-to-b from-black/80 to-[#0A3A2A]/60 border-2 border-[#D4AF37]/20 p-4 backdrop-blur-sm shadow-xl">
+                <div className="text-center mb-6 flex items-center justify-center">
+                  <div className="relative flex items-center gap-3">
+                    <div className="absolute -left-10 -top-6 opacity-30 rotate-12">
+                      <span className="text-[#D4AF37] text-6xl">♥️</span>
+                    </div>
+                    <div className="absolute -right-10 -bottom-6 opacity-30 -rotate-12">
+                      <span className="text-[#D4AF37] text-6xl">♠️</span>
+                    </div>
                     <img 
                       src="/assets/poker-logo-alt.jpeg" 
                       alt="بوكر عرباوي" 
-                      className="w-12 h-12 rounded-full border-2 border-[#D4AF37] object-cover shadow-md shadow-[#D4AF37]/30"
+                      className="w-16 h-16 rounded-full border-2 border-[#D4AF37] object-cover shadow-md shadow-[#D4AF37]/30"
                     />
-                    <h2 className="text-2xl font-bold text-[#D4AF37]">اختر نوع اللعبة</h2>
+                    <div>
+                      <h2 className="text-2xl font-bold text-[#D4AF37]">ألعابنا المميزة</h2>
+                      <p className="text-gray-300 text-sm">اختر نوع اللعبة التي ترغب باللعب فيها</p>
+                    </div>
                   </div>
                 </div>
 
@@ -372,6 +469,130 @@ export default function LobbyPage() {
                 </div>
                 <div className="p-2 bg-black/40 rounded-full w-8 h-8 flex items-center justify-center text-white/70 hover:bg-black/60 hover:text-white cursor-pointer transition-all">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                </div>
+              </div>
+            </div>
+
+            {/* الأقسام الإضافية - مقسمة إلى 3 أعمدة */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
+              {/* VIP Section */}
+              <div className="bg-gradient-to-b from-black/80 to-[#0A3A2A]/60 border-2 border-[#D4AF37]/20 backdrop-blur-sm rounded-lg overflow-hidden shadow-lg">
+                <div className="bg-gradient-to-r from-[#D4AF37]/20 to-transparent border-b border-[#D4AF37]/20 p-2 relative">
+                  <div className="absolute right-2 top-2 w-8 h-8 flex items-center justify-center rounded-full bg-[#D4AF37] text-black font-bold text-xs shadow-lg">VIP</div>
+                  <h3 className="text-[#D4AF37] font-bold text-lg">مميزات VIP</h3>
+                </div>
+                <div className="p-4">
+                  <div className="mb-3 relative">
+                    <div className="w-full h-20 bg-gradient-to-r from-[#0A3A2A] to-black rounded shadow-md flex items-center justify-center">
+                      <span className="text-[#D4AF37] text-2xl font-bold">⭐ VIP ⭐</span>
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                    <div className="absolute bottom-2 left-2 text-[#D4AF37] text-sm font-bold">احصل على مميزات حصرية</div>
+                  </div>
+                  <ul className="text-xs text-gray-300 list-disc list-inside mb-3 space-y-1">
+                    <li>طاولات VIP خاصة</li>
+                    <li>عروض وخصومات حصرية</li>
+                    <li>مكافآت يومية مضاعفة</li>
+                    <li>هدايا أسبوعية خاصة</li>
+                    <li>دعم فني مميز</li>
+                  </ul>
+                  <Button 
+                    className="w-full bg-gradient-to-r from-[#D4AF37] to-[#AA8C2C] text-black hover:bg-[#E5C04B] font-bold"
+                    onClick={() => navigate("/vip")}
+                  >
+                    ترقية إلى VIP
+                  </Button>
+                </div>
+              </div>
+
+              {/* Tournaments & Events Section */}
+              <div className="bg-gradient-to-b from-black/80 to-[#0A3A2A]/60 border-2 border-[#D4AF37]/20 backdrop-blur-sm rounded-lg overflow-hidden shadow-lg">
+                <div className="bg-gradient-to-r from-[#D4AF37]/20 to-transparent border-b border-[#D4AF37]/20 p-2">
+                  <h3 className="text-[#D4AF37] font-bold text-lg">بطولات وأحداث</h3>
+                </div>
+                <div className="p-4">
+                  <div className="space-y-3">
+                    <div className="bg-black/40 rounded-lg p-3 border border-[#D4AF37]/10">
+                      <div className="flex justify-between items-center mb-2">
+                        <h4 className="text-[#D4AF37] font-bold text-sm">بطولة الجمعة الكبرى</h4>
+                        <span className="bg-red-600 text-white text-xs px-2 py-0.5 rounded">اليوم</span>
+                      </div>
+                      <p className="text-gray-300 text-xs mb-2">بطولة أسبوعية بجوائز مالية ضخمة</p>
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="text-gray-400">الجائزة: 100,000 رقاقة</span>
+                        <span className="text-green-400">10:00 مساءً</span>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-black/40 rounded-lg p-3 border border-[#D4AF37]/10">
+                      <div className="flex justify-between items-center mb-2">
+                        <h4 className="text-[#D4AF37] font-bold text-sm">بطولة السبت الذهبية</h4>
+                        <span className="bg-gray-600 text-white text-xs px-2 py-0.5 rounded">غداً</span>
+                      </div>
+                      <p className="text-gray-300 text-xs mb-2">مخصصة للاعبين من مستوى VIP فقط</p>
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="text-gray-400">الجائزة: 250,000 رقاقة</span>
+                        <span className="text-gray-400">8:00 مساءً</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <Button 
+                    variant="outline"
+                    className="w-full mt-3 border-[#D4AF37]/50 text-[#D4AF37] hover:bg-[#D4AF37]/10"
+                    onClick={() => alert("قريباً")}
+                  >
+                    عرض جميع البطولات
+                  </Button>
+                </div>
+              </div>
+
+              {/* Latest News & Updates */}
+              <div className="bg-gradient-to-b from-black/80 to-[#0A3A2A]/60 border-2 border-[#D4AF37]/20 backdrop-blur-sm rounded-lg overflow-hidden shadow-lg">
+                <div className="bg-gradient-to-r from-[#D4AF37]/20 to-transparent border-b border-[#D4AF37]/20 p-2">
+                  <h3 className="text-[#D4AF37] font-bold text-lg">أخبار وتحديثات</h3>
+                </div>
+                <div className="p-4">
+                  <div className="space-y-3">
+                    <div className="flex gap-3 items-start">
+                      <div className="min-w-8 h-8 rounded-md bg-blue-600/50 flex items-center justify-center">
+                        <Download className="h-4 w-4 text-white" />
+                      </div>
+                      <div>
+                        <h4 className="text-[#D4AF37] text-sm font-bold">تطبيق الجوال متاح الآن</h4>
+                        <p className="text-xs text-gray-300">قم بتحميل تطبيق بوكر عرباوي على هاتفك الآن!</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-3 items-start">
+                      <div className="min-w-8 h-8 rounded-md bg-green-600/50 flex items-center justify-center">
+                        <Coins className="h-4 w-4 text-white" />
+                      </div>
+                      <div>
+                        <h4 className="text-[#D4AF37] text-sm font-bold">عرض شحن خاص</h4>
+                        <p className="text-xs text-gray-300">احصل على 50% رقائق إضافية عند الشحن اليوم!</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-3 items-start">
+                      <div className="min-w-8 h-8 rounded-md bg-orange-600/50 flex items-center justify-center">
+                        <Bell className="h-4 w-4 text-white" />
+                      </div>
+                      <div>
+                        <h4 className="text-[#D4AF37] text-sm font-bold">تحديث اللعبة</h4>
+                        <p className="text-xs text-gray-300">تم إضافة ميزات جديدة وإصلاح المشكلات!</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <Button 
+                    variant="outline"
+                    className="w-full mt-3 border-blue-500/50 text-blue-400 hover:bg-blue-500/10"
+                    onClick={() => navigate("/notifications")}
+                  >
+                    <Bell className="ml-2 h-4 w-4" />
+                    عرض كل الإشعارات
+                  </Button>
                 </div>
               </div>
             </div>
