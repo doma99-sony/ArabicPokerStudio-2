@@ -175,41 +175,74 @@ export function PokerTable({ gameState }: PokerTableProps) {
         </div>
       )}
       
-      {/* Main table container */}
+      {/* Main table container with higher quality design */}
       <div 
-        className="poker-table absolute inset-0 rounded-full overflow-hidden flex items-center justify-center"
+        className="poker-table absolute inset-0 overflow-hidden flex items-center justify-center"
         style={{
           // Apply the oval/stadium shape
           borderRadius: "45%/55%",
-          boxShadow: '0 10px 30px rgba(0, 0, 0, 0.5)'
+          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.7)'
         }}
       >
-        {/* Border layer */}
-        <div className="absolute inset-0 rounded-full" 
+        {/* Outer border layer with golden accent */}
+        <div className="absolute inset-0" 
           style={{ 
             borderRadius: "45%/55%", 
-            border: "10px solid #333333",
-            boxShadow: 'inset 0 0 20px rgba(0, 0, 0, 0.8)'
+            border: "12px solid #2C2C2C",
+            boxShadow: 'inset 0 0 30px rgba(0, 0, 0, 0.8)',
+            background: 'linear-gradient(135deg, rgba(44, 44, 44, 1) 0%, rgba(28, 28, 28, 1) 100%)',
+          }}>
+          {/* Golden accent rim */}
+          <div className="absolute inset-0"
+            style={{
+              borderRadius: "45%/55%",
+              border: "2px solid rgba(212, 175, 55, 0.3)",
+              boxShadow: 'inset 0 0 15px rgba(212, 175, 55, 0.1)'
+            }}></div>
+        </div>
+        
+        {/* Table padding layer */}
+        <div className="absolute inset-[12px]" 
+          style={{ 
+            borderRadius: "45%/55%",
+            background: 'linear-gradient(135deg, #1A1A1A 0%, #0D0D0D 100%)',
+            boxShadow: 'inset 0 0 20px rgba(0, 0, 0, 0.6)'
           }}>
         </div>
         
-        {/* Table surface */}
-        <div className="absolute inset-[10px] bg-[#0f653a]" 
+        {/* Table felt surface with texture */}
+        <div className="absolute inset-[18px]" 
           style={{ 
             borderRadius: "45%/55%",
             background: 'linear-gradient(to bottom, #0f653a, #0a4528)',
             boxShadow: 'inset 0 0 50px rgba(0, 0, 0, 0.5)'
           }}>
+          {/* Felt texture overlay */}
+          <div className="absolute inset-0"
+            style={{
+              borderRadius: "45%/55%",
+              backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'100\' height=\'100\' viewBox=\'0 0 100 100\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.7\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100\' height=\'100\' filter=\'url(%23noise)\' opacity=\'0.1\'/%3E%3C/svg%3E")',
+              opacity: 0.15,
+              mixBlendMode: 'multiply'
+            }}></div>
           
-          {/* Center table logo - faded watermark */}
-          <div className="absolute inset-0 flex items-center justify-center text-white/10 text-4xl font-bold"
+          {/* Felt glow effect */}
+          <div className="absolute inset-0"
+            style={{
+              borderRadius: "45%/55%",
+              background: 'radial-gradient(circle at center, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0) 70%)'
+            }}></div>
+            
+          {/* Center table logo - enhanced watermark */}
+          <div className="absolute inset-0 flex items-center justify-center"
             style={{ 
               textShadow: '0 2px 10px rgba(255, 255, 255, 0.1)',
               userSelect: 'none'
             }}>
             <div className="flex flex-col items-center justify-center">
-              <div className="text-gold/30 text-6xl mb-2">♠</div>
-              <div className="text-white/20 text-2xl font-bold">BOYA</div>
+              <div className="text-gold/20 text-7xl mb-3 filter blur-[1px]">♠</div>
+              <div className="text-white/15 text-2xl font-bold tracking-wider filter blur-[0.5px]">VIP POKER</div>
+              <div className="mt-2 w-40 h-0.5 bg-gradient-to-r from-transparent via-gold/15 to-transparent"></div>
             </div>
           </div>
         </div>
@@ -260,15 +293,42 @@ export function PokerTable({ gameState }: PokerTableProps) {
           )}
         </div>
 
-        {/* Dealer button */}
+        {/* Dealer button - enhanced with animation */}
         {gameState.gameStatus !== "waiting" && (
-          <div className="absolute z-10 w-10 h-10 bg-white rounded-full flex items-center justify-center text-sm font-bold border-2 border-gold shadow-lg" 
-               style={{ 
-                 bottom: '45%', 
-                 right: '40%' 
-               }}>
-            D
-          </div>
+          <motion.div 
+            className="absolute z-10 w-12 h-12 bg-gradient-to-br from-white to-gray-100 rounded-full flex items-center justify-center text-sm font-bold border-2 border-gold shadow-lg overflow-hidden" 
+            style={{ 
+              bottom: '45%', 
+              right: '40%' 
+            }}
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ 
+              type: "spring",
+              stiffness: 260,
+              damping: 20,
+              duration: 0.3
+            }}
+          >
+            {/* Shine effect */}
+            <div className="absolute inset-0 bg-gradient-to-br from-white/80 via-transparent to-transparent opacity-70 animate-shine"></div>
+            
+            {/* Subtle pulse */}
+            <motion.div 
+              className="absolute inset-0 rounded-full border-2 border-gold/30"
+              animate={{ 
+                boxShadow: ['0 0 0px rgba(212, 175, 55, 0.3)', '0 0 8px rgba(212, 175, 55, 0.7)', '0 0 0px rgba(212, 175, 55, 0.3)'],
+              }}
+              transition={{ 
+                duration: 2, 
+                repeat: Infinity,
+                repeatType: "loop" 
+              }}
+            ></motion.div>
+            
+            {/* Dealer text with gold gradient */}
+            <div className="text-transparent bg-clip-text bg-gradient-to-br from-amber-800 to-amber-600 font-bold text-lg">D</div>
+          </motion.div>
         )}
       
         {/* Center pot indicator */}
@@ -333,37 +393,142 @@ export function PokerTable({ gameState }: PokerTableProps) {
           ))}
         </div>
         
-        {/* Winner Announcement - Show only during showdown */}
+        {/* Winner Announcement - Enhanced with animations and visual effects */}
         {gameState.gameStatus === "showdown" && gameState.winners && gameState.winners.length > 0 && (
           <motion.div 
-            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 mt-[-60px]"
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, type: "spring" }}
+            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 mt-[-60px] w-96 max-w-[90vw]"
+            initial={{ opacity: 0, scale: 0.5, y: 50 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ 
+              duration: 0.8, 
+              type: "spring",
+              stiffness: 200,
+              damping: 15
+            }}
           >
-            <div className="bg-black/80 backdrop-blur-xl px-6 py-4 rounded-xl border-2 border-[#D4AF37] shadow-[0_0_20px_rgba(212,175,55,0.6)]">
-              <div className="text-center">
-                <h2 className="text-[#D4AF37] text-2xl font-bold mb-2">
-                  {positionedPlayers.find(p => p.id === gameState.winners![0].playerId)?.isCurrentPlayer 
-                    ? "لقد فزت! 🎉" 
-                    : `الفائز: ${positionedPlayers.find(p => p.id === gameState.winners![0].playerId)?.username}`}
-                </h2>
-                <div className="text-white mb-3">
-                  بواسطة <span className="text-[#D4AF37] font-bold">{gameState.winners[0].handName}</span>
+            {/* Confetti animation container - absolute positioned outside card */}
+            <div className="absolute -top-20 left-0 right-0 flex justify-center pointer-events-none">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <motion.div
+                  key={`confetti-${i}`}
+                  className="absolute"
+                  initial={{ opacity: 0, scale: 0, y: 0 }}
+                  animate={{ 
+                    opacity: [0, 1, 0],
+                    scale: [0.3, 1, 0.5],
+                    y: [-20, -100 - i * 30],
+                    x: [0, (i-1) * 40]
+                  }}
+                  transition={{
+                    duration: 2,
+                    delay: i * 0.2,
+                    repeat: Infinity,
+                    repeatDelay: 1
+                  }}
+                >
+                  <div 
+                    className={`w-6 h-6 ${i % 3 === 0 ? 'bg-gold' : i % 3 === 1 ? 'bg-red-500' : 'bg-blue-500'} rotate-45 rounded-sm`}
+                    style={{ opacity: 0.7 }}
+                  ></div>
+                </motion.div>
+              ))}
+            </div>
+            
+            {/* Main winner card with luxurious design */}
+            <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-[#0F0F1A] to-[#1F1F2F] p-[3px]">
+              {/* Gold border animated gradient */}
+              <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-[#D4AF37] via-[#FFEA83] to-[#D4AF37] opacity-50 animate-border-flow"></div>
+              
+              {/* Content container */}
+              <div className="relative bg-black/95 backdrop-blur-xl px-6 py-5 rounded-lg border border-[#D4AF37]/20 shadow-[0_0_30px_rgba(212,175,55,0.3)] overflow-hidden">
+                {/* Background design elements */}
+                <div className="absolute inset-0 overflow-hidden">
+                  <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-radial from-gold/10 to-transparent rounded-full -translate-y-1/2 translate-x-1/2"></div>
+                  <div className="absolute bottom-0 left-0 w-40 h-40 bg-gradient-radial from-gold/5 to-transparent rounded-full translate-y-1/2 -translate-x-1/2"></div>
                 </div>
-                <div className="flex justify-center items-center gap-1">
-                  {gameState.winners[0].handDetails?.bestHand?.map((card: CardType, idx: number) => (
-                    <div 
-                      key={`winner-card-${idx}`}
-                      className="transform transition-all duration-300 hover:scale-110"
-                      style={{ margin: '0 -4px' }}
-                    >
-                      <CardComponent card={card} size="sm" variant="gold" isWinning={true} />
+                
+                {/* Trophy icon */}
+                <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/3 text-gold/10 text-7xl">🏆</div>
+                
+                <div className="relative text-center">
+                  {/* Winner badge/ribbon */}
+                  <div className="mb-2">
+                    <div className="inline-flex items-center bg-gradient-to-r from-amber-700 to-amber-500 px-4 py-1 rounded-full shadow-lg">
+                      <motion.div
+                        animate={{ rotate: [0, 5, 0, -5, 0] }}
+                        transition={{ duration: 1.5, repeat: Infinity }}
+                        className="text-xl mr-2"
+                      >
+                        🏆
+                      </motion.div>
+                      <span className="text-white text-sm font-bold uppercase tracking-wider">Winner</span>
                     </div>
-                  ))}
-                </div>
-                <div className="mt-3 text-xl font-bold text-green-500">
-                  +{gameState.winners[0].amount.toLocaleString()} رقاقة
+                  </div>
+                  
+                  {/* Winner name with glow effect */}
+                  <motion.h2 
+                    className="text-gold text-3xl font-bold mb-2"
+                    animate={{ 
+                      textShadow: [
+                        '0 0 5px rgba(212,175,55,0.3)', 
+                        '0 0 15px rgba(212,175,55,0.7)', 
+                        '0 0 5px rgba(212,175,55,0.3)'
+                      ] 
+                    }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    {positionedPlayers.find(p => p.id === gameState.winners![0].playerId)?.isCurrentPlayer 
+                      ? "لقد فزت! 🎉" 
+                      : `${positionedPlayers.find(p => p.id === gameState.winners![0].playerId)?.username}`}
+                  </motion.h2>
+                  
+                  {/* Hand name with elegant styling */}
+                  <div className="text-white mb-4">
+                    بواسطة <span className="text-gold font-bold px-2 py-0.5 bg-gold/10 rounded-md">{gameState.winners[0].handName}</span>
+                  </div>
+                  
+                  {/* Winner's hand with animation */}
+                  <motion.div 
+                    className="flex justify-center items-center gap-1 mb-4"
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.2, duration: 0.5 }}
+                  >
+                    {gameState.winners[0].handDetails?.bestHand?.map((card: CardType, idx: number) => (
+                      <motion.div 
+                        key={`winner-card-${idx}`}
+                        className="transform transition-all duration-300 hover:scale-110"
+                        style={{ margin: '0 -4px' }}
+                        whileHover={{ y: -10, zIndex: 10 }}
+                        custom={idx}
+                        initial={{ y: 40, opacity: 0, rotateY: 180 }}
+                        animate={{ y: 0, opacity: 1, rotateY: 0 }}
+                        transition={{ 
+                          delay: 0.3 + (idx * 0.1),
+                          duration: 0.5,
+                          type: "spring",
+                          stiffness: 260,
+                          damping: 20
+                        }}
+                      >
+                        <CardComponent card={card} size="md" variant="gold" isWinning={true} />
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                  
+                  {/* Chips amount with animation */}
+                  <motion.div 
+                    className="mt-3 text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600"
+                    initial={{ scale: 0.5, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.6, type: "spring" }}
+                  >
+                    <div className="flex items-center justify-center">
+                      <span className="text-xl mr-1">+</span>
+                      <span className="text-3xl">{gameState.winners[0].amount.toLocaleString()}</span>
+                    </div>
+                    <div className="text-white/70 text-sm font-normal mt-1">رقاقة</div>
+                  </motion.div>
                 </div>
               </div>
             </div>
@@ -382,20 +547,53 @@ export function PokerTable({ gameState }: PokerTableProps) {
           />
         ))}
         
-        {/* Empty seats with join buttons */}
+        {/* Empty seats with enhanced join buttons */}
         {!isUserPlaying && emptySeats.map((seat, index) => (
           <div key={`empty-seat-${index}`} className={`${seat.className} z-10`}>
-            <motion.button
-              onClick={() => handleJoinSeat(seat.position)}
-              disabled={isJoining}
-              className="w-14 h-14 bg-black/60 hover:bg-gold/40 rounded-full border-2 border-dashed border-white/50 flex items-center justify-center cursor-pointer transition-all duration-300 transform hover:scale-110"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
+            <motion.div
+              className="relative"
+              initial={{ opacity: 0.7 }}
+              animate={{ opacity: 1 }}
+              transition={{ 
+                duration: 1.5, 
+                repeat: Infinity, 
+                repeatType: "reverse" 
+              }}
             >
-              <Plus className="w-8 h-8 text-white" />
-              <span className="sr-only">الانضمام إلى المقعد</span>
-            </motion.button>
-            <div className="mt-2 text-center text-white/70 text-xs">اضغط للجلوس</div>
+              <motion.button
+                onClick={() => handleJoinSeat(seat.position)}
+                disabled={isJoining}
+                className="relative w-16 h-16 bg-gradient-to-br from-black/80 to-slate-900/80 hover:from-gold/30 hover:to-amber-800/50 rounded-full border-2 border-gold/30 flex items-center justify-center cursor-pointer transition-all duration-300 shadow-[0_0_10px_rgba(0,0,0,0.5)] overflow-hidden group"
+                whileHover={{ scale: 1.15, borderColor: "rgba(212, 175, 55, 0.6)" }}
+                whileTap={{ scale: 0.95 }}
+              >
+                {/* Glow effect on hover */}
+                <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                
+                {/* Pulse effect */}
+                <motion.div 
+                  className="absolute inset-0 rounded-full border-2 border-gold/30"
+                  animate={{ 
+                    scale: [1, 1.2, 1],
+                    opacity: [0, 0.5, 0],
+                  }}
+                  transition={{ 
+                    duration: 2, 
+                    repeat: Infinity,
+                    repeatType: "loop" 
+                  }}
+                ></motion.div>
+                
+                {/* Icon */}
+                <Plus className="w-8 h-8 text-gold group-hover:text-white transition-colors" />
+                <span className="sr-only">الانضمام إلى المقعد</span>
+              </motion.button>
+              
+              {/* Label with enhanced styling */}
+              <div className="mt-3 text-center bg-black/40 backdrop-blur-sm px-2 py-1 rounded-full border border-gold/20">
+                <span className="text-gold/80 text-xs font-medium">انضم للعب</span>
+              </div>
+            </motion.div>
           </div>
         ))}
 

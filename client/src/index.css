@@ -10,7 +10,31 @@
     background-image: radial-gradient(var(--tw-gradient-stops));
   }
   
-  /* تأثيرات متطورة للتطبيق */
+  /* تأثيرات متطورة للتطبيق - VIP */
+  
+  /* أنيميشن لمعان الحدود */
+  .animate-border-flow {
+    background-size: 400% 400%;
+    animation: borderFlow 8s ease infinite;
+  }
+  
+  @keyframes borderFlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  
+  /* أنيميشن بريق لامع */
+  .animate-shine {
+    background-size: 200% 100%;
+    background-position: 100% 0;
+    animation: shine 2s infinite linear;
+  }
+  
+  @keyframes shine {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
   
   /* أنيميشن نبض بطيء */
   .animate-pulse-slow {
@@ -31,6 +55,16 @@
       opacity: 1;
       transform: translateY(0);
     }
+  }
+  
+  /* تأثير للحدود المضيئة */
+  .animate-glow-border {
+    animation: glowBorder 3s infinite alternate;
+  }
+  
+  @keyframes glowBorder {
+    0% { box-shadow: 0 0 5px rgba(212, 175, 55, 0.3), inset 0 0 5px rgba(212, 175, 55, 0.3); }
+    100% { box-shadow: 0 0 15px rgba(212, 175, 55, 0.7), inset 0 0 10px rgba(212, 175, 55, 0.5); }
   }
   
   /* أنيميشن توزيع البطاقات */
@@ -85,6 +119,16 @@
     100% {
       filter: drop-shadow(0 0 1px rgba(212, 175, 55, 0.5));
     }
+  }
+  
+  /* تأثير الوميض الذهبي */
+  .animate-gold-flash {
+    animation: goldFlash 2s ease-in-out infinite;
+  }
+  
+  @keyframes goldFlash {
+    0%, 100% { background-color: rgba(212, 175, 55, 0.1); }
+    50% { background-color: rgba(212, 175, 55, 0.3); }
   }
   
   /* أنيميشن للعناصر العائمة */
@@ -150,6 +194,34 @@
     }
     100% {
       box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+    }
+  }
+  
+  /* تأثير توهج النص */
+  .animate-text-glow {
+    animation: textGlow 2s infinite alternate;
+  }
+  
+  @keyframes textGlow {
+    0% {
+      text-shadow: 0 0 4px rgba(212, 175, 55, 0.5);
+    }
+    100% {
+      text-shadow: 0 0 12px rgba(212, 175, 55, 0.8), 0 0 20px rgba(212, 175, 55, 0.5);
+    }
+  }
+  
+  /* تأثير الظل النابض للبطاقات */
+  .animate-card-shadow {
+    animation: cardShadow 3s infinite alternate;
+  }
+  
+  @keyframes cardShadow {
+    0% {
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+    100% {
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
     }
   }
 }

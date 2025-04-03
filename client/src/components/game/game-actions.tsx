@@ -237,97 +237,203 @@ export function GameActions({
       )}
       
       <div className="flex flex-col items-end space-y-3">
-        {/* لوحة الأزرار الرئيسية */}
-        <div className="bg-black/40 backdrop-blur-md p-3 rounded-2xl border border-gray-700 shadow-xl">
+        {/* لوحة الأزرار الرئيسية - تصميم VIP فاخر */}
+        <div className="bg-gradient-to-b from-black/80 to-[#0A0A0A]/95 backdrop-blur-xl p-4 rounded-2xl border border-[#D4AF37]/30 shadow-[0_5px_20px_rgba(0,0,0,0.7)]">
           {/* عنوان لوحة الأزرار */}
           {isCurrentTurn && (
-            <div className="text-white text-center mb-2 font-bold text-sm">
-              <span className="bg-black/40 rounded-full px-3 py-1">دورك للعب</span>
-            </div>
+            <motion.div 
+              className="text-white text-center mb-3"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3 }}
+            >
+              <span className="bg-gradient-to-r from-[#D4AF37]/20 to-[#D4AF37]/10 rounded-full px-4 py-1.5 text-[#D4AF37] font-bold text-sm border border-[#D4AF37]/20 shadow-[0_0_10px_rgba(212,175,55,0.2)]">
+                دورك للعب
+              </span>
+            </motion.div>
           )}
           
-          <div className="grid grid-cols-2 gap-2">
-            {/* التخلي (Fold) */}
-            <Button
-              onClick={() => handleAction("fold")}
-              disabled={buttonsDisabled || isActionInProgress}
-              className={`
-                bg-red-600 text-white px-4 py-3 rounded-xl
-                hover:bg-red-700 hover:scale-105 transform transition-all duration-200
-                shadow-lg flex items-center justify-between 
-                disabled:opacity-50 disabled:cursor-not-allowed
-                border border-red-500/30
-              `}
+          <div className="grid grid-cols-2 gap-3">
+            {/* التخلي (Fold) - تصميم محسن */}
+            <motion.div
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
             >
-              <span>تخلي</span>
-              <span className="bg-white/20 rounded-full h-6 w-6 flex items-center justify-center text-xs">F</span>
-            </Button>
+              <Button
+                onClick={() => handleAction("fold")}
+                disabled={buttonsDisabled || isActionInProgress}
+                className={`
+                  relative w-full bg-gradient-to-br from-red-900/90 to-red-700/90 text-white px-4 py-3 rounded-xl
+                  hover:shadow-[0_0_15px_rgba(220,38,38,0.5)] transform transition-all duration-200
+                  shadow-lg flex items-center justify-between overflow-hidden
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                  border border-red-600/30 group
+                `}
+              >
+                {/* تأثير توهج عند الحركة */}
+                <div className="absolute inset-0 bg-gradient-to-t from-transparent via-red-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                
+                {/* محتوى الزر */}
+                <div className="flex items-center gap-1">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-1">
+                    <path d="M19 5L5 19M5 5L19 19" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+                  </svg>
+                  <span className="font-medium">تخلي</span>
+                </div>
+                <span className="bg-black/30 rounded-lg h-6 w-6 flex items-center justify-center text-xs font-bold border border-red-500/20">F</span>
+              </Button>
+            </motion.div>
 
-            {/* المتابعة (Check) أو المجاراة (Call) */}
-            <Button
-              onClick={() => handleAction(canCheck ? "check" : "call")}
-              disabled={buttonsDisabled || (!canCheck && !canCall) || isActionInProgress}
-              className={`
-                bg-green-600 text-white px-4 py-3 rounded-xl
-                hover:bg-green-700 hover:scale-105 transform transition-all duration-200
-                shadow-lg flex items-center justify-between 
-                disabled:opacity-50 disabled:cursor-not-allowed
-                border border-green-500/30
-                ${canCheck ? 'animate-pulse' : ''}
-              `}
+            {/* المتابعة (Check) أو المجاراة (Call) - تصميم محسن */}
+            <motion.div
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
             >
-              <div className="flex flex-col">
-                <span>{canCheck ? "متابعة" : "مجاراة"}</span>
-                {!canCheck && <span className="text-xs opacity-80">{currentBet}</span>}
-              </div>
-              <span className="bg-white/20 rounded-full h-6 w-6 flex items-center justify-center text-xs">C</span>
-            </Button>
+              <Button
+                onClick={() => handleAction(canCheck ? "check" : "call")}
+                disabled={buttonsDisabled || (!canCheck && !canCall) || isActionInProgress}
+                className={`
+                  relative w-full bg-gradient-to-br from-green-900/90 to-green-700/90 text-white px-4 py-3 rounded-xl
+                  hover:shadow-[0_0_15px_rgba(22,163,74,0.5)] transform transition-all duration-200
+                  shadow-lg flex items-center justify-between overflow-hidden
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                  border border-green-600/30 group
+                  ${canCheck ? 'ring-1 ring-green-400/50' : ''}
+                `}
+              >
+                {/* تأثير توهج عند الحركة */}
+                <div className="absolute inset-0 bg-gradient-to-t from-transparent via-green-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                
+                {/* تأثير دور اللاعب */}
+                {canCheck && isCurrentTurn && (
+                  <motion.div 
+                    className="absolute inset-0 opacity-30 z-10 pointer-events-none"
+                    animate={{ 
+                      boxShadow: ['inset 0 0 5px rgba(22,163,74,0.3)', 'inset 0 0 15px rgba(22,163,74,0.7)', 'inset 0 0 5px rgba(22,163,74,0.3)']
+                    }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  />
+                )}
+                
+                {/* محتوى الزر */}
+                <div className="flex flex-col items-start">
+                  <div className="flex items-center gap-1">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-1">
+                      <path d="M5 12L9 16L19 6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    <span className="font-medium">{canCheck ? "متابعة" : "مجاراة"}</span>
+                  </div>
+                  {!canCheck && (
+                    <span className="text-xs text-green-200/80 mr-6">
+                      {currentBet.toLocaleString()} رقاقة
+                    </span>
+                  )}
+                </div>
+                <span className="bg-black/30 rounded-lg h-6 w-6 flex items-center justify-center text-xs font-bold border border-green-500/20">C</span>
+              </Button>
+            </motion.div>
 
-            {/* زيادة (Raise) أو رهان (Bet) */}
-            <Button
-              onClick={() => handleAction("raise")}
-              disabled={buttonsDisabled || (!canRaise && !canBet) || isActionInProgress}
-              className={`
-                bg-amber-600 text-white px-4 py-3 rounded-xl
-                hover:bg-amber-700 hover:scale-105 transform transition-all duration-200
-                shadow-lg flex items-center justify-between 
-                disabled:opacity-50 disabled:cursor-not-allowed
-                border border-amber-500/30
-              `}
+            {/* زيادة (Raise) أو رهان (Bet) - تصميم محسن */}
+            <motion.div
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
             >
-              <div className="flex flex-col">
-                <span>{canBet ? "رهان" : "زيادة"}</span>
-                <span className="text-xs opacity-80">{minRaise > 0 ? `${minRaise}+` : ''}</span>
-              </div>
-              <span className="bg-white/20 rounded-full h-6 w-6 flex items-center justify-center text-xs">R</span>
-            </Button>
+              <Button
+                onClick={() => handleAction("raise")}
+                disabled={buttonsDisabled || (!canRaise && !canBet) || isActionInProgress}
+                className={`
+                  relative w-full bg-gradient-to-br from-amber-800/90 to-amber-600/90 text-white px-4 py-3 rounded-xl
+                  hover:shadow-[0_0_15px_rgba(217,119,6,0.5)] transform transition-all duration-200
+                  shadow-lg flex items-center justify-between overflow-hidden
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                  border border-amber-500/30 group
+                `}
+              >
+                {/* تأثير توهج عند الحركة */}
+                <div className="absolute inset-0 bg-gradient-to-t from-transparent via-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                
+                {/* محتوى الزر */}
+                <div className="flex flex-col items-start">
+                  <div className="flex items-center gap-1">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-1">
+                      <path d="M12 20V4M12 4L5 11M12 4L19 11" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    <span className="font-medium">{canBet ? "رهان" : "زيادة"}</span>
+                  </div>
+                  {minRaise > 0 && (
+                    <span className="text-xs text-amber-200/80 mr-6">
+                      {minRaise.toLocaleString()}+ رقاقة
+                    </span>
+                  )}
+                </div>
+                <span className="bg-black/30 rounded-lg h-6 w-6 flex items-center justify-center text-xs font-bold border border-amber-500/20">R</span>
+              </Button>
+            </motion.div>
 
-            {/* كل ما لديك (All-In) */}
-            <Button
-              onClick={() => handleAction("all_in", playerChips)}
-              disabled={buttonsDisabled || !canAllIn || isActionInProgress}
-              className={`
-                bg-gradient-to-r from-red-600 to-yellow-500 text-white px-4 py-3 rounded-xl
-                hover:from-red-700 hover:to-yellow-600 hover:scale-105 transform transition-all duration-200
-                shadow-lg flex items-center justify-between 
-                disabled:opacity-50 disabled:cursor-not-allowed
-                border border-yellow-500/30
-              `}
+            {/* كل ما لديك (All-In) - تصميم محسن بتأثيرات متقدمة */}
+            <motion.div
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
             >
-              <div className="flex flex-col">
-                <span>كل شيء!</span>
-                <span className="text-xs opacity-80">{playerChips}</span>
-              </div>
-              <span className="bg-white/20 rounded-full h-6 w-6 flex items-center justify-center text-xs">A</span>
-            </Button>
+              <Button
+                onClick={() => handleAction("all_in", playerChips)}
+                disabled={buttonsDisabled || !canAllIn || isActionInProgress}
+                className={`
+                  relative w-full bg-gradient-to-br from-purple-900/90 to-red-700/90 text-white px-4 py-3 rounded-xl
+                  hover:shadow-[0_0_15px_rgba(220,38,38,0.7)] transform transition-all duration-200
+                  shadow-lg flex items-center justify-between overflow-hidden group
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                  border border-red-600/30
+                `}
+              >
+                {/* تأثير الخلفية المتحركة */}
+                <div className="absolute inset-0 bg-gradient-to-br from-red-600/20 via-yellow-400/10 to-red-600/20 group-hover:opacity-100 opacity-0 transition-opacity duration-500"></div>
+                
+                {/* تأثير النبض */}
+                <motion.div
+                  className="absolute inset-0 bg-red-500/10 rounded-xl"
+                  animate={{
+                    boxShadow: ['inset 0 0 5px rgba(255,0,0,0.3)', 'inset 0 0 15px rgba(255,0,0,0.7)', 'inset 0 0 5px rgba(255,0,0,0.3)']
+                  }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                />
+                
+                {/* محتوى الزر */}
+                <div className="flex flex-col items-start z-10">
+                  <div className="flex items-center gap-1">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-1">
+                      <path d="M12 12.5L7 7.5M12 12.5L17 7.5M12 12.5V3M21 16V20C21 20.5523 20.5523 21 20 21H4C3.44772 21 3 20.5523 3 20V16" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    <span className="font-bold">كل الرقائق!</span>
+                  </div>
+                  <span className="text-xs text-red-200/90 mr-6">
+                    {playerChips.toLocaleString()} رقاقة
+                  </span>
+                </div>
+                <span className="bg-black/30 rounded-lg h-6 w-6 flex items-center justify-center text-xs font-bold border border-red-500/20">A</span>
+              </Button>
+            </motion.div>
           </div>
         </div>
 
         {/* مؤشر الرقائق الحالية للاعب */}
-        <div className="bg-black/60 backdrop-blur-sm rounded-full px-3 py-1 text-center shadow-inner border border-gray-700/50">
-          <span className="text-gold text-sm">رقائقك: </span>
-          <span className="text-white font-bold">{playerChips.toLocaleString()}</span>
-        </div>
+        <motion.div 
+          className="bg-gradient-to-r from-[#0A0A0A]/95 to-black/90 backdrop-blur-xl rounded-full px-4 py-2 text-center shadow-lg border border-[#D4AF37]/30 flex items-center gap-2"
+          animate={{ 
+            boxShadow: ['0 0 5px rgba(212,175,55,0.2)', '0 0 10px rgba(212,175,55,0.3)', '0 0 5px rgba(212,175,55,0.2)']
+          }}
+          transition={{ duration: 3, repeat: Infinity, repeatType: "reverse" }}
+        >
+          {/* أيقونة الرقائق */}
+          <div className="relative h-6 w-6">
+            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-gold to-amber-600 shadow-md flex items-center justify-center transform rotate-12 border border-white/30"></div>
+          </div>
+          
+          <div>
+            <span className="text-gold/90 text-sm mr-1">رقائقك: </span>
+            <span className="text-white font-bold">{playerChips.toLocaleString()}</span>
+          </div>
+        </motion.div>
       </div>
 
       {/* عناصر التحكم في الرهان */}
