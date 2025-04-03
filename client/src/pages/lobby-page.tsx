@@ -266,10 +266,10 @@ export default function LobbyPage() {
                     </div>
                   </div>
 
-                  <div className="flex flex-row-reverse gap-8">
+                  <div className="grid grid-cols-2 gap-6">
                     {/* بوكر عرباوي - تصميم جديد */}
                     <div 
-                      className={`group relative flex flex-col h-64 w-44 rounded-2xl overflow-hidden shadow-xl hover:shadow-[#D4AF37]/30 transition-all duration-300 hover:scale-105 cursor-pointer ${activeGameCategory === 'poker' ? 'ring-4 ring-[#D4AF37]' : ''}`}
+                      className={`group relative flex flex-col h-64 w-full rounded-2xl overflow-hidden shadow-xl hover:shadow-[#D4AF37]/30 transition-all duration-300 hover:scale-105 cursor-pointer ${activeGameCategory === 'poker' ? 'ring-4 ring-[#D4AF37]' : ''}`}
                       onClick={() => {
                         setActiveGameCategory('poker');
                         navigateToGameTables('poker');
@@ -333,7 +333,7 @@ export default function LobbyPage() {
 
                     {/* نارتو - تصميم جديد */}
                     <div 
-                      className={`group relative flex flex-col h-64 w-44 rounded-2xl overflow-hidden shadow-xl hover:shadow-orange-500/30 transition-all duration-300 hover:scale-105 cursor-pointer ${activeGameCategory === 'naruto' ? 'ring-4 ring-orange-500' : ''}`}
+                      className={`group relative flex flex-col h-64 w-full rounded-2xl overflow-hidden shadow-xl hover:shadow-orange-500/30 transition-all duration-300 hover:scale-105 cursor-pointer ${activeGameCategory === 'naruto' ? 'ring-4 ring-orange-500' : ''}`}
                       onClick={() => {
                         setActiveGameCategory('naruto');
                         navigateToGameTables('naruto');
@@ -396,7 +396,7 @@ export default function LobbyPage() {
 
                     {/* دومينو - تصميم جديد */}
                     <div 
-                      className={`group relative flex flex-col h-64 w-44 rounded-2xl overflow-hidden shadow-xl hover:shadow-blue-500/30 transition-all duration-300 hover:scale-105 cursor-pointer ${activeGameCategory === 'domino' ? 'ring-4 ring-blue-500' : ''}`}
+                      className={`group relative flex flex-col h-64 w-full rounded-2xl overflow-hidden shadow-xl hover:shadow-blue-500/30 transition-all duration-300 hover:scale-105 cursor-pointer ${activeGameCategory === 'domino' ? 'ring-4 ring-blue-500' : ''}`}
                       onClick={() => {
                         setActiveGameCategory('domino');
                         navigateToGameTables('domino');
@@ -463,7 +463,7 @@ export default function LobbyPage() {
 
                     {/* تيكن - قريباً */}
                     <div 
-                      className={`group relative flex flex-col h-64 w-44 rounded-2xl overflow-hidden shadow-xl hover:shadow-red-500/30 transition-all duration-300 hover:scale-105 cursor-pointer ${activeGameCategory === 'tekken' ? 'ring-4 ring-red-600' : ''}`}
+                      className={`group relative flex flex-col h-64 w-full rounded-2xl overflow-hidden shadow-xl hover:shadow-red-500/30 transition-all duration-300 hover:scale-105 cursor-pointer ${activeGameCategory === 'tekken' ? 'ring-4 ring-red-600' : ''}`}
                       onClick={() => setActiveGameCategory('tekken')}
                     >
                       {/* خلفية اللعبة - صورة */}
@@ -678,18 +678,7 @@ export default function LobbyPage() {
             </button>
           </div>
           
-          {/* الملابس */}
-          <div className="relative">
-            <button 
-              onClick={() => alert("سيتم فتح الملابس")}
-              className="flex flex-col items-center justify-center p-2 min-w-[48px]"
-            >
-              <div className="bg-black/60 rounded-full w-11 h-11 border border-[#D4AF37] flex items-center justify-center text-[#D4AF37]">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.47a1 1 0 00.99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 002-2V10h2.15a1 1 0 00.99-.84l.58-3.47a2 2 0 00-1.34-2.23z"></path></svg>
-              </div>
-              <span className="text-[11px] text-white mt-1">الملابس</span>
-            </button>
-          </div>
+
           
           {/* الترتيب */}
           <div className="relative">
@@ -717,18 +706,7 @@ export default function LobbyPage() {
             </button>
           </div>
           
-          {/* المكافآت */}
-          <div className="relative">
-            <button 
-              onClick={() => alert("سيتم فتح المكافآت")}
-              className="flex flex-col items-center justify-center p-2 min-w-[48px]"
-            >
-              <div className="bg-black/60 rounded-full w-11 h-11 border border-[#D4AF37] flex items-center justify-center text-[#D4AF37]">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
-              </div>
-              <span className="text-[11px] text-white mt-1">المكافآت</span>
-            </button>
-          </div>
+
           
           {/* العبها الآن */}
           <div className="relative group">
