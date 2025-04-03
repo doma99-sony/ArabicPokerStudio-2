@@ -6,6 +6,58 @@ export interface Card {
   isWinning?: boolean;
 }
 
+// تعريف فئات الشارات
+export interface BadgeCategory {
+  id: number;
+  name: string;
+  description?: string;
+  icon?: string;
+  sortOrder: number;
+}
+
+// تعريف الشارة
+export interface Badge {
+  id: number;
+  name: string;
+  description: string;
+  imageUrl: string;
+  categoryId?: number;
+  category?: BadgeCategory;
+  isRare: boolean;
+  isHidden: boolean;
+  requiredVipLevel: number;
+  rarityLevel: number; // مستوى الندرة من 1 إلى 5
+  sortOrder: number;
+  grantCriteria?: Record<string, any>; // معايير منح الشارة
+  color: string; // لون أساسي للشارة
+  glowColor?: string; // لون التوهج للشارة
+  effects?: BadgeEffect[]; // التأثيرات الخاصة بالشارة
+  createdAt: Date;
+}
+
+// تعريف تأثيرات الشارة
+export interface BadgeEffect {
+  type: 'glow' | 'pulse' | 'rotate' | 'shake' | 'sparkle' | 'flip' | 'rainbow';
+  intensity?: number; // قوة التأثير (1-10)
+  color?: string; // لون التأثير إن وجد
+  activationMode?: 'always' | 'hover' | 'click' | 'sequence'; // متى يتم تنشيط التأثير
+}
+
+// تعريف شارة المستخدم
+export interface UserBadge {
+  id: number;
+  userId: number;
+  badgeId: number;
+  badge: Badge; // معلومات الشارة الكاملة
+  acquiredAt: Date;
+  isEquipped: boolean;
+  equippedPosition?: number;
+  displayProgress?: number; // تقدم العرض (0-100)
+  source?: string; // مصدر الحصول على الشارة
+  favoriteOrder?: number; // ترتيب المفضلة
+  metadata?: Record<string, any>; // بيانات إضافية
+}
+
 // تعريف نوع طاولة اللعب
 export interface GameTable {
   id: number;
@@ -110,4 +162,95 @@ export interface GameState {
     action: GameAction;
     amount?: number;
   };
+}
+
+// إحصائيات اللاعب
+export interface PlayerStats {
+  gamesPlayed: number;
+  wins: number;
+  losses: number;
+  draws: number;
+  highestWin: number;
+  biggestPot: number;
+  winRate: number;
+  joinDate: Date;
+  totalPlayTime: number;
+  
+  // إحصائيات إضافية للبوكر
+  handsPlayed?: number;
+  flopsSeen?: number;
+  turnsReached?: number;
+  riverReached?: number;
+  showdownsReached?: number;
+  
+  // أيادي البوكر
+  royalFlushes?: number;
+  straightFlushes?: number;
+  fourOfAKind?: number;
+  fullHouses?: number;
+  flushes?: number;
+  straights?: number;
+  threeOfAKind?: number;
+  twoPairs?: number;
+  onePairs?: number;
+  
+  // إحصائيات الأفعال
+  totalBets?: number;
+  totalRaises?: number;
+  totalCalls?: number;
+  totalFolds?: number;
+  totalChecks?: number;
+  totalAllIns?: number;
+}
+
+// عنصر تاريخ اللعب
+export interface GameHistoryItem {
+  id: number;
+  tableId: number;
+  tableName?: string;
+  gameType: "poker" | "naruto" | "domino" | "tekken";
+  startedAt: Date;
+  endedAt?: Date;
+  result: "win" | "loss" | "draw";
+  chipsChange: number;
+  opponentNames?: string[];
+  handDetails?: HandDetails;
+}
+
+// الإنجازات
+export interface Achievement {
+  id: number;
+  name: string;
+  description: string;
+  imageUrl?: string;
+  progress: number; // 0 - 100
+  unlocked: boolean;
+  unlockedDate?: Date;
+  category: string;
+}
+
+// الملف الشخصي للاعب
+export interface PlayerProfile {
+  userId: number;
+  username: string;
+  level: number;
+  vipLevel: number;
+  vipPoints: number;
+  avatar?: string;
+  coverPhoto?: string;
+  bio?: string;
+  chips: number;
+  diamonds: number;
+  stats: PlayerStats;
+  achievements: Achievement[];
+  gameHistory: GameHistoryItem[];
+  lastLogin?: Date;
+  status: 'online' | 'offline' | 'in_game';
+  totalDeposits?: number;
+  badges: UserBadge[]; // شارات المستخدم
+  equippedBadges: UserBadge[]; // الشارات المجهزة حالياً
+  favoriteBadges: UserBadge[]; // الشارات المفضلة
+  badgeProgress: Record<number, number>; // تقدم الحصول على الشارات (بقية الشارات)
+  badgeCount: number; // عدد الشارات الكلي
+  rareCount: number; // عدد الشارات النادرة
 }

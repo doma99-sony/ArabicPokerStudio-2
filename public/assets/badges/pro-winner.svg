@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+  <circle cx="60" cy="60" r="50" fill="#FFC107" stroke="#FFD700" stroke-width="4" filter="url(#glow)"/>
+  <text x="60" y="65" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="white" text-anchor="middle">فائز</text>
+  <path d="M45 35 L55 45 L45 55" fill="gold" stroke="white" stroke-width="2"/>
+  <path d="M75 35 L65 45 L75 55" fill="gold" stroke="white" stroke-width="2"/>
+  <path d="M50 75 L60 85 L70 75" fill="gold" stroke="white" stroke-width="2"/>
+  <circle cx="60" cy="35" r="10" fill="gold" stroke="white" stroke-width="1"/>
+</svg>

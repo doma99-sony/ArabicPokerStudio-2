@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="60" cy="60" r="50" fill="#4CAF50" stroke="#fff" stroke-width="2"/>
+  <text x="60" y="65" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="white" text-anchor="middle">جديد</text>
+  <path d="M80 40 L90 50 L80 60" fill="none" stroke="white" stroke-width="3"/>
+  <path d="M40 40 L30 50 L40 60" fill="none" stroke="white" stroke-width="3"/>
+  <circle cx="60" cy="40" r="8" fill="white"/>
+</svg>

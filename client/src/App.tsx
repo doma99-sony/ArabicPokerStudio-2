@@ -19,6 +19,7 @@ import MissionsPage from "@/pages/missions-page";
 import VIPPage from "@/pages/vip-page";
 import SettingsPage from "@/pages/settings-page";
 import HowToPlayPage from "@/pages/how-to-play-page";
+import BadgesPage from "@/pages/badges-page";
 import { ProtectedRoute } from "./lib/protected-route";
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
@@ -62,6 +63,7 @@ function Router() {
       <ProtectedRoute path="/missions" component={MissionsPage} />
       <ProtectedRoute path="/vip" component={VIPPage} />
       <ProtectedRoute path="/settings" component={SettingsPage} />
+      <ProtectedRoute path="/badges" component={BadgesPage} />
       <Route component={NotFound} />
     </Switch>
   );

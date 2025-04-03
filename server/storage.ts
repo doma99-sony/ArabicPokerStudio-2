@@ -1,4 +1,15 @@
-import { users, type User, type InsertUser } from "@shared/schema";
+import { 
+  users, 
+  type User, 
+  type InsertUser, 
+  type Badge,
+  type BadgeCategory,
+  type UserBadge,
+  type InsertBadge,
+  badges,
+  badgeCategories,
+  userBadges
+} from "@shared/schema";
 import createMemoryStore from "memorystore";
 import session from "express-session";
 import fs from "fs";
@@ -13,7 +24,8 @@ import {
   Achievement,
   GameHistoryItem,
   PlayerProfile,
-  GameType
+  GameType,
+  BadgeEffect
 } from "../client/src/types";
 import { createDeck, shuffleDeck, dealCards, remainingCards } from "../client/src/lib/card-utils";
 import { GameRoom, createGameRoom } from "./game-room";
@@ -54,6 +66,16 @@ export interface IStorage {
     result: "win" | "loss",
     chipsChange: number
   ): Promise<void>;
+  
+  // Badge operations
+  getBadgeCategories(): Promise<BadgeCategory[]>;
+  getBadges(categoryId?: number): Promise<Badge[]>;
+  getUserBadges(userId: number): Promise<UserBadge[]>;
+  addUserBadge(userId: number, badgeId: number): Promise<UserBadge | undefined>;
+  equipBadge(userId: number, badgeId: number, position?: number): Promise<UserBadge | undefined>;
+  unequipBadge(userId: number, badgeId: number): Promise<UserBadge | undefined>;
+  addToFavorites(userId: number, badgeId: number, order?: number): Promise<UserBadge | undefined>;
+  removeFromFavorites(userId: number, badgeId: number): Promise<UserBadge | undefined>;
   
   // Session store
   sessionStore: any; // Express session store
@@ -835,6 +857,316 @@ export class MemStorage implements IStorage {
     
     // Update the profile
     this.playerProfiles.set(userId, profile);
+  }
+  
+  // Badge operations
+  async getBadgeCategories(): Promise<BadgeCategory[]> {
+    // In the memory storage implementation, we'll create some default badge categories
+    const categories: BadgeCategory[] = [
+      {
+        id: 1,
+        name: "إنجازات اللعب",
+        description: "شارات تمنح عند تحقيق إنجازات معينة في اللعب",
+        icon: "🏆",
+        sortOrder: 1
+      },
+      {
+        id: 2,
+        name: "شارات VIP",
+        description: "شارات خاصة بأعضاء VIP",
+        icon: "👑",
+        sortOrder: 2
+      },
+      {
+        id: 3,
+        name: "أحداث خاصة",
+        description: "شارات تمنح خلال المناسبات والأحداث الخاصة",
+        icon: "🎉",
+        sortOrder: 3
+      },
+      {
+        id: 4,
+        name: "مجتمع اللاعبين",
+        description: "شارات تتعلق بالتفاعل مع المجتمع",
+        icon: "👥",
+        sortOrder: 4
+      }
+    ];
+    
+    return categories;
+  }
+  
+  async getBadges(categoryId?: number): Promise<Badge[]> {
+    // Define default badges
+    const allBadges: Badge[] = [
+      {
+        id: 1,
+        name: "لاعب جديد",
+        description: "انضم للعبة وأكمل التسجيل",
+        imageUrl: "/assets/badges/new-player.svg",
+        categoryId: 1,
+        isRare: false,
+        isHidden: false,
+        requiredVipLevel: 0,
+        rarityLevel: 1,
+        sortOrder: 1,
+        color: "#4CAF50",
+        createdAt: new Date()
+      },
+      {
+        id: 2,
+        name: "فائز محترف",
+        description: "فاز بـ 10 مباريات متتالية",
+        imageUrl: "/assets/badges/pro-winner.svg",
+        categoryId: 1,
+        isRare: true,
+        isHidden: false,
+        requiredVipLevel: 0,
+        rarityLevel: 4,
+        sortOrder: 2,
+        color: "#FFC107",
+        glowColor: "#FFD700",
+        effects: [
+          { type: "glow", intensity: 5, color: "#FFD700", activationMode: "always" }
+        ],
+        createdAt: new Date()
+      },
+      {
+        id: 3,
+        name: "عضو VIP",
+        description: "وصل إلى مستوى VIP",
+        imageUrl: "/assets/badges/vip-member.svg",
+        categoryId: 2,
+        isRare: false,
+        isHidden: false,
+        requiredVipLevel: 1,
+        rarityLevel: 2,
+        sortOrder: 1,
+        color: "#9C27B0",
+        glowColor: "#E1BEE7",
+        effects: [
+          { type: "pulse", intensity: 3, activationMode: "hover" }
+        ],
+        createdAt: new Date()
+      },
+      {
+        id: 4,
+        name: "مليونير الرقائق",
+        description: "امتلك أكثر من مليون رقاقة",
+        imageUrl: "/assets/badges/chip-millionaire.svg",
+        categoryId: 1,
+        isRare: true,
+        isHidden: false,
+        requiredVipLevel: 0,
+        rarityLevel: 3,
+        sortOrder: 3,
+        color: "#F44336",
+        glowColor: "#FFCDD2",
+        effects: [
+          { type: "sparkle", intensity: 7, color: "#FFD700", activationMode: "hover" }
+        ],
+        createdAt: new Date()
+      },
+      {
+        id: 5,
+        name: "بطل رمضان",
+        description: "شارك في بطولة رمضان",
+        imageUrl: "/assets/badges/ramadan-champion.svg",
+        categoryId: 3,
+        isRare: true,
+        isHidden: false,
+        requiredVipLevel: 0,
+        rarityLevel: 3,
+        sortOrder: 1,
+        color: "#2196F3",
+        effects: [
+          { type: "rotate", intensity: 2, activationMode: "hover" }
+        ],
+        createdAt: new Date()
+      }
+    ];
+    
+    // Filter by category ID if provided
+    if (categoryId !== undefined) {
+      return allBadges.filter(badge => badge.categoryId === categoryId);
+    }
+    
+    return allBadges;
+  }
+  
+  async getUserBadges(userId: number): Promise<UserBadge[]> {
+    const profile = await this.getPlayerProfile(userId);
+    if (!profile || !profile.badges) {
+      return [];
+    }
+    
+    return profile.badges;
+  }
+  
+  async addUserBadge(userId: number, badgeId: number): Promise<UserBadge | undefined> {
+    const profile = await this.getPlayerProfile(userId);
+    if (!profile) return undefined;
+    
+    // Make sure badges array exists
+    if (!profile.badges) {
+      profile.badges = [];
+    }
+    
+    // Check if user already has this badge
+    const existingBadge = profile.badges.find(ub => ub.badgeId === badgeId);
+    if (existingBadge) {
+      return existingBadge;
+    }
+    
+    // Get the badge details
+    const allBadges = await this.getBadges();
+    const badge = allBadges.find(b => b.id === badgeId);
+    
+    if (!badge) {
+      return undefined;
+    }
+    
+    // Create new user badge
+    const userBadge: UserBadge = {
+      id: Date.now(), // Use timestamp as ID for in-memory storage
+      userId,
+      badgeId,
+      badge,
+      acquiredAt: new Date(),
+      isEquipped: false,
+      displayProgress: 100, // Default to complete
+      source: "award" // Default source
+    };
+    
+    // Add to user's badges
+    profile.badges.push(userBadge);
+    
+    // Update badge counts
+    profile.badgeCount = profile.badges.length;
+    profile.rareCount = profile.badges.filter(ub => ub.badge.isRare).length;
+    
+    // Save changes
+    this.playerProfiles.set(userId, profile);
+    
+    return userBadge;
+  }
+  
+  async equipBadge(userId: number, badgeId: number, position: number = 0): Promise<UserBadge | undefined> {
+    const profile = await this.getPlayerProfile(userId);
+    if (!profile || !profile.badges) return undefined;
+    
+    // Find the badge
+    const userBadge = profile.badges.find(ub => ub.badgeId === badgeId);
+    if (!userBadge) return undefined;
+    
+    // Unequip any badge in the same position
+    if (profile.equippedBadges && position !== undefined) {
+      const badgeInPosition = profile.equippedBadges.find(ub => ub.equippedPosition === position);
+      if (badgeInPosition) {
+        badgeInPosition.isEquipped = false;
+        badgeInPosition.equippedPosition = undefined;
+      }
+    }
+    
+    // Equip the badge
+    userBadge.isEquipped = true;
+    userBadge.equippedPosition = position;
+    
+    // Make sure equippedBadges array exists
+    if (!profile.equippedBadges) {
+      profile.equippedBadges = [];
+    }
+    
+    // Add to equipped badges (if not already there)
+    const existingIndex = profile.equippedBadges.findIndex(ub => ub.badgeId === badgeId);
+    if (existingIndex >= 0) {
+      profile.equippedBadges[existingIndex] = userBadge;
+    } else {
+      profile.equippedBadges.push(userBadge);
+    }
+    
+    // Save changes
+    this.playerProfiles.set(userId, profile);
+    
+    return userBadge;
+  }
+  
+  async unequipBadge(userId: number, badgeId: number): Promise<UserBadge | undefined> {
+    const profile = await this.getPlayerProfile(userId);
+    if (!profile || !profile.badges) return undefined;
+    
+    // Find the badge
+    const userBadge = profile.badges.find(ub => ub.badgeId === badgeId);
+    if (!userBadge) return undefined;
+    
+    // Unequip the badge
+    userBadge.isEquipped = false;
+    userBadge.equippedPosition = undefined;
+    
+    // Remove from equipped badges
+    if (profile.equippedBadges) {
+      profile.equippedBadges = profile.equippedBadges.filter(ub => ub.badgeId !== badgeId);
+    }
+    
+    // Save changes
+    this.playerProfiles.set(userId, profile);
+    
+    return userBadge;
+  }
+  
+  async addToFavorites(userId: number, badgeId: number, order: number = 0): Promise<UserBadge | undefined> {
+    const profile = await this.getPlayerProfile(userId);
+    if (!profile || !profile.badges) return undefined;
+    
+    // Find the badge
+    const userBadge = profile.badges.find(ub => ub.badgeId === badgeId);
+    if (!userBadge) return undefined;
+    
+    // Update favorite order
+    userBadge.favoriteOrder = order;
+    
+    // Make sure favoriteBadges array exists
+    if (!profile.favoriteBadges) {
+      profile.favoriteBadges = [];
+    }
+    
+    // Add to favorite badges (if not already there)
+    const existingIndex = profile.favoriteBadges.findIndex(ub => ub.badgeId === badgeId);
+    if (existingIndex >= 0) {
+      profile.favoriteBadges[existingIndex] = userBadge;
+    } else {
+      profile.favoriteBadges.push(userBadge);
+    }
+    
+    // Sort favorites by order
+    profile.favoriteBadges.sort((a, b) => (a.favoriteOrder || 0) - (b.favoriteOrder || 0));
+    
+    // Save changes
+    this.playerProfiles.set(userId, profile);
+    
+    return userBadge;
+  }
+  
+  async removeFromFavorites(userId: number, badgeId: number): Promise<UserBadge | undefined> {
+    const profile = await this.getPlayerProfile(userId);
+    if (!profile || !profile.badges) return undefined;
+    
+    // Find the badge
+    const userBadge = profile.badges.find(ub => ub.badgeId === badgeId);
+    if (!userBadge) return undefined;
+    
+    // Remove favorite order
+    userBadge.favoriteOrder = undefined;
+    
+    // Remove from favorites
+    if (profile.favoriteBadges) {
+      profile.favoriteBadges = profile.favoriteBadges.filter(ub => ub.badgeId !== badgeId);
+    }
+    
+    // Save changes
+    this.playerProfiles.set(userId, profile);
+    
+    return userBadge;
   }
 }
 

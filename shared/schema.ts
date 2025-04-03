@@ -312,3 +312,61 @@ export const userPurchases = pgTable("user_purchases", {
   purchaseDate: timestamp("purchase_date").defaultNow().notNull(),
   itemsPurchased: jsonb("items_purchased"), // تفاصيل العناصر المشتراة
 });
+
+// جدول فئات الشارات
+export const badgeCategories = pgTable("badge_categories", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(),
+  description: text("description"),
+  icon: text("icon"), // رمز الفئة
+  sortOrder: integer("sort_order").default(0), // ترتيب العرض
+});
+
+// جدول الشارات
+export const badges = pgTable("badges", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(),
+  description: text("description").notNull(),
+  imageUrl: text("image_url").notNull(),
+  categoryId: integer("category_id").references(() => badgeCategories.id),
+  isRare: boolean("is_rare").default(false), // هل الشارة نادرة
+  isHidden: boolean("is_hidden").default(false), // هل الشارة مخفية حتى يتم اكتسابها
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  requiredVipLevel: integer("required_vip_level").default(0), // مستوى VIP المطلوب
+  rarityLevel: integer("rarity_level").default(1), // مستوى ندرة الشارة (1-5)
+  sortOrder: integer("sort_order").default(0), // ترتيب العرض
+  grantCriteria: jsonb("grant_criteria"), // معايير منح الشارة
+  color: text("color").default('#D4AF37'), // لون الشارة الافتراضي ذهبي
+  glowColor: text("glow_color"), // لون توهج الشارة
+  effects: jsonb("effects"), // تأثيرات خاصة للشارة (مثل توهج، حركة، إلخ)
+});
+
+// جدول شارات المستخدم
+export const userBadges = pgTable("user_badges", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  badgeId: integer("badge_id").notNull().references(() => badges.id),
+  acquiredAt: timestamp("acquired_at").defaultNow().notNull(),
+  isEquipped: boolean("is_equipped").default(false), // هل الشارة مجهزة (معروضة في الملف الشخصي)
+  equippedPosition: integer("equipped_position"), // موضع العرض في الملف الشخصي
+  displayProgress: integer("display_progress"), // تقدم العرض (0-100 للشارات التراكمية)
+  source: text("source"), // مصدر الحصول على الشارة (إنجاز، هدية، مناسبة، شراء...)
+  favoriteOrder: integer("favorite_order"), // ترتيب المفضلة
+  metadata: jsonb("metadata"), // بيانات إضافية عن الشارة
+});
+
+// مخططات الإدخال للشارات
+export const insertBadgeSchema = createInsertSchema(badges).omit({
+  id: true,
+  createdAt: true
+});
+
+export const insertUserBadgeSchema = createInsertSchema(userBadges).omit({
+  id: true,
+  acquiredAt: true
+});
+
+export type InsertBadge = z.infer<typeof insertBadgeSchema>;
+export type UserBadge = typeof userBadges.$inferSelect;
+export type Badge = typeof badges.$inferSelect;
+export type BadgeCategory = typeof badgeCategories.$inferSelect;

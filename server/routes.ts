@@ -562,6 +562,199 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+  
+  // ----- Badge API Routes -----
+  
+  // Get badge categories
+  app.get("/api/badges/categories", ensureAuthenticated, async (req, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "غير مصرح" });
+      }
+      
+      const categories = await storage.getBadgeCategories();
+      res.json(categories);
+    } catch (error) {
+      console.error("خطأ في الحصول على فئات الشارات:", error);
+      res.status(500).json({ message: "حدث خطأ أثناء جلب فئات الشارات" });
+    }
+  });
+  
+  // Get all badges (optionally filtered by category)
+  app.get("/api/badges", ensureAuthenticated, async (req, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "غير مصرح" });
+      }
+      
+      const categoryId = req.query.categoryId ? parseInt(req.query.categoryId as string) : undefined;
+      const badges = await storage.getBadges(categoryId);
+      res.json(badges);
+    } catch (error) {
+      console.error("خطأ في الحصول على الشارات:", error);
+      res.status(500).json({ message: "حدث خطأ أثناء جلب الشارات" });
+    }
+  });
+  
+  // Get current user's badges
+  app.get("/api/badges/user", ensureAuthenticated, async (req, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "غير مصرح" });
+      }
+      
+      const userBadges = await storage.getUserBadges(req.user.id);
+      res.json(userBadges);
+    } catch (error) {
+      console.error("خطأ في الحصول على شارات المستخدم:", error);
+      res.status(500).json({ message: "حدث خطأ أثناء جلب شارات المستخدم" });
+    }
+  });
+  
+  // Award a badge to the user
+  app.post("/api/badges/award/:badgeId", ensureAuthenticated, async (req, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "غير مصرح" });
+      }
+      
+      const badgeId = parseInt(req.params.badgeId);
+      if (isNaN(badgeId)) {
+        return res.status(400).json({ message: "معرف الشارة غير صالح" });
+      }
+      
+      const userBadge = await storage.addUserBadge(req.user.id, badgeId);
+      
+      if (!userBadge) {
+        return res.status(404).json({ message: "الشارة غير موجودة" });
+      }
+      
+      res.json(userBadge);
+    } catch (error) {
+      console.error("خطأ في منح الشارة:", error);
+      res.status(500).json({ message: "حدث خطأ أثناء منح الشارة" });
+    }
+  });
+  
+  // Equip a badge
+  app.post("/api/badges/equip/:badgeId", ensureAuthenticated, async (req, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "غير مصرح" });
+      }
+      
+      const badgeId = parseInt(req.params.badgeId);
+      if (isNaN(badgeId)) {
+        return res.status(400).json({ message: "معرف الشارة غير صالح" });
+      }
+      
+      // Validate position
+      let position = 0; // Default position
+      
+      if (req.body && req.body.position !== undefined) {
+        position = parseInt(req.body.position);
+        if (isNaN(position) || position < 0 || position > 5) {
+          return res.status(400).json({ message: "الموضع غير صالح. يجب أن يكون بين 0 و 5." });
+        }
+      }
+      
+      const userBadge = await storage.equipBadge(req.user.id, badgeId, position);
+      
+      if (!userBadge) {
+        return res.status(404).json({ message: "الشارة غير موجودة أو غير مكتسبة" });
+      }
+      
+      res.json(userBadge);
+    } catch (error) {
+      console.error("خطأ في تجهيز الشارة:", error);
+      res.status(500).json({ message: "حدث خطأ أثناء تجهيز الشارة" });
+    }
+  });
+  
+  // Unequip a badge
+  app.post("/api/badges/unequip/:badgeId", ensureAuthenticated, async (req, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "غير مصرح" });
+      }
+      
+      const badgeId = parseInt(req.params.badgeId);
+      if (isNaN(badgeId)) {
+        return res.status(400).json({ message: "معرف الشارة غير صالح" });
+      }
+      
+      const userBadge = await storage.unequipBadge(req.user.id, badgeId);
+      
+      if (!userBadge) {
+        return res.status(404).json({ message: "الشارة غير موجودة أو غير مجهزة" });
+      }
+      
+      res.json(userBadge);
+    } catch (error) {
+      console.error("خطأ في إزالة الشارة:", error);
+      res.status(500).json({ message: "حدث خطأ أثناء إزالة الشارة" });
+    }
+  });
+  
+  // Add a badge to favorites
+  app.post("/api/badges/favorite/:badgeId", ensureAuthenticated, async (req, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "غير مصرح" });
+      }
+      
+      const badgeId = parseInt(req.params.badgeId);
+      if (isNaN(badgeId)) {
+        return res.status(400).json({ message: "معرف الشارة غير صالح" });
+      }
+      
+      // Validate order
+      let order = 0; // Default order
+      
+      if (req.body && req.body.order !== undefined) {
+        order = parseInt(req.body.order);
+        if (isNaN(order) || order < 0) {
+          return res.status(400).json({ message: "الترتيب غير صالح. يجب أن يكون رقمًا موجبًا." });
+        }
+      }
+      
+      const userBadge = await storage.addToFavorites(req.user.id, badgeId, order);
+      
+      if (!userBadge) {
+        return res.status(404).json({ message: "الشارة غير موجودة أو غير مكتسبة" });
+      }
+      
+      res.json(userBadge);
+    } catch (error) {
+      console.error("خطأ في إضافة الشارة للمفضلة:", error);
+      res.status(500).json({ message: "حدث خطأ أثناء إضافة الشارة للمفضلة" });
+    }
+  });
+  
+  // Remove a badge from favorites
+  app.post("/api/badges/unfavorite/:badgeId", ensureAuthenticated, async (req, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "غير مصرح" });
+      }
+      
+      const badgeId = parseInt(req.params.badgeId);
+      if (isNaN(badgeId)) {
+        return res.status(400).json({ message: "معرف الشارة غير صالح" });
+      }
+      
+      const userBadge = await storage.removeFromFavorites(req.user.id, badgeId);
+      
+      if (!userBadge) {
+        return res.status(404).json({ message: "الشارة غير موجودة أو ليست في المفضلة" });
+      }
+      
+      res.json(userBadge);
+    } catch (error) {
+      console.error("خطأ في إزالة الشارة من المفضلة:", error);
+      res.status(500).json({ message: "حدث خطأ أثناء إزالة الشارة من المفضلة" });
+    }
+  });
 
   return httpServer;
 }

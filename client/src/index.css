@@ -5,6 +5,32 @@
 @tailwind components;
 @tailwind utilities;
 
+@keyframes rainbow {
+  0% { box-shadow: 0 0 10px #ff0000; }
+  14% { box-shadow: 0 0 10px #ff7f00; }
+  28% { box-shadow: 0 0 10px #ffff00; }
+  42% { box-shadow: 0 0 10px #00ff00; }
+  56% { box-shadow: 0 0 10px #0000ff; }
+  70% { box-shadow: 0 0 10px #4b0082; }
+  84% { box-shadow: 0 0 10px #9400d3; }
+  100% { box-shadow: 0 0 10px #ff0000; }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  50% { transform: translateX(0); }
+  75% { transform: translateX(2px); }
+}
+
+.animate-rainbow-border {
+  animation: rainbow 3s linear infinite;
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out infinite;
+}
+
 body {
   overflow: hidden;
 }

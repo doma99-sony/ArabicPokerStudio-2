@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="ramadanGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2196F3"/>
+      <stop offset="100%" stop-color="#90CAF9"/>
+    </linearGradient>
+  </defs>
+  <circle cx="60" cy="60" r="50" fill="url(#ramadanGradient)" stroke="#fff" stroke-width="2"/>
+  <text x="60" y="50" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="white" text-anchor="middle">بطل</text>
+  <text x="60" y="75" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="white" text-anchor="middle">رمضان</text>
+  <path d="M60,20 L63,32 L75,32 L65,38 L69,50 L60,42 L51,50 L55,38 L45,32 L57,32 Z" fill="gold"/>
+</svg>
