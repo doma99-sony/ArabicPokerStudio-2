@@ -90,7 +90,7 @@ export default function LobbyPage() {
   };
 
   return (
-    <div className="min-h-screen bg-cover bg-center flex flex-col"
+    <div className="h-screen overflow-hidden bg-cover bg-center flex flex-col"
          style={{ backgroundImage: "url('/images/egyptian-background.jpg')" }}>
       
       {/* خلفية الفيديو */}
@@ -200,7 +200,7 @@ export default function LobbyPage() {
       </header>
 
       {/* Main Content */}
-      <main className="relative z-10 flex-1 overflow-hidden">
+      <main className="relative z-10 flex-1 overflow-hidden h-[calc(100vh-8rem)]">
         {/* Chat Section - Fixed to left */}
         <div 
           className="fixed top-16 left-0 h-[calc(100%-8rem)] z-20 transition-all duration-300" 
@@ -240,10 +240,10 @@ export default function LobbyPage() {
         </div>
 
         {/* المحتوى الرئيسي */}
-        <div className="container mx-auto p-4">
-          <div className="flex flex-col gap-6">
+        <div className="container mx-auto p-4 h-full overflow-hidden">
+          <div className="flex flex-col h-full overflow-hidden">
             {/* العناصر الرئيسية */}
-            <div className="grid grid-cols-1 gap-6">
+            <div className="grid grid-cols-1 overflow-hidden">
               {/* تم حذف قسم معلومات اللاعب بناءً على طلب المستخدم */}
 
               {/* واجهة اختيار الألعاب - قسم عرضي كامل */}
