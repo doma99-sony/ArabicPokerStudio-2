@@ -959,6 +959,39 @@ export function createGameRoom(table: GameTable): GameRoom {
         }
         break;
         
+      case "restart_round":
+        // لبدء جولة جديدة من اللعب
+        console.log(`طلب إعادة بدء الجولة من اللاعب ${player.username}`);
+        
+        // تسجيل حدث إعادة تشغيل الجولة
+        const restartActionHistoryItem: GameRoundAction = {
+          id: `${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+          round: round.roundNumber,
+          action: "restart_round",
+          player: player.username,
+          playerId: player.id,
+          timestamp: Date.now()
+        };
+        round.gameHistory.push(restartActionHistoryItem);
+        
+        // إعادة تعيين حالة اللاعبين
+        for (const [_, p] of players) {
+          p.folded = false;
+          p.betAmount = 0;
+          p.isAllIn = false;
+          p.cards = [];
+        }
+        
+        // بدء جولة جديدة
+        startNewRound();
+        
+        // إعادة حالة اللعبة المحدثة
+        gameStateCache.clear(); // مسح الكاش للتأكد من تحديث الحالة
+        return { 
+          success: true,
+          message: "تم بدء جولة جديدة بنجاح" 
+        };
+        
       default:
         return { success: false, message: "إجراء غير صالح" };
     }

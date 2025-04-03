@@ -656,20 +656,22 @@ export function PokerTable({ gameState }: PokerTableProps) {
         
         {/* زر بدء جولة جديدة - يظهر في الأعلى */}
         {(gameState.gameStatus === "showdown" || gameState.gameStatus === "waiting" || 
-         (positionedPlayers.find(p => p.isCurrentPlayer)?.folded && gameState.currentTurn === -1)) && (
+          positionedPlayers.some(p => p.isCurrentPlayer && p.folded)) && (
           <motion.div 
-            className="absolute top-6 left-1/2 transform -translate-x-1/2 z-40"
+            className="absolute top-20 left-1/2 transform -translate-x-1/2 z-50"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.3 }}
           >
             <Button
               onClick={() => {
-                // إرسال طلب لبدء جولة جديدة
-                fetch(`/api/game/${gameState.id || gameState.gameId}/start-round`, {
+                console.log("محاولة بدء جولة جديدة...");
+                // إجراء اللعب - استخدام performGameAction
+                fetch(`/api/game/${gameState.id || gameState.tableId}/action`, {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
-                  credentials: 'include'
+                  credentials: 'include',
+                  body: JSON.stringify({ action: "restart_round" })
                 })
                 .then(response => {
                   if (!response.ok) {
@@ -685,14 +687,44 @@ export function PokerTable({ gameState }: PokerTableProps) {
                   });
                 })
                 .catch(error => {
+                  console.error("خطأ في بدء الجولة:", error);
                   toast({
                     title: "خطأ في بدء جولة جديدة",
                     description: error.message,
                     variant: "destructive",
                   });
+                  
+                  // محاولة استخدام نقطة النهاية الاحتياطية
+                  fetch(`/api/game/${gameState.id || gameState.tableId}/start-round`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include'
+                  })
+                  .then(response => {
+                    if (!response.ok) {
+                      throw new Error('فشل في بدء جولة جديدة (طريقة احتياطية)');
+                    }
+                    return response.json();
+                  })
+                  .then(data => {
+                    toast({
+                      title: "تم بدء جولة جديدة",
+                      description: "استعد للعب! (تم استخدام طريقة احتياطية)",
+                      variant: "default",
+                    });
+                  })
+                  .catch(backupError => {
+                    console.error("فشل أيضًا في الطريقة الاحتياطية:", backupError);
+                    toast({
+                      title: "تعذر بدء جولة جديدة",
+                      description: "حاول مرة أخرى لاحقًا",
+                      variant: "destructive",
+                    });
+                  });
                 });
               }}
-              className="bg-gradient-to-r from-gold to-amber-600 hover:from-gold/90 hover:to-amber-500 text-black font-bold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 border-2 border-gold/50 animate-pulse"
+              size="lg"
+              className="bg-gradient-to-r from-gold to-amber-600 hover:from-gold/90 hover:to-amber-500 text-black font-bold px-6 py-3 rounded-xl shadow-[0_0_15px_rgba(212,175,55,0.5)] hover:shadow-[0_0_20px_rgba(212,175,55,0.7)] transform hover:scale-105 transition-all duration-200 border-2 border-gold/50"
             >
               <div className="flex items-center gap-2">
                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-5 h-5">
