@@ -359,25 +359,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "غير مصرح" });
       }
       
-      // Validate the action
-      const actionSchema = z.object({
-        action: z.enum(["fold", "check", "call", "raise", "all_in"]),
-        amount: z.number().optional(),
-      });
+      console.log(`طلب إجراء من المستخدم ${req.user.id} على الطاولة ${tableId}:`, req.body);
       
-      const validatedData = actionSchema.parse(req.body);
-      const result = await storage.performGameAction(
-        tableId,
-        req.user.id,
-        validatedData.action,
-        validatedData.amount
-      );
-      
-      if (!result.success) {
-        return res.status(400).json({ message: result.message });
+      // Validate the action (with restart_round and check if it's a string)
+      try {
+        // تحقق إذا كان الإجراء هو إعادة تشغيل الجولة
+        if (req.body.action === "restart_round") {
+          console.log(`طلب بدء جولة جديدة من المستخدم ${req.user.id}`);
+          const result = await storage.startNewRound(tableId);
+          return res.json({ 
+            success: true, 
+            message: "تم بدء جولة جديدة",
+            gameState: result?.gameState 
+          });
+        }
+        
+        const actionSchema = z.object({
+          action: z.enum(["fold", "check", "call", "raise", "all_in"]),
+          amount: z.number().optional(),
+        });
+        
+        const validatedData = actionSchema.parse(req.body);
+        console.log(`إجراء تم التحقق منه:`, validatedData);
+        
+        // معالجة الإجراء
+        const result = await storage.performGameAction(
+          tableId,
+          req.user.id,
+          validatedData.action,
+          validatedData.amount
+        );
+        
+        console.log(`نتيجة الإجراء:`, {
+          success: result.success,
+          message: result.message,
+          hasGameState: !!result.gameState
+        });
+        
+        if (!result.success) {
+          return res.status(400).json({ 
+            success: false,
+            message: result.message 
+          });
+        }
+        
+        return res.json({ 
+          success: true, 
+          gameState: result.gameState,
+          message: "تم تنفيذ الإجراء بنجاح" 
+        });
+      } catch (validationError) {
+        console.error("خطأ في التحقق من الإجراء:", validationError);
+        return res.status(400).json({ 
+          success: false,
+          message: "إجراء غير صالح" 
+        });
       }
-      
-      res.json({ success: true, gameState: result.gameState });
     } catch (error) {
       res.status(500).json({ message: "حدث خطأ أثناء تنفيذ الإجراء" });
     }

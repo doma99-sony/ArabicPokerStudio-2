@@ -891,9 +891,35 @@ export function createGameRoom(table: GameTable): GameRoom {
   // Perform a game action (fold, check, call, raise, all-in)
   const performAction = (
     playerId: number, 
-    action: GameAction, 
+    action: GameAction | "restart_round",  // أضف الدعم الصريح لإجراء إعادة بدء الجولة 
     amount?: number
   ): ActionResult => {
+    
+    // تحقق أولاً إذا كان الإجراء هو إعادة تشغيل الجولة
+    if (action === "restart_round") {
+      console.log(`إجراء إعادة تشغيل الجولة من اللاعب ${playerId}`);
+      
+      // تسجيل الإجراء في تاريخ اللعبة
+      const restartActionHistoryItem: GameRoundAction = {
+        id: `${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+        round: round.roundNumber,
+        action: "restart_round",
+        player: players.get(playerId)?.username || "مجهول",
+        playerId,
+        timestamp: Date.now()
+      };
+      round.gameHistory.push(restartActionHistoryItem);
+      
+      // بدء جولة جديدة
+      startNewRound();
+      
+      // إعادة حالة اللعبة بعد بدء الجولة الجديدة
+      return {
+        success: true,
+        message: "تم بدء جولة جديدة",
+        gameState: getGameStateForPlayer(playerId)
+      };
+    }
     // Check if it's the player's turn
     if (round.currentTurn !== playerId) {
       return { success: false, message: "ليس دورك" };
