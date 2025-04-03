@@ -248,11 +248,8 @@ export default function LobbyPage() {
 
               {/* واجهة اختيار الألعاب - قسم عرضي كامل */}
               <div className="w-full">
-                <div className="rounded-xl bg-[#0A3A2A] border-2 border-[#D4AF37]/40 p-4 shadow-xl">
-                  <div className="mb-3">
-                  </div>
-
-                  <div className="flex flex-col gap-3 w-full max-w-sm mr-0 ml-0">
+                <div className="p-4">
+                  <div className="flex flex-col gap-3 w-full max-w-sm mr-0 ml-auto">
                     {/* بوكر عرباوي - تصميم جديد */}
                     <div 
                       className={`relative flex flex-col h-32 w-full rounded-xl overflow-hidden shadow-xl mb-6 mt-3 ${activeGameCategory === 'poker' ? 'ring-2 ring-[#D4AF37]' : ''} hover:scale-102 transition-transform`}
@@ -492,7 +489,6 @@ export default function LobbyPage() {
                   </div>
                 </div>
               </div>
-
 
             </div>
           </div>
