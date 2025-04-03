@@ -37,6 +37,66 @@ export function PokerTable({ gameState }: PokerTableProps) {
   // متغير لعرض/إخفاء شارة الإجراء
   const [showActionBadge, setShowActionBadge] = useState(true);
   
+  // كائن WebSocket
+  const [socket, setSocket] = useState<WebSocket | null>(null);
+  
+  // إنشاء اتصال WebSocket
+  useEffect(() => {
+    if (!gameState || !gameState.id) return;
+    
+    // بناء عنوان WebSocket باستخدام معرف الطاولة
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${wsProtocol}//${window.location.host}/ws?sid=${Date.now()}-${Math.random().toString(36).substring(2)}&uid=${user?.id || 0}&ts=${Date.now()}`;
+    
+    console.log("محاولة اتصال WebSocket:", wsUrl);
+    
+    const newSocket = new WebSocket(wsUrl);
+    
+    newSocket.onopen = () => {
+      console.log("تم الاتصال بالخادم عبر WebSocket");
+      setSocket(newSocket);
+      
+      // إرسال رسالة اختبار
+      newSocket.send(JSON.stringify({
+        type: 'ping',
+        timestamp: Date.now(),
+        message: 'مرحبا من واجهة لعبة البوكر'
+      }));
+    };
+    
+    newSocket.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        console.log("رسالة واردة من WebSocket:", data);
+        
+        // معالجة تحديثات حالة اللعبة هنا
+        if (data.type === 'game_state_update') {
+          // تحديث حالة اللعبة إذا لزم الأمر
+          console.log("تم استلام تحديث لحالة اللعبة");
+        }
+      } catch (error) {
+        console.error("خطأ في معالجة رسالة WebSocket:", error);
+      }
+    };
+    
+    newSocket.onclose = () => {
+      console.log("تم إغلاق اتصال WebSocket");
+      setSocket(null);
+    };
+    
+    newSocket.onerror = (error) => {
+      console.error("خطأ في اتصال WebSocket:", error);
+    };
+    
+    // تنظيف عند إزالة المكون
+    return () => {
+      console.log("إغلاق اتصال WebSocket عند مغادرة طاولة اللعب");
+      if (newSocket) {
+        newSocket.close();
+      }
+    };
+  }, [gameState?.id, user?.id]); // إعادة إنشاء الاتصال إذا تغير معرف الطاولة
+  
   // Positions for players based on their slot - updated for 9-seat oval table layout
   const playerPositions = [
     "bottom", // current user (0) - دائما في الوسط أسفل
@@ -607,61 +667,137 @@ export function PokerTable({ gameState }: PokerTableProps) {
               الدور الحالي: {gameState.currentTurn}
             </div>
             
-            {/* أزرار اختبار مباشرة للإجراءات */}
+            {/* أزرار اختبار مباشرة WebSocket */}
             <div className="mb-2 p-2 bg-black/40 rounded flex gap-2 flex-wrap">
               <button 
                 className="px-2 py-1 bg-red-500 text-white rounded text-xs"
                 onClick={() => {
-                  // إرسال طلب مباشر للتخلي
-                  fetch(`/api/game/${gameState.id}/action`, {
+                  // إرسال أمر مباشر للتخلي باستخدام WebSocket
+                  if (socket && socket.readyState === WebSocket.OPEN) {
+                    const message = {
+                      type: 'game_action',
+                      tableId: gameState.id || gameState.gameId,
+                      action: 'fold',
+                      playerId: positionedPlayers.find(p => p.isCurrentPlayer)?.id,
+                      timestamp: Date.now()
+                    };
+                    socket.send(JSON.stringify(message));
+                    console.log("تم إرسال أمر التخلي عبر WebSocket:", message);
+                    toast({
+                      title: "تم إرسال الأمر",
+                      description: "تم إرسال أمر التخلي",
+                      variant: "default",
+                    });
+                  } else {
+                    console.error("WebSocket غير متصل");
+                    toast({
+                      title: "خطأ في الاتصال",
+                      description: "WebSocket غير متصل",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+              >
+                WebSocket تخلي
+              </button>
+              
+              <button 
+                className="px-2 py-1 bg-green-500 text-white rounded text-xs"
+                onClick={() => {
+                  // إرسال أمر مباشر للمتابعة/المجاراة باستخدام WebSocket
+                  if (socket && socket.readyState === WebSocket.OPEN) {
+                    const action = gameState.currentBet === 0 ? "check" : "call";
+                    const message = {
+                      type: 'game_action',
+                      tableId: gameState.id || gameState.gameId,
+                      action,
+                      playerId: positionedPlayers.find(p => p.isCurrentPlayer)?.id,
+                      timestamp: Date.now()
+                    };
+                    socket.send(JSON.stringify(message));
+                    console.log(`تم إرسال أمر ${action} عبر WebSocket:`, message);
+                    toast({
+                      title: "تم إرسال الأمر",
+                      description: `تم إرسال أمر ${action === 'check' ? 'المتابعة' : 'المجاراة'}`,
+                      variant: "default",
+                    });
+                  } else {
+                    console.error("WebSocket غير متصل");
+                    toast({
+                      title: "خطأ في الاتصال",
+                      description: "WebSocket غير متصل",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+              >
+                WebSocket {gameState.currentBet === 0 ? "متابعة" : "مجاراة"}
+              </button>
+              
+              <button 
+                className="px-2 py-1 bg-amber-500 text-white rounded text-xs"
+                onClick={() => {
+                  // إرسال أمر مباشر للزيادة باستخدام WebSocket
+                  if (socket && socket.readyState === WebSocket.OPEN) {
+                    const amount = gameState.currentBet === 0 ? 20 : gameState.currentBet * 2;
+                    const message = {
+                      type: 'game_action',
+                      tableId: gameState.id || gameState.gameId,
+                      action: 'raise',
+                      amount,
+                      playerId: positionedPlayers.find(p => p.isCurrentPlayer)?.id,
+                      timestamp: Date.now()
+                    };
+                    socket.send(JSON.stringify(message));
+                    console.log("تم إرسال أمر الزيادة عبر WebSocket:", message);
+                    toast({
+                      title: "تم إرسال الأمر",
+                      description: `تم إرسال أمر الزيادة بمبلغ ${amount}`,
+                      variant: "default",
+                    });
+                  } else {
+                    console.error("WebSocket غير متصل");
+                    toast({
+                      title: "خطأ في الاتصال",
+                      description: "WebSocket غير متصل",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+              >
+                WebSocket زيادة
+              </button>
+              
+              <button 
+                className="px-2 py-1 bg-purple-500 text-white rounded text-xs"
+                onClick={() => {
+                  // طلب HTTP تقليدي للمقارنة
+                  fetch(`/api/game/${gameState.id || gameState.gameId}/action`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
                     body: JSON.stringify({ action: "fold" })
                   })
                   .then(response => response.json())
-                  .then(data => console.log("نتيجة التخلي:", data))
-                  .catch(err => console.error("خطأ في التخلي:", err));
-                }}
-              >
-                اختبار التخلي
-              </button>
-              
-              <button 
-                className="px-2 py-1 bg-green-500 text-white rounded text-xs"
-                onClick={() => {
-                  // إرسال طلب مباشر للمتابعة/المجاراة
-                  fetch(`/api/game/${gameState.id}/action`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({ action: gameState.currentBet === 0 ? "check" : "call" })
+                  .then(data => {
+                    console.log("نتيجة التخلي عبر HTTP:", data);
+                    toast({
+                      title: "تم إرسال الأمر عبر HTTP",
+                      description: "تم إرسال أمر التخلي عبر HTTP التقليدي",
+                      variant: "default",
+                    });
                   })
-                  .then(response => response.json())
-                  .then(data => console.log("نتيجة المتابعة/المجاراة:", data))
-                  .catch(err => console.error("خطأ في المتابعة/المجاراة:", err));
+                  .catch(err => {
+                    console.error("خطأ في التخلي عبر HTTP:", err);
+                    toast({
+                      title: "خطأ في الطلب",
+                      description: "فشل إرسال أمر التخلي عبر HTTP",
+                      variant: "destructive",
+                    });
+                  });
                 }}
               >
-                اختبار {gameState.currentBet === 0 ? "متابعة" : "مجاراة"}
-              </button>
-              
-              <button 
-                className="px-2 py-1 bg-amber-500 text-white rounded text-xs"
-                onClick={() => {
-                  // إرسال طلب مباشر للزيادة
-                  const amount = gameState.currentBet === 0 ? 20 : gameState.currentBet * 2;
-                  fetch(`/api/game/${gameState.id}/action`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({ action: "raise", amount })
-                  })
-                  .then(response => response.json())
-                  .then(data => console.log("نتيجة الزيادة:", data))
-                  .catch(err => console.error("خطأ في الزيادة:", err));
-                }}
-              >
-                اختبار الزيادة
+                HTTP تخلي
               </button>
             </div>
             <GameActions 
@@ -715,7 +851,7 @@ export function PokerTable({ gameState }: PokerTableProps) {
                   });
                 });
               }}
-              tableId={gameState.id}
+              tableId={gameState.id || gameState.gameId}
               gameStatus={gameState.gameStatus}
             />
           </div>
