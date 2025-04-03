@@ -110,22 +110,23 @@ export default function LobbyPage() {
       
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
 
-      {/* Header Bar - تصميم جديد احترافي */}
-      <header className="relative z-10 bg-gradient-to-r from-[#0A3A2A] to-black py-3 shadow-xl border-b-2 border-[#D4AF37]/50">
+      {/* Header Bar - تصميم احترافي محسّن */}
+      <header className="relative z-10 bg-gradient-to-r from-[#0A3A2A] via-[#0F1F1A] to-black py-3 shadow-2xl border-b-2 border-[#D4AF37] sticky top-0">
         <div className="container mx-auto flex justify-between items-center px-4">
           {/* القسم الأيسر - الشعار ومعلومات اللعبة */}
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3">
-              <div className="relative">
+              <div className="relative group">
+                <div className="absolute inset-0 bg-gradient-to-r from-[#D4AF37]/50 to-[#D4AF37]/0 rounded-full blur-md animate-pulse-slow opacity-50 group-hover:opacity-75 transition-all duration-300"></div>
                 <img 
                   src="/assets/poker-logo.jpeg" 
                   alt="بوكر عرباوي" 
-                  className="w-12 h-12 rounded-full border-2 border-[#D4AF37] object-cover shadow-md shadow-[#D4AF37]/30" 
+                  className="relative w-12 h-12 rounded-full border-2 border-[#D4AF37] object-cover shadow-lg shadow-[#D4AF37]/30 group-hover:shadow-[#D4AF37]/50 transition-all duration-300" 
                 />
-                <div className="absolute -bottom-1 -right-1 bg-green-500 w-4 h-4 rounded-full border border-black"></div>
+                <div className="absolute -bottom-1 -right-1 bg-green-500 w-4 h-4 rounded-full border border-black animate-pulse"></div>
               </div>
               <div>
-                <h1 className="text-xl font-bold text-[#D4AF37] drop-shadow-md">بوكر تكساس عرباوي</h1>
+                <h1 className="text-xl font-bold bg-gradient-to-r from-[#D4AF37] to-[#FFC107] bg-clip-text text-transparent drop-shadow-md">بوكر تكساس عرباوي</h1>
                 <div className="flex items-center mt-0.5">
                   <OnlineUsersCounter />
                 </div>
@@ -136,9 +137,9 @@ export default function LobbyPage() {
           {/* القسم الأيمن - معلومات المستخدم والأزرار */}
           <div className="flex items-center gap-3">
             {/* معلومات المستخدم والرصيد */}
-            <div className="bg-[#0A3A2A]/60 rounded-lg border border-[#D4AF37]/30 py-1 px-3 mr-2">
+            <div className="bg-gradient-to-r from-[#0A3A2A]/90 to-black/80 rounded-lg border border-[#D4AF37] py-1.5 px-3 mr-2 shadow-lg hover:shadow-[#D4AF37]/20 transition-all duration-300">
               <div className="flex items-center gap-2">
-                <div className="relative w-8 h-8 rounded-full overflow-hidden border border-[#D4AF37]/70">
+                <div className="relative w-9 h-9 rounded-full overflow-hidden border-2 border-[#D4AF37] shadow-inner">
                   <img 
                     src={user?.avatar || "/assets/poker-icon-gold.png"} 
                     alt="صورة المستخدم" 
@@ -147,7 +148,7 @@ export default function LobbyPage() {
                 </div>
                 <div className="text-right">
                   <p className="text-[#D4AF37] text-sm font-bold leading-tight">{user?.username}</p>
-                  <div className="flex items-center">
+                  <div className="flex items-center bg-[#0A3A2A]/80 px-2 py-0.5 rounded-full border border-[#D4AF37]/30">
                     <Coins className="h-3.5 w-3.5 text-[#D4AF37] ml-1" />
                     <span className="text-[#D4AF37] text-xs font-bold">{formatChips(user?.chips || 0)}</span>
                   </div>
@@ -165,16 +166,17 @@ export default function LobbyPage() {
               
               <Button 
                 variant="outline" 
-                className="border-[#D4AF37]/50 text-[#D4AF37] hover:bg-[#D4AF37]/10 h-9 py-0 px-3 text-xs bg-black/30 backdrop-blur-sm"
+                className="border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37]/10 h-9 py-0 px-3 text-xs bg-black/50 backdrop-blur-sm transition-all duration-300 shadow-md hover:shadow-[#D4AF37]/20"
                 onClick={() => navigate("/notifications")}
               >
                 <Bell size={16} className="ml-1" />
                 <span className="hidden md:inline">الإشعارات</span>
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-white text-[10px] flex items-center justify-center shadow-md">٢</span>
               </Button>
 
               <Button 
                 variant="outline" 
-                className="border-[#D4AF37]/50 text-[#D4AF37] hover:bg-[#D4AF37]/10 h-9 py-0 px-3 text-xs bg-black/30 backdrop-blur-sm"
+                className="border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37]/10 h-9 py-0 px-3 text-xs bg-black/50 backdrop-blur-sm transition-all duration-300 shadow-md hover:shadow-[#D4AF37]/20"
                 onClick={navigateToProfile}
               >
                 <User size={16} className="ml-1" />
@@ -183,7 +185,7 @@ export default function LobbyPage() {
 
               <Button 
                 variant="outline" 
-                className="border-red-500/50 text-red-400 hover:bg-red-500/10 h-9 py-0 px-3 text-xs bg-black/30 backdrop-blur-sm"
+                className="border-red-500 text-red-400 hover:bg-red-500/10 h-9 py-0 px-3 text-xs bg-black/50 backdrop-blur-sm transition-all duration-300 shadow-md"
                 onClick={handleLogout}
                 disabled={logoutMutation.isPending}
               >
@@ -307,7 +309,7 @@ export default function LobbyPage() {
 
                     {/* نارتو - تصميم واضح */}
                     <div 
-                      className={`relative flex flex-col h-[160px] w-full rounded-xl overflow-hidden shadow-lg mb-4 ${activeGameCategory === 'naruto' ? 'ring-2 ring-orange-500' : 'ring-1 ring-orange-500'} hover:scale-[1.02] transition-all duration-300 cursor-pointer`}
+                      className={`relative flex flex-col h-[145px] w-full rounded-xl overflow-hidden shadow-lg mb-4 ${activeGameCategory === 'naruto' ? 'ring-2 ring-orange-500' : 'ring-1 ring-orange-500'} hover:scale-[1.02] transition-all duration-300 cursor-pointer`}
                       onClick={() => {
                         setActiveGameCategory('naruto');
                         navigateToGameTables('naruto');
