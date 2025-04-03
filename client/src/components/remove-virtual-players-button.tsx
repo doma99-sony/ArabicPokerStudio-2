@@ -82,10 +82,10 @@ export function RemoveVirtualPlayersButton() {
         <Button
           variant="destructive"
           size="sm"
-          className="bg-red-600 hover:bg-red-700 text-white text-xs h-7 px-2"
+          className="bg-red-600/20 hover:bg-red-600/30 text-red-500 p-0 h-10 w-10 rounded-full border border-red-500/50"
+          title="إزالة اللاعبين الوهميين"
         >
-          <UserX size={14} className="ml-1" />
-          إزالة اللاعبين الوهميين
+          <UserX size={18} />
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md bg-gray-900 border border-gray-800">

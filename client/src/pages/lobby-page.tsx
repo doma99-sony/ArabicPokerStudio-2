@@ -306,37 +306,7 @@ export default function LobbyPage() {
                 </div>
               </div>
 
-              {/* VIP Section - عنصر على اليمين */}
-              <div className="md:col-span-1">
-                <div className="bg-gradient-to-b from-black/80 to-[#0A3A2A]/60 border-2 border-[#D4AF37]/20 backdrop-blur-sm rounded-lg overflow-hidden shadow-lg h-full">
-                  <div className="bg-gradient-to-r from-[#D4AF37]/20 to-transparent border-b border-[#D4AF37]/20 p-2 relative">
-                    <div className="absolute right-2 top-2 w-8 h-8 flex items-center justify-center rounded-full bg-[#D4AF37] text-black font-bold text-xs shadow-lg">VIP</div>
-                    <h3 className="text-[#D4AF37] font-bold text-lg">مميزات VIP</h3>
-                  </div>
-                  <div className="p-4 flex flex-col justify-between h-[calc(100%-46px)]">
-                    <div>
-                      <div className="mb-3 relative">
-                        <div className="w-full h-20 bg-gradient-to-r from-[#0A3A2A] to-black rounded shadow-md flex items-center justify-center">
-                          <span className="text-[#D4AF37] text-2xl font-bold">⭐ VIP ⭐</span>
-                        </div>
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-                        <div className="absolute bottom-2 left-2 text-[#D4AF37] text-sm font-bold">احصل على مميزات حصرية</div>
-                      </div>
-                      <ul className="text-xs text-gray-300 list-disc list-inside mb-3 space-y-1">
-                        <li>طاولات VIP خاصة</li>
-                        <li>مكافآت يومية مضاعفة</li>
-                        <li>دعم أولوية</li>
-                      </ul>
-                    </div>
-                    <Button 
-                      className="w-full bg-gradient-to-r from-[#D4AF37] to-[#AA8C2C] text-black hover:bg-[#E5C04B] font-bold"
-                      onClick={() => navigate("/vip")}
-                    >
-                      ترقية إلى VIP
-                    </Button>
-                  </div>
-                </div>
-              </div>
+              {/* تم حذف قسم VIP كما طلب المستخدم */}
 
               {/* واجهة اختيار الألعاب - قسم عرضي كامل على غرار تصميم الدومينو */}
               <div className="md:col-span-3">

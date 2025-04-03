@@ -91,10 +91,10 @@ export function ResetChipsButton() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button 
-          className="bg-gradient-to-r from-[#D4AF37] to-[#AA8C2C] text-black hover:bg-gradient-to-r hover:from-[#E5C04B] hover:to-[#BF9E37]"
+          className="bg-[#D4AF37]/20 text-[#D4AF37] hover:bg-[#D4AF37]/30 p-0 h-10 w-10 rounded-full border border-[#D4AF37]/50"
+          title="إعادة تعبئة الرصيد"
         >
-          <Coins className="ml-2 h-4 w-4" />
-          إعادة تعبئة الرصيد
+          <Coins className="h-5 w-5" />
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
