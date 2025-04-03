@@ -19,7 +19,6 @@ export default function LobbyPage() {
   const [activeGameCategory, setActiveGameCategory] = useState<GameType>("poker");
   const [isChatHidden, setIsChatHidden] = useState(false);
   const [videoMuted, setVideoMuted] = useState(true);
-  const [directTableId, setDirectTableId] = useState<string>("");
   const videoRef = useRef<HTMLVideoElement>(null);
   
   // استخدام WebSocket لاتصال مستمر مع الخادم
@@ -140,29 +139,7 @@ export default function LobbyPage() {
               </div>
             </div>
 
-            {/* زر الانتقال المباشر للطاولة */}
-            <div className="flex items-center gap-2">
-              <input
-                type="number"
-                placeholder="رقم الطاولة"
-                value={directTableId}
-                onChange={(e) => setDirectTableId(e.target.value)}
-                className="bg-black/50 text-[#D4AF37] border border-[#D4AF37]/40 rounded-md h-8 w-24 text-xs px-2 focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/40"
-              />
-              <Button 
-                variant="outline" 
-                size="sm"
-                className="h-8 py-0 px-2 text-xs border-[#D4AF37]/40 text-[#D4AF37] hover:bg-[#D4AF37]/10"
-                onClick={() => {
-                  if (directTableId && !isNaN(parseInt(directTableId))) {
-                    navigate(`/direct-table/${directTableId}`);
-                  }
-                }}
-              >
-                <ExternalLink size={14} className="ml-1" />
-                انتقال مباشر
-              </Button>
-            </div>
+
             
             <Button 
               variant="outline" 
@@ -182,17 +159,7 @@ export default function LobbyPage() {
               الملف
             </Button>
 
-            <Button 
-              variant="outline" 
-              className="border-green-500/50 text-green-400 hover:bg-green-500/10 h-8 py-0 px-2 text-xs"
-              onClick={() => {
-                // رابط تحميل التطبيق للأندرويد (ستقوم بتغييره لاحقا بالرابط الفعلي)
-                alert("سيتم تحميل تطبيق الأندرويد");
-              }}
-            >
-              <Smartphone size={14} className="ml-1" />
-              تحميل التطبيق
-            </Button>
+
             
             <Button 
               variant="outline" 
@@ -651,195 +618,7 @@ export default function LobbyPage() {
                 </div>
               </div>
 
-              {/* البطولات - عنصر في الثلث الأول  */}
-              <div className="md:col-span-1">
-                <div className="bg-gradient-to-b from-black/80 to-[#0A3A2A]/60 border-2 border-[#D4AF37]/20 backdrop-blur-sm rounded-lg overflow-hidden shadow-lg h-full">
-                  <div className="bg-gradient-to-r from-[#D4AF37]/20 to-transparent border-b border-[#D4AF37]/20 p-2">
-                    <h3 className="text-[#D4AF37] font-bold text-lg">بطولات</h3>
-                  </div>
-                  <div className="p-3">
-                    <div className="space-y-3">
-                      <div className="bg-black/40 rounded-lg p-3 border border-[#D4AF37]/10">
-                        <div className="flex justify-between items-center mb-1">
-                          <h4 className="text-[#D4AF37] font-bold text-sm">بطولة الجمعة</h4>
-                          <span className="bg-red-600 text-white text-xs px-2 py-0.5 rounded">اليوم</span>
-                        </div>
-                        <div className="flex justify-between items-center text-xs">
-                          <span className="text-gray-400">100,000 رقاقة</span>
-                          <span className="text-green-400">10:00م</span>
-                        </div>
-                      </div>
-                      
-                      <div className="bg-black/40 rounded-lg p-3 border border-[#D4AF37]/10">
-                        <div className="flex justify-between items-center mb-1">
-                          <h4 className="text-[#D4AF37] font-bold text-sm">بطولة VIP</h4>
-                          <span className="bg-gray-600 text-white text-xs px-2 py-0.5 rounded">غداً</span>
-                        </div>
-                        <div className="flex justify-between items-center text-xs">
-                          <span className="text-gray-400">250,000 رقاقة</span>
-                          <span className="text-gray-400">8:00م</span>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <Button 
-                      variant="outline"
-                      size="sm"
-                      className="w-full mt-3 border-[#D4AF37]/50 text-[#D4AF37] hover:bg-[#D4AF37]/10"
-                      onClick={() => navigate("/tournaments")}
-                    >
-                      المزيد من البطولات
-                    </Button>
-                  </div>
-                </div>
-              </div>
 
-              {/* أحدث اللاعبين - عنصر في الثلث الثاني */}
-              <div className="md:col-span-1">
-                <div className="bg-gradient-to-b from-black/80 to-[#0A3A2A]/60 border-2 border-[#D4AF37]/20 backdrop-blur-sm rounded-lg overflow-hidden shadow-lg h-full">
-                  <div className="bg-gradient-to-r from-[#D4AF37]/20 to-transparent border-b border-[#D4AF37]/20 p-2">
-                    <h3 className="text-[#D4AF37] font-bold text-lg">أفضل اللاعبين</h3>
-                  </div>
-                  <div className="p-3">
-                    <div className="space-y-2">
-                      {/* أعلى لاعب */}
-                      <div className="bg-black/40 rounded-lg p-2 border border-[#D4AF37]/20 flex items-center gap-2">
-                        <div className="bg-[#D4AF37]/20 rounded-full w-8 h-8 flex items-center justify-center">
-                          <span className="text-[#D4AF37] font-bold text-sm">1</span>
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex justify-between">
-                            <h4 className="text-white text-xs font-bold">PlayerOne</h4>
-                            <span className="text-[#D4AF37] text-xs">5.2M</span>
-                          </div>
-                          <div className="w-full h-1 bg-gray-700 rounded-full mt-1">
-                            <div className="h-full bg-gradient-to-r from-[#D4AF37] to-[#E5C04B] w-full rounded-full"></div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* ثاني لاعب */}
-                      <div className="bg-black/40 rounded-lg p-2 border border-[#D4AF37]/20 flex items-center gap-2">
-                        <div className="bg-gray-700/60 rounded-full w-8 h-8 flex items-center justify-center">
-                          <span className="text-gray-300 font-bold text-sm">2</span>
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex justify-between">
-                            <h4 className="text-white text-xs font-bold">PlayerTwo</h4>
-                            <span className="text-gray-300 text-xs">3.7M</span>
-                          </div>
-                          <div className="w-full h-1 bg-gray-700 rounded-full mt-1">
-                            <div className="h-full bg-gray-400 w-3/4 rounded-full"></div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* ثالث لاعب */}
-                      <div className="bg-black/40 rounded-lg p-2 border border-[#D4AF37]/20 flex items-center gap-2">
-                        <div className="bg-[#CD7F32]/30 rounded-full w-8 h-8 flex items-center justify-center">
-                          <span className="text-[#CD7F32] font-bold text-sm">3</span>
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex justify-between">
-                            <h4 className="text-white text-xs font-bold">PlayerThree</h4>
-                            <span className="text-[#CD7F32] text-xs">2.9M</span>
-                          </div>
-                          <div className="w-full h-1 bg-gray-700 rounded-full mt-1">
-                            <div className="h-full bg-[#CD7F32] w-[60%] rounded-full"></div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <Button 
-                      variant="outline"
-                      size="sm"
-                      className="w-full mt-3 border-blue-500/50 text-blue-400 hover:bg-blue-500/10"
-                      onClick={() => navigate("/rankings")}
-                    >
-                      جميع التصنيفات
-                    </Button>
-                  </div>
-                </div>
-              </div>
-
-              {/* أخبار وتحديثات - عنصر في الثلث الثالث */}
-              <div className="md:col-span-1">
-                <div className="bg-gradient-to-b from-black/80 to-[#0A3A2A]/60 border-2 border-[#D4AF37]/20 backdrop-blur-sm rounded-lg overflow-hidden shadow-lg h-full">
-                  <div className="bg-gradient-to-r from-[#D4AF37]/20 to-transparent border-b border-[#D4AF37]/20 p-2">
-                    <h3 className="text-[#D4AF37] font-bold text-lg">تحديثات</h3>
-                  </div>
-                  <div className="p-3">
-                    <div className="space-y-2">
-                      <div className="bg-black/40 rounded-lg p-2 border border-[#D4AF37]/10 flex items-center gap-2">
-                        <div className="min-w-8 h-8 rounded-md bg-blue-600/50 flex items-center justify-center">
-                          <Download className="h-4 w-4 text-white" />
-                        </div>
-                        <div>
-                          <h4 className="text-[#D4AF37] text-xs font-bold">تطبيق الجوال متاح الآن</h4>
-                          <p className="text-[11px] text-gray-300 truncate">تحميل تطبيق بوكر عرباوي!</p>
-                        </div>
-                      </div>
-                      
-                      <div className="bg-black/40 rounded-lg p-2 border border-[#D4AF37]/10 flex items-center gap-2">
-                        <div className="min-w-8 h-8 rounded-md bg-green-600/50 flex items-center justify-center">
-                          <Coins className="h-4 w-4 text-white" />
-                        </div>
-                        <div>
-                          <h4 className="text-[#D4AF37] text-xs font-bold">عرض شحن خاص</h4>
-                          <p className="text-[11px] text-gray-300 truncate">+50% رقائق إضافية اليوم!</p>
-                        </div>
-                      </div>
-                      
-                      <div className="bg-black/40 rounded-lg p-2 border border-[#D4AF37]/10 flex items-center gap-2">
-                        <div className="min-w-8 h-8 rounded-md bg-orange-600/50 flex items-center justify-center">
-                          <Bell className="h-4 w-4 text-white" />
-                        </div>
-                        <div>
-                          <h4 className="text-[#D4AF37] text-xs font-bold">تحديث اللعبة</h4>
-                          <p className="text-[11px] text-gray-300 truncate">ميزات جديدة وإصلاحات!</p>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <Button 
-                      variant="outline"
-                      size="sm"
-                      className="w-full mt-3 border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/10"
-                      onClick={() => navigate("/news")}
-                    >
-                      <Bell className="ml-2 h-4 w-4" />
-                      جميع التحديثات
-                    </Button>
-                  </div>
-                </div>
-              </div>
-
-              {/* المساحة المتاحة للإضافات المستقبلية */}
-              <div className="md:col-span-3">
-                <div className="bg-gradient-to-b from-black/80 to-[#0A3A2A]/60 border-2 border-[#D4AF37]/20 p-3 backdrop-blur-sm rounded-lg overflow-hidden shadow-lg">
-                  <div className="flex justify-between items-center">
-                    <h3 className="text-[#D4AF37] font-bold text-lg">مساحة للإضافات المستقبلية</h3>
-                    <Button 
-                      variant="outline"
-                      size="sm"
-                      className="border-[#D4AF37]/50 text-[#D4AF37] hover:bg-[#D4AF37]/10 h-8 py-0"
-                    >
-                      المزيد
-                    </Button>
-                  </div>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
-                    {[1, 2, 3, 4].map((i) => (
-                      <div key={i} className="bg-black/40 rounded-lg border border-[#D4AF37]/10 p-2 flex flex-col items-center justify-center min-h-24">
-                        <div className="w-10 h-10 rounded-full bg-[#0A3A2A]/70 border border-[#D4AF37]/30 flex items-center justify-center mb-2">
-                          <span className="text-[#D4AF37] text-xl">+</span>
-                        </div>
-                        <p className="text-gray-400 text-xs">قريبًا...</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </div>
