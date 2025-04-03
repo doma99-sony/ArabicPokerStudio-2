@@ -222,86 +222,25 @@ export default function LobbyPage() {
         <div className="container mx-auto p-4">
           <div className="flex flex-col gap-6">
             {/* العناصر الرئيسية */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* شريط الترحيب - أول عنصر على اليسار */}
-              <div className="md:col-span-2">
-                <div className="bg-gradient-to-r from-[#0A3A2A]/90 to-black/80 rounded-xl p-4 border-2 border-[#D4AF37]/30 shadow-lg backdrop-blur-md h-full">
-                  <div className="flex flex-col gap-3">
-                    {/* معلومات اللاعب */}
-                    <div className="flex items-center gap-3">
-                      <div className="relative">
-                        <img 
-                          src={user?.avatar || "/assets/poker-icon-gold.png"}
-                          alt="Avatar" 
-                          className="w-16 h-16 rounded-full object-cover border-2 border-[#D4AF37]" 
-                        />
-                        <div className="absolute -bottom-1 -right-1 bg-green-500 p-1 rounded-full w-5 h-5 flex items-center justify-center border border-black">
-                          <span className="text-[8px] text-black font-bold">متصل</span>
-                        </div>
-                      </div>
-                      <div>
-                        <h2 className="text-[#D4AF37] text-xl font-bold">أهلاً بك، {user?.username}!</h2>
-                        <p className="text-gray-300 text-sm">آخر تواجد: اليوم {new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}</p>
-                      </div>
-                    </div>
+            <div className="grid grid-cols-1 gap-6">
+              {/* تم حذف قسم معلومات اللاعب بناءً على طلب المستخدم */}
 
-                    {/* إحصائيات اللاعب */}
-                    <div className="flex flex-wrap items-center gap-4">
-                      <div className="bg-[#0A3A2A]/70 p-2 rounded-lg border border-[#D4AF37]/30 shadow flex items-center">
-                        <Coins className="h-5 w-5 text-[#D4AF37] mr-2" />
-                        <div>
-                          <p className="text-xs text-gray-300">رصيدك الحالي</p>
-                          <p className="text-[#D4AF37] font-bold text-lg">{formatChips(user?.chips || 0)}</p>
-                        </div>
-                      </div>
-                      {/* تم حذف مربع مميزات VIP بناءً على طلب المستخدم */}
-                    </div>
-
-                    {/* أزرار الوصول السريع */}
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      <Button 
-                        variant="outline" 
-                        className="border-[#D4AF37]/50 text-[#D4AF37] hover:bg-[#D4AF37]/10 h-9 py-0"
-                        onClick={() => navigate("/profile")}
-                      >
-                        <User size={16} className="ml-2" />
-                        الملف الشخصي
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        className="border-green-500/50 text-green-400 hover:bg-green-500/10 h-9 py-0"
-                        onClick={() => navigate("/shop")}
-                      >
-                        <ShoppingBag size={16} className="ml-2" />
-                        المتجر
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10 h-9 py-0"
-                        onClick={() => navigate("/rankings")}
-                      >
-                        <Trophy size={16} className="ml-2" />
-                        التصنيفات
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* تم حذف قسم VIP كما طلب المستخدم */}
-
-              {/* واجهة اختيار الألعاب - قسم عرضي كامل على غرار تصميم الدومينو */}
-              <div className="md:col-span-3">
-                <div className="rounded-xl bg-gradient-to-b from-[#6b21a8]/90 to-[#4c1d95]/70 border-2 border-[#c084fc]/40 p-4 backdrop-blur-sm shadow-2xl">
-                  <div className="text-center mb-6 flex items-center justify-center">
+              {/* واجهة اختيار الألعاب - قسم عرضي كامل */}
+              <div className="w-full">
+                <div className="rounded-xl bg-gradient-to-b from-[#0A3A2A]/90 to-black/80 border-2 border-[#D4AF37]/40 p-4 backdrop-blur-sm shadow-2xl">
+                  <div className="text-center mb-8 flex items-center justify-center">
                     <div className="relative">
                       <div className="absolute -top-12 left-1/2 transform -translate-x-1/2">
-                        <div className="bg-gradient-to-r from-[#c026d3] to-[#7e22ce] text-white text-xl font-bold py-2 px-8 rounded-full shadow-lg border-2 border-white/20">
-                          ألعابنا المميزة
+                        <div className="bg-gradient-to-r from-[#0A3A2A] to-[#1B4D3E] text-[#D4AF37] text-xl font-bold py-2 px-10 rounded-full shadow-lg border-2 border-[#D4AF37]/30">
+                          <span className="flex items-center justify-center gap-3">
+                            <span className="text-xl">♣</span>
+                            ألعابنا المميزة
+                            <span className="text-xl">♠</span>
+                          </span>
                         </div>
                       </div>
-                      <div className="mt-8 mb-1 flex items-center justify-center">
-                        <div className="h-1 w-32 bg-gradient-to-r from-[#f0abfc]/10 via-[#f0abfc] to-[#f0abfc]/10 rounded-full"></div>
+                      <div className="mt-8 mb-2 flex items-center justify-center">
+                        <div className="h-0.5 w-60 bg-gradient-to-r from-[#D4AF37]/0 via-[#D4AF37] to-[#D4AF37]/0 rounded-full"></div>
                       </div>
                     </div>
                   </div>
