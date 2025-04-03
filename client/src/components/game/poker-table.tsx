@@ -606,6 +606,64 @@ export function PokerTable({ gameState }: PokerTableProps) {
               معرف اللاعب: {positionedPlayers.find(p => p.isCurrentPlayer)?.id} | 
               الدور الحالي: {gameState.currentTurn}
             </div>
+            
+            {/* أزرار اختبار مباشرة للإجراءات */}
+            <div className="mb-2 p-2 bg-black/40 rounded flex gap-2 flex-wrap">
+              <button 
+                className="px-2 py-1 bg-red-500 text-white rounded text-xs"
+                onClick={() => {
+                  // إرسال طلب مباشر للتخلي
+                  fetch(`/api/game/${gameState.id}/action`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ action: "fold" })
+                  })
+                  .then(response => response.json())
+                  .then(data => console.log("نتيجة التخلي:", data))
+                  .catch(err => console.error("خطأ في التخلي:", err));
+                }}
+              >
+                اختبار التخلي
+              </button>
+              
+              <button 
+                className="px-2 py-1 bg-green-500 text-white rounded text-xs"
+                onClick={() => {
+                  // إرسال طلب مباشر للمتابعة/المجاراة
+                  fetch(`/api/game/${gameState.id}/action`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ action: gameState.currentBet === 0 ? "check" : "call" })
+                  })
+                  .then(response => response.json())
+                  .then(data => console.log("نتيجة المتابعة/المجاراة:", data))
+                  .catch(err => console.error("خطأ في المتابعة/المجاراة:", err));
+                }}
+              >
+                اختبار {gameState.currentBet === 0 ? "متابعة" : "مجاراة"}
+              </button>
+              
+              <button 
+                className="px-2 py-1 bg-amber-500 text-white rounded text-xs"
+                onClick={() => {
+                  // إرسال طلب مباشر للزيادة
+                  const amount = gameState.currentBet === 0 ? 20 : gameState.currentBet * 2;
+                  fetch(`/api/game/${gameState.id}/action`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ action: "raise", amount })
+                  })
+                  .then(response => response.json())
+                  .then(data => console.log("نتيجة الزيادة:", data))
+                  .catch(err => console.error("خطأ في الزيادة:", err));
+                }}
+              >
+                اختبار الزيادة
+              </button>
+            </div>
             <GameActions 
               currentBet={gameState.currentBet}
               minRaise={gameState.currentBet * 2}
