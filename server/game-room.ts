@@ -626,8 +626,19 @@ export function createGameRoom(table: GameTable): GameRoom {
   
   // Check if the game is over (only one player left or showdown complete)
   const isGameOver = (): boolean => {
+    // اللعبة تنتهي في حالة تبقي لاعب واحد فقط أو في حالة "showdown"
     const activePlayers = Array.from(players.values()).filter(p => !p.folded);
-    return activePlayers.length <= 1 || round.gameStatus === "showdown";
+    const gameEnded = activePlayers.length <= 1 || round.gameStatus === "showdown";
+    
+    if (gameEnded) {
+      console.log(`اللعبة انتهت. لاعبين نشطين: ${activePlayers.length}, الحالة: ${round.gameStatus}`);
+      // إضافة تسجيل للفائز
+      if (activePlayers.length === 1) {
+        console.log(`الفائز بالجولة: ${activePlayers[0].username} بسبب انسحاب باقي اللاعبين`);
+      }
+    }
+    
+    return gameEnded;
   };
   
   // Convert internal game state to client-facing game state for a specific player
@@ -1010,6 +1021,26 @@ export function createGameRoom(table: GameTable): GameRoom {
       // If game is over, end the round and return results
       if (isGameOver()) {
         const results = endRound();
+        
+        // إعادة تعيين حالة اللاعبين لجولة جديدة
+        for (const [_, p] of players) {
+          p.folded = false;
+          p.betAmount = 0;
+          p.isAllIn = false;
+          p.cards = [];
+        }
+        
+        // بدء جولة جديدة تلقائياً بعد مدة قصيرة
+        console.log("الجولة انتهت، جدولة بدء جولة جديدة...");
+        setTimeout(() => {
+          if (players.size >= 2) {
+            console.log("بدء جولة جديدة تلقائياً بعد انتهاء الجولة السابقة...");
+            startNewRound();
+            // مسح الكاش للتأكد من تحديث الحالة
+            gameStateCache.clear();
+          }
+        }, 2000); // بدء جولة جديدة بعد ثانيتين
+
         return { 
           success: true, 
           gameEnded: true,
