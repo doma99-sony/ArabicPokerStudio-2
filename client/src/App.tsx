@@ -21,7 +21,6 @@ import SettingsPage from "@/pages/settings-page";
 import HowToPlayPage from "@/pages/how-to-play-page";
 import { ProtectedRoute } from "./lib/protected-route";
 import { useAuth } from "@/hooks/use-auth";
-import { useWebSocket } from "@/hooks/use-websocket-simplified"; // استخدام النسخة المبسطة من WebSocket
 import { Loader2 } from "lucide-react";
 import { WelcomeMessageNotification } from "@/components/ui/welcome-message";
 import { LandscapeNotice } from "@/components/ui/landscape-notice";
@@ -30,7 +29,11 @@ import { HomeRedirect } from "@/components/navigation/home-redirect";
 import { initializePerformanceOptimizations } from "@/lib/performance-utils";
 import { SplashScreen } from "@/components/ui/splash-screen";
 import { useState, useEffect, useRef } from "react";
+import { ErrorProvider } from "@/components/error-handler";
 
+// استيراد المكونات والأدوات الجديدة
+import { useGlobalWebSocket } from "@/hooks/use-global-websocket";
+import { useSessionManager } from "@/hooks/use-session-manager";
 
 
 function Router() {
@@ -141,13 +144,14 @@ function App() {
   }
   
   return (
-    <NotificationsProvider>
-
-      <Router />
-      <WelcomeMessageNotification />
-      <LandscapeNotice />
-      <Toaster />
-    </NotificationsProvider>
+    <ErrorProvider>
+      <NotificationsProvider>
+        <Router />
+        <WelcomeMessageNotification />
+        <LandscapeNotice />
+        <Toaster />
+      </NotificationsProvider>
+    </ErrorProvider>
   );
 }
 
