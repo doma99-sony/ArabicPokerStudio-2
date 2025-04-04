@@ -3,34 +3,34 @@ import { useState, useEffect, useRef } from 'react';
 // قائمة مسارات الموسيقى المحلية
 const musicTracks = [
   {
-    title: "Energetic 1",
+    title: "Ambient 1",
     artist: "Poker Game",
-    src: "/audio/energetic/track1.mp3" // استخدام ملف محلي بدلاً من الروابط الخارجية
+    src: "/sounds/music/ambient1.mp3" // استخدام ملفات موسيقية من مجلد sounds
   },
   {
-    title: "Energetic 2",
+    title: "Music 1",
     artist: "Game Sounds",
-    src: "/audio/energetic/energetic_1.mp3"
+    src: "/sounds/music/music1.mp3"
   },
   {
-    title: "Energetic 3",
+    title: "Ambient 2",
     artist: "Card Music",
-    src: "/audio/energetic/energetic_2.mp3"
+    src: "/sounds/music/ambient2.mp3"
   },
   {
-    title: "Energetic 4",
+    title: "Music 2",
     artist: "Casino Beats",
-    src: "/audio/energetic/energetic_3.mp3"
+    src: "/sounds/music/music2.mp3"
   },
   {
-    title: "Energetic 5",
+    title: "Ambient 3",
     artist: "Poker Club",
-    src: "/audio/energetic/energetic_4.mp3"
+    src: "/sounds/music/ambient3.mp3"
   },
   {
-    title: "Background Music",
+    title: "Music 3",
     artist: "Poker Game",
-    src: "/background-music.mp3"
+    src: "/sounds/music/music3.mp3"
   }
 ];
 
