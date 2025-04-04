@@ -12,8 +12,14 @@ import {
   Wallet, 
   Download, 
   Upload, 
-  CheckCircle 
+  CheckCircle,
+  Music,
+  Play,
+  Pause,
+  SkipForward,
+  SkipBack
 } from "lucide-react";
+import { useMusic } from "@/components/background-music";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
@@ -49,6 +55,9 @@ export default function SettingsPage() {
   const [, navigate] = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();
+  
+  // استخدام سياق الموسيقى للتحكم في الأغاني
+  const { volume: musicVolume, setVolume: setMusicVolume, isPlaying, togglePlay, currentTrack, nextTrack, previousTrack } = useMusic();
   
   // إعدادات الصوت
   const [volume, setVolume] = useState<number>(70);
@@ -353,21 +362,63 @@ export default function SettingsPage() {
                   />
                 </div>
                 
-                <div className="space-y-2">
+                {/* تحكم بالموسيقى الخلفية */}
+                <div className="bg-[#1a1708]/70 rounded-lg p-4 border border-[#D4AF37]/20 space-y-4">
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="music-volume" className="text-white">الموسيقى</Label>
-                    <span className="text-white/70">{volume - 20 < 0 ? 0 : volume - 20}%</span>
+                    <h3 className="text-lg font-bold text-[#D4AF37] flex items-center gap-2">
+                      <Music className="h-5 w-5" />
+                      الأغاني والموسيقى
+                    </h3>
+                    <div className="flex items-center gap-2">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={previousTrack}
+                        className="text-white hover:bg-[#D4AF37]/10"
+                      >
+                        <SkipBack className="h-5 w-5" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={togglePlay}
+                        className="text-white hover:bg-[#D4AF37]/10"
+                      >
+                        {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={nextTrack}
+                        className="text-white hover:bg-[#D4AF37]/10"
+                      >
+                        <SkipForward className="h-5 w-5" />
+                      </Button>
+                    </div>
                   </div>
-                  <Slider
-                    id="music-volume"
-                    value={[volume - 20 < 0 ? 0 : volume - 20]} 
-                    min={0} 
-                    max={100} 
-                    step={1}
-                    disabled={isMuted}
-                    onValueChange={(value) => setVolume(value[0] + 20 > 100 ? 100 : value[0] + 20)}
-                    className={isMuted ? "opacity-50" : ""}
-                  />
+                  
+                  <div className="space-y-2">
+                    <div className="text-sm text-white/70">
+                      {currentTrack?.title || "الأغنية الحالية"} - {currentTrack?.artist || "الفنان"}
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="music-volume" className="text-white flex items-center gap-2">
+                        <Volume2 className="h-4 w-4 text-[#D4AF37]" />
+                        <span>مستوى صوت الأغاني</span>
+                      </Label>
+                      <span className="text-white/70">{Math.round(musicVolume * 100)}%</span>
+                    </div>
+                    <Slider
+                      id="music-volume"
+                      value={[musicVolume * 100]} 
+                      min={0} 
+                      max={100} 
+                      step={5}
+                      disabled={!isPlaying}
+                      onValueChange={(value) => setMusicVolume(value[0] / 100)}
+                      className={!isPlaying ? "opacity-50" : ""}
+                    />
+                  </div>
                 </div>
               </CardContent>
               <CardFooter>

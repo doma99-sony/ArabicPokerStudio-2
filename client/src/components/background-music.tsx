@@ -1,89 +1,138 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, createContext, useContext } from 'react';
 
-// قائمة بالأغاني الإلكترونية والحماسية المشابهة للأغنية المطلوبة
-// استخدام مصادر أغاني متاحة عبر الإنترنت
+// سياق عام للموسيقى لمشاركة حالة التشغيل بين المكونات
+interface MusicContextType {
+  volume: number;
+  setVolume: (volume: number) => void;
+  isPlaying: boolean;
+  togglePlay: () => void;
+  currentTrack: typeof musicTracks[0];
+  nextTrack: () => void;
+  previousTrack: () => void;
+}
+
+const defaultMusicContext: MusicContextType = {
+  volume: 0.7,
+  setVolume: () => {},
+  isPlaying: true,
+  togglePlay: () => {},
+  currentTrack: {
+    title: "",
+    artist: "",
+    src: ""
+  },
+  nextTrack: () => {},
+  previousTrack: () => {}
+};
+
+const MusicContext = createContext<MusicContextType>(defaultMusicContext);
+
+// استخدام سياق الموسيقى في المكونات الأخرى
+export const useMusic = () => useContext(MusicContext);
+
+// قائمة بالأغاني العربية والإلكترونية الحماسية
 const musicTracks = [
   {
-    title: "Electronic Energy",
-    artist: "DJ Mixer",
-    src: "https://storage.googleapis.com/media-session/big-buck-bunny/prelude.mp3"
+    title: "أغنية حماسية 1",
+    artist: "DJ مصري",
+    src: "https://dl.dropbox.com/scl/fi/l0vw2ep5a2i5r1d9z0mcp/arabic-trap.mp3?rlkey=hz1itfm13jvtdh37rtw9tmbq9&dl=0"
   },
   {
-    title: "Party House",
-    artist: "Club Masters",
-    src: "https://storage.googleapis.com/media-session/elephants-dream/the-wires.mp3"
+    title: "إيقاعات شرقية",
+    artist: "نجم الميكس",
+    src: "https://dl.dropbox.com/scl/fi/xbjgk2ogknpfq59z6rqwd/arabic-house.mp3?rlkey=p7wicfh2eqamf9zcmtjnhzrsj&dl=0"
   },
   {
-    title: "Deep Bass",
-    artist: "Electronic Kings",
-    src: "https://cdn.freesound.org/previews/686/686367_9715151-lq.mp3"
+    title: "ريمكس عربي",
+    artist: "DJ خليجي",
+    src: "https://dl.dropbox.com/scl/fi/0k1pji63sak6l0jkhj6ud/arabic-mix.mp3?rlkey=yrfhmmr4kkx25tojxwpejl5un&dl=0"
   },
   {
-    title: "Dance Floor",
-    artist: "House Nation",
-    src: "https://cdn.freesound.org/previews/608/608280_12422346-lq.mp3"
+    title: "ليلة سهر",
+    artist: "نجوم الريمكس",
+    src: "https://dl.dropbox.com/scl/fi/66iu3a02ys2e2p9zwu3vp/club-energy.mp3?rlkey=5eplj5w4wz2xt6y8b94m90odz&dl=0"
   },
   {
-    title: "High Energy",
-    artist: "EDM Stars",
-    src: "https://cdn.freesound.org/previews/458/458587_9159316-lq.mp3"
-  },
-  {
-    title: "Electric Dreams",
-    artist: "Future Beat",
-    src: "https://cdn.freesound.org/previews/650/650781_11861866-lq.mp3"
-  },
-  {
-    title: "Club Remix",
-    artist: "Beat Monsters",
-    src: "https://cdn.freesound.org/previews/624/624736_5674468-lq.mp3"
-  },
-  {
-    title: "Techno Rush",
-    artist: "Digital DJs",
-    src: "https://cdn.freesound.org/previews/631/631440_10402710-lq.mp3"
+    title: "إيقاع الطبلة",
+    artist: "موسيقى الشرق",
+    src: "https://dl.dropbox.com/scl/fi/qyg9yiw8e7f5f0svjihq3/energetic-trap.mp3?rlkey=4dvvh651iu6cti3m5mmkcwdmt&dl=0"
   }
 ];
 
-// مكون للموسيقى الخلفية التي تعمل تلقائياً بدون عناصر تحكم مرئية
-export function BackgroundMusic() {
+// مكون مزود الموسيقى الذي يوفر السياق لباقي التطبيق
+export function BackgroundMusicProvider() {
+  const [isMounted, setIsMounted] = useState(false);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(Math.floor(Math.random() * musicTracks.length));
+  const [volume, setVolume] = useState<number>(0.7); // افتراضي 70%
+  const [isPlaying, setIsPlaying] = useState<boolean>(true);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   
-  // جلب المسار الحالي
+  // الحصول على المسار الحالي
   const currentTrack = musicTracks[currentTrackIndex];
+  
+  // التبديل بين تشغيل وإيقاف الموسيقى
+  const togglePlay = () => {
+    if (!audioRef.current) return;
+    
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      const playPromise = audioRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(error => {
+          console.warn("تعذر تشغيل الأغنية", error);
+        });
+      }
+    }
+    
+    setIsPlaying(!isPlaying);
+  };
+  
+  // الانتقال للأغنية التالية
+  const nextTrack = () => {
+    setCurrentTrackIndex(prev => (prev + 1) % musicTracks.length);
+  };
+  
+  // الانتقال للأغنية السابقة
+  const previousTrack = () => {
+    setCurrentTrackIndex(prev => (prev - 1 + musicTracks.length) % musicTracks.length);
+  };
+  
+  // تحديث مستوى الصوت
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+    }
+  }, [volume]);
   
   // تهيئة عنصر الصوت
   useEffect(() => {
     const audio = new Audio();
-    audio.volume = 0.65; // مستوى صوت مرتفع للأغاني الحماسية
-    audio.loop = false; // عدم تكرار الأغنية الواحدة
+    audio.volume = volume;
+    audio.loop = false;
     
     // تشغيل الأغنية التالية عند انتهاء الحالية
     audio.onended = () => {
-      setCurrentTrackIndex(prev => (prev + 1) % musicTracks.length);
+      nextTrack();
     };
     
     audioRef.current = audio;
     
-    // تحريك الأغاني بشكل عشوائي عند التحميل
-    shuffleTracks();
-    
-    // محاولة تشغيل الموسيقى فوراً عند تحميل الصفحة
+    // تشغيل الموسيقى تلقائياً عند بدء التطبيق
     setTimeout(() => {
-      if (audioRef.current) {
+      if (audioRef.current && isPlaying) {
         const playPromise = audioRef.current.play();
         if (playPromise !== undefined) {
           playPromise.catch(error => {
-            console.warn("تعذر التشغيل التلقائي للموسيقى", error);
+            console.warn("تعذر التشغيل التلقائي للأغنية", error);
             
-            // خطة بديلة في حال عدم السماح بالتشغيل التلقائي
+            // محاولة التشغيل عند تفاعل المستخدم إذا فشل التشغيل التلقائي
             const handleUserInteraction = () => {
-              if (audioRef.current && audioRef.current.paused) {
+              if (audioRef.current && audioRef.current.paused && isPlaying) {
                 const retryPromise = audioRef.current.play();
                 if (retryPromise !== undefined) {
                   retryPromise.catch(retryError => {
-                    console.warn("تعذر تشغيل الموسيقى بعد تفاعل المستخدم", retryError);
+                    console.warn("تعذر تشغيل الأغنية بعد تفاعل المستخدم", retryError);
                   });
                 }
                 
@@ -101,7 +150,7 @@ export function BackgroundMusic() {
           });
         }
       }
-    }, 1000); // تأخير مناسب للتأكد من تحميل الصفحة
+    }, 1000);
     
     // تنظيف عند إزالة المكون
     return () => {
@@ -111,12 +160,6 @@ export function BackgroundMusic() {
     };
   }, []);
   
-  // مزج مسارات الموسيقى بشكل عشوائي
-  const shuffleTracks = () => {
-    const randomIndex = Math.floor(Math.random() * musicTracks.length);
-    setCurrentTrackIndex(randomIndex);
-  };
-  
   // تحديث المسار عند تغيير المؤشر
   useEffect(() => {
     if (!audioRef.current) return;
@@ -124,11 +167,11 @@ export function BackgroundMusic() {
     const audio = audioRef.current;
     
     const handleError = () => {
-      console.warn(`تعذر تحميل الملف الصوتي: ${currentTrack.src}`);
+      console.warn(`تعذر تحميل ملف الأغنية: ${currentTrack.src}`);
       // الانتقال للمسار التالي بعد فشل التحميل
       setTimeout(() => {
-        setCurrentTrackIndex(prev => (prev + 1) % musicTracks.length);
-      }, 2000);
+        nextTrack();
+      }, 1000);
     };
     
     // إضافة محقق أخطاء تحميل الملفات الصوتية
@@ -140,16 +183,17 @@ export function BackgroundMusic() {
     // تحميل المسار
     audio.load();
     
-    // تشغيل الموسيقى
-    const playPromise = audio.play();
-    if (playPromise !== undefined) {
-      playPromise.catch(error => {
-        console.warn("تعذر تشغيل المسار الصوتي", error);
-        // محاولة الانتقال للمسار التالي بعد فشل التشغيل
-        setTimeout(() => {
-          setCurrentTrackIndex(prev => (prev + 1) % musicTracks.length);
-        }, 2000);
-      });
+    // تشغيل الأغنية إذا كان وضع التشغيل نشط
+    if (isPlaying) {
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(error => {
+          console.warn("تعذر تشغيل الأغنية", error);
+          setTimeout(() => {
+            nextTrack();
+          }, 1000);
+        });
+      }
     }
     
     // تنظيف عند تغيير المسار
@@ -158,21 +202,34 @@ export function BackgroundMusic() {
     };
   }, [currentTrackIndex, currentTrack.src]);
   
-  // لا يوجد شيء مرئي للعرض، فقط تشغيل الموسيقى في الخلفية
-  return null;
-}
-
-// المكون الذي سيتم استخدامه في التطبيق
-export function BackgroundMusicProvider() {
-  const [isMounted, setIsMounted] = useState(false);
-
+  // التأكد من تحميل المكون فقط في جانب العميل
   useEffect(() => {
-    // التأكد من تحميل المكون فقط في جانب العميل
     setIsMounted(true);
     return () => setIsMounted(false);
   }, []);
-
+  
   if (!isMounted) return null;
   
-  return <BackgroundMusic />;
+  // توفير معلومات التحكم بالموسيقى لباقي المكونات
+  return (
+    <MusicContext.Provider
+      value={{
+        volume,
+        setVolume,
+        isPlaying,
+        togglePlay,
+        currentTrack,
+        nextTrack,
+        previousTrack
+      }}
+    >
+      <BackgroundMusic />
+    </MusicContext.Provider>
+  );
+}
+
+// المكون الفعلي للموسيقى (بدون واجهة مرئية)
+function BackgroundMusic() {
+  // لا يوجد أي عناصر مرئية، المكون يعمل فقط لتشغيل الموسيقى في الخلفية
+  return null;
 }
