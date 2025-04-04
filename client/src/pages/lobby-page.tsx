@@ -110,88 +110,11 @@ export default function LobbyPage() {
       
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
 
-      {/* Header Bar - تصميم احترافي محسّن */}
+      {/* Header Bar - تصميم احترافي بجودة عالية */}
       <header className="relative z-10 bg-gradient-to-r from-[#0A3A2A] via-[#0F1F1A] to-black py-3 shadow-2xl border-b-2 border-[#D4AF37] sticky top-0">
         <div className="container mx-auto flex justify-between items-center px-4">
-          {/* القسم الأيسر - الشعار ومعلومات اللعبة */}
+          {/* القسم الأيسر - معلومات المستخدم والرصيد (تم تبديل المكان) */}
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-3">
-              <div className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-r from-[#D4AF37]/50 to-[#D4AF37]/0 rounded-full blur-md animate-pulse-slow opacity-50 group-hover:opacity-75 transition-all duration-300"></div>
-                <img 
-                  src="/assets/poker-logo.jpeg" 
-                  alt="بوكر عرباوي" 
-                  className="relative w-12 h-12 rounded-full border-2 border-[#D4AF37] object-cover shadow-lg shadow-[#D4AF37]/30 group-hover:shadow-[#D4AF37]/50 transition-all duration-300" 
-                />
-                <div className="absolute -bottom-1 -right-1 bg-green-500 w-4 h-4 rounded-full border border-black animate-pulse"></div>
-              </div>
-              <div>
-                <h1 className="text-xl font-bold bg-gradient-to-r from-[#D4AF37] to-[#FFC107] bg-clip-text text-transparent drop-shadow-md">بوكر تكساس عرباوي</h1>
-                <div className="flex items-center mt-0.5">
-                  <OnlineUsersCounter />
-                </div>
-              </div>
-            </div>
-            
-            {/* أزرار التنقل - تم التعديل */}
-            <div className="hidden lg:flex items-center gap-3 mr-4">
-              <Button 
-                variant="ghost" 
-                className="h-9 px-3 text-sm bg-black/20 text-[#D4AF37] hover:bg-[#D4AF37]/10 hover:text-[#FFD700] transition-all duration-300 flex items-center"
-                onClick={() => navigate("/send-chips")}
-              >
-                <Coins size={16} className="ml-1" />
-                <span>العطاء</span>
-              </Button>
-              
-              <Button 
-                variant="ghost" 
-                className="h-9 px-3 text-sm bg-black/20 text-[#D4AF37] hover:bg-[#D4AF37]/10 hover:text-[#FFD700] transition-all duration-300 flex items-center"
-                onClick={() => window.open("https://wa.me/201008508826", "_blank")}
-              >
-                <span className="flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1">
-                    <path d="M15.05 5A5 5 0 0 1 19 8.95M15.05 1A9 9 0 0 1 23 8.94m-1 7.98v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-                  </svg>
-                  <span>الدعم</span>
-                </span>
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-              </Button>
-              
-              <Button 
-                variant="ghost" 
-                className="h-9 px-3 text-sm bg-black/20 text-[#D4AF37] hover:bg-[#D4AF37]/10 hover:text-[#FFD700] transition-all duration-300 flex items-center"
-                onClick={() => navigate("/offers")}
-              >
-                <span className="flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1">
-                    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
-                    <line x1="7" y1="7" x2="7.01" y2="7"></line>
-                  </svg>
-                  <span>عروض الشحن</span>
-                </span>
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-              </Button>
-            </div>
-          </div>
-
-          {/* زر الهامبرغر للتنقل في الموبايل - إضافة جديدة */}
-          <div className="lg:hidden ml-auto mr-2">
-            <Button 
-              variant="ghost" 
-              className="h-9 w-9 p-0 bg-black/20 text-[#D4AF37] hover:bg-[#D4AF37]/10 hover:text-[#FFD700] rounded-lg"
-              onClick={() => navigate("/menu")}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="4" x2="20" y1="12" y2="12" />
-                <line x1="4" x2="20" y1="6" y2="6" />
-                <line x1="4" x2="20" y1="18" y2="18" />
-              </svg>
-            </Button>
-          </div>
-
-          {/* القسم الأيمن - معلومات المستخدم والأزرار */}
-          <div className="flex items-center gap-3">
             {/* معلومات المستخدم والرصيد */}
             <div className="bg-gradient-to-r from-[#0A3A2A]/90 to-black/80 rounded-lg border-2 border-[#D4AF37] py-2 px-3 mr-2 shadow-xl hover:shadow-[#D4AF37]/30 transition-all duration-300">
               <div className="flex items-center gap-2">
@@ -220,6 +143,83 @@ export default function LobbyPage() {
                     <Coins className="h-3.5 w-3.5 text-[#D4AF37] ml-1" />
                     <span className="text-[#D4AF37] text-sm font-bold">{formatChips(user?.chips || 0)}</span>
                   </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* أزرار التنقل - بتصميم محسن وأيقونات عالية الجودة */}
+            <div className="hidden lg:flex items-center gap-3 mr-4">
+              <Button 
+                variant="outline" 
+                className="h-9 px-4 text-sm bg-black/30 border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37]/10 hover:text-[#FFD700] transition-all duration-300 flex items-center shadow-md hover:shadow-[#D4AF37]/20"
+                onClick={() => navigate("/send-chips")}
+              >
+                <Coins size={18} className="ml-2 drop-shadow-gold" />
+                <span className="font-semibold">العطاء</span>
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                className="h-9 px-4 text-sm bg-black/30 border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37]/10 hover:text-[#FFD700] transition-all duration-300 flex items-center shadow-md hover:shadow-[#D4AF37]/20 relative"
+                onClick={() => window.open("https://wa.me/201008508826", "_blank")}
+              >
+                <span className="flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-2 drop-shadow-gold">
+                    <path d="M15.05 5A5 5 0 0 1 19 8.95M15.05 1A9 9 0 0 1 23 8.94m-1 7.98v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                  </svg>
+                  <span className="font-semibold">الدعم</span>
+                </span>
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse shadow-lg"></div>
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                className="h-9 px-4 text-sm bg-black/30 border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37]/10 hover:text-[#FFD700] transition-all duration-300 flex items-center shadow-md hover:shadow-[#D4AF37]/20 relative"
+                onClick={() => navigate("/offers")}
+              >
+                <span className="flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-2 drop-shadow-gold">
+                    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                    <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                  </svg>
+                  <span className="font-semibold">عروض الشحن</span>
+                </span>
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse shadow-lg"></div>
+              </Button>
+            </div>
+          </div>
+
+          {/* زر الهامبرغر للتنقل في الموبايل - إضافة جديدة */}
+          <div className="lg:hidden ml-auto mr-2">
+            <Button 
+              variant="ghost" 
+              className="h-9 w-9 p-0 bg-black/20 text-[#D4AF37] hover:bg-[#D4AF37]/10 hover:text-[#FFD700] rounded-lg"
+              onClick={() => navigate("/menu")}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="4" x2="20" y1="12" y2="12" />
+                <line x1="4" x2="20" y1="6" y2="6" />
+                <line x1="4" x2="20" y1="18" y2="18" />
+              </svg>
+            </Button>
+          </div>
+
+          {/* القسم الأيمن (الجديد) - الشعار ومعلومات اللعبة بجودة عالية */}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3">
+              <div className="relative group">
+                <div className="absolute inset-0 bg-gradient-to-r from-[#D4AF37]/50 to-[#D4AF37]/0 rounded-full blur-md animate-pulse-slow opacity-50 group-hover:opacity-75 transition-all duration-300"></div>
+                <img 
+                  src="/assets/poker-icon-gold.png" 
+                  alt="بوكر عرباوي" 
+                  className="relative w-12 h-12 rounded-full border-2 border-[#D4AF37] object-cover shadow-lg shadow-[#D4AF37]/30 group-hover:shadow-[#D4AF37]/50 transition-all duration-300" 
+                />
+                <div className="absolute -bottom-1 -right-1 bg-green-500 w-4 h-4 rounded-full border border-black animate-pulse"></div>
+              </div>
+              <div>
+                <h1 className="text-xl font-bold bg-gradient-to-r from-[#D4AF37] to-[#FFC107] bg-clip-text text-transparent drop-shadow-md">بوكر تكساس عرباوي</h1>
+                <div className="flex items-center mt-0.5">
+                  <OnlineUsersCounter />
                 </div>
               </div>
             </div>
