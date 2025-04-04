@@ -69,37 +69,45 @@ export function BackgroundMusic() {
     // تحريك الأغاني بشكل عشوائي عند التحميل
     shuffleTracks();
     
-    // التأكد من أن تشغيل الصوت يحدث فقط بعد تفاعل المستخدم مع الصفحة
-    const handleUserInteraction = () => {
+    // تشغيل الصوت تلقائياً عند بدء التطبيق (دون الحاجة لتفاعل المستخدم)
+    setTimeout(() => {
       if (audioRef.current && audioRef.current.paused) {
         const playPromise = audioRef.current.play();
         if (playPromise !== undefined) {
           playPromise.catch(error => {
-            console.warn("تعذر تشغيل المسار الصوتي بعد تفاعل المستخدم", error);
+            console.warn("تعذر التشغيل التلقائي للمسار الصوتي", error);
+            
+            // إذا فشل التشغيل التلقائي، نحاول مرة أخرى عند تفاعل المستخدم
+            const handleUserInteraction = () => {
+              if (audioRef.current && audioRef.current.paused) {
+                const retryPlayPromise = audioRef.current.play();
+                if (retryPlayPromise !== undefined) {
+                  retryPlayPromise.catch(retryError => {
+                    console.warn("تعذر تشغيل المسار الصوتي حتى بعد تفاعل المستخدم", retryError);
+                  });
+                }
+              }
+              
+              // إزالة مستمعي الأحداث بعد التفاعل الأول
+              document.removeEventListener('click', handleUserInteraction);
+              document.removeEventListener('touchstart', handleUserInteraction);
+              document.removeEventListener('keydown', handleUserInteraction);
+            };
+            
+            // إضافة مستمعي أحداث للتفاعل مع الصفحة (خطة بديلة)
+            document.addEventListener('click', handleUserInteraction);
+            document.addEventListener('touchstart', handleUserInteraction);
+            document.addEventListener('keydown', handleUserInteraction);
           });
         }
       }
-      
-      // إزالة مستمعي الأحداث بعد التفاعل الأول
-      document.removeEventListener('click', handleUserInteraction);
-      document.removeEventListener('touchstart', handleUserInteraction);
-      document.removeEventListener('keydown', handleUserInteraction);
-    };
+    }, 500); // تأخير قليل للتأكد من أن التطبيق تحمل تماماً
     
-    // إضافة مستمعي أحداث للتفاعل مع الصفحة
-    document.addEventListener('click', handleUserInteraction);
-    document.addEventListener('touchstart', handleUserInteraction);
-    document.addEventListener('keydown', handleUserInteraction);
-    
-    // تفريغ عنصر الصوت وإزالة مستمعي الأحداث عند التدمير
+    // تفريغ عنصر الصوت عند التدمير
     return () => {
       audio.pause();
       audio.src = '';
       audioRef.current = null;
-      
-      document.removeEventListener('click', handleUserInteraction);
-      document.removeEventListener('touchstart', handleUserInteraction);
-      document.removeEventListener('keydown', handleUserInteraction);
     };
   }, []);
   
