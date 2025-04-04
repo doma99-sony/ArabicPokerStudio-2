@@ -35,27 +35,27 @@ const musicTracks = [
   {
     title: "أغنية حماسية 1",
     artist: "DJ مصري",
-    src: "https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3"
+    src: "/audio/sample-sound.mp3"
   },
   {
     title: "إيقاعات شرقية",
     artist: "نجم الميكس",
-    src: "https://assets.mixkit.co/music/preview/mixkit-hazy-after-hours-132.mp3"
+    src: "/audio/sample-sound2.mp3"
   },
   {
     title: "ريمكس عربي",
     artist: "DJ خليجي",
-    src: "https://assets.mixkit.co/music/preview/mixkit-serene-view-443.mp3"
+    src: "/audio/sample-sound3.mp3"
   },
   {
     title: "ليلة سهر",
     artist: "نجوم الريمكس",
-    src: "https://assets.mixkit.co/music/preview/mixkit-deep-urban-623.mp3"
+    src: "/audio/sample-sound4.mp3"
   },
   {
     title: "إيقاع الطبلة",
     artist: "موسيقى الشرق",
-    src: "https://assets.mixkit.co/music/preview/mixkit-hip-hop-02-738.mp3"
+    src: "/audio/sample-sound5.mp3"
   }
 ];
 
@@ -117,40 +117,6 @@ export function BackgroundMusicProvider() {
     };
     
     audioRef.current = audio;
-    
-    // تشغيل الموسيقى تلقائياً عند بدء التطبيق
-    setTimeout(() => {
-      if (audioRef.current && isPlaying) {
-        const playPromise = audioRef.current.play();
-        if (playPromise !== undefined) {
-          playPromise.catch(error => {
-            console.warn("تعذر التشغيل التلقائي للأغنية", error);
-            
-            // محاولة التشغيل عند تفاعل المستخدم إذا فشل التشغيل التلقائي
-            const handleUserInteraction = () => {
-              if (audioRef.current && audioRef.current.paused && isPlaying) {
-                const retryPromise = audioRef.current.play();
-                if (retryPromise !== undefined) {
-                  retryPromise.catch(retryError => {
-                    console.warn("تعذر تشغيل الأغنية بعد تفاعل المستخدم", retryError);
-                  });
-                }
-                
-                // إزالة مستمعي الأحداث بعد محاولة التشغيل
-                document.removeEventListener('click', handleUserInteraction);
-                document.removeEventListener('touchstart', handleUserInteraction);
-                document.removeEventListener('keydown', handleUserInteraction);
-              }
-            };
-            
-            // إضافة مستمعي أحداث لتفاعل المستخدم
-            document.addEventListener('click', handleUserInteraction);
-            document.addEventListener('touchstart', handleUserInteraction);
-            document.addEventListener('keydown', handleUserInteraction);
-          });
-        }
-      }
-    }, 1000);
     
     // تنظيف عند إزالة المكون
     return () => {
@@ -228,8 +194,27 @@ export function BackgroundMusicProvider() {
   );
 }
 
-// المكون الفعلي للموسيقى (بدون واجهة مرئية)
+// المكون الفعلي للموسيقى مع زر للتحكم
 function BackgroundMusic() {
-  // لا يوجد أي عناصر مرئية، المكون يعمل فقط لتشغيل الموسيقى في الخلفية
-  return null;
+  const { isPlaying, togglePlay } = useContext(MusicContext);
+  
+  return (
+    <div className="fixed bottom-4 left-4 z-50">
+      <button 
+        onClick={togglePlay}
+        className="rounded-full bg-gradient-to-r from-purple-600 to-indigo-700 p-3 text-white shadow-lg hover:from-purple-700 hover:to-indigo-800 transition-all duration-300"
+      >
+        {isPlaying ? (
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="6" y="4" width="4" height="16"></rect>
+            <rect x="14" y="4" width="4" height="16"></rect>
+          </svg>
+        ) : (
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+        )}
+      </button>
+    </div>
+  );
 }
