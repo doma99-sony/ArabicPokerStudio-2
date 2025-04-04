@@ -10,7 +10,7 @@ import { OnlineUsersCounter } from "@/components/ui/online-users-badge";
 import { ResetChipsButton } from "@/components/reset-chips-button";
 import { RemoveVirtualPlayersButton } from "@/components/remove-virtual-players-button";
 import { NotificationsButton, GameInstructionsButton } from "@/components/ui/notifications-system";
-import { LogOut, User, ChevronRight, Loader2, ChevronLeft, ChevronUp, Bell, ShoppingBag, ShoppingCart, Download, Smartphone, ExternalLink, Coins, Trophy } from "lucide-react";
+import { LogOut, User, ChevronRight, Loader2, ChevronLeft, ChevronUp, Bell, ShoppingBag, ShoppingCart, Download, Smartphone, ExternalLink, Coins, Trophy, Crown } from "lucide-react";
 import { formatChips } from "@/lib/utils";
 
 export default function LobbyPage() {
