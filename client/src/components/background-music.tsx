@@ -14,7 +14,7 @@ export function BackgroundMusicProvider() {
       const playPromise = audio.play();
       if (playPromise !== undefined) {
         playPromise.catch(error => {
-          console.log("فشل التشغيل التلقائي، سنحاول مرة أخرى عند تفاعل المستخدم");
+          console.log("محاولة تشغيل الموسيقى تلقائيًا...");
         });
       }
     };
@@ -46,32 +46,12 @@ export function BackgroundMusicProvider() {
       document.removeEventListener('scroll', handleInteraction);
     };
     
-    // انشاء زر مخفي يمكن للمستخدم النقر عليه لتشغيل الموسيقى
-    const button = document.createElement('button');
-    button.innerText = 'تشغيل الموسيقى';
-    button.style.position = 'fixed';
-    button.style.bottom = '20px';
-    button.style.right = '20px';
-    button.style.zIndex = '9999';
-    button.style.padding = '10px';
-    button.style.backgroundColor = '#007bff';
-    button.style.color = 'white';
-    button.style.border = 'none';
-    button.style.borderRadius = '5px';
-    button.style.cursor = 'pointer';
-    
-    button.onclick = () => {
-      playMusic();
-      button.style.display = 'none'; // إخفاء الزر بعد النقر عليه
-    };
-    
-    document.body.appendChild(button);
-    
-    // محاولة التشغيل بشكل متكرر كل ثانية
+    // محاولة التشغيل بشكل متكرر كل ثانية لضمان بدء الموسيقى تلقائيًا
     const interval = setInterval(() => {
       if (audio.paused) {
         playMusic();
       } else {
+        // إذا بدأ التشغيل، توقف عن المحاولة
         clearInterval(interval);
       }
     }, 1000);
@@ -82,9 +62,6 @@ export function BackgroundMusicProvider() {
       audio.src = '';
       clearInterval(interval);
       removeEventListeners();
-      if (document.body.contains(button)) {
-        document.body.removeChild(button);
-      }
     };
   }, []);
   
