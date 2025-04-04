@@ -33,29 +33,29 @@ export const useMusic = () => useContext(MusicContext);
 // قائمة بالأغاني العربية والإلكترونية الحماسية
 const musicTracks = [
   {
-    title: "أغنية عربية",
+    title: "أغنية حماسية 1",
     artist: "DJ مصري",
-    src: "/sounds/ambient/arabic_music.mp3"
+    src: "https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3"
   },
   {
-    title: "أجواء الكازينو",
+    title: "إيقاعات شرقية",
     artist: "نجم الميكس",
-    src: "/sounds/ambient/casino_ambient.mp3"
+    src: "https://assets.mixkit.co/music/preview/mixkit-hazy-after-hours-132.mp3"
   },
   {
-    title: "طاولة البوكر",
+    title: "ريمكس عربي",
     artist: "DJ خليجي",
-    src: "/sounds/ambient/table_ambient.mp3"
+    src: "https://assets.mixkit.co/music/preview/mixkit-serene-view-443.mp3"
   },
   {
-    title: "الطاولة الذهبية",
+    title: "ليلة سهر",
     artist: "نجوم الريمكس",
-    src: "/sounds/game/check.mp3"
+    src: "https://assets.mixkit.co/music/preview/mixkit-deep-urban-623.mp3"
   },
   {
-    title: "اللعبة المتميزة",
+    title: "إيقاع الطبلة",
     artist: "موسيقى الشرق",
-    src: "/sounds/win/win_pot.mp3"
+    src: "https://assets.mixkit.co/music/preview/mixkit-hip-hop-02-738.mp3"
   }
 ];
 
