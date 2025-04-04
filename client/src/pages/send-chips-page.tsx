@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { z } from "zod";
@@ -59,8 +59,8 @@ import { useAuth } from "@/hooks/use-auth";
 // تعريف المخطط
 const sendChipsSchema = z.object({
   recipientId: z.string().min(1, { message: "يرجى إدخال معرف المستلم" }),
-  amount: z.number().min(10, { message: "الحد الأدنى للتحويل هو 10 رقائق" })
-    .max(100000, { message: "الحد الأقصى للتحويل هو 100,000 رقائق" }),
+  amount: z.number().min(1000, { message: "الحد الأدنى للتحويل هو 1,000 رقائق" })
+    .max(100000000, { message: "الحد الأقصى للتحويل هو 100,000,000 رقائق" }),
 });
 
 type SendChipsFormValues = z.infer<typeof sendChipsSchema>;
@@ -71,16 +71,30 @@ export default function SendChipsPage() {
   const { user } = useAuth();
   const [searchLoading, setSearchLoading] = useState(false);
   const [recipient, setRecipient] = useState<any | null>(null);
+  const [dailyLimit, setDailyLimit] = useState<{
+    used: number;
+    remaining: number;
+    resetTime: number;
+  }>({
+    used: 0,
+    remaining: 100000000, // 100 مليون رقاقة
+    resetTime: Date.now() + 24 * 60 * 60 * 1000, // وقت إعادة التعيين بعد 24 ساعة
+  });
+  const [countdown, setCountdown] = useState<{
+    hours: number;
+    minutes: number;
+    seconds: number;
+  }>({ hours: 24, minutes: 0, seconds: 0 });
 
-  // Maximum amount based on user's available chips
-  const maxAmount = Math.min(user?.chips || 0, 100000);
+  // Maximum amount based on user's available chips (limited to 100 million)
+  const maxAmount = Math.min(user?.chips || 0, 100000000);
   
   // إعداد النموذج
   const form = useForm<SendChipsFormValues>({
     resolver: zodResolver(sendChipsSchema),
     defaultValues: {
       recipientId: "",
-      amount: Math.min(1000, maxAmount), // قيمة افتراضية معقولة
+      amount: Math.min(1000, maxAmount), // قيمة افتراضية معقولة (الحد الأدنى)
     },
   });
 
@@ -149,6 +163,41 @@ export default function SendChipsPage() {
     }
   };
 
+  // تحديث العد التنازلي
+  useEffect(() => {
+    // استرجاع البيانات المخزنة من localStorage
+    const storedDailyLimit = localStorage.getItem('dailyLimit');
+    if (storedDailyLimit) {
+      setDailyLimit(JSON.parse(storedDailyLimit));
+    }
+
+    // تحديث العد التنازلي كل ثانية
+    const intervalId = setInterval(() => {
+      const now = Date.now();
+      if (now >= dailyLimit.resetTime) {
+        // إعادة تعيين الحد اليومي عند انتهاء الوقت
+        const newLimit = {
+          used: 0,
+          remaining: 100000000,
+          resetTime: now + 24 * 60 * 60 * 1000,
+        };
+        setDailyLimit(newLimit);
+        localStorage.setItem('dailyLimit', JSON.stringify(newLimit));
+        setCountdown({ hours: 24, minutes: 0, seconds: 0 });
+      } else {
+        // تحديث العد التنازلي
+        const diff = dailyLimit.resetTime - now;
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+        setCountdown({ hours, minutes, seconds });
+      }
+    }, 1000);
+    
+    // تنظيف المؤقت عند إلغاء تحميل المكون
+    return () => clearInterval(intervalId);
+  }, [dailyLimit.resetTime]);
+  
   // تقديم النموذج
   const onSubmit = (data: SendChipsFormValues) => {
     if (data.amount > (user?.chips || 0)) {
@@ -159,6 +208,25 @@ export default function SendChipsPage() {
       });
       return;
     }
+    
+    // التحقق من الحد اليومي
+    if (data.amount > dailyLimit.remaining) {
+      toast({
+        title: "تجاوز الحد اليومي",
+        description: `يمكنك تحويل ${dailyLimit.remaining.toLocaleString('ar-EG')} رقاقة كحد أقصى في الوقت الحالي. يمكنك التحويل مرة أخرى بعد ${countdown.hours} ساعة و ${countdown.minutes} دقيقة.`,
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // تحديث الحد اليومي بعد التحويل الناجح
+    const newLimit = {
+      ...dailyLimit,
+      used: dailyLimit.used + data.amount,
+      remaining: dailyLimit.remaining - data.amount,
+    };
+    setDailyLimit(newLimit);
+    localStorage.setItem('dailyLimit', JSON.stringify(newLimit));
     
     sendChipsMutation.mutate(data);
   };
@@ -293,7 +361,7 @@ export default function SendChipsPage() {
                               <Input
                                 type="number"
                                 className="bg-[#0A3A2A]/40 border-[#D4AF37]/30 text-white"
-                                min={10}
+                                min={1000}
                                 max={maxAmount}
                                 {...field}
                                 onChange={(e) => field.onChange(Number(e.target.value) || 0)}
@@ -309,13 +377,13 @@ export default function SendChipsPage() {
                               defaultValue={[field.value]}
                               value={[field.value]}
                               max={maxAmount}
-                              min={10}
-                              step={10}
+                              min={1000}
+                              step={1000}
                               className="py-4"
                             />
                             
                             <div className="flex justify-between text-xs text-gray-400">
-                              <span>الحد الأدنى: 10</span>
+                              <span>الحد الأدنى: 1,000</span>
                               <span>الحد الأقصى: {maxAmount.toLocaleString('ar-EG')}</span>
                             </div>
                           </div>
@@ -343,9 +411,31 @@ export default function SendChipsPage() {
                 </form>
               </Form>
             </CardContent>
-            <CardFooter className="flex flex-col">
+            <CardFooter className="flex flex-col space-y-3">
+              {/* عرض معلومات الحد اليومي والعد التنازلي */}
+              <div className="border border-[#D4AF37]/30 rounded-lg p-3 bg-[#0A3A2A]/30 w-full mb-3">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-[#D4AF37] text-sm">الحد اليومي:</span>
+                  <span className="text-white text-sm">
+                    <span className="font-bold">{dailyLimit.remaining.toLocaleString('ar-EG')}</span>
+                    <span className="text-gray-400"> / 100,000,000</span>
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-[#D4AF37] text-sm">إعادة التعيين:</span>
+                  <div className="flex items-center bg-black/30 rounded px-2 py-1 text-white font-mono">
+                    <span className="mx-1">{countdown.hours.toString().padStart(2, '0')}</span>:
+                    <span className="mx-1">{countdown.minutes.toString().padStart(2, '0')}</span>:
+                    <span className="mx-1">{countdown.seconds.toString().padStart(2, '0')}</span>
+                  </div>
+                </div>
+              </div>
+              
               <p className="text-xs text-gray-400 text-center">
                 ملاحظة: سيتم إرسال إشعار للمستلم لاستلام الرقائق من خلال صندوق الرسائل
+              </p>
+              <p className="text-xs text-gray-400 text-center">
+                يمكنك تحويل 100,000,000 رقاقة كحد أقصى كل 24 ساعة
               </p>
             </CardFooter>
           </Card>
