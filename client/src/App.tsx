@@ -34,6 +34,9 @@ import { SplashScreen } from "@/components/ui/splash-screen";
 import { useState, useEffect, useRef } from "react";
 import { ErrorProvider } from "@/components/error-handler";
 
+// استيراد مشغل الموسيقى
+import { MusicPlayerProvider } from "@/components/music-player";
+
 // استيراد المكونات والأدوات الجديدة
 import { useGlobalWebSocket } from "@/hooks/use-global-websocket";
 import { useSessionManager } from "@/hooks/use-session-manager";
@@ -155,6 +158,7 @@ function App() {
         <Router />
         <WelcomeMessageNotification />
         <LandscapeNotice />
+        <MusicPlayerProvider />
         <Toaster />
       </NotificationsProvider>
     </ErrorProvider>
