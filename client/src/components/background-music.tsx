@@ -35,27 +35,27 @@ const musicTracks = [
   {
     title: "أغنية حماسية 1",
     artist: "DJ مصري",
-    src: "/sounds/music/ambient1.mp3"
+    src: "/audio/sample-sound.mp3"
   },
   {
     title: "إيقاعات شرقية",
     artist: "نجم الميكس",
-    src: "/sounds/music/ambient2.mp3"
+    src: "/audio/sample-sound2.mp3"
   },
   {
     title: "ريمكس عربي",
     artist: "DJ خليجي",
-    src: "/sounds/music/ambient3.mp3"
+    src: "/audio/sample-sound3.mp3"
   },
   {
     title: "ليلة سهر",
     artist: "نجوم الريمكس",
-    src: "/sounds/music/ambient4.mp3"
+    src: "/audio/sample-sound4.mp3"
   },
   {
     title: "إيقاع الطبلة",
     artist: "موسيقى الشرق",
-    src: "/sounds/music/ambient5.mp3"
+    src: "/audio/sample-sound5.mp3"
   }
 ];
 
