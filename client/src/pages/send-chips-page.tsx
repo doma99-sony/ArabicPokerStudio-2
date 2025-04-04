@@ -104,32 +104,16 @@ export default function SendChipsPage() {
   // تقديم النموذج - المتغير
   const sendChipsMutation = useMutation({
     mutationFn: (data: SendChipsFormValues) => {
+      // تحويل معرف المستلم إلى رقم قبل الإرسال عن طريق إرسال نسخة معدلة من البيانات
       return apiRequest("/api/send-chips", {
         method: "POST",
-        data,
+        data: {
+          ...data,
+          // ملاحظة: لا نغير النوع هنا، نرسل البيانات كما هي والخادم سيتعامل معها
+          recipientId: data.recipientId.trim()
+        },
       });
-    },
-    onSuccess: () => {
-      toast({
-        title: "تم إرسال الرقائق بنجاح",
-        description: `تم إرسال ${chipsAmount} رقائق إلى ${recipient?.username || form.getValues().recipientId}`,
-      });
-      
-      // تحديث بيانات المستخدم
-      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-      
-      // العودة إلى الصفحة السابقة بعد النجاح
-      setTimeout(() => {
-        navigate("/");
-      }, 2000);
-    },
-    onError: (error: any) => {
-      toast({
-        title: "خطأ في إرسال الرقائق",
-        description: error.message || "حدث خطأ أثناء محاولة إرسال الرقائق. يرجى المحاولة مرة أخرى.",
-        variant: "destructive",
-      });
-    },
+    }
   });
 
   // البحث عن المستخدم
@@ -157,10 +141,23 @@ export default function SendChipsPage() {
 
   // البحث عن المستخدم عند التغيير
   const handleSearchUser = () => {
-    const userId = form.getValues().recipientId;
-    if (userId && userId.length > 0) {
-      searchUserMutation.mutate(userId);
+    const userId = form.getValues().recipientId.trim(); // إزالة المسافات الزائدة
+    
+    if (!userId || userId.length === 0) {
+      toast({
+        title: "معرف المستلم مطلوب",
+        description: "يرجى إدخال معرف المستلم للبحث عنه",
+        variant: "destructive",
+      });
+      return;
     }
+    
+    // تحويل معرف المستخدم إلى رقم إذا كان ممكناً
+    const userIdNum = parseInt(userId);
+    const searchId = isNaN(userIdNum) ? userId : userIdNum.toString();
+    
+    // البحث عن المستخدم
+    searchUserMutation.mutate(searchId);
   };
 
   // تحديث العد التنازلي
@@ -200,6 +197,16 @@ export default function SendChipsPage() {
   
   // تقديم النموذج
   const onSubmit = (data: SendChipsFormValues) => {
+    // التحقق من وجود المستلم قبل الإرسال
+    if (!recipient) {
+      toast({
+        title: "المستلم غير موجود",
+        description: "يرجى البحث عن المستلم والتأكد من وجوده قبل إرسال الرقائق.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     if (data.amount > (user?.chips || 0)) {
       toast({
         title: "رصيد غير كافي",
@@ -219,16 +226,39 @@ export default function SendChipsPage() {
       return;
     }
     
-    // تحديث الحد اليومي بعد التحويل الناجح
-    const newLimit = {
-      ...dailyLimit,
-      used: dailyLimit.used + data.amount,
-      remaining: dailyLimit.remaining - data.amount,
-    };
-    setDailyLimit(newLimit);
-    localStorage.setItem('dailyLimit', JSON.stringify(newLimit));
-    
-    sendChipsMutation.mutate(data);
+    // إرسال الطلب
+    sendChipsMutation.mutate(data, {
+      onSuccess: () => {
+        // تحديث الحد اليومي فقط بعد نجاح التحويل
+        const newLimit = {
+          ...dailyLimit,
+          used: dailyLimit.used + data.amount,
+          remaining: dailyLimit.remaining - data.amount,
+        };
+        setDailyLimit(newLimit);
+        localStorage.setItem('dailyLimit', JSON.stringify(newLimit));
+        
+        toast({
+          title: "تم إرسال الرقائق بنجاح",
+          description: `تم إرسال ${data.amount.toLocaleString('ar-EG')} رقائق إلى ${recipient?.username}`,
+        });
+        
+        // تحديث بيانات المستخدم
+        queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+        
+        // العودة إلى الصفحة السابقة بعد النجاح
+        setTimeout(() => {
+          navigate("/");
+        }, 2000);
+      },
+      onError: (error: any) => {
+        toast({
+          title: "خطأ في إرسال الرقائق",
+          description: error.message || "حدث خطأ أثناء محاولة إرسال الرقائق. يرجى المحاولة مرة أخرى.",
+          variant: "destructive",
+        });
+      }
+    });
   };
 
   // التحقق من أن المستخدم مسجل الدخول
