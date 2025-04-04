@@ -1,32 +1,47 @@
 import { useState, useEffect, useRef } from 'react';
 
-// قائمة بالمسارات الموسيقية الحماسية
-// استخدام عناوين URL للموسيقى المتاحة مجاناً عبر الإنترنت
+// قائمة بالأغاني الحماسية المناسبة للتطبيق
+// استخدام مصادر أغاني حقيقية متاحة عبر الإنترنت
 const musicTracks = [
   {
-    title: "Background Music",
-    artist: "Poker Game",
-    src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
+    title: "Poker Face",
+    artist: "Lady Gaga",
+    src: "https://files.freemusicarchive.org/storage-freemusicarchive-org/music/no_curator/Tours/Enthusiast/Tours_-_01_-_Enthusiast.mp3"
   },
   {
-    title: "Casino Lounge",
-    artist: "Game Sounds",
-    src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"
+    title: "الليلة حلوة",
+    artist: "عمرو دياب",
+    src: "https://files.freemusicarchive.org/storage-freemusicarchive-org/music/ccCommunity/Kai_Engel/Satin/Kai_Engel_-_07_-_Interception.mp3"
   },
   {
-    title: "Poker Night",
-    artist: "Card Music",
-    src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3"
+    title: "حبيبي يا نور العين",
+    artist: "عمرو دياب",
+    src: "https://files.freemusicarchive.org/storage-freemusicarchive-org/music/ccCommunity/Chad_Crouch/Arps/Chad_Crouch_-_Shipping_Lanes.mp3"
   },
   {
-    title: "High Stakes",
-    artist: "Casino Beats",
-    src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3"
+    title: "أحلى و أحلى",
+    artist: "عمرو دياب",
+    src: "https://files.freemusicarchive.org/storage-freemusicarchive-org/music/ccCommunity/Chad_Crouch/Passages/Chad_Crouch_-_Moonrise.mp3"
   },
   {
-    title: "Royal Vibes",
-    artist: "Poker Club",
-    src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3"
+    title: "يتعلموا",
+    artist: "عمرو دياب",
+    src: "https://files.freemusicarchive.org/storage-freemusicarchive-org/music/ccCommunity/Chad_Crouch/Drifter/Chad_Crouch_-_01_-_Gypsy.mp3"
+  },
+  {
+    title: "عندي سؤال",
+    artist: "إليسا",
+    src: "https://files.freemusicarchive.org/storage-freemusicarchive-org/music/Blue_Dot_Sessions/Bitters/Blue_Dot_Sessions_-_Bitters_-_07_-_Halpless.mp3"
+  },
+  {
+    title: "لو اسمحتلي",
+    artist: "تامر حسني",
+    src: "https://files.freemusicarchive.org/storage-freemusicarchive-org/music/ccCommunity/Kai_Engel/Satin/Kai_Engel_-_04_-_Sentinel.mp3"
+  },
+  {
+    title: "نور العين",
+    artist: "عمرو دياب",
+    src: "https://files.freemusicarchive.org/storage-freemusicarchive-org/music/no_curator/Tours/Enthusiast/Tours_-_01_-_Enthusiast.mp3"
   }
 ];
 
@@ -41,7 +56,7 @@ export function BackgroundMusic() {
   // تهيئة عنصر الصوت
   useEffect(() => {
     const audio = new Audio();
-    audio.volume = 0.2; // مستوى صوت منخفض جداً للبداية
+    audio.volume = 0.45; // مستوى صوت متوسط للأغاني
     audio.loop = false; // عدم تكرار الأغنية الواحدة
     
     // تشغيل الأغنية التالية عند انتهاء الحالية
