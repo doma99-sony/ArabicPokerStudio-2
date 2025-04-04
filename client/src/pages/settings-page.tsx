@@ -363,117 +363,30 @@ export default function SettingsPage() {
                 </div>
                 
                 {/* تحكم بالموسيقى الخلفية */}
-                <div className="bg-[#1a1708]/70 rounded-lg p-4 border border-[#D4AF37]/20 space-y-4">
-                  <div className="flex items-center justify-between">
+                <div className="bg-[#1a1708]/70 rounded-lg p-4 border border-[#D4AF37]/20">
+                  <div className="flex items-center justify-between mb-3">
                     <h3 className="text-lg font-bold text-[#D4AF37] flex items-center gap-2">
                       <Music className="h-5 w-5" />
                       الأغاني والموسيقى
                     </h3>
-                    <div className="flex items-center gap-2">
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={previousTrack}
-                        className="text-white hover:bg-[#D4AF37]/10"
-                      >
-                        <SkipBack className="h-5 w-5" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={togglePlay}
-                        className="text-white hover:bg-[#D4AF37]/10"
-                      >
-                        {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={nextTrack}
-                        className="text-white hover:bg-[#D4AF37]/10"
-                      >
-                        <SkipForward className="h-5 w-5" />
-                      </Button>
-                    </div>
                   </div>
                   
-                  <div className="space-y-4">
-                    <div className="px-2 py-3 rounded-md bg-[#111]/40 border border-[#D4AF37]/10">
-                      <div className="text-sm text-white font-medium mb-1 flex items-center">
-                        <span className="ml-2 inline-block w-3 h-3 bg-[#D4AF37] animate-pulse rounded-full"></span>
-                        {currentTrack?.title || "Best Songs Mix 2023"} - {currentTrack?.artist || "SoundCloud"}
-                      </div>
-                      <div className="h-1 w-full bg-[#222] rounded overflow-hidden">
-                        <div className="h-full bg-gradient-to-r from-[#D4AF37] to-amber-400 w-[45%] animate-[progress_20s_linear_infinite]"></div>
-                      </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="music-volume" className="text-white flex items-center gap-2">
+                        <Volume2 className="h-4 w-4 text-[#D4AF37]" />
+                        <span>مستوى صوت الموسيقى الخلفية</span>
+                      </Label>
+                      <span className="text-white/70">{Math.round(musicVolume * 100)}%</span>
                     </div>
-                    
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <Label htmlFor="music-volume" className="text-white flex items-center gap-2">
-                          {musicVolume === 0 ? (
-                            <VolumeX className="h-5 w-5 text-[#D4AF37]" />
-                          ) : musicVolume < 0.3 ? (
-                            <Volume2 className="h-5 w-5 text-[#D4AF37] opacity-50" />
-                          ) : musicVolume < 0.7 ? (
-                            <Volume2 className="h-5 w-5 text-[#D4AF37] opacity-80" />
-                          ) : (
-                            <Volume2 className="h-5 w-5 text-[#D4AF37]" />
-                          )}
-                          <span>مستوى صوت الأغاني</span>
-                        </Label>
-                        <span className="text-white font-medium bg-[#D4AF37]/10 px-2 py-1 rounded text-sm">
-                          {Math.round(musicVolume * 100)}%
-                        </span>
-                      </div>
-                      
-                      <div className="grid grid-cols-3 gap-2 mb-3">
-                        <Button 
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setMusicVolume(0)}
-                          className="border-[#D4AF37]/20 hover:bg-[#D4AF37]/10 text-white"
-                        >
-                          <VolumeX className="h-4 w-4 ml-1" />
-                          كتم
-                        </Button>
-                        <Button 
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setMusicVolume(0.5)}
-                          className="border-[#D4AF37]/20 hover:bg-[#D4AF37]/10 text-white"
-                        >
-                          <Volume2 className="h-4 w-4 ml-1 opacity-70" />
-                          متوسط
-                        </Button>
-                        <Button 
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setMusicVolume(1)}
-                          className="border-[#D4AF37]/20 hover:bg-[#D4AF37]/10 text-white"
-                        >
-                          <Volume2 className="h-4 w-4 ml-1" />
-                          أقصى
-                        </Button>
-                      </div>
-                      
-                      <Slider
-                        id="music-volume"
-                        value={[musicVolume * 100]} 
-                        min={0} 
-                        max={100} 
-                        step={1}
-                        onValueChange={(value) => setMusicVolume(value[0] / 100)}
-                        className="py-1"
-                      />
-                      
-                      <style jsx>{`
-                        @keyframes progress {
-                          0% { transform: translateX(0); }
-                          100% { transform: translateX(100%); }
-                        }
-                      `}</style>
-                    </div>
+                    <Slider
+                      id="music-volume"
+                      value={[musicVolume * 100]} 
+                      min={0} 
+                      max={100} 
+                      step={5}
+                      onValueChange={(value) => setMusicVolume(value[0] / 100)}
+                    />
                   </div>
                 </div>
               </CardContent>
