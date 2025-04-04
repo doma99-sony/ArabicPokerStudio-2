@@ -93,7 +93,7 @@ export default function LobbyPage() {
     <div className="h-screen overflow-hidden bg-cover bg-center flex flex-col"
          style={{ backgroundImage: "url('/images/egyptian-background.jpg')" }}>
       
-      {/* خلفية الفيديو */}
+      {/* خلفية الفيديو محسنة - بتأثيرات ضبابية وإضاءة */}
       <div className="fixed inset-0 z-0 overflow-hidden">
         <video
           ref={videoRef}
@@ -101,18 +101,33 @@ export default function LobbyPage() {
           loop
           muted={videoMuted}
           playsInline
-          className="absolute w-full h-full object-cover"
+          className="absolute w-full h-full object-cover scale-110 transform-gpu"
         >
-          <source src="/assets/WhatsApp Video 2025-03-30 at 11.41.26 PM.mp4" type="video/mp4" />
+          <source src="/assets/backgrounds/poker-background.mp4" type="video/mp4" />
         </video>
-        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+        
+        {/* طبقات تأثير متعددة للحصول على مظهر محترف */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0A3A2A]/50 via-black/60 to-[#0A3A2A]/70 mix-blend-multiply"></div>
+        <div className="absolute inset-0 bg-[url('/assets/backgrounds/gradient-poker-table-background_23-2151085419 (1).jpg')] bg-cover opacity-30 mix-blend-soft-light"></div>
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-black/80 to-transparent h-32 pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 to-transparent h-32 pointer-events-none"></div>
+        
+        {/* إضافة تلميعات ضوئية متحركة */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-[#D4AF37]/10 blur-3xl animate-pulse-slow opacity-60 mix-blend-screen"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 rounded-full bg-[#D4AF37]/10 blur-3xl animate-pulse-slow opacity-50 mix-blend-screen" style={{ animationDelay: "2s" }}></div>
       </div>
-      
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
 
-      {/* Header Bar - تصميم احترافي بجودة عالية */}
-      <header className="relative z-10 bg-gradient-to-r from-[#0A3A2A] via-[#0F1F1A] to-black py-3 shadow-2xl border-b-2 border-[#D4AF37] sticky top-0">
-        <div className="container mx-auto flex justify-between items-center px-4">
+      {/* Header Bar - تصميم احترافي بجودة عالية مع تأثيرات مذهلة */}
+      <header className="relative z-10 py-3 sticky top-0 backdrop-blur-sm">
+        {/* طبقات الخلفية والتأثيرات */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0A3A2A]/90 via-[#0F1F1A]/90 to-black/90"></div>
+        <div className="absolute inset-0 bg-[url('/assets/backgrounds/gradient-poker-table-background_23-2151085419 (1).jpg')] bg-cover opacity-20 mix-blend-overlay"></div>
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-36 left-1/2 w-96 h-96 rounded-full bg-[#D4AF37]/5 blur-3xl animate-pulse-slow mix-blend-screen"></div>
+        </div>
+        <div className="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-[#D4AF37]/20 via-[#D4AF37] to-[#D4AF37]/20 shadow-lg shadow-[#D4AF37]/30"></div>
+        
+        <div className="container mx-auto flex justify-between items-center px-4 relative">
           {/* القسم الأيسر - معلومات المستخدم والرصيد (تم تبديل المكان) */}
           <div className="flex items-center gap-4">
             {/* معلومات المستخدم والرصيد */}
@@ -269,40 +284,58 @@ export default function LobbyPage() {
 
       {/* Main Content */}
       <main className="relative z-10 flex-1 overflow-hidden">
-        {/* Chat Section - Fixed to left */}
+        {/* Chat Section - Fixed to left - تصميم محسن بتأثيرات زجاجية وذهبية */}
         <div 
-          className="fixed top-16 left-0 h-[calc(100%-8rem)] z-20 transition-all duration-300" 
+          className="fixed top-16 left-0 h-[calc(100%-8rem)] z-20 transition-all duration-500 shadow-2xl shadow-black/50" 
           id="chat-container"
           style={{ transform: isChatHidden ? "translateX(-100%)" : "translateX(0)" }}
         >
           <div className="relative h-full">
             <div className="h-full">
-              <div className="rounded-r-xl overflow-hidden border-2 border-l-0 border-[#D4AF37] h-full shadow-lg">
-                {/* رأس الدردشة */}
-                <div className="bg-[#0A3A2A] p-3 border-b border-[#D4AF37] flex justify-between items-center">
-                  <h2 className="text-base font-bold text-[#D4AF37]">الدردشة العامة</h2>
+              <div className="rounded-r-2xl overflow-hidden backdrop-blur-sm border-2 border-l-0 border-[#D4AF37] h-full shadow-xl">
+                {/* رأس الدردشة مع تأثيرات العمق */}
+                <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#0A3A2A]/90 to-[#0A3A2A]/80"></div>
+                  <div className="absolute inset-0 bg-[url('/assets/backgrounds/gradient-poker-table-background_23-2151085419 (1).jpg')] bg-cover opacity-10 mix-blend-overlay"></div>
+                  <div className="relative p-3 border-b border-[#D4AF37] flex justify-between items-center">
+                    <h2 className="text-base font-bold bg-gradient-to-r from-[#D4AF37] to-[#FFC107] bg-clip-text text-transparent">الدردشة العامة</h2>
+                    <div className="flex items-center gap-1">
+                      <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                      <span className="text-xs text-[#D4AF37]/80">متصل</span>
+                    </div>
+                  </div>
                 </div>
                 
-                {/* منطقة الدردشة */}
-                <div className="h-[calc(80%-50px)] bg-gradient-to-b from-[#1B4D3E]/80 to-black/60 w-80">
-                  <div className="h-full w-full">
+                {/* منطقة الدردشة - تحسينات بصرية وتأثيرات زجاجية */}
+                <div className="relative h-[calc(100%-50px)] w-80">
+                  <div className="absolute inset-0 bg-gradient-to-b from-[#0A3A2A]/60 via-black/50 to-[#0A3A2A]/40"></div>
+                  <div className="absolute inset-0 bg-[url('/assets/backgrounds/futuristic-casino-architecture.jpg')] bg-cover opacity-5 mix-blend-overlay"></div>
+                  
+                  {/* تأثيرات إضاءة متحركة */}
+                  <div className="absolute top-1/4 left-1/4 w-32 h-32 rounded-full bg-[#D4AF37]/5 blur-3xl animate-pulse-slow opacity-40 mix-blend-screen"></div>
+                  
+                  <div className="relative h-full w-full backdrop-blur-sm">
                     <ChatBox />
                   </div>
                 </div>
               </div>
             </div>
             
-            {/* زر التبديل */}
+            {/* زر التبديل - محسن مع تأثيرات توهج */}
             <button 
               id="chat-toggle"
-              className="absolute -right-8 top-1/2 transform -translate-y-1/2 h-16 w-8 bg-[#0A3A2A] border-2 border-l-0 border-[#D4AF37] rounded-r-lg flex items-center justify-center"
+              className="absolute -right-10 top-1/2 transform -translate-y-1/2 h-20 w-10 bg-gradient-to-l from-[#0A3A2A] to-[#0F1F1A] border-2 border-l-0 border-[#D4AF37] rounded-r-xl flex items-center justify-center shadow-lg shadow-black/50 hover:shadow-[#D4AF37]/20 transition-all duration-300"
               onClick={toggleChat}
             >
+              <div className="absolute inset-0 rounded-r-xl overflow-hidden">
+                <div className="absolute inset-0 opacity-30 bg-[url('/assets/backgrounds/gradient-poker-table-background_23-2151085419 (1).jpg')] bg-cover mix-blend-overlay"></div>
+              </div>
               {isChatHidden ? (
-                <ChevronRight className="h-4 w-4 text-[#D4AF37]" />
+                <ChevronRight className="relative z-10 h-5 w-5 text-[#D4AF37] drop-shadow-gold" />
               ) : (
-                <ChevronLeft className="h-4 w-4 text-[#D4AF37]" />
+                <ChevronLeft className="relative z-10 h-5 w-5 text-[#D4AF37] drop-shadow-gold" />
               )}
+              <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-1 h-8 bg-[#D4AF37]/20 rounded-full"></div>
             </button>
           </div>
         </div>

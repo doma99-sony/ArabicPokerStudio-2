@@ -41,13 +41,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // البحث عن مستخدم بواسطة المعرف
   app.get("/api/users/:userId", ensureAuthenticated, async (req, res) => {
     try {
-      const userId = parseInt(req.params.userId);
+      let user;
+      const userIdParam = req.params.userId;
       
-      if (isNaN(userId)) {
-        return res.status(400).json({ error: "معرف المستخدم غير صالح" });
+      // محاولة تحويل المعرف إلى رقم، قد يكون رقم معرف المستخدم أو رمز المستخدم الفريد
+      const userId = parseInt(userIdParam);
+      
+      console.log(`البحث عن المستخدم: ${userIdParam} - معرف رقمي: ${!isNaN(userId) ? userId : 'لا'}`);
+      
+      // البحث حسب المعرف الرقمي
+      if (!isNaN(userId)) {
+        user = await storage.getUser(userId);
+        
+        // إذا لم يتم العثور على المستخدم بالمعرف الرقمي
+        if (!user) {
+          // البحث بواسطة معرف المستخدم المكون من 5 أرقام (userCode)
+          const usersWithCode = Array.from(storage.users.values()).filter(u => u.userCode === userIdParam);
+          if (usersWithCode.length > 0) {
+            user = usersWithCode[0];
+            console.log(`تم العثور على المستخدم بواسطة الرمز: ${userIdParam}`);
+          }
+        } else {
+          console.log(`تم العثور على المستخدم بواسطة المعرف الرقمي: ${userId}`);
+        }
+      } else {
+        // البحث بواسطة اسم المستخدم
+        user = await storage.getUserByUsername(userIdParam);
+        
+        if (!user) {
+          // البحث بواسطة معرف المستخدم المكون من 5 أرقام (userCode)
+          const usersWithCode = Array.from(storage.users.values()).filter(u => u.userCode === userIdParam);
+          if (usersWithCode.length > 0) {
+            user = usersWithCode[0];
+            console.log(`تم العثور على المستخدم بواسطة الرمز: ${userIdParam}`);
+          }
+        } else {
+          console.log(`تم العثور على المستخدم بواسطة اسم المستخدم: ${userIdParam}`);
+        }
       }
-      
-      const user = await storage.getUser(userId);
       
       if (!user) {
         return res.status(404).json({ error: "المستخدم غير موجود" });
@@ -58,6 +89,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         id: user.id,
         username: user.username,
         avatar: user.avatar,
+        userCode: user.userCode // إضافة معرف المستخدم المكون من 5 أرقام
       };
       
       res.json(safeUser);

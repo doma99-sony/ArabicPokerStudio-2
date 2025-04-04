@@ -127,13 +127,30 @@ export default function SendChipsPage() {
     onSuccess: (data) => {
       setRecipient(data);
       setSearchLoading(false);
+      
+      // رسالة نجاح لتأكيد العثور على المستخدم
+      toast({
+        title: "تم العثور على المستخدم",
+        description: `المستخدم ${data.username} جاهز لاستلام الرقائق.`,
+        variant: "default",
+      });
     },
-    onError: () => {
+    onError: (error: any) => {
       setRecipient(null);
       setSearchLoading(false);
+      
+      let errorMessage = "تأكد من إدخال معرف المستخدم بشكل صحيح.";
+      
+      // التحقق من نوع الخطأ إذا كان معروفًا
+      if (error && error.message) {
+        if (error.message.includes("المستخدم غير موجود")) {
+          errorMessage = "هذا المستخدم غير مسجل في النظام.";
+        }
+      }
+      
       toast({
         title: "لم يتم العثور على المستخدم",
-        description: "تأكد من إدخال معرف المستخدم بشكل صحيح.",
+        description: errorMessage,
         variant: "destructive",
       });
     }
@@ -252,9 +269,28 @@ export default function SendChipsPage() {
         }, 2000);
       },
       onError: (error: any) => {
+        let errorMessage = "حدث خطأ أثناء محاولة إرسال الرقائق. يرجى المحاولة مرة أخرى.";
+        let errorTitle = "خطأ في إرسال الرقائق";
+        
+        // تفصيل رسائل الخطأ استناداً إلى نوع الخطأ المعروف
+        if (error && error.message) {
+          if (error.message.includes("المستلم غير موجود")) {
+            errorMessage = "لم يتم العثور على المستخدم المستلم. يرجى التحقق من المعرّف وإعادة المحاولة.";
+            errorTitle = "خطأ في المستلم";
+          } else if (error.message.includes("رصيد غير كافٍ")) {
+            errorMessage = "لا تملك رصيد كافي من الرقائق لإتمام هذه العملية.";
+            errorTitle = "رصيد غير كافي";
+          } else if (error.message.includes("لا يمكنك إرسال رقائق لنفسك")) {
+            errorMessage = "لا يمكنك إرسال رقائق لنفسك. يرجى إدخال معرّف مستخدم آخر.";
+            errorTitle = "عملية غير مسموحة";
+          } else {
+            errorMessage = error.message;
+          }
+        }
+        
         toast({
-          title: "خطأ في إرسال الرقائق",
-          description: error.message || "حدث خطأ أثناء محاولة إرسال الرقائق. يرجى المحاولة مرة أخرى.",
+          title: errorTitle,
+          description: errorMessage,
           variant: "destructive",
         });
       }
