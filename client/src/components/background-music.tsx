@@ -1,75 +1,111 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
-// مكون بسيط للموسيقى الخلفية باستخدام عنصر HTML audio مباشرة
+// طريقة بسيطة لتشغيل الموسيقى تلقائيًا دون أي قيود
 export function BackgroundMusicProvider() {
-  const [isMounted, setIsMounted] = useState(false);
-  
-  // التأكد من تحميل المكون فقط في جانب العميل
   useEffect(() => {
-    setIsMounted(true);
+    // إنشاء عنصر صوت برمجيًا
+    const audio = new Audio('/background-music.mp3');
+    audio.loop = true;
+    audio.volume = 0.5;
     
-    // تشغيل الموسيقى بمجرد تفاعل المستخدم مع الصفحة
-    const playAudio = () => {
-      // إنشاء عنصر الصوت
-      const audioElement = document.getElementById('background-music') as HTMLAudioElement;
-      
-      if (audioElement) {
-        // محاولة التشغيل
-        const promise = audioElement.play();
-        if (promise !== undefined) {
-          promise.catch(() => {
-            console.log("تعذر تشغيل الموسيقى تلقائيًا، سيتم التشغيل عند أول تفاعل");
-          });
-        }
+    // دالة للتشغيل الفوري
+    const playMusic = () => {
+      // محاولة التشغيل مباشرة
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(error => {
+          console.log("فشل التشغيل التلقائي، سنحاول مرة أخرى عند تفاعل المستخدم");
+        });
       }
     };
     
-    // تسجيل مستمعي الأحداث للتشغيل عند أول تفاعل
-    document.addEventListener('click', playAudio, { once: true });
-    document.addEventListener('touchstart', playAudio, { once: true });
-    document.addEventListener('keydown', playAudio, { once: true });
+    // محاولة التشغيل عند تحميل الصفحة
+    playMusic();
     
-    // محاولة التشغيل مباشرة
-    setTimeout(playAudio, 1000);
+    // محاولة التشغيل عند أي تفاعل من المستخدم
+    const handleInteraction = () => {
+      playMusic();
+      
+      // إزالة مستمعي الأحداث بعد التشغيل الناجح
+      if (!audio.paused) {
+        removeEventListeners();
+      }
+    };
     
-    // تنظيف المكون عند إزالته
+    // إضافة مستمعي أحداث متعددة لتفاعل المستخدم
+    document.addEventListener('click', handleInteraction);
+    document.addEventListener('touchstart', handleInteraction);
+    document.addEventListener('keydown', handleInteraction);
+    document.addEventListener('scroll', handleInteraction);
+    
+    // دالة لإزالة جميع مستمعي الأحداث
+    const removeEventListeners = () => {
+      document.removeEventListener('click', handleInteraction);
+      document.removeEventListener('touchstart', handleInteraction);
+      document.removeEventListener('keydown', handleInteraction);
+      document.removeEventListener('scroll', handleInteraction);
+    };
+    
+    // انشاء زر مخفي يمكن للمستخدم النقر عليه لتشغيل الموسيقى
+    const button = document.createElement('button');
+    button.innerText = 'تشغيل الموسيقى';
+    button.style.position = 'fixed';
+    button.style.bottom = '20px';
+    button.style.right = '20px';
+    button.style.zIndex = '9999';
+    button.style.padding = '10px';
+    button.style.backgroundColor = '#007bff';
+    button.style.color = 'white';
+    button.style.border = 'none';
+    button.style.borderRadius = '5px';
+    button.style.cursor = 'pointer';
+    
+    button.onclick = () => {
+      playMusic();
+      button.style.display = 'none'; // إخفاء الزر بعد النقر عليه
+    };
+    
+    document.body.appendChild(button);
+    
+    // محاولة التشغيل بشكل متكرر كل ثانية
+    const interval = setInterval(() => {
+      if (audio.paused) {
+        playMusic();
+      } else {
+        clearInterval(interval);
+      }
+    }, 1000);
+    
+    // تنظيف الموارد عند إزالة المكون
     return () => {
-      document.removeEventListener('click', playAudio);
-      document.removeEventListener('touchstart', playAudio);
-      document.removeEventListener('keydown', playAudio);
-      setIsMounted(false);
+      audio.pause();
+      audio.src = '';
+      clearInterval(interval);
+      removeEventListeners();
+      if (document.body.contains(button)) {
+        document.body.removeChild(button);
+      }
     };
   }, []);
   
-  // لا نعرض أي شيء إذا كان المكون لم يتم تحميله بعد
-  if (!isMounted) return null;
-  
-  // إنشاء عنصر صوت مرئي للتحكم بالتشغيل
-  return (
-    <audio 
-      id="background-music"
-      src="/test-music.mp3"
-      autoPlay
-      loop
-      style={{ display: 'none' }}
-    />
-  );
+  // هذا المكون لا يُظهر أي عناصر مرئية
+  return null;
 }
 
-// تصدير واجهة بسيطة لاستخدام مكون الموسيقى في المكونات الأخرى
+// واجهة بسيطة للتحكم بالموسيقى في المكونات الأخرى
 export const useMusic = () => {
   return {
     play: () => {
-      const audio = document.getElementById('background-music') as HTMLAudioElement;
-      if (audio) audio.play();
+      const audios = document.querySelectorAll('audio');
+      audios.forEach(audio => audio.play());
     },
     pause: () => {
-      const audio = document.getElementById('background-music') as HTMLAudioElement;
-      if (audio) audio.pause();
+      const audios = document.querySelectorAll('audio');
+      audios.forEach(audio => audio.pause());
     },
     setVolume: (volume: number) => {
-      const audio = document.getElementById('background-music') as HTMLAudioElement;
-      if (audio) audio.volume = volume;
+      const audios = document.querySelectorAll('audio');
+      audios.forEach(audio => { audio.volume = volume; });
     }
   };
 };
