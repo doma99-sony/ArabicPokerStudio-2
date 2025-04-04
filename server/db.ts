@@ -7,11 +7,11 @@ import { log } from './vite';
 
 // إنشاء اتصال مع قاعدة البيانات
 if (!process.env.DATABASE_URL) {
-  throw new Error('DATABASE_URL environment variable is not set');
+  console.warn('DATABASE_URL environment variable is not set. Using in-memory storage instead.');
 }
 
 // تهيئة مجموعة الاتصالات مع تكوين محسن للأداء
-const pool = new Pool({
+const pool = process.env.DATABASE_URL ? new Pool({
   connectionString: process.env.DATABASE_URL,
   max: 20, // زيادة الحد الأقصى لعدد الاتصالات المتزامنة
   idleTimeoutMillis: 60000, // زيادة وقت انتهاء الاتصال الخامل لتقليل عمليات إعادة الاتصال
@@ -19,19 +19,27 @@ const pool = new Pool({
   allowExitOnIdle: false, // منع إغلاق الاتصالات عند الخمول لتحسين الأداء
   keepAlive: true, // إبقاء الاتصال حياً
   keepAliveInitialDelayMillis: 10000, // تأخير أولي لإرسال حزم keep-alive
-});
+}) : null;
 
 // معالجة أخطاء الاتصال بقاعدة البيانات
-pool.on('error', (err) => {
-  log(`Unexpected error on idle client: ${err.message}`, 'database');
-  process.exit(-1);
-});
+if (pool) {
+  pool.on('error', (err) => {
+    log(`Unexpected error on idle client: ${err.message}`, 'database');
+    process.exit(-1);
+  });
+}
 
 // تهيئة عميل Drizzle للتعامل مع قاعدة البيانات
-export const db = drizzle(pool, { schema });
+export const db = pool ? drizzle(pool, { schema }) : null;
 
 // وظيفة لتنفيذ الترحيلات التلقائية عند بدء التشغيل مع دعم إعادة المحاولة
 export async function initializeDatabase(maxRetries = 5, retryDelay = 2000) {
+  // إذا لم يكن هناك اتصال بقاعدة البيانات، نعود مباشرة
+  if (!pool) {
+    log('No database connection pool available. Using in-memory storage.', 'database');
+    return true;
+  }
+
   let retryCount = 0;
   
   while (retryCount < maxRetries) {
@@ -51,13 +59,15 @@ export async function initializeDatabase(maxRetries = 5, retryDelay = 2000) {
       log('Database connection successful and validated', 'database');
       
       // تنفيذ الترحيلات تلقائيًا
-      log('Running migrations...', 'database');
-      await migrate(db, { migrationsFolder: './migrations' });
-      log('Migrations completed successfully', 'database');
-      
-      // إجراء عملية تنظيف للاتصالات غير المستخدمة
-      await pool.query('SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE state = \'idle\' AND state_change < NOW() - INTERVAL \'1 hour\'');
-      log('Cleaned up idle connections', 'database');
+      if (db) {
+        log('Running migrations...', 'database');
+        await migrate(db, { migrationsFolder: './migrations' });
+        log('Migrations completed successfully', 'database');
+        
+        // إجراء عملية تنظيف للاتصالات غير المستخدمة
+        await pool.query('SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE state = \'idle\' AND state_change < NOW() - INTERVAL \'1 hour\'');
+        log('Cleaned up idle connections', 'database');
+      }
       
       return true;
     } catch (error: any) {
@@ -84,6 +94,12 @@ export async function initializeDatabase(maxRetries = 5, retryDelay = 2000) {
 
 // وظيفة لإغلاق اتصالات قاعدة البيانات بشكل آمن مع محاولات إعادة المحاولة
 export async function closeDatabase(maxRetries = 3, retryDelay = 1000) {
+  // إذا لم يكن هناك اتصال بقاعدة البيانات، نعود مباشرة
+  if (!pool) {
+    log('No database connection pool to close.', 'database');
+    return true;
+  }
+
   let retryCount = 0;
   
   while (retryCount < maxRetries) {
