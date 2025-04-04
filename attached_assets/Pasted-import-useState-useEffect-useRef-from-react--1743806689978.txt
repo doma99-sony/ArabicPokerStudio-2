@@ -153,21 +153,3 @@ export function BackgroundMusicProvider() {
   
   return <BackgroundMusic />;
 }
-
-// واجهة بسيطة للتحكم بالموسيقى في المكونات الأخرى
-export const useMusic = () => {
-  return {
-    play: () => {
-      const audios = document.querySelectorAll('audio');
-      audios.forEach(audio => audio.play());
-    },
-    pause: () => {
-      const audios = document.querySelectorAll('audio');
-      audios.forEach(audio => audio.pause());
-    },
-    setVolume: (volume: number) => {
-      const audios = document.querySelectorAll('audio');
-      audios.forEach(audio => { audio.volume = volume; });
-    }
-  };
-};
