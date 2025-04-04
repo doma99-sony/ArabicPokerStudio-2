@@ -132,16 +132,71 @@ export default function LobbyPage() {
                 </div>
               </div>
             </div>
+            
+            {/* أزرار التنقل - الإضافة الجديدة */}
+            <div className="hidden lg:flex items-center gap-2 mr-4">
+              <Button 
+                variant="ghost" 
+                className="h-9 px-3 text-sm bg-black/20 text-[#D4AF37] hover:bg-[#D4AF37]/10 hover:text-[#FFD700] transition-all duration-300"
+                onClick={() => navigate("/shop")}
+              >
+                <ShoppingCart size={16} className="ml-1" />
+                <span>المتجر</span>
+              </Button>
+              
+              <Button 
+                variant="ghost" 
+                className="h-9 px-3 text-sm bg-black/20 text-[#D4AF37] hover:bg-[#D4AF37]/10 hover:text-[#FFD700] transition-all duration-300"
+                onClick={() => navigate("/vip")}
+              >
+                <Crown size={16} className="ml-1" />
+                <span>VIP</span>
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></div>
+              </Button>
+              
+              <Button 
+                variant="ghost" 
+                className="h-9 px-3 text-sm bg-black/20 text-[#D4AF37] hover:bg-[#D4AF37]/10 hover:text-[#FFD700] transition-all duration-300"
+                onClick={() => navigate("/inventory")}
+              >
+                <ShoppingBag size={16} className="ml-1" />
+                <span>الحقيبة</span>
+              </Button>
+              
+              <Button 
+                variant="ghost" 
+                className="h-9 px-3 text-sm bg-black/20 text-[#D4AF37] hover:bg-[#D4AF37]/10 hover:text-[#FFD700] transition-all duration-300"
+                onClick={() => navigate("/missions")}
+              >
+                <Trophy size={16} className="ml-1" />
+                <span>المهمات</span>
+              </Button>
+            </div>
+          </div>
+
+          {/* زر الهامبرغر للتنقل في الموبايل - إضافة جديدة */}
+          <div className="lg:hidden ml-auto mr-2">
+            <Button 
+              variant="ghost" 
+              className="h-9 w-9 p-0 bg-black/20 text-[#D4AF37] hover:bg-[#D4AF37]/10 hover:text-[#FFD700] rounded-lg"
+              onClick={() => navigate("/menu")}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="4" x2="20" y1="12" y2="12" />
+                <line x1="4" x2="20" y1="6" y2="6" />
+                <line x1="4" x2="20" y1="18" y2="18" />
+              </svg>
+            </Button>
           </div>
 
           {/* القسم الأيمن - معلومات المستخدم والأزرار */}
           <div className="flex items-center gap-3">
-            {/* معلومات المستخدم والرصيد - تم تكبير الحجم */}
-            <div className="bg-gradient-to-r from-[#0A3A2A]/90 to-black/80 rounded-lg border-2 border-[#D4AF37] py-2 px-4 mr-2 shadow-xl hover:shadow-[#D4AF37]/30 transition-all duration-300">
-              <div className="flex items-center gap-3">
+            {/* معلومات المستخدم والرصيد */}
+            <div className="bg-gradient-to-r from-[#0A3A2A]/90 to-black/80 rounded-lg border-2 border-[#D4AF37] py-2 px-3 mr-2 shadow-xl hover:shadow-[#D4AF37]/30 transition-all duration-300">
+              <div className="flex items-center gap-2">
                 {/* صورة المستخدم مع زر التعديل */}
                 <div className="relative group">
-                  <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-[#D4AF37] shadow-inner">
+                  <div className="w-11 h-11 rounded-full overflow-hidden border-2 border-[#D4AF37] shadow-inner">
                     <img 
                       src={user?.avatar || "/assets/poker-icon-gold.png"} 
                       alt="صورة المستخدم" 
@@ -156,12 +211,12 @@ export default function LobbyPage() {
                     <span className="text-white text-xs">تغيير</span>
                   </button>
                   {/* مؤشر الحالة */}
-                  <div className="absolute -bottom-1 -right-1 bg-green-500 w-4 h-4 rounded-full border border-black animate-pulse"></div>
+                  <div className="absolute -bottom-1 -right-1 bg-green-500 w-3 h-3 rounded-full border border-black animate-pulse"></div>
                 </div>
                 <div className="text-right">
                   <p className="text-[#D4AF37] text-base font-bold leading-tight mb-1">{user?.username}</p>
-                  <div className="flex items-center bg-[#0A3A2A]/80 px-3 py-1 rounded-full border border-[#D4AF37]/30">
-                    <Coins className="h-4 w-4 text-[#D4AF37] ml-2" />
+                  <div className="flex items-center bg-[#0A3A2A]/80 px-2 py-0.5 rounded-full border border-[#D4AF37]/30">
+                    <Coins className="h-3.5 w-3.5 text-[#D4AF37] ml-1" />
                     <span className="text-[#D4AF37] text-sm font-bold">{formatChips(user?.chips || 0)}</span>
                   </div>
                 </div>
@@ -178,7 +233,7 @@ export default function LobbyPage() {
               
               <Button 
                 variant="outline" 
-                className="border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37]/10 h-9 py-0 px-3 text-xs bg-black/50 backdrop-blur-sm transition-all duration-300 shadow-md hover:shadow-[#D4AF37]/20"
+                className="border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37]/10 h-9 py-0 px-2.5 text-xs bg-black/50 backdrop-blur-sm transition-all duration-300 shadow-md hover:shadow-[#D4AF37]/20"
                 onClick={() => navigate("/notifications")}
               >
                 <Bell size={16} className="ml-1" />
@@ -188,7 +243,7 @@ export default function LobbyPage() {
 
               <Button 
                 variant="outline" 
-                className="border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37]/10 h-9 py-0 px-3 text-xs bg-black/50 backdrop-blur-sm transition-all duration-300 shadow-md hover:shadow-[#D4AF37]/20"
+                className="border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37]/10 h-9 py-0 px-2.5 text-xs bg-black/50 backdrop-blur-sm transition-all duration-300 shadow-md hover:shadow-[#D4AF37]/20"
                 onClick={navigateToProfile}
               >
                 <User size={16} className="ml-1" />
@@ -197,7 +252,7 @@ export default function LobbyPage() {
 
               <Button 
                 variant="outline" 
-                className="border-red-500 text-red-400 hover:bg-red-500/10 h-9 py-0 px-3 text-xs bg-black/50 backdrop-blur-sm transition-all duration-300 shadow-md"
+                className="border-red-500 text-red-400 hover:bg-red-500/10 h-9 py-0 px-2.5 text-xs bg-black/50 backdrop-blur-sm transition-all duration-300 shadow-md"
                 onClick={handleLogout}
                 disabled={logoutMutation.isPending}
               >
