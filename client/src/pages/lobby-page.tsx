@@ -209,11 +209,9 @@ export default function LobbyPage() {
             <div className="flex items-center gap-3">
               <div className="relative group">
                 <div className="absolute inset-0 bg-gradient-to-r from-[#D4AF37]/50 to-[#D4AF37]/0 rounded-full blur-md animate-pulse-slow opacity-50 group-hover:opacity-75 transition-all duration-300"></div>
-                <img 
-                  src="/assets/poker-icon-gold.png" 
-                  alt="بوكر عرباوي" 
-                  className="relative w-12 h-12 rounded-full border-2 border-[#D4AF37] object-cover shadow-lg shadow-[#D4AF37]/30 group-hover:shadow-[#D4AF37]/50 transition-all duration-300" 
-                />
+                <div className="relative w-12 h-12 rounded-full border-2 border-[#D4AF37] bg-[#0A3A2A] flex items-center justify-center shadow-lg shadow-[#D4AF37]/30 group-hover:shadow-[#D4AF37]/50 transition-all duration-300">
+                  <span className="text-[#D4AF37] text-2xl font-bold">♠</span>
+                </div>
                 <div className="absolute -bottom-1 -right-1 bg-green-500 w-4 h-4 rounded-full border border-black animate-pulse"></div>
               </div>
               <div>
