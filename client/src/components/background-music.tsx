@@ -1,68 +1,154 @@
 import { useState, useEffect, useRef } from 'react';
 
-// قائمة بالمسارات الموسيقية الحماسية
-// استخدام عناوين URL للموسيقى المتاحة مجاناً عبر الإنترنت
+// قائمة مسارات الموسيقى المحلية
 const musicTracks = [
+  {
+    title: "Energetic 1",
+    artist: "Poker Game",
+    src: "/audio/energetic/track1.mp3" // استخدام ملف محلي بدلاً من الروابط الخارجية
+  },
+  {
+    title: "Energetic 2",
+    artist: "Game Sounds",
+    src: "/audio/energetic/energetic_1.mp3"
+  },
+  {
+    title: "Energetic 3",
+    artist: "Card Music",
+    src: "/audio/energetic/energetic_2.mp3"
+  },
+  {
+    title: "Energetic 4",
+    artist: "Casino Beats",
+    src: "/audio/energetic/energetic_3.mp3"
+  },
+  {
+    title: "Energetic 5",
+    artist: "Poker Club",
+    src: "/audio/energetic/energetic_4.mp3"
+  },
   {
     title: "Background Music",
     artist: "Poker Game",
-    src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
-  },
-  {
-    title: "Casino Lounge",
-    artist: "Game Sounds",
-    src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"
-  },
-  {
-    title: "Poker Night",
-    artist: "Card Music",
-    src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3"
-  },
-  {
-    title: "High Stakes",
-    artist: "Casino Beats",
-    src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3"
-  },
-  {
-    title: "Royal Vibes",
-    artist: "Poker Club",
-    src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3"
+    src: "/background-music.mp3"
   }
 ];
 
 // مكون للموسيقى الخلفية التي تعمل تلقائياً بدون عناصر تحكم مرئية
 export function BackgroundMusic() {
-  const [currentTrackIndex, setCurrentTrackIndex] = useState(Math.floor(Math.random() * musicTracks.length));
+  const [currentTrackIndex, setCurrentTrackIndex] = useState(0); // نبدأ بالمسار الأول
+  const [volume, setVolume] = useState(0.05); // بداية بمستوى صوت منخفض
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const fadeIntervalRef = useRef<NodeJS.Timeout | null>(null);
   
   // جلب المسار الحالي
   const currentTrack = musicTracks[currentTrackIndex];
   
+  // وظيفة لزيادة مستوى الصوت بشكل تدريجي
+  const fadeInVolume = () => {
+    if (audioRef.current) {
+      // بدء من مستوى صوت منخفض وزيادته تدريجياً
+      setVolume(0.05);
+      let currentVol = 0.05;
+      const targetVol = 0.3; // مستوى الصوت المستهدف
+      
+      // إلغاء أي فاصل زمني سابق
+      if (fadeIntervalRef.current) {
+        clearInterval(fadeIntervalRef.current);
+      }
+      
+      // زيادة مستوى الصوت تدريجيا على مدار 3 ثوان
+      fadeIntervalRef.current = setInterval(() => {
+        currentVol = Math.min(currentVol + 0.02, targetVol);
+        if (audioRef.current) {
+          audioRef.current.volume = currentVol;
+          setVolume(currentVol);
+        }
+        
+        if (currentVol >= targetVol) {
+          if (fadeIntervalRef.current) {
+            clearInterval(fadeIntervalRef.current);
+            fadeIntervalRef.current = null;
+          }
+        }
+      }, 200);
+    }
+  };
+  
+  // وظيفة لخفض مستوى الصوت تدريجياً
+  const fadeOutVolume = (callback?: () => void) => {
+    if (audioRef.current) {
+      let currentVol = audioRef.current.volume;
+      
+      // إلغاء أي فاصل زمني سابق
+      if (fadeIntervalRef.current) {
+        clearInterval(fadeIntervalRef.current);
+      }
+      
+      // خفض مستوى الصوت تدريجياً على مدار ثانية واحدة
+      fadeIntervalRef.current = setInterval(() => {
+        currentVol = Math.max(currentVol - 0.05, 0);
+        if (audioRef.current) {
+          audioRef.current.volume = currentVol;
+          setVolume(currentVol);
+        }
+        
+        if (currentVol <= 0) {
+          if (fadeIntervalRef.current) {
+            clearInterval(fadeIntervalRef.current);
+            fadeIntervalRef.current = null;
+            
+            if (callback) callback();
+          }
+        }
+      }, 100);
+    } else if (callback) {
+      callback();
+    }
+  };
+  
+  // وظيفة لبدء تشغيل المسار الحالي
+  const playCurrentTrack = () => {
+    if (!audioRef.current) return;
+    
+    const audio = audioRef.current;
+    audio.volume = volume;
+    
+    const playPromise = audio.play();
+    if (playPromise !== undefined) {
+      playPromise.then(() => {
+        // تم التشغيل بنجاح، زيادة مستوى الصوت تدريجياً
+        fadeInVolume();
+      }).catch(error => {
+        console.warn("تعذر تشغيل المسار الصوتي", error);
+        // محاولة الانتقال للمسار التالي بعد فشل التشغيل
+        setTimeout(() => {
+          setCurrentTrackIndex(prev => (prev + 1) % musicTracks.length);
+        }, 2000);
+      });
+    }
+  };
+  
   // تهيئة عنصر الصوت
   useEffect(() => {
     const audio = new Audio();
-    audio.volume = 0.2; // مستوى صوت منخفض جداً للبداية
+    audio.volume = volume; // مستوى صوت منخفض للبداية
     audio.loop = false; // عدم تكرار الأغنية الواحدة
     
     // تشغيل الأغنية التالية عند انتهاء الحالية
     audio.onended = () => {
-      setCurrentTrackIndex(prev => (prev + 1) % musicTracks.length);
+      // خفض مستوى الصوت تدريجياً قبل الانتقال للمسار التالي
+      fadeOutVolume(() => {
+        setCurrentTrackIndex(prev => (prev + 1) % musicTracks.length);
+      });
     };
     
     audioRef.current = audio;
     
-    // تحريك الأغاني بشكل عشوائي عند التحميل
-    shuffleTracks();
-    
     // التأكد من أن تشغيل الصوت يحدث فقط بعد تفاعل المستخدم مع الصفحة
     const handleUserInteraction = () => {
       if (audioRef.current && audioRef.current.paused) {
-        const playPromise = audioRef.current.play();
-        if (playPromise !== undefined) {
-          playPromise.catch(error => {
-            console.warn("تعذر تشغيل المسار الصوتي بعد تفاعل المستخدم", error);
-          });
-        }
+        playCurrentTrack();
       }
       
       // إزالة مستمعي الأحداث بعد التفاعل الأول
@@ -76,10 +162,33 @@ export function BackgroundMusic() {
     document.addEventListener('touchstart', handleUserInteraction);
     document.addEventListener('keydown', handleUserInteraction);
     
+    // إعداد مؤقت للمحاولة بشكل متكرر
+    const autoPlayInterval = setInterval(() => {
+      if (audioRef.current && audioRef.current.paused) {
+        const tryPlay = audioRef.current.play();
+        if (tryPlay) {
+          tryPlay.catch(() => {
+            console.log("محاولة التشغيل التلقائي مستمرة...");
+          });
+        }
+      } else {
+        clearInterval(autoPlayInterval);
+      }
+    }, 3000);
+    
     // تفريغ عنصر الصوت وإزالة مستمعي الأحداث عند التدمير
     return () => {
-      audio.pause();
-      audio.src = '';
+      if (fadeIntervalRef.current) {
+        clearInterval(fadeIntervalRef.current);
+      }
+      
+      clearInterval(autoPlayInterval);
+      
+      if (audio) {
+        audio.pause();
+        audio.src = '';
+      }
+      
       audioRef.current = null;
       
       document.removeEventListener('click', handleUserInteraction);
@@ -88,52 +197,39 @@ export function BackgroundMusic() {
     };
   }, []);
   
-  // مزج مسارات الموسيقى بشكل عشوائي
-  const shuffleTracks = () => {
-    const randomIndex = Math.floor(Math.random() * musicTracks.length);
-    setCurrentTrackIndex(randomIndex);
-  };
-  
   // تحديث المسار عند تغيير المؤشر
   useEffect(() => {
     if (!audioRef.current) return;
     
     const audio = audioRef.current;
     
+    const handleCanPlay = () => {
+      console.log(`جاهز لتشغيل: ${currentTrack.title}`);
+      playCurrentTrack();
+    };
+    
     const handleError = () => {
       console.warn(`تعذر تحميل الملف الصوتي: ${currentTrack.src}`);
       // الانتقال للمسار التالي بعد فشل التحميل
       setTimeout(() => {
         setCurrentTrackIndex(prev => (prev + 1) % musicTracks.length);
-      }, 3000);
+      }, 2000);
     };
     
-    // إضافة محقق أخطاء تحميل الملفات الصوتية
+    // إضافة معالجات الأحداث
+    audio.oncanplay = handleCanPlay;
     audio.onerror = handleError;
     
-    // تعيين المسار الجديد
+    // تعيين المسار الجديد وتحميله
     audio.src = currentTrack.src;
-    
-    // تحميل المسار
     audio.load();
     
-    // تشغيل الموسيقى
-    const playPromise = audio.play();
-    if (playPromise !== undefined) {
-      playPromise.catch(error => {
-        console.warn("تعذر تشغيل المسار الصوتي", error);
-        // محاولة الانتقال للمسار التالي بعد فشل التشغيل
-        setTimeout(() => {
-          setCurrentTrackIndex(prev => (prev + 1) % musicTracks.length);
-        }, 3000);
-      });
-    }
-    
-    // تنظيف عند إزالة المكون
+    // تنظيف عند إزالة التأثير
     return () => {
+      audio.oncanplay = null;
       audio.onerror = null;
     };
-  }, [currentTrackIndex, currentTrack.src]);
+  }, [currentTrackIndex]);
   
   // لا يوجد شيء مرئي للعرض، فقط تشغيل الموسيقى في الخلفية
   return null;
@@ -154,20 +250,90 @@ export function BackgroundMusicProvider() {
   return <BackgroundMusic />;
 }
 
-// واجهة بسيطة للتحكم بالموسيقى في المكونات الأخرى
+// واجهة برمجية بسيطة للتحكم بالموسيقى من المكونات الأخرى
 export const useMusic = () => {
   return {
     play: () => {
       const audios = document.querySelectorAll('audio');
-      audios.forEach(audio => audio.play());
+      audios.forEach(audio => {
+        if (audio.paused) {
+          const playPromise = audio.play();
+          if (playPromise) {
+            playPromise.catch(err => console.warn("فشل في استئناف التشغيل", err));
+          }
+        }
+      });
     },
     pause: () => {
       const audios = document.querySelectorAll('audio');
-      audios.forEach(audio => audio.pause());
+      audios.forEach(audio => {
+        if (!audio.paused) {
+          audio.pause();
+        }
+      });
     },
     setVolume: (volume: number) => {
       const audios = document.querySelectorAll('audio');
-      audios.forEach(audio => { audio.volume = volume; });
+      audios.forEach(audio => { 
+        audio.volume = Math.max(0, Math.min(1, volume)); 
+      });
+    },
+    // دالة لرفع الصوت تدريجياً
+    fadeInVolume: (duration: number = 1000) => {
+      const audios = document.querySelectorAll('audio');
+      
+      audios.forEach(audio => {
+        let startVolume = 0;
+        const targetVolume = 0.3; // مستوى الصوت المستهدف
+        const steps = 20;
+        const stepTime = duration / steps;
+        
+        audio.volume = startVolume;
+        
+        let step = 0;
+        const fadeInterval = setInterval(() => {
+          step++;
+          if (step <= steps) {
+            const newVolume = startVolume + (targetVolume - startVolume) * (step / steps);
+            audio.volume = newVolume;
+          } else {
+            clearInterval(fadeInterval);
+          }
+        }, stepTime);
+      });
+    },
+    // دالة لخفض الصوت تدريجياً
+    fadeOutVolume: (duration: number = 1000, callback?: () => void) => {
+      const audios = document.querySelectorAll('audio');
+      if (audios.length === 0 && callback) {
+        callback();
+        return;
+      }
+      
+      let completedCount = 0;
+      
+      audios.forEach(audio => {
+        const startVolume = audio.volume;
+        const steps = 20;
+        const stepTime = duration / steps;
+        
+        let step = 0;
+        const fadeInterval = setInterval(() => {
+          step++;
+          if (step <= steps) {
+            const newVolume = startVolume * (1 - step / steps);
+            audio.volume = newVolume;
+          } else {
+            clearInterval(fadeInterval);
+            audio.pause();
+            completedCount++;
+            
+            if (completedCount === audios.length && callback) {
+              callback();
+            }
+          }
+        }, stepTime);
+      });
     }
   };
 };
