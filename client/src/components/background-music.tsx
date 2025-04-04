@@ -33,29 +33,29 @@ export const useMusic = () => useContext(MusicContext);
 // قائمة بالأغاني العربية والإلكترونية الحماسية
 const musicTracks = [
   {
-    title: "أغنية حماسية 1",
+    title: "أغنية عربية",
     artist: "DJ مصري",
-    src: "https://dl.dropbox.com/scl/fi/l0vw2ep5a2i5r1d9z0mcp/arabic-trap.mp3?rlkey=hz1itfm13jvtdh37rtw9tmbq9&dl=0"
+    src: "/sounds/ambient/arabic_music.mp3"
   },
   {
-    title: "إيقاعات شرقية",
+    title: "أجواء الكازينو",
     artist: "نجم الميكس",
-    src: "https://dl.dropbox.com/scl/fi/xbjgk2ogknpfq59z6rqwd/arabic-house.mp3?rlkey=p7wicfh2eqamf9zcmtjnhzrsj&dl=0"
+    src: "/sounds/ambient/casino_ambient.mp3"
   },
   {
-    title: "ريمكس عربي",
+    title: "طاولة البوكر",
     artist: "DJ خليجي",
-    src: "https://dl.dropbox.com/scl/fi/0k1pji63sak6l0jkhj6ud/arabic-mix.mp3?rlkey=yrfhmmr4kkx25tojxwpejl5un&dl=0"
+    src: "/sounds/ambient/table_ambient.mp3"
   },
   {
-    title: "ليلة سهر",
+    title: "الطاولة الذهبية",
     artist: "نجوم الريمكس",
-    src: "https://dl.dropbox.com/scl/fi/66iu3a02ys2e2p9zwu3vp/club-energy.mp3?rlkey=5eplj5w4wz2xt6y8b94m90odz&dl=0"
+    src: "/sounds/game/check.mp3"
   },
   {
-    title: "إيقاع الطبلة",
+    title: "اللعبة المتميزة",
     artist: "موسيقى الشرق",
-    src: "https://dl.dropbox.com/scl/fi/qyg9yiw8e7f5f0svjihq3/energetic-trap.mp3?rlkey=4dvvh651iu6cti3m5mmkcwdmt&dl=0"
+    src: "/sounds/win/win_pot.mp3"
   }
 ];
 
