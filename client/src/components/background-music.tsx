@@ -1,47 +1,47 @@
 import { useState, useEffect, useRef } from 'react';
 
-// قائمة بالأغاني الأجنبية الحماسية المناسبة للتطبيق
-// استخدام مصادر أغاني حقيقية متاحة عبر الإنترنت
+// قائمة بالأغاني الإلكترونية والحماسية المشابهة للأغنية المطلوبة
+// استخدام مصادر أغاني متاحة عبر الإنترنت
 const musicTracks = [
   {
-    title: "High Energy",
-    artist: "Rock Stars",
-    src: "https://files.freemusicarchive.org/storage-freemusicarchive-org/music/no_curator/Tours/Enthusiast/Tours_-_01_-_Enthusiast.mp3"
-  },
-  {
-    title: "Electric Pulse",
-    artist: "DJ Beatmaster",
-    src: "https://storage.googleapis.com/media-session/elephants-dream/the-wires.mp3"
-  },
-  {
-    title: "Casino Royale",
-    artist: "James Bond",
+    title: "Electronic Energy",
+    artist: "DJ Mixer",
     src: "https://storage.googleapis.com/media-session/big-buck-bunny/prelude.mp3"
   },
   {
-    title: "Power Play",
-    artist: "Game Masters",
-    src: "https://dl.dropboxusercontent.com/s/8c9m92u1euqnkl3/Michael%20Jackson%20-%20Rock%20With%20You.mp3"
+    title: "Party House",
+    artist: "Club Masters",
+    src: "https://storage.googleapis.com/media-session/elephants-dream/the-wires.mp3"
   },
   {
-    title: "Poker Night",
-    artist: "Card Kings",
-    src: "https://dl.dropboxusercontent.com/s/rk5e6qb7vjqnxrh/Eurythmics%20-%20Sweet%20Dreams.mp3"
+    title: "Deep Bass",
+    artist: "Electronic Kings",
+    src: "https://cdn.freesound.org/previews/686/686367_9715151-lq.mp3"
   },
   {
-    title: "Victory Dance",
-    artist: "Winners Circle",
-    src: "https://dl.dropboxusercontent.com/s/38qrdl6sdf4j6d5/Michael%20Jackson%20-%20Billie%20Jean.mp3"
+    title: "Dance Floor",
+    artist: "House Nation",
+    src: "https://cdn.freesound.org/previews/608/608280_12422346-lq.mp3"
   },
   {
-    title: "All In",
-    artist: "Vegas Players",
-    src: "https://dl.dropboxusercontent.com/s/qn33hbt5t1blmhu/Metallica%20-%20Nothing%20Else%20Matters.mp3"
+    title: "High Energy",
+    artist: "EDM Stars",
+    src: "https://cdn.freesound.org/previews/458/458587_9159316-lq.mp3"
   },
   {
-    title: "Royal Flush",
-    artist: "Ace Squad",
-    src: "https://dl.dropboxusercontent.com/s/a9fa06cgzz3hm30/Eagles%20-%20Hotel%20California.mp3"
+    title: "Electric Dreams",
+    artist: "Future Beat",
+    src: "https://cdn.freesound.org/previews/650/650781_11861866-lq.mp3"
+  },
+  {
+    title: "Club Remix",
+    artist: "Beat Monsters",
+    src: "https://cdn.freesound.org/previews/624/624736_5674468-lq.mp3"
+  },
+  {
+    title: "Techno Rush",
+    artist: "Digital DJs",
+    src: "https://cdn.freesound.org/previews/631/631440_10402710-lq.mp3"
   }
 ];
 
@@ -56,7 +56,7 @@ export function BackgroundMusic() {
   // تهيئة عنصر الصوت
   useEffect(() => {
     const audio = new Audio();
-    audio.volume = 0.65; // مستوى صوت مرتفع نسبياً للأغاني الحماسية
+    audio.volume = 0.65; // مستوى صوت مرتفع للأغاني الحماسية
     audio.loop = false; // عدم تكرار الأغنية الواحدة
     
     // تشغيل الأغنية التالية عند انتهاء الحالية
@@ -69,41 +69,41 @@ export function BackgroundMusic() {
     // تحريك الأغاني بشكل عشوائي عند التحميل
     shuffleTracks();
     
-    // تشغيل الصوت تلقائياً عند بدء التطبيق (دون الحاجة لتفاعل المستخدم)
+    // محاولة تشغيل الموسيقى فوراً عند تحميل الصفحة
     setTimeout(() => {
-      if (audioRef.current && audioRef.current.paused) {
+      if (audioRef.current) {
         const playPromise = audioRef.current.play();
         if (playPromise !== undefined) {
           playPromise.catch(error => {
-            console.warn("تعذر التشغيل التلقائي للمسار الصوتي", error);
+            console.warn("تعذر التشغيل التلقائي للموسيقى", error);
             
-            // إذا فشل التشغيل التلقائي، نحاول مرة أخرى عند تفاعل المستخدم
+            // خطة بديلة في حال عدم السماح بالتشغيل التلقائي
             const handleUserInteraction = () => {
               if (audioRef.current && audioRef.current.paused) {
-                const retryPlayPromise = audioRef.current.play();
-                if (retryPlayPromise !== undefined) {
-                  retryPlayPromise.catch(retryError => {
-                    console.warn("تعذر تشغيل المسار الصوتي حتى بعد تفاعل المستخدم", retryError);
+                const retryPromise = audioRef.current.play();
+                if (retryPromise !== undefined) {
+                  retryPromise.catch(retryError => {
+                    console.warn("تعذر تشغيل الموسيقى بعد تفاعل المستخدم", retryError);
                   });
                 }
+                
+                // إزالة مستمعي الأحداث بعد محاولة التشغيل
+                document.removeEventListener('click', handleUserInteraction);
+                document.removeEventListener('touchstart', handleUserInteraction);
+                document.removeEventListener('keydown', handleUserInteraction);
               }
-              
-              // إزالة مستمعي الأحداث بعد التفاعل الأول
-              document.removeEventListener('click', handleUserInteraction);
-              document.removeEventListener('touchstart', handleUserInteraction);
-              document.removeEventListener('keydown', handleUserInteraction);
             };
             
-            // إضافة مستمعي أحداث للتفاعل مع الصفحة (خطة بديلة)
+            // إضافة مستمعي أحداث لتفاعل المستخدم
             document.addEventListener('click', handleUserInteraction);
             document.addEventListener('touchstart', handleUserInteraction);
             document.addEventListener('keydown', handleUserInteraction);
           });
         }
       }
-    }, 500); // تأخير قليل للتأكد من أن التطبيق تحمل تماماً
+    }, 1000); // تأخير مناسب للتأكد من تحميل الصفحة
     
-    // تفريغ عنصر الصوت عند التدمير
+    // تنظيف عند إزالة المكون
     return () => {
       audio.pause();
       audio.src = '';
@@ -128,7 +128,7 @@ export function BackgroundMusic() {
       // الانتقال للمسار التالي بعد فشل التحميل
       setTimeout(() => {
         setCurrentTrackIndex(prev => (prev + 1) % musicTracks.length);
-      }, 3000);
+      }, 2000);
     };
     
     // إضافة محقق أخطاء تحميل الملفات الصوتية
@@ -148,11 +148,11 @@ export function BackgroundMusic() {
         // محاولة الانتقال للمسار التالي بعد فشل التشغيل
         setTimeout(() => {
           setCurrentTrackIndex(prev => (prev + 1) % musicTracks.length);
-        }, 3000);
+        }, 2000);
       });
     }
     
-    // تنظيف عند إزالة المكون
+    // تنظيف عند تغيير المسار
     return () => {
       audio.onerror = null;
     };
