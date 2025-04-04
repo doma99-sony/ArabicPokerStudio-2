@@ -174,45 +174,45 @@ export function TableCard({ table }: TableCardProps) {
   const seats = generateSeats();
 
   return (
-    <Card className="bg-black/70 border border-[#D4AF37]/30 shadow-xl hover:shadow-2xl transition-all duration-300 hover:border-[#D4AF37]/50" 
+    <Card className="bg-black/70 border border-[#D4AF37]/30 shadow-xl hover:shadow-2xl transition-all duration-300 hover:border-[#D4AF37]/50 h-full" 
           onMouseEnter={() => setShowSeats(true)} 
           onMouseLeave={() => setShowSeats(false)}>
-      <CardHeader className="pb-2">
+      <CardHeader className="pb-1 px-2 pt-2">
         <div className="flex justify-between items-start">
-          <CardTitle className="text-[#D4AF37] text-xl">{table.name}</CardTitle>
-          <Badge className={`${getStatusColor()} text-white`}>
+          <CardTitle className="text-[#D4AF37] text-sm">{table.name}</CardTitle>
+          <Badge className={`${getStatusColor()} text-white text-xs px-1 py-0`}>
             {getStatusText()}
           </Badge>
         </div>
       </CardHeader>
-      <CardContent className="text-white/80 space-y-4">
+      <CardContent className="text-white/80 space-y-2 px-2 py-1">
         <div className="relative">
-          <div className="w-full h-24 bg-gradient-to-br from-[#1B4D3E] to-[#0A3A2A] rounded-full flex items-center justify-center border-2 border-[#D4AF37]/70">
-            <span className="text-[#D4AF37] text-lg font-bold">♠️ ♥️</span>
+          <div className="w-full h-16 bg-gradient-to-br from-[#1B4D3E] to-[#0A3A2A] rounded-lg flex items-center justify-center border border-[#D4AF37]/70">
+            <span className="text-[#D4AF37] text-base font-bold">♠️ ♥️</span>
           </div>
-          <div className="absolute inset-0 -top-4">
+          <div className="absolute inset-0 -top-2">
             <div className="flex justify-around">
               {seats.slice(0, 5).map((seat, index) => (
                 <div key={index} className="relative" 
                      onMouseEnter={() => setHoverSeat(seat.id)} 
                      onMouseLeave={() => setHoverSeat(null)}>
                   <div className={cn(
-                    "w-8 h-8 rounded-full flex items-center justify-center", 
+                    "w-6 h-6 rounded-full flex items-center justify-center", 
                     seat.occupied ? "bg-[#D4AF37] text-black" : "bg-gray-700/50 text-white border border-dashed border-[#D4AF37]/40", 
                     hoverSeat === seat.id && !seat.occupied && "bg-[#D4AF37]/30")}>
                     {seat.occupied ? (
                       <span className="text-xs">🧑</span>
                     ) : (
-                      <span className="text-white"><Plus size={14} /></span>
+                      <span className="text-white"><Plus size={10} /></span>
                     )}
                   </div>
                   {hoverSeat === seat.id && !seat.occupied && showSeats && (
-                    <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 z-10 whitespace-nowrap">
+                    <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 z-10 whitespace-nowrap">
                       <button onClick={handleSeatJoin} 
                               disabled={table.status === "full" || joinMutation.isPending} 
-                              className="bg-[#D4AF37] text-black text-xs py-1 px-2 rounded-md shadow-lg whitespace-nowrap flex items-center">
+                              className="bg-[#D4AF37] text-black text-[10px] py-0.5 px-1 rounded-md shadow-lg whitespace-nowrap flex items-center">
                         {joinMutation.isPending ? (
-                          <Loader2 className="h-3 w-3 animate-spin mx-auto" />
+                          <Loader2 className="h-2 w-2 animate-spin mx-auto" />
                         ) : (
                           <>انضم</>
                         )}
@@ -224,25 +224,25 @@ export function TableCard({ table }: TableCardProps) {
             </div>
           </div>
         </div>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between text-xs">
           <div className="flex items-center">
-            <Users size={16} className="text-[#D4AF37] ml-2" />
-            <span>اللاعبين: {table.currentPlayers}/{table.maxPlayers}</span>
+            <Users size={12} className="text-[#D4AF37] ml-1" />
+            <span>{table.currentPlayers}/{table.maxPlayers}</span>
           </div>
           <div className="flex items-center">
-            <DollarSign size={16} className="text-[#D4AF37] ml-2" />
-            <span>العمى: {formatChips(table.smallBlind)} / {formatChips(table.bigBlind)}</span>
+            <DollarSign size={12} className="text-[#D4AF37] ml-1" />
+            <span>{formatChips(table.smallBlind)}/{formatChips(table.bigBlind)}</span>
           </div>
         </div>
-        <div className="border-t border-[#D4AF37]/20 pt-3 text-sm">
-          <div className="flex justify-between mb-1">
-            <span>الحد الأدنى للدخول:</span>
-            <span className="font-bold text-[#D4AF37] flex items-center"><Coins className="ml-1 h-4 w-4" /> {formatChips(table.minBuyIn)}</span>
+        <div className="border-t border-[#D4AF37]/20 pt-1 text-xs">
+          <div className="flex justify-between">
+            <span>الحد الأدنى:</span>
+            <span className="font-bold text-[#D4AF37] flex items-center"><Coins className="ml-1 h-3 w-3" /> {formatChips(table.minBuyIn)}</span>
           </div>
         </div>
       </CardContent>
-      <CardFooter className="flex flex-col gap-2">
-        <Button className={`w-full font-bold ${
+      <CardFooter className="flex flex-col gap-1 p-2 pt-0">
+        <Button className={`w-full font-bold text-xs py-1 px-2 h-auto ${
           table.status === "full" 
             ? "bg-gradient-to-br from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black" 
             : "bg-gradient-to-br from-[#D4AF37] to-[#AA8C2C] hover:from-[#E5C04B] hover:to-[#D4AF37] text-[#0A0A0A]"
@@ -250,12 +250,12 @@ export function TableCard({ table }: TableCardProps) {
                 disabled={joinMutation.isPending} 
                 onClick={() => joinMutation.mutate()}>
           {joinMutation.isPending ? (
-            <Loader2 className="h-5 w-5 animate-spin mx-auto" />
+            <Loader2 className="h-3 w-3 animate-spin mx-auto" />
           ) : (
             table.status === "full" ? (
-              <> <EyeIcon size={18} className="ml-2" /> مشاهدة </>
+              <> <EyeIcon size={12} className="ml-1" /> مشاهدة </>
             ) : (
-              <> <PlayCircle size={18} className="ml-2" /> انضم للعب </>
+              <> <PlayCircle size={12} className="ml-1" /> انضم للعب </>
             )
           )}
         </Button>
@@ -264,12 +264,12 @@ export function TableCard({ table }: TableCardProps) {
         <Button 
           variant="outline" 
           size="sm"
-          className="w-full mt-1 border-[#D4AF37]/40 text-[#D4AF37] hover:bg-[#D4AF37]/10"
+          className="w-full text-xs py-1 px-2 h-auto border-[#D4AF37]/40 text-[#D4AF37] hover:bg-[#D4AF37]/10"
           onClick={() => {
             window.location.href = `/direct-table/${table.id}`;
           }}
         >
-          <ExternalLink size={14} className="ml-2" /> الانتقال المباشر للطاولة
+          <ExternalLink size={10} className="ml-1" /> انتقال مباشر
         </Button>
       </CardFooter>
     </Card>
