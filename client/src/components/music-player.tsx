@@ -7,52 +7,52 @@ import { useLocalStorage } from '../lib/hooks/use-local-storage';
 // قائمة بالمسارات الموسيقية الحماسية
 const musicTracks = [
   {
-    title: "Poker Face",
-    artist: "Intense Music",
-    src: "/assets/music/poker-face.mp3",
-    thumbnail: "/assets/music/poker-face-thumb.jpg"
+    title: "Epic Electronic Rock",
+    artist: "King Around Here",
+    src: "/audio/energetic/energetic_1.mp3",
+    thumbnail: ""
   },
   {
-    title: "Casino Royale",
-    artist: "Epic Sounds",
-    src: "/assets/music/casino-royale.mp3",
-    thumbnail: "/assets/music/casino-royale-thumb.jpg"
+    title: "Powerful Energetic Dubstep",
+    artist: "Powerful Bass",
+    src: "/audio/energetic/energetic_2.mp3",
+    thumbnail: ""
   },
   {
-    title: "High Stakes",
-    artist: "Poker Kings",
-    src: "/assets/music/high-stakes.mp3",
-    thumbnail: "/assets/music/high-stakes-thumb.jpg"
+    title: "Sport Workout Energy",
+    artist: "Fitness Master",
+    src: "/audio/energetic/energetic_3.mp3",
+    thumbnail: ""
   },
   {
-    title: "Royal Flush",
-    artist: "Card Masters",
-    src: "/assets/music/royal-flush.mp3",
-    thumbnail: "/assets/music/royal-flush-thumb.jpg"
+    title: "Epic Piano Dubstep",
+    artist: "Sport Trailer",
+    src: "/audio/energetic/energetic_4.mp3",
+    thumbnail: ""
   },
   {
-    title: "All In",
-    artist: "Epic Beats",
-    src: "/assets/music/all-in.mp3",
-    thumbnail: "/assets/music/all-in-thumb.jpg"
+    title: "Action Sport Rock",
+    artist: "Power Players",
+    src: "/audio/energetic/energetic_5.mp3",
+    thumbnail: ""
   },
   {
-    title: "Vegas Nights",
-    artist: "Game Masters",
-    src: "/assets/music/vegas-nights.mp3",
-    thumbnail: "/assets/music/vegas-nights-thumb.jpg"
+    title: "Poker Classic",
+    artist: "Gaming Masters",
+    src: "/background-music.mp3",
+    thumbnail: ""
   },
   {
-    title: "Ace of Spades",
-    artist: "Card Kings",
-    src: "/assets/music/ace-of-spades.mp3",
-    thumbnail: "/assets/music/ace-of-spades-thumb.jpg"
+    title: "Test Energetic",
+    artist: "Test Music",
+    src: "/test-music.mp3",
+    thumbnail: ""
   },
   {
-    title: "Diamond Dealer",
-    artist: "Table Masters",
-    src: "/assets/music/diamond-dealer.mp3",
-    thumbnail: "/assets/music/diamond-dealer-thumb.jpg"
+    title: "Sample Sound Special",
+    artist: "Sound Effects Pro",
+    src: "/audio/sample-sound.mp3",
+    thumbnail: ""
   }
 ];
 

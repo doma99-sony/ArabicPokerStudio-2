@@ -36,6 +36,7 @@ import { ErrorProvider } from "@/components/error-handler";
 
 // استيراد مشغل الموسيقى الخلفية
 import { BackgroundMusicProvider } from "@/components/background-music";
+import { MusicPlayerProvider } from "@/components/music-player";
 
 // استيراد المكونات والأدوات الجديدة
 import { useGlobalWebSocket } from "@/hooks/use-global-websocket";
@@ -159,6 +160,7 @@ function App() {
         <WelcomeMessageNotification />
         <LandscapeNotice />
         <BackgroundMusicProvider />
+        <MusicPlayerProvider />
         <Toaster />
       </NotificationsProvider>
     </ErrorProvider>
