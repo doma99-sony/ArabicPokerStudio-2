@@ -117,35 +117,24 @@ export default function PokerTablesPage() {
       {/* Main Content */}
       <main className="relative z-10 container mx-auto flex-1 p-6 mt-8">
         <div className="space-y-8">
-          {/* Ranking Section */}
-          <div className="relative mb-16 mt-4">
-            <div className="absolute -top-8 right-4 w-64">
-              <div className="text-center">
-                <h3 className="text-2xl font-bold text-[#D4AF37] mb-2">RANK</h3>
-                <img 
-                  src="/attached_assets/image_1743420817096.png" 
-                  alt="Games Ranking" 
-                  className="w-full h-auto"
-                  style={{ maxWidth: "200px" }}
-                />
-              </div>
+          {/* Ranking Section - تعديل موضع قسم التصنيف */}
+          <div className="relative mb-6">
+            <div className="text-center mb-4">
+              <h3 className="text-2xl font-bold text-[#D4AF37] mb-2">تصنيف اللاعبين</h3>
+              <img 
+                src="/attached_assets/image_1743420817096.png" 
+                alt="Games Ranking" 
+                className="mx-auto h-auto"
+                style={{ maxWidth: "200px" }}
+              />
             </div>
-
-            {/* Popup Button */}
-            <button
-              onClick={() => setShowRankPopup(true)}
-              className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#D4AF37] text-black px-6 py-3 rounded-lg font-bold hover:bg-[#E5C04B] transition-colors z-20"
-            >
-              عرض التفاصيل
-            </button>
 
             {/* Popup Dialog */}
             {showRankPopup && (
               <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-30">
-                <div className="bg-deepBlack border-2 border-[#D4AF37] rounded-xl p-8 max-w-2xl w-full mx-4">
+                <div className="bg-black border-2 border-[#D4AF37] rounded-xl p-8 max-w-2xl w-full mx-4">
                   <h2 className="text-2xl font-bold text-[#D4AF37] mb-4">تفاصيل التصنيف</h2>
                   <div className="text-white space-y-4">
-                    {/* Add your ranking details here */}
                     <p>سيتم إضافة تفاصيل التصنيف هنا...</p>
                   </div>
                   <button
@@ -157,46 +146,16 @@ export default function PokerTablesPage() {
                 </div>
               </div>
             )}
-          </div>
-          {/* Ranking Section */}
-          <div className="relative mb-8">
-            <div className="absolute top-4 right-4 w-64">
-              <div className="text-center">
-                <h3 className="text-2xl font-bold text-[#D4AF37] mb-2">RANK</h3>
-                <img 
-                  src="/your-uploaded-games-image.png" 
-                  alt="Ranking" 
-                  className="w-full h-auto"
-                />
-              </div>
+            
+            {/* زر عرض التفاصيل - نقلناه خارج الطبقات المثبتة */}
+            <div className="text-center">
+              <button
+                onClick={() => setShowRankPopup(true)}
+                className="bg-[#D4AF37] text-black px-6 py-3 rounded-lg font-bold hover:bg-[#E5C04B] transition-colors"
+              >
+                عرض تفاصيل التصنيف
+              </button>
             </div>
-
-            {/* Popup Button */}
-            <button
-              onClick={() => setShowRankPopup(true)}
-              className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#D4AF37] text-black px-6 py-3 rounded-lg font-bold hover:bg-[#E5C04B] transition-colors z-20"
-            >
-              عرض التفاصيل
-            </button>
-
-            {/* Popup Dialog */}
-            {showRankPopup && (
-              <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-30">
-                <div className="bg-deepBlack border-2 border-[#D4AF37] rounded-xl p-8 max-w-2xl w-full mx-4">
-                  <h2 className="text-2xl font-bold text-[#D4AF37] mb-4">تفاصيل التصنيف</h2>
-                  <div className="text-white space-y-4">
-                    {/* Add your ranking details here */}
-                    <p>سيتم إضافة تفاصيل التصنيف هنا...</p>
-                  </div>
-                  <button
-                    onClick={() => setShowRankPopup(false)}
-                    className="mt-6 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition-colors"
-                  >
-                    إغلاق
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
 
 
@@ -255,10 +214,15 @@ export default function PokerTablesPage() {
                 ) : (
                   <div className="bg-black/30 rounded-lg p-4">
                     <h3 className="text-[#D4AF37] text-lg mb-4">طاولات النوب <span className="text-white/70 text-sm mr-2">الحد الأدنى: 20,000 رقاقة</span></h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                      {getTablesByCategory("نوب").map((table) => (
-                        <TableCard key={table.id} table={table} />
-                      ))}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 overflow-y-auto max-h-[400px] p-2">
+                      {getTablesByCategory("نوب").length > 0 ? 
+                        getTablesByCategory("نوب").map((table) => (
+                          <TableCard key={table.id} table={table} />
+                        )) : 
+                        <div className="col-span-full text-center py-8 text-white/70">
+                          لا توجد طاولات متاحة حالياً في هذا المستوى
+                        </div>
+                      }
                     </div>
                   </div>
                 )}
@@ -273,10 +237,15 @@ export default function PokerTablesPage() {
                 ) : (
                   <div className="bg-black/30 rounded-lg p-4">
                     <h3 className="text-[#D4AF37] text-lg mb-4">طاولات لسه بتعلم <span className="text-white/70 text-sm mr-2">الحد الأدنى: 100,000 رقاقة</span></h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                      {getTablesByCategory("لسه بتعلم").map((table) => (
-                        <TableCard key={table.id} table={table} />
-                      ))}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 overflow-y-auto max-h-[400px] p-2">
+                      {getTablesByCategory("لسه بتعلم").length > 0 ? 
+                        getTablesByCategory("لسه بتعلم").map((table) => (
+                          <TableCard key={table.id} table={table} />
+                        )) : 
+                        <div className="col-span-full text-center py-8 text-white/70">
+                          لا توجد طاولات متاحة حالياً في هذا المستوى
+                        </div>
+                      }
                     </div>
                   </div>
                 )}
@@ -291,10 +260,15 @@ export default function PokerTablesPage() {
                 ) : (
                   <div className="bg-black/30 rounded-lg p-4">
                     <h3 className="text-[#D4AF37] text-lg mb-4">طاولات المحترف <span className="text-white/70 text-sm mr-2">الحد الأدنى: 500,000 رقاقة</span></h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                      {getTablesByCategory("محترف").map((table) => (
-                        <TableCard key={table.id} table={table} />
-                      ))}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 overflow-y-auto max-h-[400px] p-2">
+                      {getTablesByCategory("محترف").length > 0 ? 
+                        getTablesByCategory("محترف").map((table) => (
+                          <TableCard key={table.id} table={table} />
+                        )) : 
+                        <div className="col-span-full text-center py-8 text-white/70">
+                          لا توجد طاولات متاحة حالياً في هذا المستوى
+                        </div>
+                      }
                     </div>
                   </div>
                 )}
@@ -309,10 +283,15 @@ export default function PokerTablesPage() {
                 ) : (
                   <div className="bg-black/30 rounded-lg p-4">
                     <h3 className="text-[#D4AF37] text-lg mb-4">طاولات الفاجر <span className="text-white/70 text-sm mr-2">الحد الأدنى: 1,000,000 رقاقة</span></h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                      {getTablesByCategory("الفاجر").map((table) => (
-                        <TableCard key={table.id} table={table} />
-                      ))}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 overflow-y-auto max-h-[400px] p-2">
+                      {getTablesByCategory("الفاجر").length > 0 ? 
+                        getTablesByCategory("الفاجر").map((table) => (
+                          <TableCard key={table.id} table={table} />
+                        )) : 
+                        <div className="col-span-full text-center py-8 text-white/70">
+                          لا توجد طاولات متاحة حالياً في هذا المستوى
+                        </div>
+                      }
                     </div>
                   </div>
                 )}
