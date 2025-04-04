@@ -167,8 +167,8 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen py-8 bg-deepBlack">
-      <div className="container mx-auto px-4">
+    <div className="min-h-screen py-2 bg-deepBlack">
+      <div className="container mx-auto px-2">
         <div className="max-w-4xl mx-auto bg-slate/20 rounded-lg overflow-hidden border border-gold/10">
           {/* صورة الغلاف */}
           <div className="relative h-48 md:h-64 overflow-hidden">
@@ -203,15 +203,15 @@ export default function ProfilePage() {
           </div>
           
           <div className="p-6 md:p-8">
-            <div className="flex items-center mb-6">
+            <div className="flex items-center mb-3">
               <Button
                 variant="ghost"
                 onClick={navigateToLobby}
-                className="text-gold hover:text-gold/80 p-2 mr-2"
+                className="text-gold hover:text-gold/80 p-1 mr-1"
               >
-                <ChevronRight className="h-5 w-5" />
+                <ChevronRight className="h-4 w-4" />
               </Button>
-              <h2 className="text-3xl font-bold text-gold font-cairo">الملف الشخصي</h2>
+              <h2 className="text-xl font-bold text-gold font-cairo">الملف الشخصي</h2>
             </div>
             
             <div className="flex flex-col md:flex-row">

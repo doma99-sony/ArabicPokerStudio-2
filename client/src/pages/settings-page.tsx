@@ -256,40 +256,40 @@ export default function SettingsPage() {
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#121212] to-[#1a1708] text-white">
-      <div className="container mx-auto p-4 md:p-6">
-        <div className="flex items-center justify-between mb-6">
+      <div className="container mx-auto p-2 md:p-3">
+        <div className="flex items-center justify-between mb-2">
           <Button 
             variant="ghost" 
             onClick={() => navigate("/lobby")}
-            className="flex items-center gap-2 text-[#D4AF37] hover:bg-[#D4AF37]/10"
+            className="flex items-center gap-1 text-[#D4AF37] hover:bg-[#D4AF37]/10 p-2 h-auto"
           >
-            <ArrowRight className="h-5 w-5" />
-            <span>العودة للصفحة الرئيسية</span>
+            <ArrowRight className="h-4 w-4" />
+            <span className="text-sm">العودة</span>
           </Button>
           
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-[#D4AF37]">الإعدادات</h1>
-            <Save className="h-6 w-6 text-[#D4AF37]" />
+          <div className="flex items-center gap-1">
+            <h1 className="text-lg font-bold text-[#D4AF37]">الإعدادات</h1>
+            <Save className="h-4 w-4 text-[#D4AF37]" />
           </div>
         </div>
         
         <Tabs defaultValue="sound" className="w-full">
-          <TabsList className="w-full mb-6 bg-black/40 border border-[#D4AF37]/20">
+          <TabsList className="w-full mb-3 bg-black/40 border border-[#D4AF37]/20">
             <TabsTrigger 
               value="sound" 
-              className="flex-1 text-white data-[state=active]:bg-[#D4AF37] data-[state=active]:text-black"
+              className="flex-1 text-white text-sm data-[state=active]:bg-[#D4AF37] data-[state=active]:text-black py-1"
             >
               الصوت
             </TabsTrigger>
             <TabsTrigger 
               value="vault" 
-              className="flex-1 text-white data-[state=active]:bg-[#D4AF37] data-[state=active]:text-black"
+              className="flex-1 text-white text-sm data-[state=active]:bg-[#D4AF37] data-[state=active]:text-black py-1"
             >
               الخزنة
             </TabsTrigger>
             <TabsTrigger 
               value="account" 
-              className="flex-1 text-white data-[state=active]:bg-[#D4AF37] data-[state=active]:text-black"
+              className="flex-1 text-white text-sm data-[state=active]:bg-[#D4AF37] data-[state=active]:text-black py-1"
             >
               الحساب
             </TabsTrigger>
@@ -298,9 +298,9 @@ export default function SettingsPage() {
           {/* إعدادات الصوت */}
           <TabsContent value="sound">
             <Card className="bg-black/40 border border-[#D4AF37]/20">
-              <CardHeader>
-                <CardTitle className="text-[#D4AF37]">إعدادات الصوت</CardTitle>
-                <CardDescription className="text-white/70">
+              <CardHeader className="p-3">
+                <CardTitle className="text-[#D4AF37] text-base">إعدادات الصوت</CardTitle>
+                <CardDescription className="text-white/70 text-xs">
                   تحكم في مستوى الصوت والمؤثرات الصوتية في اللعبة
                 </CardDescription>
               </CardHeader>

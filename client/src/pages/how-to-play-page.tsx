@@ -176,27 +176,27 @@ export default function HowToPlayPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#0A0A0A] to-[#1A1A1A] text-white">
       {/* Header decoration */}
-      <div className="relative h-40 bg-black overflow-hidden">
+      <div className="relative h-24 bg-black overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-[#D4AF37]/5 via-[#D4AF37]/20 to-[#D4AF37]/5"></div>
         
         {/* Card suits decoration */}
-        <div className="absolute top-5 left-5 text-[#D4AF37]/10 text-7xl">♠</div>
-        <div className="absolute bottom-5 right-5 text-[#D4AF37]/10 text-7xl">♥</div>
-        <div className="absolute top-5 right-10 text-[#D4AF37]/10 text-5xl">♣</div>
-        <div className="absolute bottom-5 left-10 text-[#D4AF37]/10 text-5xl">♦</div>
+        <div className="absolute top-2 left-2 text-[#D4AF37]/10 text-4xl">♠</div>
+        <div className="absolute bottom-2 right-2 text-[#D4AF37]/10 text-4xl">♥</div>
+        <div className="absolute top-2 right-5 text-[#D4AF37]/10 text-3xl">♣</div>
+        <div className="absolute bottom-2 left-5 text-[#D4AF37]/10 text-3xl">♦</div>
         
-        <div className="container mx-auto px-4 h-full flex flex-col justify-center items-center">
-          <h1 className="text-4xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] to-[#BF9B30] mb-2">
+        <div className="container mx-auto px-2 h-full flex flex-col justify-center items-center">
+          <h1 className="text-2xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] to-[#BF9B30] mb-1">
             كيف تلعب البوكر
           </h1>
-          <p className="text-[#D4AF37]/80 text-center max-w-2xl">
+          <p className="text-[#D4AF37]/80 text-center max-w-xl text-sm">
             دليل شامل لقواعد لعبة تكساس هولدم ومصطلحاتها وترتيب الأوراق
           </p>
         </div>
       </div>
       
       {/* Main content */}
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-2 py-2">
         <Tabs defaultValue="basics" className="mb-8" value={tab} onValueChange={setTab}>
           <div className="flex justify-center mb-6">
             <TabsList className="bg-black/50 p-1">
