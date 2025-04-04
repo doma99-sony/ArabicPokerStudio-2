@@ -1,47 +1,47 @@
 import { useState, useEffect, useRef } from 'react';
 
-// قائمة بالأغاني الحماسية المناسبة للتطبيق
+// قائمة بالأغاني الأجنبية الحماسية المناسبة للتطبيق
 // استخدام مصادر أغاني حقيقية متاحة عبر الإنترنت
 const musicTracks = [
   {
-    title: "Poker Face",
-    artist: "Lady Gaga",
+    title: "High Energy",
+    artist: "Rock Stars",
     src: "https://files.freemusicarchive.org/storage-freemusicarchive-org/music/no_curator/Tours/Enthusiast/Tours_-_01_-_Enthusiast.mp3"
   },
   {
-    title: "الليلة حلوة",
-    artist: "عمرو دياب",
-    src: "https://files.freemusicarchive.org/storage-freemusicarchive-org/music/ccCommunity/Kai_Engel/Satin/Kai_Engel_-_07_-_Interception.mp3"
+    title: "Electric Pulse",
+    artist: "DJ Beatmaster",
+    src: "https://storage.googleapis.com/media-session/elephants-dream/the-wires.mp3"
   },
   {
-    title: "حبيبي يا نور العين",
-    artist: "عمرو دياب",
-    src: "https://files.freemusicarchive.org/storage-freemusicarchive-org/music/ccCommunity/Chad_Crouch/Arps/Chad_Crouch_-_Shipping_Lanes.mp3"
+    title: "Casino Royale",
+    artist: "James Bond",
+    src: "https://storage.googleapis.com/media-session/big-buck-bunny/prelude.mp3"
   },
   {
-    title: "أحلى و أحلى",
-    artist: "عمرو دياب",
-    src: "https://files.freemusicarchive.org/storage-freemusicarchive-org/music/ccCommunity/Chad_Crouch/Passages/Chad_Crouch_-_Moonrise.mp3"
+    title: "Power Play",
+    artist: "Game Masters",
+    src: "https://dl.dropboxusercontent.com/s/8c9m92u1euqnkl3/Michael%20Jackson%20-%20Rock%20With%20You.mp3"
   },
   {
-    title: "يتعلموا",
-    artist: "عمرو دياب",
-    src: "https://files.freemusicarchive.org/storage-freemusicarchive-org/music/ccCommunity/Chad_Crouch/Drifter/Chad_Crouch_-_01_-_Gypsy.mp3"
+    title: "Poker Night",
+    artist: "Card Kings",
+    src: "https://dl.dropboxusercontent.com/s/rk5e6qb7vjqnxrh/Eurythmics%20-%20Sweet%20Dreams.mp3"
   },
   {
-    title: "عندي سؤال",
-    artist: "إليسا",
-    src: "https://files.freemusicarchive.org/storage-freemusicarchive-org/music/Blue_Dot_Sessions/Bitters/Blue_Dot_Sessions_-_Bitters_-_07_-_Halpless.mp3"
+    title: "Victory Dance",
+    artist: "Winners Circle",
+    src: "https://dl.dropboxusercontent.com/s/38qrdl6sdf4j6d5/Michael%20Jackson%20-%20Billie%20Jean.mp3"
   },
   {
-    title: "لو اسمحتلي",
-    artist: "تامر حسني",
-    src: "https://files.freemusicarchive.org/storage-freemusicarchive-org/music/ccCommunity/Kai_Engel/Satin/Kai_Engel_-_04_-_Sentinel.mp3"
+    title: "All In",
+    artist: "Vegas Players",
+    src: "https://dl.dropboxusercontent.com/s/qn33hbt5t1blmhu/Metallica%20-%20Nothing%20Else%20Matters.mp3"
   },
   {
-    title: "نور العين",
-    artist: "عمرو دياب",
-    src: "https://files.freemusicarchive.org/storage-freemusicarchive-org/music/no_curator/Tours/Enthusiast/Tours_-_01_-_Enthusiast.mp3"
+    title: "Royal Flush",
+    artist: "Ace Squad",
+    src: "https://dl.dropboxusercontent.com/s/a9fa06cgzz3hm30/Eagles%20-%20Hotel%20California.mp3"
   }
 ];
 
@@ -56,7 +56,7 @@ export function BackgroundMusic() {
   // تهيئة عنصر الصوت
   useEffect(() => {
     const audio = new Audio();
-    audio.volume = 0.45; // مستوى صوت متوسط للأغاني
+    audio.volume = 0.65; // مستوى صوت مرتفع نسبياً للأغاني الحماسية
     audio.loop = false; // عدم تكرار الأغنية الواحدة
     
     // تشغيل الأغنية التالية عند انتهاء الحالية
