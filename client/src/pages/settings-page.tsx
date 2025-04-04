@@ -57,7 +57,7 @@ export default function SettingsPage() {
   const { toast } = useToast();
   
   // استخدام سياق الموسيقى للتحكم في الأغاني
-  const { volume: musicVolume, setVolume: setMusicVolume, isPlaying, togglePlay, currentTrack, nextTrack, previousTrack } = useMusic();
+  const { volume: musicVolume, setVolume: setMusicVolume } = useMusic();
   
   // إعدادات الصوت
   const [volume, setVolume] = useState<number>(70);

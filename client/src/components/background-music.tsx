@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { Volume2, VolumeX } from "lucide-react";
 
 // قائمة مسارات الموسيقى
 const musicTracks = [
@@ -76,8 +77,54 @@ export function BackgroundMusicProvider() {
 
 // واجهة برمجية بسيطة للتحكم بالموسيقى من المكونات الأخرى
 export const useMusic = () => {
-  return {
-    play: () => {
+  // حالة لتتبع مستوى الصوت الحالي
+  const [volume, setVolumeState] = useState<number>(0.75);
+  const [isPlaying, setIsPlaying] = useState<boolean>(true);
+  const [currentTrack, setCurrentTrack] = useState({ title: "Best Songs Mix", artist: "SoundCloud" });
+
+  // الحصول على كائن SDK لـ SoundCloud
+  const getSoundCloudWidget = (): any => {
+    const iframe = document.querySelector('iframe');
+    if (!iframe) return null;
+    
+    // @ts-ignore
+    if (window.SC && window.SC.Widget) {
+      // @ts-ignore
+      return window.SC.Widget(iframe);
+    }
+    return null;
+  };
+
+  // ضبط مستوى الصوت باستخدام SoundCloud API
+  const setVolume = (newVolume: number) => {
+    const boundedVolume = Math.max(0, Math.min(1, newVolume));
+    setVolumeState(boundedVolume);
+    
+    try {
+      const widget = getSoundCloudWidget();
+      if (widget) {
+        widget.setVolume(boundedVolume * 100);
+      }
+      
+      // احتياطي: محاولة ضبط صوت العناصر الصوتية الأخرى
+      const audios = document.querySelectorAll('audio');
+      audios.forEach(audio => { 
+        audio.volume = boundedVolume; 
+      });
+    } catch (error) {
+      console.warn("خطأ في ضبط مستوى الصوت:", error);
+    }
+  };
+
+  // الدوال الأخرى
+  const play = () => {
+    try {
+      const widget = getSoundCloudWidget();
+      if (widget) {
+        widget.play();
+      }
+      
+      // احتياطي: محاولة تشغيل العناصر الصوتية الأخرى
       const audios = document.querySelectorAll('audio');
       audios.forEach(audio => {
         if (audio.paused) {
@@ -87,77 +134,113 @@ export const useMusic = () => {
           }
         }
       });
-    },
-    pause: () => {
+    } catch (error) {
+      console.warn("خطأ في تشغيل الموسيقى:", error);
+    }
+  };
+
+  const pause = () => {
+    try {
+      const widget = getSoundCloudWidget();
+      if (widget) {
+        widget.pause();
+      }
+      
+      // احتياطي: محاولة إيقاف العناصر الصوتية الأخرى
       const audios = document.querySelectorAll('audio');
       audios.forEach(audio => {
         if (!audio.paused) {
           audio.pause();
         }
       });
-    },
-    setVolume: (volume: number) => {
-      const audios = document.querySelectorAll('audio');
-      audios.forEach(audio => { 
-        audio.volume = Math.max(0, Math.min(1, volume)); 
-      });
-    },
-    // دالة لرفع الصوت تدريجياً
-    fadeInVolume: (duration: number = 1000) => {
-      const audios = document.querySelectorAll('audio');
-      
-      audios.forEach(audio => {
-        let startVolume = 0;
-        const targetVolume = 0.3; // مستوى الصوت المستهدف
-        const steps = 20;
-        const stepTime = duration / steps;
-        
-        audio.volume = startVolume;
-        
-        let step = 0;
-        const fadeInterval = setInterval(() => {
-          step++;
-          if (step <= steps) {
-            const newVolume = startVolume + (targetVolume - startVolume) * (step / steps);
-            audio.volume = newVolume;
-          } else {
-            clearInterval(fadeInterval);
-          }
-        }, stepTime);
-      });
-    },
-    // دالة لخفض الصوت تدريجياً
-    fadeOutVolume: (duration: number = 1000, callback?: () => void) => {
-      const audios = document.querySelectorAll('audio');
-      if (audios.length === 0 && callback) {
-        callback();
-        return;
-      }
-      
-      let completedCount = 0;
-      
-      audios.forEach(audio => {
-        const startVolume = audio.volume;
-        const steps = 20;
-        const stepTime = duration / steps;
-        
-        let step = 0;
-        const fadeInterval = setInterval(() => {
-          step++;
-          if (step <= steps) {
-            const newVolume = startVolume * (1 - step / steps);
-            audio.volume = newVolume;
-          } else {
-            clearInterval(fadeInterval);
-            audio.pause();
-            completedCount++;
-            
-            if (completedCount === audios.length && callback) {
-              callback();
-            }
-          }
-        }, stepTime);
-      });
+    } catch (error) {
+      console.warn("خطأ في إيقاف الموسيقى مؤقتًا:", error);
     }
+  };
+
+  // دالة لرفع الصوت تدريجياً
+  const fadeInVolume = (duration: number = 1000) => {
+    try {
+      let startVolume = 0;
+      const targetVolume = 0.75;
+      const steps = 20;
+      const stepTime = duration / steps;
+      
+      setVolume(startVolume);
+      
+      let step = 0;
+      const fadeInterval = setInterval(() => {
+        step++;
+        if (step <= steps) {
+          const newVolume = startVolume + (targetVolume - startVolume) * (step / steps);
+          setVolume(newVolume);
+        } else {
+          clearInterval(fadeInterval);
+        }
+      }, stepTime);
+    } catch (error) {
+      console.warn("خطأ في رفع الصوت تدريجياً:", error);
+    }
+  };
+
+  // دالة لخفض الصوت تدريجياً
+  const fadeOutVolume = (duration: number = 1000, callback?: () => void) => {
+    try {
+      const startVolume = volume;
+      const steps = 20;
+      const stepTime = duration / steps;
+      
+      let step = 0;
+      const fadeInterval = setInterval(() => {
+        step++;
+        if (step <= steps) {
+          const newVolume = startVolume * (1 - step / steps);
+          setVolume(newVolume);
+        } else {
+          clearInterval(fadeInterval);
+          pause();
+          if (callback) callback();
+        }
+      }, stepTime);
+    } catch (error) {
+      console.warn("خطأ في خفض الصوت تدريجياً:", error);
+      if (callback) callback();
+    }
+  };
+
+  // دالة لتبديل حالة التشغيل
+  const togglePlay = () => {
+    if (isPlaying) {
+      pause();
+      setIsPlaying(false);
+    } else {
+      play();
+      setIsPlaying(true);
+    }
+  };
+
+  // دوال للتنقل بين المسارات (وهمية حالياً)
+  const nextTrack = () => {
+    console.log("التالي");
+    // في المستقبل: يمكن إضافة التنقل الحقيقي بين المسارات
+  };
+
+  const previousTrack = () => {
+    console.log("السابق");
+    // في المستقبل: يمكن إضافة التنقل الحقيقي بين المسارات
+  };
+
+  return {
+    play,
+    pause,
+    setVolume,
+    fadeInVolume,
+    fadeOutVolume,
+    togglePlay,
+    nextTrack,
+    previousTrack,
+    isPlaying,
+    currentTrack,
+    volume // إعادة الحجم الحالي
   };
 };
