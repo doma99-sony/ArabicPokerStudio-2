@@ -143,23 +143,27 @@ function App() {
     );
   }
   
-  // إذا كانت شاشة البداية مفعلة، اعرضها أولاً
-  if (showSplash) {
-    return <SplashScreen onComplete={() => {
-      // تعيين علامة في sessionStorage أنه قد رأى شاشة البداية
-      sessionStorage.setItem('hasSeenSplash', 'true');
-      setShowSplash(false);
-    }} />;
-  }
-  
   return (
     <ErrorProvider>
       <NotificationsProvider>
-        <Router />
-        <WelcomeMessageNotification />
-        <LandscapeNotice />
+        {/* تضمين مزود الموسيقى الخلفية في جميع الحالات لضمان تشغيلها في كل الشاشات */}
         <BackgroundMusicProvider />
-        <Toaster />
+        
+        {/* إذا كانت شاشة البداية مفعلة، اعرضها وإلا اعرض التطبيق الرئيسي */}
+        {showSplash ? (
+          <SplashScreen onComplete={() => {
+            // تعيين علامة في sessionStorage أنه قد رأى شاشة البداية
+            sessionStorage.setItem('hasSeenSplash', 'true');
+            setShowSplash(false);
+          }} />
+        ) : (
+          <>
+            <Router />
+            <WelcomeMessageNotification />
+            <LandscapeNotice />
+            <Toaster />
+          </>
+        )}
       </NotificationsProvider>
     </ErrorProvider>
   );
