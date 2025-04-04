@@ -6,6 +6,8 @@ import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
 import createMemoryStore from "memorystore";
+// Import PostgreSQL store
+import pgSession from "connect-pg-simple";
 
 // تعريف واجهة المستخدم في النظام
 interface UserType {
@@ -25,6 +27,7 @@ declare global {
 
 const scryptAsync = promisify(scrypt);
 const MemoryStore = createMemoryStore(session);
+const PostgreSqlStore = pgSession(session);
 
 export async function hashPassword(password: string) {
   const salt = randomBytes(16).toString("hex");
@@ -48,17 +51,25 @@ function generateGuestUsername(): string {
 export function setupAuth(app: Express) {
   const sessionSecret = process.env.SESSION_SECRET || "poker-game-secret-key";
   
+  // إعداد مخزن جلسات PostgreSQL
+  const pgStore = new PostgreSqlStore({
+    // استخدام متغير البيئة الموفر من Replit
+    conString: process.env.DATABASE_URL,
+    tableName: 'sessions',   // اسم الجدول في قاعدة البيانات
+    createTableIfMissing: true, // إنشاء الجدول إذا لم يكن موجوداً
+    pruneSessionInterval: 60 * 60, // تنظيف الجلسات المنتهية كل ساعة
+    errorLog: console.error,
+    disableTouch: false // تمكين تحديث الجلسات
+  });
+  
   const sessionSettings: session.SessionOptions = {
     secret: sessionSecret,
     resave: false,
     saveUninitialized: false,
-    store: new MemoryStore({
-      checkPeriod: 86400000, // 24 ساعة
-      stale: false
-    }),
+    store: pgStore, // استخدام مخزن PostgreSQL
     cookie: { 
       secure: false, // تعطيل secure لبيئة التطوير
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 1 أسبوع
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 يوم (زيادة المدة)
       sameSite: 'lax', // الإعداد الأساسي
       httpOnly: true,
       path: '/'
@@ -95,9 +106,19 @@ export function setupAuth(app: Express) {
   passport.deserializeUser(async (id: number, done) => {
     try {
       const user = await storage.getUser(id);
+      
+      // إذا لم يتم العثور على المستخدم (ربما تم حذفه)، لا يتم رمي خطأ بل إرجاع معلومات فشل المصادقة
+      if (!user) {
+        console.log(`لم يتم العثور على المستخدم برقم ${id}، إزالة تخصيص الجلسة`);
+        return done(null, false);
+      }
+      
+      // إرجاع بيانات المستخدم الموجود
       done(null, user);
     } catch (err) {
-      done(err);
+      console.error("خطأ في استرجاع بيانات المستخدم:", err);
+      // في حالة وجود خطأ، نعيد قيمة false بدلًا من الخطأ نفسه
+      done(null, false);
     }
   });
 
@@ -120,12 +141,12 @@ export function setupAuth(app: Express) {
         if (err) return next(err);
         
         // Set cookie for the session
-        const oneWeek = 7 * 24 * 60 * 60 * 1000;
+        const oneMonth = 30 * 24 * 60 * 60 * 1000; // زيادة المدة إلى 30 يوم
         res.cookie('connect.sid', req.sessionID, {
           path: '/',
           httpOnly: true,
           sameSite: 'lax',
-          maxAge: oneWeek,
+          maxAge: oneMonth,
           secure: false
         });
         
@@ -152,12 +173,12 @@ export function setupAuth(app: Express) {
         }
         
         // تأكيد للمتصفح بأن ملفات تعريف الارتباط يجب تخزينها - استخدام cookie parser
-        const oneWeek = 7 * 24 * 60 * 60 * 1000;
+        const oneMonth = 30 * 24 * 60 * 60 * 1000; // زيادة المدة إلى 30 يوم
         res.cookie('connect.sid', req.sessionID, {
           path: '/',
           httpOnly: true,
           sameSite: 'lax',
-          maxAge: oneWeek,
+          maxAge: oneMonth,
           secure: false
         });
         
@@ -207,12 +228,12 @@ export function setupAuth(app: Express) {
         if (err) return next(err);
         
         // تأكيد على المتصفح بحفظ جلسة المستخدم
-        const oneWeek = 7 * 24 * 60 * 60 * 1000;
+        const oneMonth = 30 * 24 * 60 * 60 * 1000; // زيادة المدة إلى 30 يوم
         res.cookie('connect.sid', req.sessionID, {
           path: '/',
           httpOnly: true,
           sameSite: 'lax',
-          maxAge: oneWeek,
+          maxAge: oneMonth,
           secure: false
         });
         
@@ -246,12 +267,12 @@ export function setupAuth(app: Express) {
         if (err) return next(err);
         
         // تأكيد على المتصفح بحفظ جلسة المستخدم
-        const oneWeek = 7 * 24 * 60 * 60 * 1000;
+        const oneMonth = 30 * 24 * 60 * 60 * 1000; // زيادة المدة إلى 30 يوم
         res.cookie('connect.sid', req.sessionID, {
           path: '/',
           httpOnly: true,
           sameSite: 'lax',
-          maxAge: oneWeek,
+          maxAge: oneMonth,
           secure: false
         });
         
@@ -292,12 +313,12 @@ export function setupAuth(app: Express) {
           }
           
           // إعادة إرسال كوكيز بجلسة محدثة
-          const oneWeek = 7 * 24 * 60 * 60 * 1000;
+          const oneMonth = 30 * 24 * 60 * 60 * 1000; // زيادة المدة إلى 30 يوم
           res.cookie('connect.sid', req.sessionID, {
             path: '/',
             httpOnly: true,
             sameSite: 'lax',
-            maxAge: oneWeek,
+            maxAge: oneMonth,
             secure: false
           });
           
