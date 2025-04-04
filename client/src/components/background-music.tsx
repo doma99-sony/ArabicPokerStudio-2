@@ -1,238 +1,122 @@
 import { useState, useEffect, useRef } from 'react';
 
-// قائمة مسارات الموسيقى المحلية
+// قائمة مسارات الموسيقى
 const musicTracks = [
   {
-    title: "Ambient 1",
-    artist: "Poker Game",
-    src: "/sounds/music/ambient1.mp3" // استخدام ملفات موسيقية من مجلد sounds
-  },
-  {
-    title: "Music 1",
-    artist: "Game Sounds",
-    src: "/sounds/music/music1.mp3"
-  },
-  {
-    title: "Ambient 2",
-    artist: "Card Music",
-    src: "/sounds/music/ambient2.mp3"
-  },
-  {
-    title: "Music 2",
-    artist: "Casino Beats",
-    src: "/sounds/music/music2.mp3"
-  },
-  {
-    title: "Ambient 3",
-    artist: "Poker Club",
-    src: "/sounds/music/ambient3.mp3"
-  },
-  {
-    title: "Music 3",
-    artist: "Poker Game",
-    src: "/sounds/music/music3.mp3"
+    title: "Best Songs Mix 2023",
+    artist: "SoundCloud",
+    src: "https://soundcloud.com/8dsongs/best-songs-mix-2023", // الموسيقى من SoundCloud
+    isSoundCloud: true // علامة لتمييز مسارات SoundCloud
   }
 ];
 
-// مكون للموسيقى الخلفية التي تعمل تلقائياً بدون عناصر تحكم مرئية
+// مكون للموسيقى الخلفية التي تدعم SoundCloud
 export function BackgroundMusic() {
-  const [currentTrackIndex, setCurrentTrackIndex] = useState(0); // نبدأ بالمسار الأول
-  const [volume, setVolume] = useState(0.05); // بداية بمستوى صوت منخفض
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const fadeIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  // حالة لتتبع ما إذا كان المستخدم قد تفاعل مع الصفحة
+  const [hasInteracted, setHasInteracted] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
   
-  // جلب المسار الحالي
-  const currentTrack = musicTracks[currentTrackIndex];
+  // في حالة SoundCloud، نحتاج إلى عرض iframe
+  const currentTrack = musicTracks[0]; // نستخدم المسار الأول دائماً
   
-  // وظيفة لزيادة مستوى الصوت بشكل تدريجي
-  const fadeInVolume = () => {
-    if (audioRef.current) {
-      // بدء من مستوى صوت منخفض وزيادته تدريجياً
-      setVolume(0.05);
-      let currentVol = 0.05;
-      const targetVol = 0.3; // مستوى الصوت المستهدف
-      
-      // إلغاء أي فاصل زمني سابق
-      if (fadeIntervalRef.current) {
-        clearInterval(fadeIntervalRef.current);
-      }
-      
-      // زيادة مستوى الصوت تدريجيا على مدار 3 ثوان
-      fadeIntervalRef.current = setInterval(() => {
-        currentVol = Math.min(currentVol + 0.02, targetVol);
-        if (audioRef.current) {
-          audioRef.current.volume = currentVol;
-          setVolume(currentVol);
-        }
-        
-        if (currentVol >= targetVol) {
-          if (fadeIntervalRef.current) {
-            clearInterval(fadeIntervalRef.current);
-            fadeIntervalRef.current = null;
-          }
-        }
-      }, 200);
-    }
-  };
-  
-  // وظيفة لخفض مستوى الصوت تدريجياً
-  const fadeOutVolume = (callback?: () => void) => {
-    if (audioRef.current) {
-      let currentVol = audioRef.current.volume;
-      
-      // إلغاء أي فاصل زمني سابق
-      if (fadeIntervalRef.current) {
-        clearInterval(fadeIntervalRef.current);
-      }
-      
-      // خفض مستوى الصوت تدريجياً على مدار ثانية واحدة
-      fadeIntervalRef.current = setInterval(() => {
-        currentVol = Math.max(currentVol - 0.05, 0);
-        if (audioRef.current) {
-          audioRef.current.volume = currentVol;
-          setVolume(currentVol);
-        }
-        
-        if (currentVol <= 0) {
-          if (fadeIntervalRef.current) {
-            clearInterval(fadeIntervalRef.current);
-            fadeIntervalRef.current = null;
-            
-            if (callback) callback();
-          }
-        }
-      }, 100);
-    } else if (callback) {
-      callback();
-    }
-  };
-  
-  // وظيفة لبدء تشغيل المسار الحالي
-  const playCurrentTrack = () => {
-    if (!audioRef.current) return;
-    
-    const audio = audioRef.current;
-    audio.volume = volume;
-    
-    const playPromise = audio.play();
-    if (playPromise !== undefined) {
-      playPromise.then(() => {
-        // تم التشغيل بنجاح، زيادة مستوى الصوت تدريجياً
-        fadeInVolume();
-      }).catch(error => {
-        console.warn("تعذر تشغيل المسار الصوتي", error);
-        // محاولة الانتقال للمسار التالي بعد فشل التشغيل
-        setTimeout(() => {
-          setCurrentTrackIndex(prev => (prev + 1) % musicTracks.length);
-        }, 2000);
-      });
-    }
-  };
-  
-  // تهيئة عنصر الصوت
-  useEffect(() => {
-    const audio = new Audio();
-    audio.volume = volume; // مستوى صوت منخفض للبداية
-    audio.loop = false; // عدم تكرار الأغنية الواحدة
-    
-    // تشغيل الأغنية التالية عند انتهاء الحالية
-    audio.onended = () => {
-      // خفض مستوى الصوت تدريجياً قبل الانتقال للمسار التالي
-      fadeOutVolume(() => {
-        setCurrentTrackIndex(prev => (prev + 1) % musicTracks.length);
-      });
-    };
-    
-    audioRef.current = audio;
-    
-    // التأكد من أن تشغيل الصوت يحدث فقط بعد تفاعل المستخدم مع الصفحة
-    const handleUserInteraction = () => {
-      if (audioRef.current && audioRef.current.paused) {
-        playCurrentTrack();
-      }
+  // وظيفة للتعامل مع تفاعل المستخدم
+  const handleUserInteraction = () => {
+    if (!hasInteracted) {
+      setHasInteracted(true);
+      setIsVisible(true);
+      console.log("تم تفعيل عنصر SoundCloud!");
       
       // إزالة مستمعي الأحداث بعد التفاعل الأول
       document.removeEventListener('click', handleUserInteraction);
       document.removeEventListener('touchstart', handleUserInteraction);
       document.removeEventListener('keydown', handleUserInteraction);
-    };
-    
-    // إضافة مستمعي أحداث للتفاعل مع الصفحة
+    }
+  };
+  
+  // إضافة مستمعي أحداث للتفاعل مع الصفحة
+  useEffect(() => {
     document.addEventListener('click', handleUserInteraction);
     document.addEventListener('touchstart', handleUserInteraction);
     document.addEventListener('keydown', handleUserInteraction);
     
-    // إعداد مؤقت للمحاولة بشكل متكرر
-    const autoPlayInterval = setInterval(() => {
-      if (audioRef.current && audioRef.current.paused) {
-        const tryPlay = audioRef.current.play();
-        if (tryPlay) {
-          tryPlay.catch(() => {
-            console.log("محاولة التشغيل التلقائي مستمرة...");
-          });
-        }
-      } else {
-        clearInterval(autoPlayInterval);
-      }
-    }, 3000);
-    
-    // تفريغ عنصر الصوت وإزالة مستمعي الأحداث عند التدمير
     return () => {
-      if (fadeIntervalRef.current) {
-        clearInterval(fadeIntervalRef.current);
-      }
-      
-      clearInterval(autoPlayInterval);
-      
-      if (audio) {
-        audio.pause();
-        audio.src = '';
-      }
-      
-      audioRef.current = null;
-      
       document.removeEventListener('click', handleUserInteraction);
       document.removeEventListener('touchstart', handleUserInteraction);
       document.removeEventListener('keydown', handleUserInteraction);
     };
-  }, []);
+  }, [hasInteracted]);
   
-  // تحديث المسار عند تغيير المؤشر
-  useEffect(() => {
-    if (!audioRef.current) return;
+  // إعداد iframe من SoundCloud
+  const setupSoundCloud = () => {
+    if (!hasInteracted) return null;
     
-    const audio = audioRef.current;
+    // تحويل رابط SoundCloud إلى رابط تضمين
+    const embedUrl = `https://w.soundcloud.com/player/?url=${encodeURIComponent(currentTrack.src)}&auto_play=true&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=false`;
     
-    const handleCanPlay = () => {
-      console.log(`جاهز لتشغيل: ${currentTrack.title}`);
-      playCurrentTrack();
-    };
-    
-    const handleError = () => {
-      console.warn(`تعذر تحميل الملف الصوتي: ${currentTrack.src}`);
-      // الانتقال للمسار التالي بعد فشل التحميل
-      setTimeout(() => {
-        setCurrentTrackIndex(prev => (prev + 1) % musicTracks.length);
-      }, 2000);
-    };
-    
-    // إضافة معالجات الأحداث
-    audio.oncanplay = handleCanPlay;
-    audio.onerror = handleError;
-    
-    // تعيين المسار الجديد وتحميله
-    audio.src = currentTrack.src;
-    audio.load();
-    
-    // تنظيف عند إزالة التأثير
-    return () => {
-      audio.oncanplay = null;
-      audio.onerror = null;
-    };
-  }, [currentTrackIndex]);
+    return (
+      <div style={{ 
+        position: 'fixed', 
+        bottom: 20, 
+        right: 20, 
+        zIndex: 9999,
+        opacity: isVisible ? 1 : 0,
+        transition: 'opacity 0.5s ease-in-out',
+        backgroundColor: '#444',
+        border: '1px solid #666',
+        borderRadius: '8px',
+        padding: '8px',
+        boxShadow: '0 4px 8px rgba(0,0,0,0.3)'
+      }}>
+        <iframe
+          title="SoundCloud Player"
+          width="300"
+          height="80"
+          scrolling="no"
+          frameBorder="no"
+          allow="autoplay"
+          src={embedUrl}
+        ></iframe>
+        <div style={{ 
+          textAlign: 'center', 
+          marginTop: '4px',
+          display: 'flex',
+          justifyContent: 'space-between'
+        }}>
+          <button 
+            onClick={() => setIsVisible(false)} 
+            style={{ 
+              padding: '4px 8px',
+              backgroundColor: '#777',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}
+          >
+            إخفاء
+          </button>
+          <button 
+            onClick={() => setIsVisible(true)} 
+            style={{ 
+              padding: '4px 8px',
+              backgroundColor: '#777',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              display: isVisible ? 'none' : 'block',
+              position: isVisible ? 'absolute' : 'relative',
+              right: isVisible ? '-9999px' : 'auto'
+            }}
+          >
+            إظهار
+          </button>
+        </div>
+      </div>
+    );
+  };
   
-  // لا يوجد شيء مرئي للعرض، فقط تشغيل الموسيقى في الخلفية
-  return null;
+  return setupSoundCloud();
 }
 
 // المكون الذي سيتم استخدامه في التطبيق
