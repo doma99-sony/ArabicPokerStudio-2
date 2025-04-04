@@ -138,16 +138,16 @@ export default function LobbyPage() {
               <Button 
                 variant="ghost" 
                 className="h-9 px-3 text-sm bg-black/20 text-[#D4AF37] hover:bg-[#D4AF37]/10 hover:text-[#FFD700] transition-all duration-300 flex items-center"
-                onClick={() => navigate("/rankings")}
+                onClick={() => navigate("/send-chips")}
               >
-                <Trophy size={16} className="ml-1" />
-                <span>الترتيب</span>
+                <Coins size={16} className="ml-1" />
+                <span>إرسال رقائق</span>
               </Button>
               
               <Button 
                 variant="ghost" 
                 className="h-9 px-3 text-sm bg-black/20 text-[#D4AF37] hover:bg-[#D4AF37]/10 hover:text-[#FFD700] transition-all duration-300 flex items-center"
-                onClick={() => navigate("/support")}
+                onClick={() => window.open("https://wa.me/201008508826", "_blank")}
               >
                 <span className="flex items-center">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1">
@@ -161,16 +161,16 @@ export default function LobbyPage() {
               <Button 
                 variant="ghost" 
                 className="h-9 px-3 text-sm bg-black/20 text-[#D4AF37] hover:bg-[#D4AF37]/10 hover:text-[#FFD700] transition-all duration-300 flex items-center"
-                onClick={() => window.open("https://share.arabipoker.com", "_blank")}
+                onClick={() => navigate("/offers")}
               >
                 <span className="flex items-center">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1">
-                    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
-                    <polyline points="16 6 12 2 8 6"></polyline>
-                    <line x1="12" y1="2" x2="12" y2="15"></line>
+                    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                    <line x1="7" y1="7" x2="7.01" y2="7"></line>
                   </svg>
-                  <span>مشاركة</span>
+                  <span>عروض الشحن</span>
                 </span>
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
               </Button>
             </div>
           </div>
