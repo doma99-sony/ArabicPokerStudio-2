@@ -141,7 +141,7 @@ export default function LobbyPage() {
                 onClick={() => navigate("/send-chips")}
               >
                 <Coins size={16} className="ml-1" />
-                <span>إرسال رقائق</span>
+                <span>العطاء</span>
               </Button>
               
               <Button 
