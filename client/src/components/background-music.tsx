@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 export function BackgroundMusicProvider() {
   useEffect(() => {
     // إنشاء عنصر صوت برمجيًا
-    const audio = new Audio('/audio/energetic/track1.mp3');
+    const audio = new Audio('/assets/music/demo-music.mp3');
     audio.loop = true;
     audio.volume = 0.5;
     
