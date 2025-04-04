@@ -133,43 +133,44 @@ export default function LobbyPage() {
               </div>
             </div>
             
-            {/* أزرار التنقل - الإضافة الجديدة */}
-            <div className="hidden lg:flex items-center gap-2 mr-4">
+            {/* أزرار التنقل - تم التعديل */}
+            <div className="hidden lg:flex items-center gap-3 mr-4">
               <Button 
                 variant="ghost" 
-                className="h-9 px-3 text-sm bg-black/20 text-[#D4AF37] hover:bg-[#D4AF37]/10 hover:text-[#FFD700] transition-all duration-300"
-                onClick={() => navigate("/shop")}
-              >
-                <ShoppingCart size={16} className="ml-1" />
-                <span>المتجر</span>
-              </Button>
-              
-              <Button 
-                variant="ghost" 
-                className="h-9 px-3 text-sm bg-black/20 text-[#D4AF37] hover:bg-[#D4AF37]/10 hover:text-[#FFD700] transition-all duration-300"
-                onClick={() => navigate("/vip")}
-              >
-                <Crown size={16} className="ml-1" />
-                <span>VIP</span>
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></div>
-              </Button>
-              
-              <Button 
-                variant="ghost" 
-                className="h-9 px-3 text-sm bg-black/20 text-[#D4AF37] hover:bg-[#D4AF37]/10 hover:text-[#FFD700] transition-all duration-300"
-                onClick={() => navigate("/inventory")}
-              >
-                <ShoppingBag size={16} className="ml-1" />
-                <span>الحقيبة</span>
-              </Button>
-              
-              <Button 
-                variant="ghost" 
-                className="h-9 px-3 text-sm bg-black/20 text-[#D4AF37] hover:bg-[#D4AF37]/10 hover:text-[#FFD700] transition-all duration-300"
-                onClick={() => navigate("/missions")}
+                className="h-9 px-3 text-sm bg-black/20 text-[#D4AF37] hover:bg-[#D4AF37]/10 hover:text-[#FFD700] transition-all duration-300 flex items-center"
+                onClick={() => navigate("/rankings")}
               >
                 <Trophy size={16} className="ml-1" />
-                <span>المهمات</span>
+                <span>الترتيب</span>
+              </Button>
+              
+              <Button 
+                variant="ghost" 
+                className="h-9 px-3 text-sm bg-black/20 text-[#D4AF37] hover:bg-[#D4AF37]/10 hover:text-[#FFD700] transition-all duration-300 flex items-center"
+                onClick={() => navigate("/support")}
+              >
+                <span className="flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1">
+                    <path d="M15.05 5A5 5 0 0 1 19 8.95M15.05 1A9 9 0 0 1 23 8.94m-1 7.98v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                  </svg>
+                  <span>الدعم</span>
+                </span>
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+              </Button>
+              
+              <Button 
+                variant="ghost" 
+                className="h-9 px-3 text-sm bg-black/20 text-[#D4AF37] hover:bg-[#D4AF37]/10 hover:text-[#FFD700] transition-all duration-300 flex items-center"
+                onClick={() => window.open("https://share.arabipoker.com", "_blank")}
+              >
+                <span className="flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1">
+                    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                    <polyline points="16 6 12 2 8 6"></polyline>
+                    <line x1="12" y1="2" x2="12" y2="15"></line>
+                  </svg>
+                  <span>مشاركة</span>
+                </span>
               </Button>
             </div>
           </div>
