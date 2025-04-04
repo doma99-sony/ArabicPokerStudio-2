@@ -8,7 +8,7 @@ export interface Card {
 }
 
 // نوع لعبة البوكر
-export type GameType = "poker" | "naruto" | "domino" | "tekken";
+export type GameType = "poker" | "naruto" | "domino" | "tekken" | "lion_gazelle";
 
 // حالة الطاولة
 export type TableStatus = "available" | "full" | "in_progress" | "maintenance";
