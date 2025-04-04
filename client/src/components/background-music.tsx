@@ -25,6 +25,19 @@ export function BackgroundMusic() {
     // تعيين عنصر الموسيقى كمحمل
     setIframeLoaded(true);
     console.log("تم تفعيل عنصر SoundCloud!");
+    
+    // تحميل مكتبة SoundCloud SDK إذا لم تكن موجودة
+    // @ts-ignore
+    if (!window.SC) {
+      const script = document.createElement('script');
+      script.src = 'https://w.soundcloud.com/player/api.js';
+      script.async = true;
+      document.body.appendChild(script);
+      
+      script.onload = () => {
+        console.log("تم تحميل SoundCloud SDK");
+      };
+    }
   }, []);
   
   // إعداد iframe من SoundCloud (مخفي تماماً)
@@ -101,9 +114,28 @@ export const useMusic = () => {
     setVolumeState(boundedVolume);
     
     try {
-      const widget = getSoundCloudWidget();
-      if (widget) {
-        widget.setVolume(boundedVolume * 100);
+      // الحصول على نافذة iframe
+      const iframe = document.querySelector('iframe');
+      
+      if (iframe) {
+        // ضبط الصوت باستخدام واجهة برمجة التطبيقات المباشرة من SoundCloud
+        // @ts-ignore
+        if (window.SC && window.SC.Widget) {
+          // @ts-ignore
+          const widget = window.SC.Widget(iframe);
+          
+          // استخدام طريقة الوعود للتأكد من استدعاء أمر ضبط الصوت بعد تحميل اللاعب
+          // @ts-ignore
+          widget.bind(window.SC.Widget.Events.READY, () => {
+            widget.setVolume(boundedVolume * 100);
+            console.log(`تم ضبط مستوى الصوت على ${boundedVolume * 100}%`);
+          });
+          
+          // محاولة ضبط الصوت مباشرة أيضًا (في حالة كان اللاعب جاهزًا بالفعل)
+          widget.setVolume(boundedVolume * 100);
+        } else {
+          console.warn("لم يتم العثور على واجهة برمجة التطبيقات SoundCloud");
+        }
       }
       
       // احتياطي: محاولة ضبط صوت العناصر الصوتية الأخرى
