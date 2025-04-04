@@ -12,43 +12,66 @@ const musicTracks = [
 
 // مكون للموسيقى الخلفية التي تدعم SoundCloud
 export function BackgroundMusic() {
-  // حالة لتتبع ما إذا كان المستخدم قد تفاعل مع الصفحة
-  const [hasInteracted, setHasInteracted] = useState(false);
+  // افتراضياً مخفي ولكن نبدأ تشغيل الموسيقى تلقائياً
   const [isVisible, setIsVisible] = useState(false);
+  const [iframeLoaded, setIframeLoaded] = useState(false);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   
   // في حالة SoundCloud، نحتاج إلى عرض iframe
   const currentTrack = musicTracks[0]; // نستخدم المسار الأول دائماً
   
-  // وظيفة للتعامل مع تفاعل المستخدم
-  const handleUserInteraction = () => {
-    if (!hasInteracted) {
-      setHasInteracted(true);
-      setIsVisible(true);
-      console.log("تم تفعيل عنصر SoundCloud!");
-      
-      // إزالة مستمعي الأحداث بعد التفاعل الأول
-      document.removeEventListener('click', handleUserInteraction);
-      document.removeEventListener('touchstart', handleUserInteraction);
-      document.removeEventListener('keydown', handleUserInteraction);
-    }
-  };
-  
-  // إضافة مستمعي أحداث للتفاعل مع الصفحة
+  // بدء تشغيل الموسيقى تلقائياً عند تحميل الصفحة
   useEffect(() => {
-    document.addEventListener('click', handleUserInteraction);
-    document.addEventListener('touchstart', handleUserInteraction);
-    document.addEventListener('keydown', handleUserInteraction);
+    // تعيين عنصر الموسيقى كمحمل
+    setIframeLoaded(true);
     
-    return () => {
-      document.removeEventListener('click', handleUserInteraction);
-      document.removeEventListener('touchstart', handleUserInteraction);
-      document.removeEventListener('keydown', handleUserInteraction);
-    };
-  }, [hasInteracted]);
+    // إضافة زر صغير للتحكم بعد فترة
+    setTimeout(() => {
+      const showMusicButton = document.createElement('button');
+      showMusicButton.textContent = '🎵';
+      showMusicButton.style.position = 'fixed';
+      showMusicButton.style.bottom = '20px';
+      showMusicButton.style.right = '20px';
+      showMusicButton.style.zIndex = '9999';
+      showMusicButton.style.padding = '5px 10px';
+      showMusicButton.style.backgroundColor = '#444';
+      showMusicButton.style.color = 'white';
+      showMusicButton.style.border = 'none';
+      showMusicButton.style.borderRadius = '50%';
+      showMusicButton.style.width = '40px';
+      showMusicButton.style.height = '40px';
+      showMusicButton.style.cursor = 'pointer';
+      showMusicButton.style.display = isVisible ? 'none' : 'block';
+      showMusicButton.style.opacity = '0.7';
+      showMusicButton.style.fontSize = '20px';
+      showMusicButton.title = 'إظهار مشغل الموسيقى';
+      
+      showMusicButton.addEventListener('click', () => {
+        setIsVisible(true);
+        showMusicButton.style.display = 'none';
+      });
+      
+      document.body.appendChild(showMusicButton);
+      
+      // تنظيف عند إزالة المكون
+      return () => {
+        document.body.removeChild(showMusicButton);
+      };
+    }, 1000);
+  }, []);
+  
+  // مراقبة حالة الظهور/الإخفاء
+  useEffect(() => {
+    // تحديث زر العرض عند تغيير حالة الظهور
+    const showMusicButton = document.querySelector('button[title="إظهار مشغل الموسيقى"]');
+    if (showMusicButton) {
+      (showMusicButton as HTMLButtonElement).style.display = isVisible ? 'none' : 'block';
+    }
+  }, [isVisible]);
   
   // إعداد iframe من SoundCloud
   const setupSoundCloud = () => {
-    if (!hasInteracted) return null;
+    if (!iframeLoaded) return null;
     
     // تحويل رابط SoundCloud إلى رابط تضمين
     const embedUrl = `https://w.soundcloud.com/player/?url=${encodeURIComponent(currentTrack.src)}&auto_play=true&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=false`;
@@ -60,14 +83,17 @@ export function BackgroundMusic() {
         right: 20, 
         zIndex: 9999,
         opacity: isVisible ? 1 : 0,
-        transition: 'opacity 0.5s ease-in-out',
+        visibility: isVisible ? 'visible' : 'hidden',
+        transition: 'opacity 0.5s ease-in-out, visibility 0.5s',
         backgroundColor: '#444',
         border: '1px solid #666',
         borderRadius: '8px',
         padding: '8px',
-        boxShadow: '0 4px 8px rgba(0,0,0,0.3)'
+        boxShadow: '0 4px 8px rgba(0,0,0,0.3)',
+        maxWidth: '320px'
       }}>
         <iframe
+          ref={iframeRef}
           title="SoundCloud Player"
           width="300"
           height="80"
@@ -80,7 +106,7 @@ export function BackgroundMusic() {
           textAlign: 'center', 
           marginTop: '4px',
           display: 'flex',
-          justifyContent: 'space-between'
+          justifyContent: 'flex-end'
         }}>
           <button 
             onClick={() => setIsVisible(false)} 
@@ -94,22 +120,6 @@ export function BackgroundMusic() {
             }}
           >
             إخفاء
-          </button>
-          <button 
-            onClick={() => setIsVisible(true)} 
-            style={{ 
-              padding: '4px 8px',
-              backgroundColor: '#777',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              display: isVisible ? 'none' : 'block',
-              position: isVisible ? 'absolute' : 'relative',
-              right: isVisible ? '-9999px' : 'auto'
-            }}
-          >
-            إظهار
           </button>
         </div>
       </div>
