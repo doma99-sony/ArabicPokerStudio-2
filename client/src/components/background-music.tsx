@@ -1,12 +1,51 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
-// طريقة بسيطة لتشغيل الموسيقى تلقائيًا دون أي قيود
+// قائمة المسارات الموسيقية الحماسية
+const energeticTracks = [
+  {
+    title: "Epic Electronic Rock",
+    src: "/audio/energetic/energetic_1.mp3",
+  },
+  {
+    title: "Powerful Energetic Dubstep",
+    src: "/audio/energetic/energetic_2.mp3",
+  },
+  {
+    title: "Sport Workout Energy",
+    src: "/audio/energetic/energetic_3.mp3",
+  },
+  {
+    title: "Epic Piano Dubstep",
+    src: "/audio/energetic/energetic_4.mp3",
+  },
+  {
+    title: "Action Sport Rock",
+    src: "/audio/energetic/energetic_5.mp3",
+  },
+  {
+    title: "Poker Classic",
+    src: "/background-music.mp3",
+  },
+  {
+    title: "Test Energetic",
+    src: "/test-music.mp3",
+  },
+  {
+    title: "Sample Sound Special",
+    src: "/audio/sample-sound.mp3",
+  }
+];
+
+// طريقة لتشغيل الموسيقى تلقائيًا دون أي قيود
 export function BackgroundMusicProvider() {
   useEffect(() => {
-    // إنشاء عنصر صوت برمجيًا
-    const audio = new Audio('/background-music.mp3');
-    audio.loop = true;
+    // إنشاء عنصر الصوت برمجيًا
+    const audio = new Audio();
     audio.volume = 0.5;
+    
+    // اختيار مسار عشوائي من القائمة
+    let currentTrackIndex = Math.floor(Math.random() * energeticTracks.length);
+    audio.src = energeticTracks[currentTrackIndex].src;
     
     // دالة للتشغيل الفوري
     const playMusic = () => {
@@ -15,8 +54,20 @@ export function BackgroundMusicProvider() {
       if (playPromise !== undefined) {
         playPromise.catch(error => {
           console.log("محاولة تشغيل الموسيقى تلقائيًا...");
+          
+          // إذا فشل تشغيل المسار الحالي، جرب المسار التالي
+          currentTrackIndex = (currentTrackIndex + 1) % energeticTracks.length;
+          audio.src = energeticTracks[currentTrackIndex].src;
+          setTimeout(playMusic, 1000);
         });
       }
+    };
+    
+    // انتقل للمسار التالي عند انتهاء المسار الحالي
+    audio.onended = () => {
+      currentTrackIndex = (currentTrackIndex + 1) % energeticTracks.length;
+      audio.src = energeticTracks[currentTrackIndex].src;
+      playMusic();
     };
     
     // محاولة التشغيل عند تحميل الصفحة
