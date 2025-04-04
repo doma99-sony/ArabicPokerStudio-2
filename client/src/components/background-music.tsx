@@ -33,29 +33,29 @@ export const useMusic = () => useContext(MusicContext);
 // قائمة بالأغاني العربية والإلكترونية الحماسية
 const musicTracks = [
   {
-    title: "Ace of Spades",
-    artist: "Casino Music",
-    src: "/assets/music/ace-of-spades.mp3"
+    title: "أغنية حماسية 1",
+    artist: "DJ مصري",
+    src: "https://dl.dropbox.com/scl/fi/l0vw2ep5a2i5r1d9z0mcp/arabic-trap.mp3?rlkey=hz1itfm13jvtdh37rtw9tmbq9&dl=0"
   },
   {
-    title: "Casino Royale",
-    artist: "Vegas Sound",
-    src: "/assets/music/casino-royale.mp3"
+    title: "إيقاعات شرقية",
+    artist: "نجم الميكس",
+    src: "https://dl.dropbox.com/scl/fi/xbjgk2ogknpfq59z6rqwd/arabic-house.mp3?rlkey=p7wicfh2eqamf9zcmtjnhzrsj&dl=0"
   },
   {
-    title: "High Stakes",
-    artist: "Table Games",
-    src: "/assets/music/high-stakes.mp3"
+    title: "ريمكس عربي",
+    artist: "DJ خليجي",
+    src: "https://dl.dropbox.com/scl/fi/0k1pji63sak6l0jkhj6ud/arabic-mix.mp3?rlkey=yrfhmmr4kkx25tojxwpejl5un&dl=0"
   },
   {
-    title: "Royal Flush",
-    artist: "Poker Kings",
-    src: "/assets/music/royal-flush.mp3"
+    title: "ليلة سهر",
+    artist: "نجوم الريمكس",
+    src: "https://dl.dropbox.com/scl/fi/66iu3a02ys2e2p9zwu3vp/club-energy.mp3?rlkey=5eplj5w4wz2xt6y8b94m90odz&dl=0"
   },
   {
-    title: "Vegas Nights",
-    artist: "Casino Lounge",
-    src: "/assets/music/vegas-nights.mp3"
+    title: "إيقاع الطبلة",
+    artist: "موسيقى الشرق",
+    src: "https://dl.dropbox.com/scl/fi/qyg9yiw8e7f5f0svjihq3/energetic-trap.mp3?rlkey=4dvvh651iu6cti3m5mmkcwdmt&dl=0"
   }
 ];
 
@@ -80,7 +80,7 @@ export function BackgroundMusicProvider() {
       const playPromise = audioRef.current.play();
       if (playPromise !== undefined) {
         playPromise.catch(error => {
-          console.warn("Failed to play track", error);
+          console.warn("تعذر تشغيل الأغنية", error);
         });
       }
     }
@@ -124,7 +124,7 @@ export function BackgroundMusicProvider() {
         const playPromise = audioRef.current.play();
         if (playPromise !== undefined) {
           playPromise.catch(error => {
-            console.warn("Failed to autoplay track", error);
+            console.warn("تعذر التشغيل التلقائي للأغنية", error);
             
             // محاولة التشغيل عند تفاعل المستخدم إذا فشل التشغيل التلقائي
             const handleUserInteraction = () => {
@@ -132,7 +132,7 @@ export function BackgroundMusicProvider() {
                 const retryPromise = audioRef.current.play();
                 if (retryPromise !== undefined) {
                   retryPromise.catch(retryError => {
-                    console.warn("Failed to play track after user interaction", retryError);
+                    console.warn("تعذر تشغيل الأغنية بعد تفاعل المستخدم", retryError);
                   });
                 }
                 
@@ -167,7 +167,7 @@ export function BackgroundMusicProvider() {
     const audio = audioRef.current;
     
     const handleError = () => {
-      console.warn(`Failed to load track: ${currentTrack.src}`);
+      console.warn(`تعذر تحميل ملف الأغنية: ${currentTrack.src}`);
       // الانتقال للمسار التالي بعد فشل التحميل
       setTimeout(() => {
         nextTrack();
@@ -188,7 +188,7 @@ export function BackgroundMusicProvider() {
       const playPromise = audio.play();
       if (playPromise !== undefined) {
         playPromise.catch(error => {
-          console.warn("Failed to play track", error);
+          console.warn("تعذر تشغيل الأغنية", error);
           setTimeout(() => {
             nextTrack();
           }, 1000);
