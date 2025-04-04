@@ -30,6 +30,109 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // API endpoints
   
+  // طرق المستخدم الأساسية
+  app.get("/api/user", (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: "غير مصرح" });
+    }
+    res.json(req.user);
+  });
+  
+  // البحث عن مستخدم بواسطة المعرف
+  app.get("/api/users/:userId", ensureAuthenticated, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      
+      if (isNaN(userId)) {
+        return res.status(400).json({ error: "معرف المستخدم غير صالح" });
+      }
+      
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ error: "المستخدم غير موجود" });
+      }
+      
+      // إعادة بيانات المستخدم الآمنة (بدون كلمة المرور)
+      const safeUser = {
+        id: user.id,
+        username: user.username,
+        avatar: user.avatar,
+      };
+      
+      res.json(safeUser);
+    } catch (error) {
+      console.error("خطأ في البحث عن المستخدم:", error);
+      res.status(500).json({ error: "حدث خطأ أثناء البحث عن المستخدم" });
+    }
+  });
+  
+  // إرسال رقائق (العطاء)
+  app.post("/api/send-chips", ensureAuthenticated, async (req, res) => {
+    try {
+      const { recipientId, amount } = req.body;
+      const senderId = req.user!.id;
+      
+      // التحقق من المعلومات
+      if (!recipientId || !amount) {
+        return res.status(400).json({ error: "يرجى تقديم معرف المستلم والمبلغ" });
+      }
+      
+      const recipientIdNum = parseInt(recipientId);
+      const amountNum = parseInt(amount);
+      
+      if (isNaN(recipientIdNum) || isNaN(amountNum)) {
+        return res.status(400).json({ error: "معرف المستلم أو المبلغ غير صالح" });
+      }
+      
+      // التحقق من أن المبلغ إيجابي
+      if (amountNum <= 0) {
+        return res.status(400).json({ error: "يجب أن يكون المبلغ أكبر من صفر" });
+      }
+      
+      // التحقق من وجود المستلم
+      const recipient = await storage.getUser(recipientIdNum);
+      if (!recipient) {
+        return res.status(404).json({ error: "المستلم غير موجود" });
+      }
+      
+      // التحقق من أن المستخدم لا يرسل لنفسه
+      if (senderId === recipientIdNum) {
+        return res.status(400).json({ error: "لا يمكنك إرسال رقائق لنفسك" });
+      }
+      
+      // التحقق من رصيد المرسل
+      const sender = await storage.getUser(senderId);
+      if (!sender) {
+        return res.status(404).json({ error: "المرسل غير موجود" });
+      }
+      
+      if (sender.chips < amountNum) {
+        return res.status(400).json({ error: "رصيد غير كافٍ" });
+      }
+      
+      // تحديث رصيد المرسل
+      const updatedSender = await storage.updateUserChips(senderId, sender.chips - amountNum);
+      
+      // تحديث رصيد المستلم
+      const updatedRecipient = await storage.updateUserChips(recipientIdNum, recipient.chips + amountNum);
+      
+      // إرسال إشعار (يمكن تنفيذه لاحقاً)
+      // TODO: إضافة نظام الإشعارات
+      
+      res.json({ 
+        success: true, 
+        message: "تم إرسال الرقائق بنجاح",
+        amount: amountNum,
+        sender: { id: sender.id, username: sender.username },
+        recipient: { id: recipient.id, username: recipient.username }
+      });
+    } catch (error) {
+      console.error("خطأ في إرسال الرقائق:", error);
+      res.status(500).json({ error: "حدث خطأ أثناء محاولة إرسال الرقائق" });
+    }
+  });
+  
   // Get user profile with stats and game history
   app.get("/api/profile", ensureAuthenticated, async (req, res) => {
     try {
