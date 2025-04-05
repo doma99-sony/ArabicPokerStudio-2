@@ -94,7 +94,7 @@ interface LeaderboardEntry {
 const LionGazelleGame = () => {
   const [location, navigate] = useLocation();
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, loginGuestMutation } = useAuth();
   const queryClient = useQueryClient();
   
   // حالة اللعبة
@@ -201,6 +201,14 @@ const LionGazelleGame = () => {
     }
   });
   
+  // تسجيل الدخول التلقائي كضيف إذا لم يكن المستخدم مسجل الدخول
+  useEffect(() => {
+    if (!user && !loginGuestMutation.isPending) {
+      console.log("محاولة تسجيل دخول تلقائي كضيف...");
+      loginGuestMutation.mutate();
+    }
+  }, [user, loginGuestMutation]);
+
   // تابع لتحديث بيانات اللعبة من الاستعلام
   useEffect(() => {
     if (gameData?.success && gameData.game) {
@@ -516,13 +524,13 @@ const LionGazelleGame = () => {
                   {/* الأسد */}
                   <div 
                     ref={lionRef}
-                    className="absolute bottom-6 left-10 w-24 h-24 z-20"
+                    className="absolute bottom-6 left-10 w-36 h-36 z-20"
                   >
                     <div className={`w-full h-full relative ${currentGame?.status === 'running' ? 'lion-running' : ''}`}>
                       <img 
-                        src="/assets/lion-gazelle/lion.svg" 
+                        src="/assets/lion-gazelle/lion-running.png" 
                         alt="الأسد" 
-                        className="w-full h-full"
+                        className="w-full h-full object-contain"
                       />
                     </div>
                   </div>
