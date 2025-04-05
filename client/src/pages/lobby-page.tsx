@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
+import { useToast } from "@/hooks/use-toast";
 import { useWebSocket } from "@/hooks/use-websocket-simplified";
 import { GameType } from "@shared/types";
 import { ChatBox } from "@/components/lobby/chat-box";
@@ -16,6 +17,7 @@ import { formatChips } from "@/lib/utils";
 export default function LobbyPage() {
   const [location, navigate] = useLocation();
   const { user, logoutMutation } = useAuth();
+  const { toast } = useToast();
   const [activeGameCategory, setActiveGameCategory] = useState<GameType>("poker");
   const [isChatHidden, setIsChatHidden] = useState(false);
   const [videoMuted, setVideoMuted] = useState(true);
@@ -86,14 +88,8 @@ export default function LobbyPage() {
     } else if (gameType === "domino") {
       navigate("/domino");
     } else if (gameType === "lion_gazelle") {
-      // التنقل إلى صفحة البوكر مؤقتاً حتى يتم تطوير لعبة الأسد والغزالة
-      navigate("/poker-tables");
-      // إعلام المستخدم أن اللعبة قيد التطوير
-      toast({
-        title: "لعبة الأسد والغزالة",
-        description: "هذه اللعبة قيد التطوير حالياً. سيتم إطلاقها قريباً!",
-        variant: "default",
-      });
+      // التنقل إلى صفحة الأسد والغزالة
+      navigate("/lion-gazelle");
     }
     // ستتم إضافة المزيد من الألعاب لاحقًا
   };

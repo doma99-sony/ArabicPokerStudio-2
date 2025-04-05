@@ -1,0 +1,65 @@
+/* رسوم متحركة للأسد والغزالة */
+
+/* حركة الأسد */
+@keyframes lion-run {
+  0% {
+    transform: scaleX(-1) translateY(0);
+  }
+  25% {
+    transform: scaleX(-1) translateY(-5px);
+  }
+  50% {
+    transform: scaleX(-1) translateY(0);
+  }
+  75% {
+    transform: scaleX(-1) translateY(-5px);
+  }
+  100% {
+    transform: scaleX(-1) translateY(0);
+  }
+}
+
+/* حركة الغزالة */
+@keyframes gazelle-run {
+  0% {
+    transform: scaleX(-1) translateY(0);
+  }
+  25% {
+    transform: scaleX(-1) translateY(-8px);
+  }
+  50% {
+    transform: scaleX(-1) translateY(0);
+  }
+  75% {
+    transform: scaleX(-1) translateY(-8px);
+  }
+  100% {
+    transform: scaleX(-1) translateY(0);
+  }
+}
+
+/* حركة الغبار */
+.dust-particle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: #D2B48C;
+  border-radius: 50%;
+  opacity: 0.5;
+  animation: dust-float 1s infinite;
+}
+
+@keyframes dust-float {
+  0% {
+    transform: translate(0, 0) scale(0.8);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translate(5px, -10px) scale(0.5);
+    opacity: 0.3;
+  }
+  100% {
+    transform: translate(10px, -15px) scale(0.2);
+    opacity: 0;
+  }
+}
