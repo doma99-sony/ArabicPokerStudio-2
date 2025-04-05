@@ -5,6 +5,7 @@ import { setupAuth, hashPassword } from "./auth";
 import { setupPokerGame, pokerModule } from "./poker";
 import { z } from "zod";
 import fileUpload from "express-fileupload";
+import lionGazelleRoutes from "./routes/lion-gazelle-routes";
 
 // ميدلوير للتحقق من المصادقة
 function ensureAuthenticated(req: Request, res: Response, next: NextFunction) {

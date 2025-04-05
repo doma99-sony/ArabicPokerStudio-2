@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, foreignKey, primaryKey, pgEnum, real, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, foreignKey, primaryKey, pgEnum, real, jsonb, doublePrecision } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -6,7 +6,7 @@ import { z } from "zod";
 export const userRoleEnum = pgEnum('user_role', ['player', 'vip', 'admin', 'moderator', 'guest']);
 
 // تعريف نوع للعبة
-export const gameTypeEnum = pgEnum('game_type', ['poker', 'naruto', 'domino', 'tekken']);
+export const gameTypeEnum = pgEnum('game_type', ['poker', 'naruto', 'domino', 'tekken', 'lion_gazelle']);
 
 // تعريف نوع لحالة الطاولة
 export const tableStatusEnum = pgEnum('table_status', ['available', 'full', 'in_progress', 'maintenance']);
@@ -370,3 +370,188 @@ export type InsertBadge = z.infer<typeof insertBadgeSchema>;
 export type UserBadge = typeof userBadges.$inferSelect;
 export type Badge = typeof badges.$inferSelect;
 export type BadgeCategory = typeof badgeCategories.$inferSelect;
+
+// ------ نظام لعبة الأسد والغزالة ------
+
+// تعريف نوع لمستويات الصعوبة في لعبة الأسد والغزالة
+export const lionGameDifficultyEnum = pgEnum('lion_game_difficulty', ['beginner', 'easy', 'medium', 'hard', 'expert']);
+
+// تعريف نوع للقوى والتحسينات في لعبة الأسد والغزالة
+export const powerUpTypeEnum = pgEnum('power_up_type', ['speed_boost', 'shield', 'slow_down', 'teleport', 'invisibility', 'double_coins', 'magnet']);
+
+// جدول إعدادات مستويات لعبة الأسد والغزالة
+export const lionGazelleLevels = pgTable("lion_gazelle_levels", {
+  id: serial("id").primaryKey(),
+  level: integer("level").notNull().unique(),
+  name: text("name").notNull(),
+  difficulty: lionGameDifficultyEnum("difficulty").notNull().default('easy'),
+  description: text("description"),
+  trackLength: integer("track_length").notNull().default(1000), // طول المسار بالوحدات
+  baseLionSpeed: real("base_lion_speed").notNull().default(100), // سرعة الأسد الأساسية
+  baseGazelleSpeed: real("base_gazelle_speed").notNull().default(120), // سرعة الغزالة الأساسية
+  obstacleCount: integer("obstacle_count").default(5), // عدد العوائق في المستوى
+  coinMultiplier: real("coin_multiplier").default(1.0), // مضاعف النقود في هذا المستوى
+  minReward: integer("min_reward").default(10), // الحد الأدنى للمكافأة
+  maxReward: integer("max_reward").default(1000), // الحد الأقصى للمكافأة
+  backgroundImage: text("background_image"), // صورة خلفية المستوى
+  unlockRequirement: integer("unlock_requirement").default(0), // متطلبات فتح المستوى (النقاط المطلوبة)
+  isLocked: boolean("is_locked").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  trackTheme: text("track_theme").default('savanna'), // موضوع المسار (صحراء، غابة، جبال، إلخ)
+  availablePowerUps: powerUpTypeEnum("available_power_ups").array(), // القوى المتاحة في هذا المستوى
+  lionSkin: text("lion_skin"), // شكل الأسد المخصص للمستوى
+  gazelleSkin: text("gazelle_skin"), // شكل الغزالة المخصص للمستوى
+  timeLimit: integer("time_limit"), // حد زمني للمستوى بالثواني (إذا كان متاحًا)
+  checkpoints: integer("checkpoints").default(0), // عدد نقاط التفتيش في المستوى
+  specialFeatures: jsonb("special_features"), // ميزات خاصة للمستوى (أحداث، تغييرات الطقس، إلخ)
+});
+
+// جدول العناصر القابلة للجمع في لعبة الأسد والغزالة
+export const lionGameCollectibles = pgTable("lion_game_collectibles", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  type: text("type").notNull(), // coin, gem, power_up, key, etc
+  value: integer("value").default(1), // قيمة العنصر
+  rarity: text("rarity").default('common'), // ندرة العنصر (شائع، نادر، أسطوري)
+  imageUrl: text("image_url"),
+  effectDuration: integer("effect_duration"), // مدة تأثير العنصر (للقوى)
+  effectStrength: real("effect_strength"), // قوة التأثير
+  description: text("description"),
+  spawnRate: real("spawn_rate").default(1.0), // معدل ظهور العنصر (0.0-1.0)
+  soundEffect: text("sound_effect"), // تأثير الصوت عند جمع العنصر
+  visualEffect: text("visual_effect"), // تأثير مرئي عند جمع العنصر
+});
+
+// جدول أنماط وشخصيات لعبة الأسد والغزالة
+export const lionGameCharacters = pgTable("lion_game_characters", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  characterType: text("character_type").notNull(), // lion, gazelle
+  imageUrl: text("image_url").notNull(),
+  previewImageUrl: text("preview_image_url"),
+  spriteSheet: text("sprite_sheet"), // صفحة صور الشخصية
+  animationData: jsonb("animation_data"), // بيانات الرسوم المتحركة
+  price: integer("price"), // السعر بالرقائق
+  diamondPrice: integer("diamond_price"), // السعر بالماس
+  isDefault: boolean("is_default").default(false), // هل هو النمط الافتراضي
+  isLocked: boolean("is_locked").default(true),
+  unlockRequirement: text("unlock_requirement"), // متطلبات فتح الشخصية
+  specialAbility: text("special_ability"), // قدرة خاصة للشخصية
+  speedModifier: real("speed_modifier").default(1.0), // معامل تعديل السرعة
+  accelerationModifier: real("acceleration_modifier").default(1.0), // معامل تعديل التسارع
+  rarityLevel: integer("rarity_level").default(1), // مستوى ندرة الشخصية (1-5)
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// جدول القوى والتحسينات في لعبة الأسد والغزالة
+export const lionGamePowerUps = pgTable("lion_game_power_ups", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  type: powerUpTypeEnum("type").notNull(),
+  description: text("description"),
+  imageUrl: text("image_url"),
+  duration: integer("duration").default(5), // مدة التأثير بالثواني
+  cooldown: integer("cooldown").default(30), // فترة الانتظار بالثواني
+  effectStrength: real("effect_strength").default(1.5), // قوة التأثير
+  price: integer("price"), // السعر بالرقائق
+  diamondPrice: integer("diamond_price"), // السعر بالماس
+  isConsumable: boolean("is_consumable").default(true), // هل يستهلك بعد الاستخدام
+  maxUses: integer("max_uses"), // الحد الأقصى للاستخدامات (للقوى المستهلكة)
+  availableInShop: boolean("available_in_shop").default(true), // متاحة في المتجر؟
+  unlockRequirement: text("unlock_requirement"), // متطلبات فتح القوة
+});
+
+// جدول العوائق والأخطار في لعبة الأسد والغزالة
+export const lionGameObstacles = pgTable("lion_game_obstacles", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  type: text("type").notNull(), // static, moving, trap, water, fire, etc
+  imageUrl: text("image_url"),
+  damageAmount: integer("damage_amount").default(0), // مقدار الضرر
+  slowAmount: real("slow_amount").default(0), // مقدار التباطؤ
+  width: integer("width").default(50), // عرض العائق
+  height: integer("height").default(50), // ارتفاع العائق
+  movementPattern: text("movement_pattern"), // نمط حركة العائق
+  movementSpeed: real("movement_speed"), // سرعة حركة العائق
+  triggerRadius: integer("trigger_radius"), // نصف قطر التفعيل (للفخاخ)
+  resetTime: integer("reset_time"), // وقت إعادة ضبط العائق
+  soundEffect: text("sound_effect"), // تأثير الصوت عند الاصطدام
+  visualEffect: text("visual_effect"), // تأثير مرئي عند الاصطدام
+});
+
+// جدول سجل ألعاب الأسد والغزالة
+export const lionGameHistory = pgTable("lion_game_history", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  levelId: integer("level_id").notNull().references(() => lionGazelleLevels.id),
+  startTime: timestamp("start_time").defaultNow().notNull(),
+  endTime: timestamp("end_time"),
+  duration: integer("duration"), // المدة بالثواني
+  distance: integer("distance").default(0), // المسافة المقطوعة
+  coinsCollected: integer("coins_collected").default(0), // عدد العملات التي تم جمعها
+  powerUpsUsed: integer("power_ups_used").default(0), // عدد القوى المستخدمة
+  obstaclesAvoided: integer("obstacles_avoided").default(0), // عدد العوائق التي تم تجنبها
+  score: integer("score").default(0), // النتيجة النهائية
+  multiplier: real("multiplier").default(1.0), // المضاعف النهائي
+  result: text("result").notNull(), // win, loss
+  rewardChips: integer("reward_chips").default(0), // المكافأة بالرقائق
+  rewardDiamonds: integer("reward_diamonds").default(0), // المكافأة بالماس
+  gameData: jsonb("game_data"), // بيانات إضافية عن اللعبة
+  characterUsed: integer("character_used").references(() => lionGameCharacters.id), // الشخصية المستخدمة
+});
+
+// جدول عناصر المستخدم في لعبة الأسد والغزالة
+export const userLionGameItems = pgTable("user_lion_game_items", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  itemType: text("item_type").notNull(), // character, power_up
+  itemId: integer("item_id").notNull(), // مرجع إلى الشخصية أو القوة
+  quantity: integer("quantity").default(1),
+  isEquipped: boolean("is_equipped").default(false),
+  purchaseDate: timestamp("purchase_date").defaultNow(),
+  expiryDate: timestamp("expiry_date"), // تاريخ انتهاء الصلاحية (إن وجد)
+  upgradeLevel: integer("upgrade_level").default(0), // مستوى ترقية العنصر
+});
+
+// جدول إحصائيات المستخدم في لعبة الأسد والغزالة
+export const lionGameUserStats = pgTable("lion_game_user_stats", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }).unique(),
+  totalGamesPlayed: integer("total_games_played").default(0),
+  gamesWon: integer("games_won").default(0), // عدد مرات الفوز
+  gamesLost: integer("games_lost").default(0), // عدد مرات الخسارة
+  totalCoinsCollected: integer("total_coins_collected").default(0),
+  totalDistance: integer("total_distance").default(0), // إجمالي المسافة المقطوعة
+  highestScore: integer("highest_score").default(0),
+  fastestCompletionTime: integer("fastest_completion_time"), // أسرع وقت إكمال بالثواني
+  favoriteCharacter: integer("favorite_character").references(() => lionGameCharacters.id),
+  mostUsedPowerUp: integer("most_used_power_up").references(() => lionGamePowerUps.id),
+  totalPowerUpsUsed: integer("total_power_ups_used").default(0),
+  perfectRuns: integer("perfect_runs").default(0), // عدد مرات الإكمال بدون اصطدام
+  lastPlayed: timestamp("last_played"),
+  unlockedLevels: integer("unlocked_levels").array(), // قائمة المستويات المفتوحة
+  specialAchievements: text("special_achievements").array(), // الإنجازات الخاصة
+});
+
+// مخططات إدخال لعبة الأسد والغزالة
+export const insertLionGameHistorySchema = createInsertSchema(lionGameHistory).omit({
+  id: true, 
+  startTime: true
+});
+
+export const insertLionGameLevelSchema = createInsertSchema(lionGazelleLevels).omit({
+  id: true,
+  createdAt: true
+});
+
+export const insertLionGameUserStatsSchema = createInsertSchema(lionGameUserStats).omit({
+  id: true
+});
+
+export type InsertLionGameHistory = z.infer<typeof insertLionGameHistorySchema>;
+export type InsertLionGameLevel = z.infer<typeof insertLionGameLevelSchema>;
+export type LionGameHistory = typeof lionGameHistory.$inferSelect;
+export type LionGameLevel = typeof lionGazelleLevels.$inferSelect;
+export type LionGameUserStats = typeof lionGameUserStats.$inferSelect;
+export type LionGameCharacter = typeof lionGameCharacters.$inferSelect;
+export type LionGamePowerUp = typeof lionGamePowerUps.$inferSelect;
