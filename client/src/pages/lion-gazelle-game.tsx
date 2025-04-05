@@ -392,7 +392,7 @@ export default function LionGazelleGame() {
           {/* Game visualization and controls - Left side on desktop */}
           <div className="lg:col-span-2 space-y-4">
             {/* Game visualization */}
-            <div ref={gameAreaRef} className="relative h-64 md:h-80 bg-[#3E2723] rounded-xl overflow-hidden border-2 border-[#DEB887] shadow-lg">
+            <div ref={gameAreaRef} className="relative h-64 md:h-80 rounded-xl overflow-hidden border-2 border-[#DEB887] shadow-lg game-viewport">
               {/* Game world container - this will move with camera position */}
               <div 
                 ref={gameTrackRef}
@@ -403,23 +403,29 @@ export default function LionGazelleGame() {
                   transition: 'transform 0.2s ease-out'
                 }}
               >
-                {/* Extended Savanna background */}
-                <div className="absolute inset-0 bg-repeat-x bg-cover h-full" style={{ 
-                  backgroundImage: "url('/assets/lion-gazelle/savanna.svg')",
+                {/* New professional savanna background */}
+                <div className="savanna-background bg-repeat-x" style={{ 
+                  backgroundImage: "url('/assets/lion-gazelle/savanna-bg.svg')",
                   width: `${gameViewportWidth}%`,
                 }}></div>
                 
-                {/* Extended racing track */}
-                <div className="absolute bottom-0 bg-repeat-x bg-cover h-24" style={{ 
+                {/* Sun glow effect */}
+                <div className="sun-glow"></div>
+                
+                {/* Enhanced racing track */}
+                <div className="racing-track bg-repeat-x" style={{ 
                   backgroundImage: "url('/assets/lion-gazelle/track.svg')",
                   width: `${gameViewportWidth}%`,
                 }}></div>
                 
-                {/* Gazelle character with more realistic animation */}
+                {/* Gazelle character with more realistic animation - improved visibility with fixed positioning */}
                 {(gameState === 'running' || gameState === 'waiting') && (
                   <div 
                     ref={gazelleRef}
-                    style={{ left: `${gazellePosition * 100 / gameViewportWidth}%` }} 
+                    style={{
+                      left: `${gazellePosition * 100 / gameViewportWidth}%`,
+                      zIndex: 20 // عنصر فوق الخلفية لضمان الرؤية
+                    }} 
                     className="absolute bottom-6 w-16 md:w-20 h-16 md:h-20 transform -translate-x-1/2 transition-all duration-75"
                     key="gazelle-character"
                   >
@@ -444,11 +450,14 @@ export default function LionGazelleGame() {
                   </div>
                 )}
                 
-                {/* Lion character with more realistic animation */}
+                {/* Lion character with more realistic animation - improved visibility with fixed positioning */}
                 {(gameState === 'running' || gameState === 'waiting') && (
                   <div 
                     ref={lionRef}
-                    style={{ left: `${lionPosition * 100 / gameViewportWidth}%` }} 
+                    style={{ 
+                      left: `${lionPosition * 100 / gameViewportWidth}%`,
+                      zIndex: 20 // عنصر فوق الخلفية لضمان الرؤية
+                    }} 
                     className="absolute bottom-6 w-20 md:w-24 h-20 md:h-24 transform -translate-x-1/2 transition-all duration-75"
                     key="lion-character"
                   >
@@ -474,9 +483,9 @@ export default function LionGazelleGame() {
                 )}
               </div>
               
-              {/* Gradient overlay masks for edges to create infinite scroll effect */}
-              <div className="absolute left-0 top-0 bottom-0 w-10 bg-gradient-to-r from-[#3E2723] to-transparent pointer-events-none z-10"></div>
-              <div className="absolute right-0 top-0 bottom-0 w-10 bg-gradient-to-l from-[#3E2723] to-transparent pointer-events-none z-10"></div>
+              {/* Gradient overlay masks for edges to create infinite scroll effect - updated to match new background */}
+              <div className="absolute left-0 top-0 bottom-0 w-10 bg-gradient-to-r from-[#5D8CAE] to-transparent pointer-events-none z-10"></div>
+              <div className="absolute right-0 top-0 bottom-0 w-10 bg-gradient-to-l from-[#5D8CAE] to-transparent pointer-events-none z-10"></div>
               
               {/* Game state display */}
               <div className="absolute top-4 left-0 right-0 flex flex-col items-center">
@@ -501,15 +510,15 @@ export default function LionGazelleGame() {
                 )}
               </div>
               
-              {/* Overlay when game ended */}
+              {/* Overlay when game ended - enhanced with new styling */}
               {gameState === 'ended' && (
-                <div className="absolute inset-0 bg-red-900/30 animate-pulse"></div>
+                <div className="absolute inset-0 bg-red-900/30 crash-background"></div>
               )}
               
-              {/* Display lion catching gazelle when game is ended */}
+              {/* Display lion catching gazelle when game is ended - enhanced with new styling */}
               {gameState === 'ended' && (
                 <div 
-                  className="absolute bottom-6 left-1/2 transform -translate-x-1/2 w-32 md:w-40 h-24 md:h-32"
+                  className="absolute bottom-6 left-1/2 transform -translate-x-1/2 w-32 md:w-40 h-24 md:h-32 crash-scene"
                   key="crash-scene"
                 >
                   <div className="relative h-full w-full">
@@ -540,8 +549,8 @@ export default function LionGazelleGame() {
               )}
             </div>
             
-            {/* Game controls */}
-            <div className="bg-[#3E2723] p-4 rounded-xl border border-[#DEB887]">
+            {/* Game controls - enhanced with new styling */}
+            <div className="bg-[#3E2723] p-4 rounded-xl border border-[#DEB887] game-controls">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Bet controls */}
                 <div className="space-y-3">
@@ -592,12 +601,12 @@ export default function LionGazelleGame() {
                     ))}
                   </div>
                   
-                  {/* Place bet / cashout button */}
+                  {/* Place bet / cashout button - enhanced with new styling */}
                   {!isPlayerBetting ? (
                     <Button 
                       onClick={placeBet}
                       disabled={gameState === 'running' || betAmount <= 0}
-                      className="w-full bg-[#8B4513] hover:bg-[#DEB887] hover:text-[#5D4037] text-white py-3 rounded-md font-bold text-lg"
+                      className="w-full bg-[#8B4513] hover:bg-[#DEB887] hover:text-[#5D4037] text-white py-3 rounded-md font-bold text-lg bet-button"
                     >
                       انضمام للجولة
                     </Button>
@@ -605,7 +614,7 @@ export default function LionGazelleGame() {
                     <Button 
                       onClick={cashOut}
                       disabled={gameState !== 'running'}
-                      className="w-full bg-green-600 hover:bg-green-500 text-white py-3 rounded-md font-bold text-lg animate-pulse"
+                      className="w-full bg-green-600 hover:bg-green-500 text-white py-3 rounded-md font-bold text-lg cashout-active bet-button"
                     >
                       سحب الأرباح ({(betAmount * currentMultiplier).toFixed(0)})
                     </Button>
@@ -728,14 +737,14 @@ export default function LionGazelleGame() {
           <h3 className="text-lg font-bold text-[#DEB887] mb-4">تاريخ الجولات الأخيرة</h3>
           
           <div className="flex flex-wrap gap-2">
-            {/* Simulate some random historical crash points */}
+            {/* Simulate some random historical crash points - enhanced with new styling */}
             {Array.from({ length: 15 }, (_, i) => ({
               id: i,
               multiplier: (1 + Math.random() * 5).toFixed(2)
             })).map(history => (
               <div 
                 key={history.id} 
-                className={`w-16 h-10 rounded flex items-center justify-center font-bold ${
+                className={`w-16 h-10 rounded flex items-center justify-center font-bold history-item ${
                   parseFloat(history.multiplier) < 1.5 ? 'bg-red-600' : 
                   parseFloat(history.multiplier) < 3 ? 'bg-yellow-600' : 
                   'bg-green-600'

@@ -1,84 +1,211 @@
-/* Lion and Gazelle Game Animations */
-
-/* Lion run animation */
-.lion-run {
-  animation: lionRun 0.35s infinite alternate ease-in-out;
-  transform-origin: center bottom;
-}
-
-@keyframes lionRun {
+/* تحريك حركة الأسد */
+@keyframes lionRunning {
   0% {
-    transform: translateY(0) rotate(-1deg);
+    transform: rotate(0deg) translateY(0px);
   }
-  100% {
-    transform: translateY(-10%) rotate(1deg);
-  }
-}
-
-/* Gazelle run animation */
-.gazelle-run {
-  animation: gazelleRun 0.3s infinite alternate ease-in-out;
-  transform-origin: center bottom;
-}
-
-@keyframes gazelleRun {
-  0% {
-    transform: translateY(0) rotate(-2deg);
-  }
-  100% {
-    transform: translateY(-15%) rotate(2deg) translateX(2%);
-  }
-}
-
-/* Dust animation */
-.dust-animation {
-  animation: dust 0.7s infinite alternate ease-in-out;
-}
-
-@keyframes dust {
-  0% {
-    opacity: 0.3;
-    transform: scale(0.8) translateY(0);
-  }
-  100% {
-    opacity: 0.7;
-    transform: scale(1.2) translateY(-20%);
-  }
-}
-
-/* Crash effect for screen shake */
-.crash-effect {
-  animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
-}
-
-@keyframes shake {
-  0%, 100% {
-    transform: translateX(0);
-  }
-  10%, 30%, 50%, 70%, 90% {
-    transform: translateX(-5px);
-  }
-  20%, 40%, 60%, 80% {
-    transform: translateX(5px);
-  }
-}
-
-/* Blinking animation for crash overlay */
-@keyframes blink {
-  0%, 100% {
-    opacity: 0;
+  25% {
+    transform: rotate(-2deg) translateY(-2px);
   }
   50% {
-    opacity: 1;
+    transform: rotate(0deg) translateY(0px);
+  }
+  75% {
+    transform: rotate(2deg) translateY(-2px);
+  }
+  100% {
+    transform: rotate(0deg) translateY(0px);
   }
 }
 
-/* Camera follow effect */
-.camera-track {
-  transition: transform 0.2s ease-out;
+/* تحريك حركة الغزالة */
+@keyframes gazelleRunning {
+  0% {
+    transform: rotate(0deg) translateY(0px);
+  }
+  25% {
+    transform: rotate(3deg) translateY(-3px);
+  }
+  50% {
+    transform: rotate(0deg) translateY(0px);
+  }
+  75% {
+    transform: rotate(-3deg) translateY(-3px);
+  }
+  100% {
+    transform: rotate(0deg) translateY(0px);
+  }
 }
 
-/* Enhanced tracking smoothness */
-.smooth-transition {
-  transition: all 0.05s linear;
+/* تحريك تأثير الغبار */
+@keyframes dustCloud {
+  0% {
+    opacity: 0.9;
+    transform: scale(0.7) translateY(0);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(0.85) translateY(-5px);
+  }
+  100% {
+    opacity: 0.5;
+    transform: scale(1) translateY(-10px);
+  }
+}
+
+/* تحريك خلفية الإنهيار */
+@keyframes crashPulse {
+  0% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.4;
+  }
+  100% {
+    opacity: 0.2;
+  }
+}
+
+/* تطبيق التحريكات على العناصر */
+.lion-run {
+  animation: lionRunning 0.4s infinite;
+}
+
+.gazelle-run {
+  animation: gazelleRunning 0.3s infinite;
+}
+
+.dust-animation {
+  animation: dustCloud 0.8s infinite alternate;
+}
+
+.crash-background {
+  animation: crashPulse 2s infinite;
+}
+
+/* أنماط عامة للعبة */
+.game-viewport {
+  perspective: 1000px;
+  overflow: hidden;
+  position: relative;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.savanna-background {
+  background-size: cover !important;
+  background-position: center !important;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+
+.racing-track {
+  position: absolute;
+  bottom: 0;
+  height: 40px;
+  background-size: 20px 20px !important;
+  background-position: 0px center !important;
+  z-index: 5;
+}
+
+/* تأثيرات خاصة للعبة */
+.sun-glow {
+  position: absolute;
+  top: 80px;
+  right: 100px;
+  width: 150px;
+  height: 150px;
+  background: radial-gradient(circle at center, rgba(255, 240, 155, 0.7) 0%, rgba(255, 240, 155, 0) 70%);
+  border-radius: 50%;
+  z-index: 2;
+  animation: pulse 3s infinite alternate ease-in-out;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1.2);
+    opacity: 0.5;
+  }
+}
+
+/* تنسيق خاص للتكوين النهائي للعبة */
+.crash-scene {
+  z-index: 50;
+  position: relative;
+}
+
+.crash-scene img {
+  transition: all 0.3s;
+}
+
+.crash-scene:hover img {
+  transform: scale(1.1);
+}
+
+/* تحسين لعناصر التحكم في اللعبة */
+.game-controls {
+  border-radius: 16px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s;
+}
+
+.game-controls:hover {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* تأثيرات للأزرار */
+.bet-button {
+  transition: all 0.2s;
+  overflow: hidden;
+  position: relative;
+}
+
+.bet-button:after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(to bottom right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.13) 77%, rgba(255,255,255,0.5) 92%, rgba(255,255,255,0) 100%);
+  opacity: 0;
+  transform: rotate(30deg);
+  transition: all 0.6s;
+}
+
+.bet-button:hover:after {
+  opacity: 1;
+  left: -30%;
+  transition: all 0.6s;
+}
+
+/* تحسين العرض عند حالة سحب الأرباح */
+.cashout-active {
+  animation: glowPulse 1.5s infinite alternate;
+}
+
+@keyframes glowPulse {
+  0% {
+    box-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.8);
+  }
+}
+
+/* تنسيق تاريخ الجولات */
+.history-item {
+  transition: all 0.2s;
+}
+
+.history-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
 }

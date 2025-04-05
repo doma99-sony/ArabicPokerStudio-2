@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600">
+  <defs>
+    <!-- Gradient definitions for the sky -->
+    <linearGradient id="skyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#5D8CAE"/>
+      <stop offset="60%" style="stop-color:#87CEEB"/>
+      <stop offset="100%" style="stop-color:#E6C79C"/>
+    </linearGradient>
+    
+    <!-- Gradient for the savanna ground -->
+    <linearGradient id="groundGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#E6C79C"/>
+      <stop offset="40%" style="stop-color:#D4AF72"/>
+      <stop offset="70%" style="stop-color:#B38B4A"/>
+      <stop offset="100%" style="stop-color:#8B6C42"/>
+    </linearGradient>
+    
+    <!-- Gradient for distant mountains -->
+    <linearGradient id="mountainGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B6C42"/>
+      <stop offset="40%" style="stop-color:#6E5536"/>
+      <stop offset="100%" style="stop-color:#594529"/>
+    </linearGradient>
+    
+    <!-- Gradient for acacia trees -->
+    <linearGradient id="treeTopGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#7D9F35"/>
+      <stop offset="100%" style="stop-color:#5D7D1E"/>
+    </linearGradient>
+    
+    <linearGradient id="treeTrunkGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B6C42"/>
+      <stop offset="100%" style="stop-color:#594529"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background sky -->
+  <rect width="1200" height="400" fill="url(#skyGradient)"/>
+  
+  <!-- Sun -->
+  <circle cx="1000" cy="100" r="60" fill="#FFA41B" filter="blur(5px)"/>
+  <circle cx="1000" cy="100" r="40" fill="#FFDB58"/>
+  
+  <!-- Distant mountains -->
+  <path d="M0,300 L200,200 L300,250 L450,180 L600,280 L750,220 L900,300 L1050,200 L1200,250 L1200,400 L0,400 Z" fill="url(#mountainGradient)" opacity="0.7"/>
+  
+  <!-- Main savanna ground -->
+  <rect y="350" width="1200" height="250" fill="url(#groundGradient)"/>
+  
+  <!-- Distant acacia trees silhouettes -->
+  <!-- Tree 1 -->
+  <g transform="translate(150, 300) scale(0.6)">
+    <rect x="-10" y="0" width="20" height="80" fill="url(#treeTrunkGradient)"/>
+    <ellipse cx="0" cy="-20" rx="60" ry="40" fill="url(#treeTopGradient)"/>
+  </g>
+  
+  <!-- Tree 2 -->
+  <g transform="translate(350, 320) scale(0.8)">
+    <rect x="-10" y="0" width="20" height="60" fill="url(#treeTrunkGradient)"/>
+    <ellipse cx="0" cy="-30" rx="80" ry="50" fill="url(#treeTopGradient)"/>
+  </g>
+  
+  <!-- Tree 3 -->
+  <g transform="translate(850, 310) scale(0.7)">
+    <rect x="-10" y="0" width="20" height="70" fill="url(#treeTrunkGradient)"/>
+    <ellipse cx="0" cy="-25" rx="70" ry="45" fill="url(#treeTopGradient)"/>
+  </g>
+  
+  <!-- Distant hills -->
+  <path d="M0,400 Q300,350 600,380 T1200,360 L1200,500 L0,500 Z" fill="#D4AF72" opacity="0.7"/>
+  
+  <!-- Grass tufts -->
+  <g opacity="0.8">
+    <path d="M100,500 L120,470 L140,500" stroke="#7D9F35" stroke-width="3" fill="none"/>
+    <path d="M300,510 L320,480 L340,510" stroke="#7D9F35" stroke-width="3" fill="none"/>
+    <path d="M600,505 L620,475 L640,505" stroke="#7D9F35" stroke-width="3" fill="none"/>
+    <path d="M900,510 L920,480 L940,510" stroke="#7D9F35" stroke-width="3" fill="none"/>
+    <path d="M1100,500 L1120,470 L1140,500" stroke="#7D9F35" stroke-width="3" fill="none"/>
+  </g>
+  
+  <!-- Racing track/path -->
+  <path d="M0,500 L1200,500" stroke="#B38B4A" stroke-width="20" stroke-dasharray="5,5" opacity="0.8"/>
+</svg>
