@@ -31,10 +31,8 @@ export default function LionGazelleGame() {
   const [countdown, setCountdown] = useState(10);
   const [players, setPlayers] = useState<Player[]>([]);
   const [bustedAt, setBustedAt] = useState<number | null>(null);
-  const [lionPosition, setLionPosition] = useState(0); // 0-100 percentage for animation
-  const [gazellePosition, setGazellePosition] = useState(20); // Always a bit ahead of lion
-  const [cameraPosition, setCameraPosition] = useState(0); // Camera position to follow characters
-  const [gameViewportWidth, setGameViewportWidth] = useState(100); // Visible portion size (percentage)
+  const [lionPosition, setLionPosition] = useState(20); // 0-100 percentage for animation
+  const [gazellePosition, setGazellePosition] = useState(80); // Always a bit ahead of lion
   
   // Refs
   const gameAreaRef = useRef<HTMLDivElement>(null);
@@ -392,28 +390,19 @@ export default function LionGazelleGame() {
           {/* Game visualization and controls - Left side on desktop */}
           <div className="lg:col-span-2 space-y-4">
             {/* Game visualization */}
-            <div ref={gameAreaRef} className="relative h-64 md:h-80 rounded-xl overflow-hidden border-2 border-[#DEB887] shadow-lg game-viewport">
+            <div ref={gameAreaRef} className="relative h-64 md:h-80 bg-[#3E2723] rounded-xl overflow-hidden border-2 border-[#DEB887] shadow-lg">
               {/* Game world container - this will move with camera position */}
               <div 
-                ref={gameTrackRef}
                 className="absolute inset-0 overflow-hidden"
-                style={{ 
-                  width: `${gameViewportWidth}%`, 
-                  transform: `translateX(-${cameraPosition}%)`,
-                  transition: 'transform 0.2s ease-out'
-                }}
               >
-                {/* New professional savanna background */}
-                <div className="savanna-background bg-repeat-x" style={{ 
-                  backgroundImage: "url('/assets/lion-gazelle/savanna-bg.svg')",
+                {/* Extended Savanna background */}
+                <div className="absolute inset-0 bg-repeat-x bg-cover h-full" style={{ 
+                  backgroundImage: "url('/assets/lion-gazelle/savanna.svg')",
                   width: `${gameViewportWidth}%`,
                 }}></div>
                 
-                {/* Sun glow effect */}
-                <div className="sun-glow"></div>
-                
-                {/* Enhanced racing track */}
-                <div className="racing-track bg-repeat-x" style={{ 
+                {/* Extended racing track */}
+                <div className="absolute bottom-0 bg-repeat-x bg-cover h-24" style={{ 
                   backgroundImage: "url('/assets/lion-gazelle/track.svg')",
                   width: `${gameViewportWidth}%`,
                 }}></div>
