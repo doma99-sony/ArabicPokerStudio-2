@@ -141,7 +141,7 @@ const LionGazelleGame = () => {
       if (data.success) {
         toast({
           title: "تمت المراهنة بنجاح",
-          description: \`لقد راهنت بـ \${betAmount} رقائق\`,
+          description: `لقد راهنت بـ ${betAmount} رقائق`,
         });
         setIsPlayerBetting(true);
         queryClient.invalidateQueries({ queryKey: ['/api/lion-gazelle/current-game'] });
@@ -171,7 +171,7 @@ const LionGazelleGame = () => {
       if (data.success) {
         toast({
           title: "تم السحب بنجاح",
-          description: \`ربحت \${data.profit} رقائق عند مضاعف \${data.multiplier}x\`,
+          description: `ربحت ${data.profit} رقائق عند مضاعف ${data.multiplier}x`,
         });
         setIsPlayerCashedOut(true);
         setLastCashedOut({
@@ -346,7 +346,7 @@ const LionGazelleGame = () => {
   
   // تنسيق المضاعف
   const formatMultiplier = (multiplier: number) => {
-    return \`\${multiplier.toFixed(2)}x\`;
+    return `${multiplier.toFixed(2)}x`;
   };
   
   // الحصول على رهان اللاعب الحالي
@@ -393,7 +393,7 @@ const LionGazelleGame = () => {
       extraClass = 'font-bold multiplier-glow';
     }
     
-    return \`\${colorClass} \${extraClass}\`;
+    return `${colorClass} ${extraClass}`;
   };
   
   return (
@@ -457,13 +457,13 @@ const LionGazelleGame = () => {
                 >
                   {/* المضاعف الكبير في منتصف الشاشة */}
                   <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10">
-                    <div className={\`text-4xl md:text-6xl font-bold \${
+                    <div className={`text-4xl md:text-6xl font-bold ${
                       currentGame?.status === 'running' 
                         ? getMultiplierClass(currentGame.currentMultiplier)
                         : currentGame?.status === 'ended'
                         ? 'text-red-500 font-extrabold'
                         : 'text-white'
-                    }\`}>
+                    }}`}>
                       {currentGame?.status === 'running' 
                         ? formatMultiplier(currentGame.currentMultiplier)
                         : currentGame?.status === 'ended'
@@ -477,7 +477,7 @@ const LionGazelleGame = () => {
                     ref={lionRef}
                     className="absolute bottom-6 left-10 w-24 h-24 z-20"
                   >
-                    <div className={\`w-full h-full relative \${currentGame?.status === 'running' ? 'lion-running' : ''}\`}>
+                    <div className={`w-full h-full relative ${currentGame?.status === 'running' ? 'lion-running' : ''}`}>
                       <img 
                         src="/assets/lion-gazelle/lion.svg" 
                         alt="الأسد" 
@@ -491,7 +491,7 @@ const LionGazelleGame = () => {
                     ref={gazelleRef}
                     className="absolute bottom-6 left-60 w-20 h-20 z-20"
                   >
-                    <div className={\`w-full h-full relative \${currentGame?.status === 'running' ? 'gazelle-running' : ''}\`}>
+                    <div className={`w-full h-full relative ${currentGame?.status === 'running' ? 'gazelle-running' : ''}`}>
                       <img 
                         src="/assets/lion-gazelle/gazelle.svg" 
                         alt="الغزالة" 
@@ -549,7 +549,7 @@ const LionGazelleGame = () => {
                         disabled={cashOutMutation.isPending}
                         size="lg"
                       >
-                        {cashOutMutation.isPending ? 'جاري السحب...' : \`السحب عند \${formatMultiplier(currentGame.currentMultiplier)}\`}
+                        {cashOutMutation.isPending ? 'جاري السحب...' : `السحب عند ${formatMultiplier(currentGame.currentMultiplier)}`}
                       </Button>
                     )}
                     
@@ -728,7 +728,7 @@ const LionGazelleGame = () => {
                               <span className="text-sm text-gray-300">
                                 {game.playerCount} لاعب
                               </span>
-                              <span className={\`font-bold \${getMultiplierColor(game.multiplier)}\`}>
+                              <span className={`font-bold ${getMultiplierColor(game.multiplier)}`}>
                                 {formatMultiplier(game.multiplier)}
                               </span>
                             </div>
@@ -770,7 +770,7 @@ const LionGazelleGame = () => {
                         </div>
                         <div className="p-3 bg-gray-800/50 rounded-md flex flex-col items-center">
                           <span className="text-sm text-gray-400">أعلى مضاعف</span>
-                          <span className={\`text-xl font-bold \${getMultiplierColor(statsData.stats.bestMultiplier)}\`}>
+                          <span className={`text-xl font-bold ${getMultiplierColor(statsData.stats.bestMultiplier)}`}>
                             {formatMultiplier(statsData.stats.bestMultiplier)}
                           </span>
                         </div>
@@ -782,7 +782,7 @@ const LionGazelleGame = () => {
                         </div>
                         <div className="p-3 bg-gray-800/50 rounded-md flex flex-col items-center">
                           <span className="text-sm text-gray-400">إجمالي الربح</span>
-                          <span className={\`text-xl font-bold \${statsData.stats.totalProfit >= 0 ? 'text-green-500' : 'text-red-500'}\`}>
+                          <span className={`text-xl font-bold ${statsData.stats.totalProfit >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                             {statsData.stats.totalProfit}
                           </span>
                         </div>
@@ -820,12 +820,12 @@ const LionGazelleGame = () => {
                     {leaderboardData.leaderboard.slice(0, 5).map((entry: LeaderboardEntry, index: number) => (
                       <div key={entry.userId} className="flex justify-between items-center p-2 bg-gray-800/50 rounded-md">
                         <div className="flex items-center gap-2">
-                          <div className={\`w-6 h-6 rounded-full flex items-center justify-center font-bold \${
+                          <div className={`w-6 h-6 rounded-full flex items-center justify-center font-bold ${
                             index === 0 ? 'bg-yellow-500 text-black' :
                             index === 1 ? 'bg-gray-300 text-black' :
                             index === 2 ? 'bg-amber-700 text-white' :
                             'bg-gray-700 text-white'
-                          }\`}>
+                          }`}>
                             {index + 1}
                           </div>
                           <span>{entry.username || `لاعب_${entry.userId}`}</span>
