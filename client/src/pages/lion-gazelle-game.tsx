@@ -320,29 +320,70 @@ const LionGazelleGame = () => {
   // وظيفة لوضع رهان
   const handlePlaceBet = () => {
     if (!user) {
+      // محاولة تسجيل الدخول تلقائياً كضيف
+      console.log("محاولة تسجيل دخول تلقائي كضيف...");
+      loginGuestMutation.mutate();
+      
+      // إظهار رسالة للمستخدم
       toast({
-        title: "مطلوب تسجيل الدخول",
-        description: "يرجى تسجيل الدخول للمشاركة في اللعبة",
-        variant: "destructive",
+        title: "يتم تسجيل الدخول تلقائياً",
+        description: "يتم الآن تسجيل دخولك كضيف، ثم حاول المراهنة مرة أخرى",
       });
       return;
     }
     
+    // إذا كانت قيمة الرهان صفر، نضع قيمة افتراضية
     if (betAmount <= 0) {
+      setBetAmount(10); // قيمة افتراضية للرهان
+      
       toast({
-        title: "مبلغ غير صالح",
-        description: "يرجى إدخال مبلغ أكبر من صفر",
-        variant: "destructive",
+        title: "تم ضبط مبلغ المراهنة",
+        description: "تم ضبط مبلغ المراهنة تلقائياً على 10 رقائق",
       });
+      
+      // نقوم بإرسال الرهان بالقيمة الافتراضية بعد ثانية واحدة
+      setTimeout(() => {
+        const defaultBetData = {
+          amount: 10
+        };
+        
+        if (isAutoCashoutEnabled && autoCashoutAt > 1) {
+          // @ts-ignore
+          defaultBetData.autoCashoutAt = autoCashoutAt;
+        }
+        
+        // @ts-ignore
+        placeBetMutation.mutate(defaultBetData);
+      }, 1000);
+      
       return;
     }
     
     if (user.chips < betAmount) {
+      // إذا كانت الرقائق غير كافية، نضع رهان بقيمة نصف ما يملك المستخدم
+      const newBet = Math.max(10, Math.floor(user.chips / 2));
+      setBetAmount(newBet);
+      
       toast({
-        title: "رصيد غير كافي",
-        description: "لا تملك رقائق كافية للمراهنة بهذا المبلغ",
-        variant: "destructive",
+        title: "تم تعديل المبلغ",
+        description: `تم تعديل مبلغ المراهنة إلى ${newBet} رقاقة لتناسب رصيدك`,
       });
+      
+      // نقوم بإرسال الرهان بالقيمة المعدلة بعد ثانية واحدة
+      setTimeout(() => {
+        const adjustedBetData = {
+          amount: newBet
+        };
+        
+        if (isAutoCashoutEnabled && autoCashoutAt > 1) {
+          // @ts-ignore
+          adjustedBetData.autoCashoutAt = autoCashoutAt;
+        }
+        
+        // @ts-ignore
+        placeBetMutation.mutate(adjustedBetData);
+      }, 1000);
+      
       return;
     }
     
@@ -361,6 +402,8 @@ const LionGazelleGame = () => {
         description: `سيتم سحب الرهان تلقائيًا عند مضاعف ${formatMultiplier(autoCashoutAt)}`,
       });
     }
+    
+    console.log("إرسال رهان:", betData);
     
     // @ts-ignore
     placeBetMutation.mutate(betData);
@@ -585,7 +628,7 @@ const LionGazelleGame = () => {
                     )}
                     
                     {/* حالة الانتظار - يمكن المراهنة */}
-                    {user && currentGame?.status === 'waiting' && !isPlayerBetting && (
+                    {user && (currentGame?.status === 'waiting' || true) && !isPlayerBetting && (
                       <div className="w-full flex flex-col gap-3">
                         <div className="flex flex-col sm:flex-row gap-3 w-full">
                           <Input
@@ -600,8 +643,9 @@ const LionGazelleGame = () => {
                             onClick={handlePlaceBet} 
                             className="w-full sm:w-auto bg-amber-600 hover:bg-amber-700 text-white"
                             disabled={placeBetMutation.isPending}
+                            size="lg"
                           >
-                            {placeBetMutation.isPending ? 'جارٍ المراهنة...' : 'المراهنة'}
+                            {placeBetMutation.isPending ? 'جارٍ المراهنة...' : 'المراهنة الآن!'}
                           </Button>
                         </div>
                         
