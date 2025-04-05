@@ -86,9 +86,8 @@ export default function LobbyPage() {
     } else if (gameType === "domino") {
       navigate("/domino");
     } else if (gameType === "lion_gazelle") {
-      // مؤقتًا سنعود إلى اللوبي حتى يتم تطوير صفحة اللعبة
-      alert("لعبة الأسد والغزالة متاحة قريبًا!");
-      // navigate("/lion-gazelle"); // سيتم تفعيل هذا لاحقًا
+      // التنقل إلى صفحة لعبة الأسد والغزالة
+      navigate("/lion-gazelle");
     }
     // ستتم إضافة المزيد من الألعاب لاحقًا
   };

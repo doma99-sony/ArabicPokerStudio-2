@@ -22,6 +22,7 @@ import HowToPlayPage from "@/pages/how-to-play-page";
 import BadgesPage from "@/pages/badges-page";
 import SendChipsPage from "@/pages/send-chips-page";
 import OffersPage from "@/pages/offers-page";
+import LionGazelleGame from "@/pages/lion-gazelle-game";
 import { ProtectedRoute } from "./lib/protected-route";
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
@@ -71,6 +72,7 @@ function Router() {
       <ProtectedRoute path="/badges" component={BadgesPage} />
       <ProtectedRoute path="/send-chips" component={SendChipsPage} />
       <ProtectedRoute path="/offers" component={OffersPage} />
+      <ProtectedRoute path="/lion-gazelle" component={LionGazelleGame} />
       <Route component={NotFound} />
     </Switch>
   );
