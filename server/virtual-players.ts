@@ -6,7 +6,6 @@
 import { storage } from "./storage";
 import { v4 as uuidv4 } from "uuid";
 import { db } from "./db";
-import { lionCrashBets } from "../shared/schema";
 import { eq } from "drizzle-orm";
 
 // أسماء المستخدمين الوهميين
@@ -239,34 +238,32 @@ class VirtualPlayerManager {
   }
 
   /**
-   * وضع رهانات للاعبين الوهميين في جولة معينة
+   * وضع رهانات للاعبين الوهميين في جولة بوكر معينة
    */
-  async placeBetsForVirtualPlayers(gameId: string, lionCrashService: any): Promise<void> {
+  async placeBetsForPokerGame(gameId: string, pokerGameService: any): Promise<void> {
     try {
       // اختيار لاعبين عشوائيين للمشاركة
-      const playersForRound = this.getRandomPlayersForRound(2, 5);
+      const playersForRound = this.getRandomPlayersForRound(1, 3);
       
-      // وضع رهانات لكل لاعب
+      // انضمام اللاعبين إلى طاولة البوكر
       for (const player of playersForRound) {
         const betAmount = player.generateBetAmount();
-        const autoCashoutAt = player.generateAutoCashoutValue();
         
-        // وضع الرهان
-        await lionCrashService.placeBet(
+        // انضمام إلى طاولة البوكر
+        await pokerGameService.joinTable(
           gameId,
           player.id,
           player.username,
           player.avatar,
-          betAmount,
-          autoCashoutAt
+          betAmount
         );
         
-        console.log(`اللاعب الوهمي ${player.username} وضع رهان: ${betAmount} بمضاعف سحب: ${autoCashoutAt}`);
+        console.log(`اللاعب الوهمي ${player.username} انضم إلى طاولة البوكر برقائق: ${betAmount}`);
       }
       
-      console.log(`تم وضع رهانات لـ ${playersForRound.length} لاعب وهمي في الجولة ${gameId}`);
+      console.log(`تم انضمام ${playersForRound.length} لاعب وهمي إلى طاولة البوكر ${gameId}`);
     } catch (error) {
-      console.error('خطأ في وضع رهانات اللاعبين الوهميين:', error);
+      console.error('خطأ في انضمام اللاعبين الوهميين إلى طاولة البوكر:', error);
     }
   }
 }

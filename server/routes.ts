@@ -5,7 +5,6 @@ import { setupAuth, hashPassword } from "./auth";
 import { setupPokerGame, pokerModule } from "./poker";
 import { z } from "zod";
 import fileUpload from "express-fileupload";
-import lionCrashRouter from "./routes/lion-crash-routes";
 
 // ميدلوير للتحقق من المصادقة
 function ensureAuthenticated(req: Request, res: Response, next: NextFunction) {
@@ -893,7 +892,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // إضافة مسارات لعبة الأسد والغزالة من نوع كراش
-  app.use("/api/lion-crash", ensureAuthenticated, lionCrashRouter);
+  // Removed Lion Crash routes
 
   // معالجة الأخطاء العامة
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {

@@ -85,9 +85,6 @@ export default function LobbyPage() {
       navigate("/naruto");
     } else if (gameType === "domino") {
       navigate("/domino");
-    } else if (gameType === "lion_gazelle") {
-      // التنقل إلى صفحة لعبة الأسد والغزالة
-      navigate("/lion-gazelle");
     }
     // ستتم إضافة المزيد من الألعاب لاحقًا
   };
@@ -409,60 +406,7 @@ export default function LobbyPage() {
                       </div>
                     </div>
 
-                    {/* الأسد والغزالة - تصميم واضح - موضع على اليمين */}
-                    <div 
-                      className={`relative flex flex-col h-[160px] w-full rounded-xl overflow-hidden shadow-lg mb-4 mt-2 ${activeGameCategory === 'lion_gazelle' ? 'ring-2 ring-[#8B4513]' : 'ring-1 ring-[#8B4513]'} hover:scale-[1.02] transition-all duration-300 cursor-pointer order-2 md:order-2`}
-                      onClick={() => {
-                        setActiveGameCategory('lion_gazelle');
-                        navigateToGameTables('lion_gazelle');
-                      }}
-                    >
-                      {/* خلفية اللعبة - لون ثابت */}
-                      <div className="absolute inset-0 bg-[#8B4513]"></div>
-                      
-                      {/* محتوى البطاقة */}
-                      <div className="relative flex flex-col h-full z-10 p-3">
-                        {/* رأس البطاقة */}
-                        <div className="flex justify-between items-center">
-                          <div className="flex gap-1.5">
-                            <div className="bg-[#DEB887] text-black font-bold text-xs p-1 px-2 rounded-md">جديد</div>
-                            <div className="bg-[#22c55e] text-white font-bold text-xs p-1 px-2 rounded-md">HOT</div>
-                          </div>
-                          <div className="w-10 h-10 bg-[#5D4037] rounded-full border-2 border-[#DEB887] flex items-center justify-center">
-                            <span className="text-[#DEB887] text-lg">🦁</span>
-                          </div>
-                        </div>
-                        
-                        {/* عنوان اللعبة */}
-                        <div className="mt-1 mb-1">
-                          <h3 className="text-[#DEB887] font-bold text-lg">الأسد والغزالة</h3>
-                          <div className="mt-0.5 w-full h-0.5 bg-[#DEB887]"></div>
-                        </div>
-                        
-                        {/* تفاصيل إضافية */}
-                        <div className="my-1 text-xs text-white flex gap-2">
-                          <div className="bg-black/40 rounded-md px-2 py-0.5 border border-[#DEB887]">
-                            <span className="text-[#DEB887] font-bold">١٥٠</span> لاعب
-                          </div>
-                          <div className="bg-black/40 rounded-md px-2 py-0.5 border border-[#DEB887]">
-                            <span className="text-[#DEB887] font-bold">١٨</span> طاولة
-                          </div>
-                        </div>
-                        
-                        {/* زر الدخول */}
-                        <div className="mt-auto">
-                          <button 
-                            className="w-full py-1.5 px-3 bg-[#8B4513] text-white font-bold text-sm rounded-lg flex items-center justify-center gap-2 border border-black/30"
-                          >
-                            <div className="w-5 h-5 rounded-full bg-[#DEB887]/30 flex items-center justify-center">
-                              <span className="text-white">🦌</span>
-                            </div>
-                            ابدأ اللعب الآن
-                            <ChevronRight className="mr-1 h-4 w-4" />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
+
 
                     {/* نارتو - تصميم واضح */}
                     <div 
