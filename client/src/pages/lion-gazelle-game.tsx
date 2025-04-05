@@ -10,7 +10,9 @@ import {
   History,
   AlertTriangle,
   TrendingUp,
-  ArrowLeft
+  ArrowLeft,
+  Rocket,
+  Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -528,8 +530,8 @@ const LionGazelleGame = () => {
                   {currentGame?.status === 'waiting' && (
                     <div className="flex items-center bg-yellow-900/30 rounded-full px-3 py-1">
                       <Clock className="h-4 w-4 text-yellow-500 ml-1.5" />
-                      <span className="text-yellow-500 font-bold">{currentGame?.countdown || 0}s</span>
-                      <span className="text-yellow-300 text-xs mr-2">استعداد...</span>
+                      <span className="text-yellow-500 font-bold countdown-timer">{currentGame?.countdown || 0}s</span>
+                      <span className="text-yellow-300 text-xs mr-2">استعداد للإطلاق...</span>
                     </div>
                   )}
                 </div>
@@ -562,6 +564,83 @@ const LionGazelleGame = () => {
                       )}
                     </svg>
                   </div>
+                  
+                  {/* صورة الصاروخ */}
+                  {currentGame?.status === 'running' && (
+                    <div className="absolute z-20 rocket-animation" 
+                      style={{
+                        left: `${Math.min(90, (currentGame.currentMultiplier - 1) * 15)}%`,
+                        bottom: `${Math.min(80, (currentGame.currentMultiplier - 1) * 20)}%`,
+                      }}
+                    >
+                      {/* جسم الصاروخ */}
+                      <div className="relative">
+                        {/* رأس الصاروخ */}
+                        <div 
+                          className="w-16 h-16"
+                          style={{
+                            transform: 'translate(-50%, 50%) rotate(45deg)',
+                            background: 'linear-gradient(135deg, #FF3A33 0%, #FF3A33 50%, transparent 50%, transparent 100%)',
+                            borderRadius: '50% 0 50% 50%',
+                            boxShadow: '0 0 20px rgba(255, 58, 51, 0.9), 0 0 40px rgba(255, 120, 30, 0.4)',
+                            border: '1px solid rgba(255, 255, 255, 0.3)'
+                          }}
+                        >
+                          {/* نافذة الصاروخ */}
+                          <div className="absolute w-4 h-4 rounded-full bg-blue-400 top-1/4 left-1/4 border-2 border-white/50"></div>
+                        </div>
+                        
+                        {/* ذيل الصاروخ */}
+                        <div className="absolute -bottom-2 left-0 w-full flex justify-center">
+                          <div className="h-8 w-4 bg-yellow-500 flame-animation" style={{ boxShadow: '0 0 10px 2px rgba(255, 200, 0, 0.8)' }}></div>
+                          <div className="h-6 w-3 bg-orange-500 flame-animation mx-1" style={{ boxShadow: '0 0 10px 2px rgba(255, 150, 0, 0.8)' }}></div>
+                          <div className="h-7 w-3 bg-red-500 flame-animation" style={{ boxShadow: '0 0 10px 2px rgba(255, 50, 0, 0.8)' }}></div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* تأثير الانفجار */}
+                  {currentGame?.status === 'ended' && (
+                    <>
+                      <div 
+                        className="absolute z-20 explosion-animation" 
+                        style={{
+                          left: `${Math.min(90, (currentGame.crashPoint - 1) * 15)}%`,
+                          bottom: `${Math.min(80, (currentGame.crashPoint - 1) * 20)}%`,
+                          width: '100px',
+                          height: '100px',
+                          borderRadius: '50%',
+                          background: 'radial-gradient(circle, rgba(255,59,0,1) 0%, rgba(255,165,0,0.8) 50%, rgba(255,215,0,0) 100%)',
+                          boxShadow: '0 0 30px 10px rgba(255,59,0,0.8)',
+                          transform: 'translate(-50%, 50%)',
+                          animation: 'explosion-animation 1s forwards',
+                        }}
+                      ></div>
+                      
+                      {/* تناثر الشظايا */}
+                      <div className="absolute z-10" style={{
+                        left: `${Math.min(90, (currentGame.crashPoint - 1) * 15)}%`,
+                        bottom: `${Math.min(80, (currentGame.crashPoint - 1) * 20)}%`,
+                      }}>
+                        {Array.from({ length: 8 }).map((_, index) => (
+                          <div 
+                            key={index}
+                            className="absolute bg-orange-500"
+                            style={{
+                              width: '3px',
+                              height: '5px',
+                              borderRadius: '50%',
+                              transform: `rotate(${index * 45}deg) translate(20px, 0)`,
+                              boxShadow: '0 0 5px 2px rgba(255, 165, 0, 0.5)',
+                              opacity: 0,
+                              animation: `fadeIn 0.2s ${index * 0.05}s forwards, slideInRight 0.5s ${index * 0.05}s forwards`
+                            }}
+                          ></div>
+                        ))}
+                      </div>
+                    </>
+                  )}
                   
                   {/* المضاعف الكبير في منتصف الشاشة */}
                   <div className="absolute inset-0 flex items-center justify-center z-10">
@@ -612,7 +691,9 @@ const LionGazelleGame = () => {
                         <Button 
                           onClick={() => navigate('/')}
                           className="bg-amber-600 hover:bg-amber-700 text-white"
+                          size="lg"
                         >
+                          <Rocket className="w-5 h-5 ml-1.5" />
                           العودة للصفحة الرئيسية
                         </Button>
                       </div>
@@ -636,7 +717,16 @@ const LionGazelleGame = () => {
                             disabled={placeBetMutation.isPending}
                             size="lg"
                           >
-                            {placeBetMutation.isPending ? 'جارٍ المراهنة...' : 'المراهنة الآن!'}
+                            {placeBetMutation.isPending ? 
+                              <>
+                                <Loader2 className="w-4 h-4 ml-1.5 animate-spin" />
+                                جارٍ المراهنة...
+                              </> : 
+                              <>
+                                <Rocket className="w-4 h-4 ml-1.5" />
+                                المراهنة الآن!
+                              </>
+                            }
                           </Button>
                         </div>
                         
@@ -676,7 +766,16 @@ const LionGazelleGame = () => {
                         disabled={cashOutMutation.isPending}
                         size="lg"
                       >
-                        {cashOutMutation.isPending ? 'جاري السحب...' : `السحب عند ${formatMultiplier(currentGame.currentMultiplier)}`}
+                        {cashOutMutation.isPending ? 
+                          <>
+                            <Loader2 className="w-4 h-4 ml-1.5 animate-spin" />
+                            جاري السحب...
+                          </> : 
+                          <>
+                            <TrendingUp className="w-4 h-4 ml-1.5" />
+                            السحب عند {formatMultiplier(currentGame.currentMultiplier)}
+                          </>
+                        }
                       </Button>
                     )}
                     
