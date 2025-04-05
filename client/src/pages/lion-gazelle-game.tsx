@@ -173,11 +173,16 @@ export default function LionGazelleGame() {
       setCurrentMultiplier(parseFloat(newMultiplier.toFixed(2)));
       
       // Lion catches up to gazelle over time
-      const newLionPosition = Math.min(800, (elapsed / gameSpeed) * 120); // Extended range for longer track
+      // Extended range for longer track with smoother movement
+      const newLionPosition = Math.min(800, (elapsed / gameSpeed) * 120); 
       setLionPosition(newLionPosition);
       
       // Gazelle stays ahead but gap closes
-      const newGazellePosition = Math.min(800, newLionPosition + 100 - (newLionPosition / 10));
+      // Ensure there's always a minimum gap between lion and gazelle
+      const minimumGap = 50; // Minimum distance between lion and gazelle
+      const distanceReducer = newLionPosition / 15; // Smaller divisor means slower closing gap
+      const gapSize = Math.max(minimumGap, 100 - distanceReducer);
+      const newGazellePosition = Math.min(800, newLionPosition + gapSize);
       setGazellePosition(newGazellePosition);
       
       // Camera position follows the action - keeps both characters in frame when possible
@@ -186,14 +191,17 @@ export default function LionGazelleGame() {
       
       // Set viewport to follow characters with some margin to see ahead
       // View size is 100 units wide, so we need to adjust camera to keep both in frame
+      // Ensure we have enough space on both sides to see the animals
       const newCameraPosition = Math.max(0, centerPoint - 50);
       setCameraPosition(newCameraPosition);
       
       // If game is in extended mode (track is longer than initial view), adjust viewport
-      if (newLionPosition > 80 || newGazellePosition > 80) {
-        // Expand the virtual track length
-        setGameViewportWidth(Math.max(100, newGazellePosition + 150));
-      }
+      // Use larger value for gameViewportWidth to ensure character visibility
+      // and add more space ahead of the gazelle
+      const minViewportWidth = 100; // Minimum viewport width
+      const gazelleLeadSpace = 200; // Extra space ahead of gazelle
+      const newViewportWidth = Math.max(minViewportWidth, newGazellePosition + gazelleLeadSpace);
+      setGameViewportWidth(newViewportWidth);
       
       // Check if game should end (lion caught gazelle)
       if (newMultiplier >= crashPoint) {
@@ -397,13 +405,13 @@ export default function LionGazelleGame() {
               >
                 {/* Extended Savanna background */}
                 <div className="absolute inset-0 bg-repeat-x bg-cover h-full" style={{ 
-                  backgroundImage: "url('assets/lion-gazelle/savanna.svg')",
+                  backgroundImage: "url('/assets/lion-gazelle/savanna.svg')",
                   width: `${gameViewportWidth}%`,
                 }}></div>
                 
                 {/* Extended racing track */}
                 <div className="absolute bottom-0 bg-repeat-x bg-cover h-24" style={{ 
-                  backgroundImage: "url('assets/lion-gazelle/track.svg')",
+                  backgroundImage: "url('/assets/lion-gazelle/track.svg')",
                   width: `${gameViewportWidth}%`,
                 }}></div>
                 
@@ -417,7 +425,7 @@ export default function LionGazelleGame() {
                   >
                     <div className="w-full h-full relative">
                       <img 
-                        src="assets/lion-gazelle/gazelle.svg" 
+                        src="/assets/lion-gazelle/gazelle.svg" 
                         alt="Gazelle" 
                         className={`w-full h-full object-contain ${gameState === 'running' ? 'gazelle-run' : ''}`}
                         style={{ 
@@ -427,7 +435,7 @@ export default function LionGazelleGame() {
                       {/* Dust effect behind gazelle - only during running state */}
                       {gameState === 'running' && (
                         <img 
-                          src="assets/lion-gazelle/dust.svg" 
+                          src="/assets/lion-gazelle/dust.svg" 
                           alt="Dust" 
                           className="absolute -left-8 bottom-0 w-12 h-8 opacity-70 dust-animation"
                         />
@@ -446,7 +454,7 @@ export default function LionGazelleGame() {
                   >
                     <div className="w-full h-full relative">
                       <img 
-                        src="assets/lion-gazelle/lion.svg" 
+                        src="/assets/lion-gazelle/lion.svg" 
                         alt="Lion" 
                         className={`w-full h-full object-contain ${gameState === 'running' ? 'lion-run' : ''}`}
                         style={{ 
@@ -456,7 +464,7 @@ export default function LionGazelleGame() {
                       {/* Dust effect behind lion - only during running state */}
                       {gameState === 'running' && (
                         <img 
-                          src="assets/lion-gazelle/dust.svg" 
+                          src="/assets/lion-gazelle/dust.svg" 
                           alt="Dust" 
                           className="absolute -left-10 bottom-0 w-16 h-10 opacity-80 dust-animation"
                         />
@@ -507,7 +515,7 @@ export default function LionGazelleGame() {
                   <div className="relative h-full w-full">
                     {/* Lion in catching position */}
                     <img 
-                      src="assets/lion-gazelle/lion.svg" 
+                      src="/assets/lion-gazelle/lion.svg" 
                       alt="Lion" 
                       className="absolute -right-3 bottom-0 w-20 md:w-24 h-20 md:h-24 object-contain transform rotate-6 scale-110"
                       style={{ filter: 'drop-shadow(3px 4px 3px rgba(0,0,0,0.4))' }}
@@ -515,7 +523,7 @@ export default function LionGazelleGame() {
                     
                     {/* Gazelle in caught position */}
                     <img 
-                      src="assets/lion-gazelle/gazelle.svg" 
+                      src="/assets/lion-gazelle/gazelle.svg" 
                       alt="Gazelle" 
                       className="absolute -left-3 bottom-2 w-16 md:w-20 h-16 md:h-20 object-contain transform -rotate-12"
                       style={{ filter: 'drop-shadow(2px 3px 2px rgba(0,0,0,0.3))' }}
@@ -523,7 +531,7 @@ export default function LionGazelleGame() {
                     
                     {/* Dust cloud from the impact */}
                     <img 
-                      src="assets/lion-gazelle/dust.svg" 
+                      src="/assets/lion-gazelle/dust.svg" 
                       alt="Dust" 
                       className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 w-32 h-20 opacity-80 dust-animation"
                     />
