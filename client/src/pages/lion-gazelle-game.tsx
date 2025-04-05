@@ -31,8 +31,10 @@ export default function LionGazelleGame() {
   const [countdown, setCountdown] = useState(10);
   const [players, setPlayers] = useState<Player[]>([]);
   const [bustedAt, setBustedAt] = useState<number | null>(null);
-  const [lionPosition, setLionPosition] = useState(20); // 0-100 percentage for animation
-  const [gazellePosition, setGazellePosition] = useState(80); // Always a bit ahead of lion
+  const [lionPosition, setLionPosition] = useState(0); // 0-100 percentage for animation
+  const [gazellePosition, setGazellePosition] = useState(20); // Always a bit ahead of lion
+  const [cameraPosition, setCameraPosition] = useState(0); // Camera position to follow characters
+  const [gameViewportWidth, setGameViewportWidth] = useState(100); // Visible portion size (percentage)
   
   // Refs
   const gameAreaRef = useRef<HTMLDivElement>(null);
@@ -393,11 +395,17 @@ export default function LionGazelleGame() {
             <div ref={gameAreaRef} className="relative h-64 md:h-80 bg-[#3E2723] rounded-xl overflow-hidden border-2 border-[#DEB887] shadow-lg">
               {/* Game world container - this will move with camera position */}
               <div 
+                ref={gameTrackRef}
                 className="absolute inset-0 overflow-hidden"
+                style={{ 
+                  width: `${gameViewportWidth}%`, 
+                  transform: `translateX(-${cameraPosition}%)`,
+                  transition: 'transform 0.2s ease-out'
+                }}
               >
-                {/* Extended Savanna background */}
-                <div className="absolute inset-0 bg-repeat-x bg-cover h-full" style={{ 
-                  backgroundImage: "url('/assets/lion-gazelle/savanna.svg')",
+                {/* احترافية جديدة مع تفاصيل الحيوانات في المشهد */}
+                <div className="absolute inset-0 bg-no-repeat bg-cover h-full" style={{ 
+                  backgroundImage: "url('/assets/lion-gazelle/background.svg')",
                   width: `${gameViewportWidth}%`,
                 }}></div>
                 

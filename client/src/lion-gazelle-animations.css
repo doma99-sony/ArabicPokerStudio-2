@@ -1,54 +1,58 @@
-/* تحريك حركة الأسد */
+/* تحريك حركة الأسد - أكثر واقعية مع تغيير في الحجم أثناء الحركة */
 @keyframes lionRunning {
   0% {
-    transform: rotate(0deg) translateY(0px);
+    transform: rotate(0deg) translateY(0px) scaleY(1);
   }
   25% {
-    transform: rotate(-2deg) translateY(-2px);
+    transform: rotate(-2deg) translateY(-2px) scaleY(0.97);
   }
   50% {
-    transform: rotate(0deg) translateY(0px);
+    transform: rotate(0deg) translateY(0px) scaleY(1);
   }
   75% {
-    transform: rotate(2deg) translateY(-2px);
+    transform: rotate(2deg) translateY(-2px) scaleY(0.97);
   }
   100% {
-    transform: rotate(0deg) translateY(0px);
+    transform: rotate(0deg) translateY(0px) scaleY(1);
   }
 }
 
-/* تحريك حركة الغزالة */
+/* تحريك حركة الغزالة - أكثر واقعية مع قفزات أعلى ودوران أكثر حدة */
 @keyframes gazelleRunning {
   0% {
-    transform: rotate(0deg) translateY(0px);
+    transform: rotate(0deg) translateY(0px) scaleY(1);
   }
   25% {
-    transform: rotate(3deg) translateY(-3px);
+    transform: rotate(3deg) translateY(-5px) scaleY(0.95);
   }
   50% {
-    transform: rotate(0deg) translateY(0px);
+    transform: rotate(-1deg) translateY(-1px) scaleY(1.02);
   }
   75% {
-    transform: rotate(-3deg) translateY(-3px);
+    transform: rotate(-4deg) translateY(-6px) scaleY(0.95);
   }
   100% {
-    transform: rotate(0deg) translateY(0px);
+    transform: rotate(0deg) translateY(0px) scaleY(1);
   }
 }
 
-/* تحريك تأثير الغبار */
+/* تحريك تأثير الغبار - تحسين حركة الغبار أثناء الجري للحصول على حركة أكثر واقعية */
 @keyframes dustCloud {
   0% {
     opacity: 0.9;
-    transform: scale(0.7) translateY(0);
+    transform: scale(0.7) translateY(0) translateX(0);
   }
-  50% {
-    opacity: 0.7;
-    transform: scale(0.85) translateY(-5px);
+  33% {
+    opacity: 0.8;
+    transform: scale(0.8) translateY(-3px) translateX(-5px);
+  }
+  66% {
+    opacity: 0.6;
+    transform: scale(0.9) translateY(-7px) translateX(-10px);
   }
   100% {
-    opacity: 0.5;
-    transform: scale(1) translateY(-10px);
+    opacity: 0.3;
+    transform: scale(1.1) translateY(-2px) translateX(-15px);
   }
 }
 
