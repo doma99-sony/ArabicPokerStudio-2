@@ -36,7 +36,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/use-auth';
 import { apiRequest } from '@/lib/queryClient';
-import '../lion-gazelle-animations.css';
+import '../rocket-game-animations.css';
 
 // تعريف أنواع البيانات
 interface GameState {
@@ -488,7 +488,7 @@ const LionGazelleGame = () => {
           <span>العودة</span>
         </Button>
         
-        <h1 className="text-2xl font-bold text-amber-500">صاروخ عرباوي</h1>
+        <h1 className="text-2xl font-bold text-amber-500">صاروخ عرباوي 🚀</h1>
         
         <div className="flex items-center gap-1">
           <span className="text-amber-500 font-bold">{user?.chips || 0}</span>
@@ -567,7 +567,7 @@ const LionGazelleGame = () => {
                   
                   {/* صورة الصاروخ */}
                   {currentGame?.status === 'running' && (
-                    <div className="absolute z-20 rocket-animation" 
+                    <div className="absolute z-20 rocket-animation rocket-flying rocket-glow" 
                       style={{
                         left: `${Math.min(90, (currentGame.currentMultiplier - 1) * 15)}%`,
                         bottom: `${Math.min(80, (currentGame.currentMultiplier - 1) * 20)}%`,
@@ -592,9 +592,28 @@ const LionGazelleGame = () => {
                         
                         {/* ذيل الصاروخ */}
                         <div className="absolute -bottom-2 left-0 w-full flex justify-center">
-                          <div className="h-8 w-4 bg-yellow-500 flame-animation" style={{ boxShadow: '0 0 10px 2px rgba(255, 200, 0, 0.8)' }}></div>
-                          <div className="h-6 w-3 bg-orange-500 flame-animation mx-1" style={{ boxShadow: '0 0 10px 2px rgba(255, 150, 0, 0.8)' }}></div>
-                          <div className="h-7 w-3 bg-red-500 flame-animation" style={{ boxShadow: '0 0 10px 2px rgba(255, 50, 0, 0.8)' }}></div>
+                          <div className="h-8 w-4 bg-yellow-500 flame-animation thrust-effect" style={{ boxShadow: '0 0 10px 2px rgba(255, 200, 0, 0.8)' }}></div>
+                          <div className="h-6 w-3 bg-orange-500 flame-animation thrust-effect mx-1" style={{ boxShadow: '0 0 10px 2px rgba(255, 150, 0, 0.8)' }}></div>
+                          <div className="h-7 w-3 bg-red-500 flame-animation thrust-effect" style={{ boxShadow: '0 0 10px 2px rgba(255, 50, 0, 0.8)' }}></div>
+                        </div>
+                        
+                        {/* دخان الصاروخ */}
+                        <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2">
+                          {Array.from({ length: 5 }).map((_, idx) => (
+                            <div 
+                              key={idx} 
+                              className="absolute smoke-effect"
+                              style={{
+                                width: '6px',
+                                height: '6px',
+                                borderRadius: '50%',
+                                backgroundColor: 'rgba(200, 200, 200, 0.5)',
+                                bottom: `${idx * 3}px`,
+                                left: `${Math.sin(idx) * 8}px`,
+                                animationDelay: `${idx * 0.1}s`
+                              }}
+                            ></div>
+                          ))}
                         </div>
                       </div>
                     </div>
@@ -604,17 +623,17 @@ const LionGazelleGame = () => {
                   {currentGame?.status === 'ended' && (
                     <>
                       <div 
-                        className="absolute z-20 explosion-animation" 
+                        className="absolute z-20 explosion-effect" 
                         style={{
                           left: `${Math.min(90, (currentGame.crashPoint - 1) * 15)}%`,
                           bottom: `${Math.min(80, (currentGame.crashPoint - 1) * 20)}%`,
-                          width: '100px',
-                          height: '100px',
+                          width: '120px',
+                          height: '120px',
                           borderRadius: '50%',
                           background: 'radial-gradient(circle, rgba(255,59,0,1) 0%, rgba(255,165,0,0.8) 50%, rgba(255,215,0,0) 100%)',
                           boxShadow: '0 0 30px 10px rgba(255,59,0,0.8)',
                           transform: 'translate(-50%, 50%)',
-                          animation: 'explosion-animation 1s forwards',
+                          animation: 'explosionEffect 1s forwards',
                         }}
                       ></div>
                       
@@ -623,22 +642,37 @@ const LionGazelleGame = () => {
                         left: `${Math.min(90, (currentGame.crashPoint - 1) * 15)}%`,
                         bottom: `${Math.min(80, (currentGame.crashPoint - 1) * 20)}%`,
                       }}>
-                        {Array.from({ length: 8 }).map((_, index) => (
+                        {Array.from({ length: 12 }).map((_, index) => (
                           <div 
                             key={index}
                             className="absolute bg-orange-500"
                             style={{
-                              width: '3px',
-                              height: '5px',
+                              width: '4px',
+                              height: '6px',
                               borderRadius: '50%',
-                              transform: `rotate(${index * 45}deg) translate(20px, 0)`,
-                              boxShadow: '0 0 5px 2px rgba(255, 165, 0, 0.5)',
+                              transform: `rotate(${index * 30}deg) translate(${20 + Math.random() * 15}px, 0)`,
+                              boxShadow: '0 0 8px 3px rgba(255, 165, 0, 0.7)',
                               opacity: 0,
-                              animation: `fadeIn 0.2s ${index * 0.05}s forwards, slideInRight 0.5s ${index * 0.05}s forwards`
+                              animation: `fadeIn 0.2s ${index * 0.03}s forwards, slideInRight 0.7s ${index * 0.03}s forwards`
                             }}
                           ></div>
                         ))}
                       </div>
+                      
+                      {/* موجة الصدمة */}
+                      <div 
+                        className="absolute z-5"
+                        style={{
+                          left: `${Math.min(90, (currentGame.crashPoint - 1) * 15)}%`,
+                          bottom: `${Math.min(80, (currentGame.crashPoint - 1) * 20)}%`,
+                          width: '200px',
+                          height: '200px',
+                          borderRadius: '50%',
+                          border: '2px solid rgba(255, 100, 0, 0.7)',
+                          transform: 'translate(-50%, 50%) scale(0)',
+                          animation: 'explosionEffect 1.5s forwards',
+                        }}
+                      ></div>
                     </>
                   )}
                   

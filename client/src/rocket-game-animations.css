@@ -1,0 +1,162 @@
+/* تعريف الرسوم المتحركة للعبة صاروخ عرباوي */
+
+/* رسوم الصاروخ المتحركة */
+@keyframes rocketFlight {
+  0% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-3px) rotate(1deg);
+  }
+  50% {
+    transform: translateY(0) rotate(0deg);
+  }
+  75% {
+    transform: translateY(-2px) rotate(-1deg);
+  }
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+}
+
+.rocket-flying {
+  animation: rocketFlight 0.5s infinite;
+}
+
+/* تأثير الدفع للصاروخ */
+@keyframes thrustEffect {
+  0% {
+    transform: scaleY(0.8);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scaleY(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scaleY(0.8);
+    opacity: 0.7;
+  }
+}
+
+.thrust-effect {
+  animation: thrustEffect 0.2s infinite;
+}
+
+/* تأثير دخان الصاروخ */
+@keyframes smokeEffect {
+  0% {
+    opacity: 0.7;
+    transform: translateY(0) scale(0.8);
+  }
+  50% {
+    opacity: 0.5;
+    transform: translateY(-5px) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-10px) scale(1.2);
+  }
+}
+
+.smoke-effect {
+  animation: smokeEffect 0.8s forwards;
+}
+
+/* تأثير المضاعف المتنامي */
+@keyframes multiplierGrow {
+  0% {
+    transform: translate(-50%, 0) scale(1);
+  }
+  50% {
+    transform: translate(-50%, 0) scale(1.05);
+  }
+  100% {
+    transform: translate(-50%, 0) scale(1);
+  }
+}
+
+.growing-multiplier {
+  animation: multiplierGrow 0.5s infinite;
+}
+
+/* تأثير الاهتزاز عند الانهيار */
+@keyframes shake {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  10% { transform: translate(-5px, 0) rotate(-2deg); }
+  20% { transform: translate(5px, 0) rotate(2deg); }
+  30% { transform: translate(-5px, 0) rotate(-2deg); }
+  40% { transform: translate(5px, 0) rotate(2deg); }
+  50% { transform: translate(-5px, 0) rotate(-2deg); }
+  60% { transform: translate(5px, 0) rotate(2deg); }
+  70% { transform: translate(-5px, 0) rotate(-2deg); }
+  80% { transform: translate(5px, 0) rotate(2deg); }
+  90% { transform: translate(-5px, 0) rotate(-2deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+.shake-effect {
+  animation: shake 0.5s;
+}
+
+/* تأثير الانفجار */
+@keyframes explosionEffect {
+  0% {
+    transform: scale(0.1);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+.explosion-effect {
+  animation: explosionEffect 0.8s forwards;
+  filter: drop-shadow(0 0 15px rgba(255, 100, 0, 0.8));
+}
+
+/* تأثير وهج الصاروخ */
+@keyframes rocketGlow {
+  0% {
+    filter: drop-shadow(0 0 3px rgba(255, 165, 0, 0.7));
+  }
+  50% {
+    filter: drop-shadow(0 0 8px rgba(255, 165, 0, 0.9));
+  }
+  100% {
+    filter: drop-shadow(0 0 3px rgba(255, 165, 0, 0.7));
+  }
+}
+
+.rocket-glow {
+  animation: rocketGlow 2s infinite;
+}
+
+/* تأثير الاختفاء التدريجي للمكافأة */
+@keyframes rewardFade {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  10% {
+    transform: translateY(-10px);
+    opacity: 1;
+  }
+  90% {
+    transform: translateY(-30px);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-40px);
+    opacity: 0;
+  }
+}
+
+.reward-text {
+  animation: rewardFade 1.5s forwards;
+}
