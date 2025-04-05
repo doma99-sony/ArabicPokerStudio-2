@@ -4,6 +4,7 @@ import { lionCrashGames, lionCrashBets, lionGameUserStats, insertLionCrashGameSc
 import { storage } from "../storage";
 import { eq, and, desc, gte, lt, sql, count, avg, max, sum } from "drizzle-orm";
 import { createHash } from "crypto";
+import { virtualPlayerManager } from "../virtual-players";
 
 // تعريف واجهة حالة اللعبة
 interface GameState {
@@ -73,7 +74,7 @@ class LionCrashGameService {
   private activeGames: Map<string, GameState> = new Map();
   private gameIntervals: Map<string, NodeJS.Timeout> = new Map();
   private waitingQueues: Map<string, GamePlayer[]> = new Map();
-  private readonly COUNTDOWN_TIME = 10; // ثوانٍ للانتظار قبل بدء جولة جديدة
+  private readonly COUNTDOWN_TIME = 5; // ثوانٍ للانتظار قبل بدء جولة جديدة (تم تقليله من 10 لتسريع اللعب)
   private readonly GROWTH_FACTOR = 0.00006; // معامل نمو المضاعف
   private readonly MIN_MULTIPLIER = 1.0; // الحد الأدنى للمضاعف
   private readonly MAX_MULTIPLIER = 100.0; // الحد الأقصى للمضاعف
@@ -321,15 +322,18 @@ class LionCrashGameService {
     
     // حساب الربح
     const multiplier = game.currentMultiplier;
-    const profit = Math.floor(player.betAmount * multiplier - player.betAmount);
+    // الربح الإجمالي هو مبلغ الرهان × المضاعف (مثال: 1000 × 3 = 3000)
+    const totalWinAmount = Math.floor(player.betAmount * multiplier);
+    // الربح الصافي هو الربح الإجمالي - مبلغ الرهان الأصلي (3000 - 1000 = 2000)
+    const profit = totalWinAmount - player.betAmount;
     
     // تحديث حالة اللاعب
     game.players[playerIndex].status = 'cashed_out';
     game.players[playerIndex].cashoutMultiplier = multiplier;
     game.players[playerIndex].profit = profit;
     
-    // تحديث رصيد اللاعب
-    this.updateUserChips(userId, profit);
+    // تحديث رصيد اللاعب (نرجع المبلغ الأصلي + الربح)
+    this.updateUserChips(userId, totalWinAmount);
     
     // تحديث الرهان في قاعدة البيانات
     try {
@@ -351,7 +355,7 @@ class LionCrashGameService {
       console.error('خطأ في تحديث رهان اللاعب في قاعدة البيانات:', error);
     }
     
-    console.log(`سحب تلقائي: اللاعب ${userId} سحب عند ${multiplier}x مع ربح ${profit}`);
+    console.log(`سحب تلقائي: اللاعب ${userId} سحب عند ${multiplier}x مع رهان ${player.betAmount} وربح إجمالي ${totalWinAmount}`);
   }
   
   /**
@@ -647,15 +651,18 @@ class LionCrashGameService {
       
       // حساب الربح
       const multiplier = game.currentMultiplier;
-      const profit = Math.floor(player.betAmount * multiplier - player.betAmount);
+      // الربح الإجمالي هو مبلغ الرهان × المضاعف (مثال: 1000 × 3 = 3000)
+      const totalWinAmount = Math.floor(player.betAmount * multiplier);
+      // الربح الصافي هو الربح الإجمالي - مبلغ الرهان الأصلي (3000 - 1000 = 2000)
+      const profit = totalWinAmount - player.betAmount;
       
       // تحديث حالة اللاعب
       game.players[playerIndex].status = 'cashed_out';
       game.players[playerIndex].cashoutMultiplier = multiplier;
       game.players[playerIndex].profit = profit;
       
-      // إضافة الأرباح إلى رصيد اللاعب
-      await this.updateUserChips(userId, player.betAmount + profit);
+      // إضافة المبلغ الإجمالي (الرهان الأصلي + الربح) إلى رصيد اللاعب
+      await this.updateUserChips(userId, totalWinAmount);
       
       // تحديث الرهان في قاعدة البيانات
       try {
@@ -677,7 +684,7 @@ class LionCrashGameService {
         console.error('خطأ في تحديث الرهان في قاعدة البيانات:', error);
       }
       
-      console.log(`تم السحب: المستخدم ${userId} سحب عند ${multiplier}x مع ربح ${profit}`);
+      console.log(`تم السحب: المستخدم ${userId} سحب عند ${multiplier}x مع رهان ${player.betAmount} وربح إجمالي ${totalWinAmount}`);
       
       return { 
         success: true,

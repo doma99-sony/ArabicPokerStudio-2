@@ -390,6 +390,11 @@ export class MemStorage implements IStorage {
       (user) => user.username === username,
     );
   }
+  
+  // وظيفة للحصول على المستخدمين باستخدام دالة فلتر معينة
+  async getUsersByFilter(filter: (user: User) => boolean): Promise<User[]> {
+    return Array.from(this.users.values()).filter(filter);
+  }
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.currentId++;

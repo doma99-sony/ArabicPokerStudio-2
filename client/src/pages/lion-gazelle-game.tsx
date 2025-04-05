@@ -488,7 +488,7 @@ const LionGazelleGame = () => {
           <span>العودة</span>
         </Button>
         
-        <h1 className="text-2xl font-bold text-amber-500">صاروخ كراش</h1>
+        <h1 className="text-2xl font-bold text-amber-500">صاروخ عرباوي</h1>
         
         <div className="flex items-center gap-1">
           <span className="text-amber-500 font-bold">{user?.chips || 0}</span>
@@ -528,16 +528,16 @@ const LionGazelleGame = () => {
                     منطقة الإطلاق
                   </CardTitle>
                   {currentGame?.status === 'waiting' && (
-                    <div className="flex items-center bg-yellow-900/30 rounded-full px-3 py-1">
-                      <Clock className="h-4 w-4 text-yellow-500 ml-1.5" />
-                      <span className="text-yellow-500 font-bold countdown-timer">{currentGame?.countdown || 0}s</span>
-                      <span className="text-yellow-300 text-xs mr-2">استعداد للإطلاق...</span>
+                    <div className="flex items-center bg-yellow-900/50 rounded-full px-3 py-1 pulse-animation">
+                      <Clock className="h-4 w-4 text-yellow-400 ml-1.5 animate-spin-slow" />
+                      <span className="text-yellow-400 font-bold countdown-timer text-lg">{currentGame?.countdown || 0}s</span>
+                      <span className="text-yellow-200 text-xs mr-2">استعداد للإطلاق...</span>
                     </div>
                   )}
                 </div>
                 <CardDescription className="text-gray-400">
                   {currentGame?.status === 'waiting' 
-                    ? 'صاروخ كراش سينطلق قريبًا، استعد للمراهنة!' 
+                    ? 'صاروخ عرباوي سينطلق قريبًا، استعد للمراهنة!' 
                     : currentGame?.status === 'running'
                     ? 'الصاروخ في تصاعد! اسحب قبل أن يتحطم!'
                     : 'تحطم الصاروخ! هل كنت محظوظًا؟'}
@@ -545,7 +545,7 @@ const LionGazelleGame = () => {
               </CardHeader>
               
               <CardContent>
-                {/* منطقة اللعب - صاروخ كراش */}
+                {/* منطقة اللعب - صاروخ عرباوي */}
                 <div 
                   ref={gameAreaRef}
                   className="relative h-64 md:h-96 overflow-hidden rounded-xl border border-amber-900/30 bg-gradient-to-b from-gray-900 to-gray-800"
