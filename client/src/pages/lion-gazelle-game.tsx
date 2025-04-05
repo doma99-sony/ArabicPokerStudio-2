@@ -1,62 +1,315 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'wouter';
-import { useQuery } from '@tanstack/react-query';
-import { ChevronRight, Crown, Trophy, Users, Coins, RefreshCw, ArrowRight, DollarSign, Star, Clock } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { 
+  ChevronRight, 
+  Coins, 
+  Trophy, 
+  Users, 
+  Clock, 
+  History,
+  AlertTriangle,
+  TrendingUp,
+  ArrowLeft
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Slider } from '@/components/ui/slider';
+import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/use-auth';
+import { apiRequest } from '@/lib/queryClient';
 import '../lion-gazelle-animations.css';
 
-interface Player {
-  id: number;
+// تعريف أنواع البيانات
+interface GameState {
+  gameId: string;
+  status: 'waiting' | 'running' | 'ended';
+  startTime?: number;
+  endTime?: number;
+  crashPoint: number;
+  currentMultiplier: number;
+  players: GamePlayer[];
+  countdown: number;
+}
+
+interface GamePlayer {
+  userId: number;
   username: string;
+  avatar?: string;
   betAmount: number;
   cashoutMultiplier: number | null;
   profit: number;
-  status: 'playing' | 'cashed_out' | 'busted';
+  status: 'betting' | 'playing' | 'cashed_out' | 'busted';
 }
 
-export default function LionGazelleGame() {
-  const { toast } = useToast();
+interface UserStats {
+  totalGames: number;
+  wins: number;
+  losses: number;
+  bestMultiplier: number;
+  biggestWin: number;
+  totalWagered: number;
+  totalProfit: number;
+  averageMultiplier: number;
+  favoriteCharacter?: {
+    id: number;
+    name: string;
+    imageUrl: string;
+  };
+}
+
+interface GameHistory {
+  gameId: number;
+  startTime: string;
+  endTime: string;
+  multiplier: number;
+  playerCount: number;
+  totalBet: number;
+}
+
+interface LeaderboardEntry {
+  userId: number;
+  username?: string;
+  totalWins: number;
+  gamesPlayed: number;
+  highestMultiplier: number;
+}
+
+const LionGazelleGame = () => {
   const [location, navigate] = useLocation();
+  const { toast } = useToast();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   
-  // Game state
-  const [gameState, setGameState] = useState<'waiting' | 'running' | 'ended'>('waiting');
-  const [currentMultiplier, setCurrentMultiplier] = useState(1);
-  const [betAmount, setBetAmount] = useState(10);
-  const [isPlayerBetting, setIsPlayerBetting] = useState(false);
-  const [countdown, setCountdown] = useState(10);
-  const [players, setPlayers] = useState<Player[]>([]);
-  const [bustedAt, setBustedAt] = useState<number | null>(null);
-  const [lionPosition, setLionPosition] = useState(0); // 0-100 percentage for animation
-  const [gazellePosition, setGazellePosition] = useState(20); // Always a bit ahead of lion
-  const [cameraPosition, setCameraPosition] = useState(0); // Camera position to follow characters
-  const [gameViewportWidth, setGameViewportWidth] = useState(100); // Visible portion size (percentage)
+  // حالة اللعبة
+  const [currentGame, setCurrentGame] = useState<GameState | null>(null);
+  const [betAmount, setBetAmount] = useState<number>(10);
+  const [isPlayerBetting, setIsPlayerBetting] = useState<boolean>(false);
+  const [isPlayerCashedOut, setIsPlayerCashedOut] = useState<boolean>(false);
+  const [lastCashedOut, setLastCashedOut] = useState<{multiplier: number, profit: number} | null>(null);
   
-  // Refs
+  // مراجع المكونات
   const gameAreaRef = useRef<HTMLDivElement>(null);
-  const gameTrackRef = useRef<HTMLDivElement>(null);
   const lionRef = useRef<HTMLDivElement>(null);
   const gazelleRef = useRef<HTMLDivElement>(null);
-  const animationFrameRef = useRef<number | null>(null);
-  const gameIntervalRef = useRef<NodeJS.Timeout | null>(null);
   
-  // Set a random crash point between 1.1x and 10x
-  // In real implementation, this would come from the server for fairness
-  const generateCrashPoint = () => {
-    return (1 + Math.random() * 9).toFixed(2);
+  // مؤقتات وحلقات التحديث
+  const updateInterval = useRef<NodeJS.Timeout | null>(null);
+  
+  // استعلام الحصول على اللعبة الحالية
+  const { data: gameData, isLoading, isError, refetch } = useQuery({
+    queryKey: ['/api/lion-gazelle/current-game'],
+    refetchInterval: 1000, // تحديث كل ثانية
+  });
+  
+  // استعلام الحصول على إحصائيات اللاعب
+  const { data: statsData } = useQuery({
+    queryKey: ['/api/lion-gazelle/stats'],
+    enabled: !!user,
+  });
+  
+  // استعلام الحصول على سجل الألعاب
+  const { data: historyData } = useQuery({
+    queryKey: ['/api/lion-gazelle/history'],
+  });
+  
+  // استعلام الحصول على المتصدرين
+  const { data: leaderboardData } = useQuery({
+    queryKey: ['/api/lion-gazelle/leaderboard'],
+  });
+  
+  // إجراء المراهنة
+  const placeBetMutation = useMutation({
+    mutationFn: async (amount: number) => {
+      return apiRequest('/api/lion-gazelle/place-bet', 'POST', { amount });
+    },
+    onSuccess: (data) => {
+      if (data.success) {
+        toast({
+          title: "تمت المراهنة بنجاح",
+          description: \`لقد راهنت بـ \${betAmount} رقائق\`,
+        });
+        setIsPlayerBetting(true);
+        queryClient.invalidateQueries({ queryKey: ['/api/lion-gazelle/current-game'] });
+      } else {
+        toast({
+          title: "فشلت المراهنة",
+          description: data.message || "حدث خطأ أثناء المراهنة",
+          variant: "destructive",
+        });
+      }
+    },
+    onError: () => {
+      toast({
+        title: "فشلت المراهنة",
+        description: "حدث خطأ أثناء الاتصال بالخادم",
+        variant: "destructive",
+      });
+    }
+  });
+  
+  // إجراء السحب
+  const cashOutMutation = useMutation({
+    mutationFn: async (gameId: string) => {
+      return apiRequest('/api/lion-gazelle/cash-out', 'POST', { gameId });
+    },
+    onSuccess: (data) => {
+      if (data.success) {
+        toast({
+          title: "تم السحب بنجاح",
+          description: \`ربحت \${data.profit} رقائق عند مضاعف \${data.multiplier}x\`,
+        });
+        setIsPlayerCashedOut(true);
+        setLastCashedOut({
+          multiplier: data.multiplier,
+          profit: data.profit
+        });
+        queryClient.invalidateQueries({ queryKey: ['/api/lion-gazelle/current-game'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+      } else {
+        toast({
+          title: "فشل السحب",
+          description: data.message || "حدث خطأ أثناء السحب",
+          variant: "destructive",
+        });
+      }
+    },
+    onError: () => {
+      toast({
+        title: "فشل السحب",
+        description: "حدث خطأ أثناء الاتصال بالخادم",
+        variant: "destructive",
+      });
+    }
+  });
+  
+  // تابع لتحديث بيانات اللعبة من الاستعلام
+  useEffect(() => {
+    if (gameData?.success && gameData.game) {
+      setCurrentGame(gameData.game);
+      
+      // التحقق من حالة اللاعب الحالية
+      if (user) {
+        const currentPlayer = gameData.game.players.find((p: GamePlayer) => p.userId === user.id);
+        setIsPlayerBetting(!!currentPlayer);
+        setIsPlayerCashedOut(currentPlayer?.status === 'cashed_out');
+      }
+    }
+  }, [gameData, user]);
+  
+  // تحديث موقع الحيوانات وحالة اللعبة
+  useEffect(() => {
+    if (currentGame?.status === 'running') {
+      // بدء حلقة التحديث فقط إذا لم تكن جارية بالفعل
+      if (!updateInterval.current) {
+        updateInterval.current = setInterval(() => {
+          // تحديث موقع الأسد والغزالة بناءً على المضاعف الحالي
+          updateAnimationPositions();
+        }, 50); // تحديث 20 مرة في الثانية للحصول على حركة سلسة
+      }
+      
+      // التأكد من أن حالة اللاعب تم تحديثها إلى "يلعب"
+      if (isPlayerBetting && !isPlayerCashedOut) {
+        // الحالة "يلعب" تعني أن اللاعب قد وضع رهانًا ولكن لم يسحب بعد
+      }
+    } else if (currentGame?.status === 'ended') {
+      // إيقاف حلقة التحديث عند انتهاء اللعبة
+      if (updateInterval.current) {
+        clearInterval(updateInterval.current);
+        updateInterval.current = null;
+      }
+      
+      // إضافة تأثير الانفجار عند انتهاء اللعبة
+      if (gameAreaRef.current) {
+        // إضافة تأثير الانفجار
+        const crashAnimation = document.createElement('div');
+        crashAnimation.className = 'crash-animation';
+        gameAreaRef.current.appendChild(crashAnimation);
+        
+        // إزالة تأثير الانفجار بعد انتهاء الرسوم المتحركة
+        setTimeout(() => {
+          if (crashAnimation.parentNode === gameAreaRef.current) {
+            gameAreaRef.current.removeChild(crashAnimation);
+          }
+        }, 800); // الرسوم المتحركة تستمر 0.8 ثانية
+        
+        // إضافة تأثير الاهتزاز للشاشة
+        gameAreaRef.current.classList.add('crash-effect');
+        
+        // إزالة تأثير الاهتزاز
+        setTimeout(() => {
+          gameAreaRef.current.classList.remove('crash-effect');
+        }, 500); // الاهتزاز يستمر 0.5 ثانية
+      }
+      
+      // إعادة تعيين حالات اللاعب للجولة التالية
+      setIsPlayerBetting(false);
+      setIsPlayerCashedOut(false);
+    }
+    
+    // تنظيف عند إلغاء تحميل المكون
+    return () => {
+      if (updateInterval.current) {
+        clearInterval(updateInterval.current);
+        updateInterval.current = null;
+      }
+    };
+  }, [currentGame, isPlayerBetting, isPlayerCashedOut]);
+  
+  // وظيفة لتحديث مواقع الرسوم المتحركة
+  const updateAnimationPositions = () => {
+    if (!currentGame || !lionRef.current || !gazelleRef.current) return;
+    
+    // حساب موقع الأسد والغزالة بناءً على المضاعف الحالي
+    // مضاعف أعلى = مسافة أقصر بين الأسد والغزالة
+    const baseDistance = 200; // المسافة الأساسية بين الأسد والغزالة
+    const multiplierEffect = (currentGame.currentMultiplier - 1) * 20; // تأثير المضاعف على المسافة
+    const distanceBetween = Math.max(10, baseDistance - multiplierEffect); // يجب أن تكون هناك مسافة دنيا
+    
+    // تحديث مواقع الأسد والغزالة في CSS
+    // الأسد يتقدم بشكل أسرع مع زيادة المضاعف
+    const lionLeft = 10 + (currentGame.currentMultiplier - 1) * 30;
+    const gazelleLeft = lionLeft + distanceBetween;
+    
+    lionRef.current.style.left = `${lionLeft}px`;
+    gazelleRef.current.style.left = `${gazelleLeft}px`;
+    
+    // إضافة غبار متحرك خلف الأسد للإشارة إلى السرعة
+    if (currentGame.currentMultiplier > 1.5 && lionRef.current.parentNode) {
+      const dustParticle = document.createElement('div');
+      dustParticle.className = 'dust-particle';
+      dustParticle.style.left = `${lionLeft - 5}px`;
+      dustParticle.style.bottom = `${5 + Math.random() * 10}px`;
+      lionRef.current.parentNode.appendChild(dustParticle);
+      
+      // إزالة جزيئات الغبار بعد انتهاء الرسوم المتحركة
+      setTimeout(() => {
+        if (dustParticle.parentNode === lionRef.current.parentNode) {
+          lionRef.current.parentNode.removeChild(dustParticle);
+        }
+      }, 1000);
+    }
   };
   
-  const [crashPoint, setCrashPoint] = useState<number>(parseFloat(generateCrashPoint()));
-  
-  // Player Join/Place Bet
-  const placeBet = () => {
+  // وظيفة لوضع رهان
+  const handlePlaceBet = () => {
     if (!user) {
       toast({
-        title: "تسجيل الدخول مطلوب",
+        title: "مطلوب تسجيل الدخول",
         description: "يرجى تسجيل الدخول للمشاركة في اللعبة",
         variant: "destructive",
       });
@@ -72,7 +325,6 @@ export default function LionGazelleGame() {
       return;
     }
     
-    // Check if user has enough chips
     if (user.chips < betAmount) {
       toast({
         title: "رصيد غير كافي",
@@ -82,613 +334,556 @@ export default function LionGazelleGame() {
       return;
     }
     
-    setIsPlayerBetting(true);
-    
-    // Add player to the game
-    const newPlayer: Player = {
-      id: user.id,
-      username: user.username,
-      betAmount: betAmount,
-      cashoutMultiplier: null,
-      profit: 0,
-      status: 'playing'
-    };
-    
-    // In a real implementation, this would be a server call
-    setPlayers(prevPlayers => {
-      const existingPlayerIndex = prevPlayers.findIndex(p => p.id === user.id);
-      if (existingPlayerIndex >= 0) {
-        // Update existing player
-        const updatedPlayers = [...prevPlayers];
-        updatedPlayers[existingPlayerIndex] = newPlayer;
-        return updatedPlayers;
-      } else {
-        // Add new player
-        return [...prevPlayers, newPlayer];
-      }
-    });
-    
-    toast({
-      title: "تمت المراهنة بنجاح",
-      description: `لقد راهنت بـ ${betAmount} رقائق`,
-      variant: "default",
-    });
+    placeBetMutation.mutate(betAmount);
   };
   
-  // Player Cash Out
-  const cashOut = () => {
-    if (!isPlayerBetting || gameState !== 'running') return;
+  // وظيفة للسحب
+  const handleCashOut = () => {
+    if (!currentGame || !user) return;
     
-    const profit = Math.floor(betAmount * currentMultiplier);
-    
-    // Update player status
-    setPlayers(prevPlayers => {
-      return prevPlayers.map(player => {
-        if (player.id === user?.id) {
-          return {
-            ...player,
-            cashoutMultiplier: currentMultiplier,
-            profit: profit - player.betAmount,
-            status: 'cashed_out'
-          };
-        }
-        return player;
-      });
-    });
-    
-    setIsPlayerBetting(false);
-    
-    toast({
-      title: "تم السحب بنجاح!",
-      description: `ربحت ${profit} رقائق بمضاعف ${currentMultiplier.toFixed(2)}x`,
-      variant: "default",
-    });
-    
-    // In a real app, you would update the user's chips on the server
+    cashOutMutation.mutate(currentGame.gameId);
   };
   
-  // Start Game Logic
-  const startGame = () => {
-    // Reset game state
-    setGameState('running');
-    setCurrentMultiplier(1);
-    setBustedAt(null);
-    setLionPosition(0);
-    setGazellePosition(20);
-    
-    // Set new random crash point
-    setCrashPoint(parseFloat(generateCrashPoint()));
-    
-    // In a real implementation, this would be synced with the server
-    let startTime = Date.now();
-    let elapsed = 0;
-    const gameSpeed = 800; // ms for one cycle - adjust for faster/slower game
-    
-    const updateGame = () => {
-      elapsed = Date.now() - startTime;
-      
-      // Calculate current multiplier based on elapsed time
-      // Using a curve function that starts slow and accelerates
-      const newMultiplier = Math.pow(1.0015, elapsed / 10);
-      setCurrentMultiplier(parseFloat(newMultiplier.toFixed(2)));
-      
-      // Lion catches up to gazelle over time
-      // Extended range for longer track with smoother movement
-      const newLionPosition = Math.min(800, (elapsed / gameSpeed) * 120); 
-      setLionPosition(newLionPosition);
-      
-      // Gazelle stays ahead but gap closes
-      // Ensure there's always a minimum gap between lion and gazelle
-      const minimumGap = 50; // Minimum distance between lion and gazelle
-      const distanceReducer = newLionPosition / 15; // Smaller divisor means slower closing gap
-      const gapSize = Math.max(minimumGap, 100 - distanceReducer);
-      const newGazellePosition = Math.min(800, newLionPosition + gapSize);
-      setGazellePosition(newGazellePosition);
-      
-      // Camera position follows the action - keeps both characters in frame when possible
-      // Calculate center point between lion and gazelle
-      const centerPoint = (newLionPosition + newGazellePosition) / 2;
-      
-      // Set viewport to follow characters with some margin to see ahead
-      // View size is 100 units wide, so we need to adjust camera to keep both in frame
-      // Ensure we have enough space on both sides to see the animals
-      const newCameraPosition = Math.max(0, centerPoint - 50);
-      setCameraPosition(newCameraPosition);
-      
-      // If game is in extended mode (track is longer than initial view), adjust viewport
-      // Use larger value for gameViewportWidth to ensure character visibility
-      // and add more space ahead of the gazelle
-      const minViewportWidth = 100; // Minimum viewport width
-      const gazelleLeadSpace = 200; // Extra space ahead of gazelle
-      const newViewportWidth = Math.max(minViewportWidth, newGazellePosition + gazelleLeadSpace);
-      setGameViewportWidth(newViewportWidth);
-      
-      // Check if game should end (lion caught gazelle)
-      if (newMultiplier >= crashPoint) {
-        // Game Over - Lion caught the gazelle
-        setGameState('ended');
-        setBustedAt(newMultiplier);
-        
-        // Mark all active players as busted
-        setPlayers(prevPlayers => {
-          return prevPlayers.map(player => {
-            if (player.status === 'playing') {
-              return {
-                ...player,
-                status: 'busted',
-                profit: -player.betAmount
-              };
-            }
-            return player;
-          });
-        });
-        
-        // Reset player betting status
-        setIsPlayerBetting(false);
-        
-        if (gameIntervalRef.current) {
-          clearInterval(gameIntervalRef.current);
-          gameIntervalRef.current = null;
-        }
-        
-        // Schedule countdown for next round
-        startCountdown();
-        
-        return;
-      }
-      
-      animationFrameRef.current = requestAnimationFrame(updateGame);
-    };
-    
-    animationFrameRef.current = requestAnimationFrame(updateGame);
+  // تنسيق المضاعف
+  const formatMultiplier = (multiplier: number) => {
+    return \`\${multiplier.toFixed(2)}x\`;
   };
   
-  // Countdown Timer Logic
-  const startCountdown = () => {
-    let remainingSeconds = 10;
-    setCountdown(remainingSeconds);
+  // الحصول على رهان اللاعب الحالي
+  const getCurrentPlayerBet = () => {
+    if (!currentGame || !user) return null;
     
-    if (gameIntervalRef.current) {
-      clearInterval(gameIntervalRef.current);
+    return currentGame.players.find(p => p.userId === user.id);
+  };
+  
+  // تصنيف اللاعبين (الفائزين، الخاسرين، المشاركين حاليًا)
+  const getPlayersByStatus = (status: 'cashed_out' | 'busted' | 'playing' | 'betting') => {
+    if (!currentGame) return [];
+    
+    return currentGame.players.filter(p => p.status === status);
+  };
+  
+  // الفائزون (سحبوا قبل الاصطدام)
+  const cashedOutPlayers = getPlayersByStatus('cashed_out').sort((a, b) => 
+    (b.cashoutMultiplier || 0) - (a.cashoutMultiplier || 0)
+  );
+  
+  // الخاسرون (لم يسحبوا قبل الاصطدام)
+  const bustedPlayers = getPlayersByStatus('busted').sort((a, b) => b.betAmount - a.betAmount);
+  
+  // المشاركون الحاليون
+  const activePlayers = [...getPlayersByStatus('playing'), ...getPlayersByStatus('betting')];
+  
+  // تأثير لون المضاعف بناءً على القيمة
+  const getMultiplierColor = (multiplier: number) => {
+    if (multiplier >= 5) return 'text-red-500';
+    if (multiplier >= 3) return 'text-amber-500';
+    if (multiplier >= 2) return 'text-yellow-500';
+    return 'text-green-500';
+  };
+  
+  // تأثير وزن خط المضاعف بناءً على القيمة
+  const getMultiplierClass = (multiplier: number) => {
+    const colorClass = getMultiplierColor(multiplier);
+    
+    let extraClass = '';
+    if (multiplier >= 5) {
+      extraClass = 'font-extrabold high-multiplier';
+    } else if (multiplier >= 2) {
+      extraClass = 'font-bold multiplier-glow';
     }
     
-    gameIntervalRef.current = setInterval(() => {
-      remainingSeconds -= 1;
-      setCountdown(remainingSeconds);
-      
-      if (remainingSeconds <= 0) {
-        if (gameIntervalRef.current) {
-          clearInterval(gameIntervalRef.current);
-          gameIntervalRef.current = null;
-        }
-        
-        // Clear players who didn't cash out and reset for next round
-        setPlayers([]);
-        startGame();
-      }
-    }, 1000);
+    return \`\${colorClass} \${extraClass}\`;
   };
-  
-  // Game Initialization
-  useEffect(() => {
-    // Start initial countdown
-    startCountdown();
-    
-    // Generate some fake players for demonstration
-    const fakePlayers: Player[] = [
-      { id: 1001, username: "لاعب_شجاع", betAmount: 200, cashoutMultiplier: null, profit: 0, status: 'playing' },
-      { id: 1002, username: "صياد_الارباح", betAmount: 500, cashoutMultiplier: null, profit: 0, status: 'playing' },
-      { id: 1003, username: "مغامر_الحظ", betAmount: 100, cashoutMultiplier: null, profit: 0, status: 'playing' },
-      { id: 1004, username: "الصقر_الذهبي", betAmount: 1000, cashoutMultiplier: null, profit: 0, status: 'playing' },
-    ];
-    
-    setPlayers(fakePlayers);
-    
-    // Clean up on component unmount
-    return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-      
-      if (gameIntervalRef.current) {
-        clearInterval(gameIntervalRef.current);
-      }
-    };
-  }, []);
-  
-  // Handle AI players cashing out at random points
-  useEffect(() => {
-    if (gameState === 'running' && players.length > 0) {
-      const aiCashoutInterval = setInterval(() => {
-        // Only process AI players (for demo purposes, all players except user are AI)
-        setPlayers(prevPlayers => {
-          return prevPlayers.map(player => {
-            // Skip players who already cashed out or busted, and skip the user
-            if (player.status !== 'playing' || player.id === user?.id) {
-              return player;
-            }
-            
-            // Randomly decide if this AI player will cash out on this tick
-            // Higher chance of cashing out as multiplier increases
-            const cashoutChance = 0.1 + (currentMultiplier - 1) * 0.05;
-            if (Math.random() < cashoutChance) {
-              return {
-                ...player,
-                cashoutMultiplier: currentMultiplier,
-                profit: Math.floor(player.betAmount * currentMultiplier) - player.betAmount,
-                status: 'cashed_out'
-              };
-            }
-            
-            return player;
-          });
-        });
-      }, 300); // Check every 300ms
-      
-      return () => clearInterval(aiCashoutInterval);
-    }
-  }, [gameState, currentMultiplier, user]);
-  
-  // Effect for when game ends with a crash (lion catches gazelle)
-  useEffect(() => {
-    if (gameState === 'ended' && bustedAt) {
-      // Add crash effect (shake the game area)
-      if (gameAreaRef.current) {
-        // Add crash effect class for screen shake
-        gameAreaRef.current.classList.add('crash-effect');
-        
-        // Play collision sound if we were to add sound effects
-        // playSound('crash.mp3');
-        
-        // Add red flash overlay
-        const flashOverlay = document.createElement('div');
-        flashOverlay.className = 'absolute inset-0 bg-red-600/40 z-10';
-        flashOverlay.style.animation = 'blink 0.2s 3';
-        gameAreaRef.current.appendChild(flashOverlay);
-        
-        // Remove effects after animation completes
-        setTimeout(() => {
-          if (gameAreaRef.current) {
-            gameAreaRef.current.classList.remove('crash-effect');
-            if (flashOverlay.parentNode === gameAreaRef.current) {
-              gameAreaRef.current.removeChild(flashOverlay);
-            }
-          }
-        }, 1000);
-      }
-    }
-  }, [gameState, bustedAt]);
-  
-  // Calculate statistics
-  const totalPlayers = players.length;
-  const totalBets = players.reduce((sum, player) => sum + player.betAmount, 0);
-  const cashedOutPlayers = players.filter(p => p.status === 'cashed_out').length;
-  const bustedPlayers = players.filter(p => p.status === 'busted').length;
-  
-  // Get current player from players array
-  const currentPlayer = players.find(p => p.id === user?.id);
   
   return (
-    <div className="min-h-screen bg-[#8B4513] text-white">
-      {/* Header area */}
-      <div className="bg-[#5D4037] border-b border-[#DEB887] p-2 flex justify-between items-center">
-        <button 
+    <div className="min-h-screen bg-gray-900 text-white overflow-hidden">
+      {/* الشريط العلوي */}
+      <div className="bg-gray-800 border-b border-gray-700 p-3 flex justify-between items-center">
+        <Button
           onClick={() => navigate('/')}
-          className="flex items-center text-[#DEB887] hover:text-white transition-colors"
+          variant="ghost"
+          className="text-gray-300 hover:text-white hover:bg-gray-700"
         >
-          <ChevronRight className="h-5 w-5" />
+          <ArrowLeft className="h-5 w-5 ml-2" />
           <span>العودة</span>
-        </button>
-        <h1 className="text-xl font-bold text-[#DEB887]">الأسد والغزالة</h1>
-        <div className="flex items-center gap-2">
-          <span className="text-[#DEB887] font-bold">{user?.chips || 0}</span>
-          <Coins className="h-5 w-5 text-[#DEB887]" />
+        </Button>
+        
+        <h1 className="text-2xl font-bold text-amber-500">الأسد والغزالة</h1>
+        
+        <div className="flex items-center gap-1">
+          <span className="text-amber-500 font-bold">{user?.chips || 0}</span>
+          <Coins className="h-5 w-5 text-amber-500" />
         </div>
       </div>
       
-      {/* Main game area */}
-      <div className="container mx-auto px-4 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {/* Game visualization and controls - Left side on desktop */}
-          <div className="lg:col-span-2 space-y-4">
-            {/* Game visualization */}
-            <div ref={gameAreaRef} className="relative h-64 md:h-80 bg-[#3E2723] rounded-xl overflow-hidden border-2 border-[#DEB887] shadow-lg">
-              {/* Game world container - this will move with camera position */}
-              <div 
-                ref={gameTrackRef}
-                className="absolute inset-0 overflow-hidden"
-                style={{ 
-                  width: `${gameViewportWidth}%`, 
-                  transform: `translateX(-${cameraPosition}%)`,
-                  transition: 'transform 0.2s ease-out'
-                }}
-              >
-                {/* احترافية جديدة مع تفاصيل الحيوانات في المشهد */}
-                <div className="absolute inset-0 bg-no-repeat bg-cover h-full" style={{ 
-                  backgroundImage: "url('/assets/lion-gazelle/background.svg')",
-                  width: `${gameViewportWidth}%`,
-                }}></div>
-                
-                {/* Extended racing track */}
-                <div className="absolute bottom-0 bg-repeat-x bg-cover h-24" style={{ 
-                  backgroundImage: "url('/assets/lion-gazelle/track.svg')",
-                  width: `${gameViewportWidth}%`,
-                }}></div>
-                
-                {/* Gazelle character with more realistic animation - improved visibility with fixed positioning */}
-                {(gameState === 'running' || gameState === 'waiting') && (
-                  <div 
-                    ref={gazelleRef}
-                    style={{
-                      left: `${gazellePosition * 100 / gameViewportWidth}%`,
-                      zIndex: 20 // عنصر فوق الخلفية لضمان الرؤية
-                    }} 
-                    className="absolute bottom-6 w-16 md:w-20 h-16 md:h-20 transform -translate-x-1/2 transition-all duration-75"
-                    key="gazelle-character"
-                  >
-                    <div className="w-full h-full relative">
-                      <img 
-                        src="/assets/lion-gazelle/gazelle.svg" 
-                        alt="Gazelle" 
-                        className={`w-full h-full object-contain ${gameState === 'running' ? 'gazelle-run' : ''}`}
-                        style={{ 
-                          filter: 'drop-shadow(2px 3px 2px rgba(0,0,0,0.3))'
-                        }}
-                      />
-                      {/* Dust effect behind gazelle - only during running state */}
-                      {gameState === 'running' && (
-                        <img 
-                          src="/assets/lion-gazelle/dust.svg" 
-                          alt="Dust" 
-                          className="absolute -left-8 bottom-0 w-12 h-8 opacity-70 dust-animation"
-                        />
-                      )}
+      {/* المحتوى الرئيسي */}
+      <div className="container mx-auto p-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* الجانب الأيسر - منطقة اللعب */}
+          <div className="lg:col-span-2">
+            {/* منطقة اللعب الرئيسية */}
+            <Card className="border-amber-900/50 bg-gradient-to-b from-amber-950/50 to-gray-900/50 mb-4">
+              <CardHeader className="pb-2">
+                <div className="flex justify-between items-center">
+                  <CardTitle className="text-xl text-amber-500">
+                    حلبة السباق
+                  </CardTitle>
+                  {currentGame?.status === 'waiting' && (
+                    <div className="flex items-center bg-yellow-900/30 rounded-full px-3 py-1">
+                      <Clock className="h-4 w-4 text-yellow-500 ml-1.5" />
+                      <span className="text-yellow-500 font-bold">{currentGame?.countdown || 0}s</span>
                     </div>
-                  </div>
-                )}
-                
-                {/* Lion character with more realistic animation - improved visibility with fixed positioning */}
-                {(gameState === 'running' || gameState === 'waiting') && (
-                  <div 
-                    ref={lionRef}
-                    style={{ 
-                      left: `${lionPosition * 100 / gameViewportWidth}%`,
-                      zIndex: 20 // عنصر فوق الخلفية لضمان الرؤية
-                    }} 
-                    className="absolute bottom-6 w-20 md:w-24 h-20 md:h-24 transform -translate-x-1/2 transition-all duration-75"
-                    key="lion-character"
-                  >
-                    <div className="w-full h-full relative">
-                      <img 
-                        src="/assets/lion-gazelle/lion.svg" 
-                        alt="Lion" 
-                        className={`w-full h-full object-contain ${gameState === 'running' ? 'lion-run' : ''}`}
-                        style={{ 
-                          filter: 'drop-shadow(3px 4px 3px rgba(0,0,0,0.4))'
-                        }}
-                      />
-                      {/* Dust effect behind lion - only during running state */}
-                      {gameState === 'running' && (
-                        <img 
-                          src="/assets/lion-gazelle/dust.svg" 
-                          alt="Dust" 
-                          className="absolute -left-10 bottom-0 w-16 h-10 opacity-80 dust-animation"
-                        />
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-              
-              {/* Game info overlays */}
-              {gameState === 'waiting' && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 z-30 text-center p-4">
-                  <h2 className="text-2xl font-bold text-[#DEB887] mb-2">الجولة التالية</h2>
-                  <div className="text-5xl font-bold text-white mb-4">{countdown}</div>
-                  <p className="text-sm text-white/80">سيبدأ الأسد بمطاردة الغزالة قريباً - ضع رهانك!</p>
-                </div>
-              )}
-              
-              {gameState === 'ended' && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-red-900/60 z-30 text-center p-4 crash-background">
-                  <h2 className="text-3xl font-bold text-red-300 mb-1">تم إمساك الغزالة!</h2>
-                  <div className="text-4xl md:text-5xl font-bold text-white mb-3">{bustedAt?.toFixed(2)}x</div>
-                  <p className="text-sm text-white/90">الجولة القادمة: <span className="font-bold">{countdown}</span></p>
-                </div>
-              )}
-              
-              {/* Current multiplier */}
-              {gameState === 'running' && (
-                <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-40">
-                  <div className="bg-[#8B4513]/80 border-2 border-[#DEB887] rounded-full px-4 py-1 text-center min-w-24">
-                    <span className="text-2xl font-bold text-[#DEB887]">{currentMultiplier.toFixed(2)}x</span>
-                  </div>
-                </div>
-              )}
-            </div>
-            
-            {/* Game controls */}
-            <div className="bg-[#5D4037] rounded-xl p-4 border-2 border-[#DEB887] shadow-lg">
-              <div className="grid grid-cols-2 gap-4">
-                {/* Left side - Bet controls */}
-                <div className="space-y-3">
-                  <h3 className="text-[#DEB887] font-semibold">مبلغ الرهان</h3>
-                  
-                  {/* Bet amount slider */}
-                  <div className="flex items-center gap-2">
-                    <Slider
-                      value={[betAmount]}
-                      min={1}
-                      max={1000}
-                      step={1}
-                      onValueChange={(values) => setBetAmount(values[0])}
-                      disabled={isPlayerBetting || gameState === 'running'}
-                      className="flex-1"
-                    />
-                    <span className="min-w-12 text-center font-bold">{betAmount}</span>
-                  </div>
-                  
-                  {/* Quick bet buttons */}
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => setBetAmount(prev => Math.max(1, prev - 10))}
-                      disabled={isPlayerBetting || gameState === 'running'}
-                      className="bg-[#3E2723] text-[#DEB887] hover:bg-[#3E2723]/80 rounded px-2 py-1 text-xs flex-1 disabled:opacity-50"
-                    >
-                      -10
-                    </button>
-                    <button
-                      onClick={() => setBetAmount(prev => Math.min(1000, prev + 10))}
-                      disabled={isPlayerBetting || gameState === 'running'}
-                      className="bg-[#3E2723] text-[#DEB887] hover:bg-[#3E2723]/80 rounded px-2 py-1 text-xs flex-1 disabled:opacity-50"
-                    >
-                      +10
-                    </button>
-                    <button
-                      onClick={() => setBetAmount(prev => Math.max(1, Math.floor(prev / 2)))}
-                      disabled={isPlayerBetting || gameState === 'running'}
-                      className="bg-[#3E2723] text-[#DEB887] hover:bg-[#3E2723]/80 rounded px-2 py-1 text-xs flex-1 disabled:opacity-50"
-                    >
-                      1/2
-                    </button>
-                    <button
-                      onClick={() => setBetAmount(prev => Math.min(1000, prev * 2))}
-                      disabled={isPlayerBetting || gameState === 'running'}
-                      className="bg-[#3E2723] text-[#DEB887] hover:bg-[#3E2723]/80 rounded px-2 py-1 text-xs flex-1 disabled:opacity-50"
-                    >
-                      2x
-                    </button>
-                  </div>
-                </div>
-                
-                {/* Right side - Action buttons */}
-                <div className="flex flex-col justify-between gap-2">
-                  {!isPlayerBetting ? (
-                    <Button
-                      onClick={placeBet}
-                      disabled={gameState === 'running' || gameState === 'ended'}
-                      className="bg-[#DEB887] hover:bg-[#D4AF37] text-black h-full text-lg font-bold"
-                    >
-                      <DollarSign className="mr-1 h-5 w-5" />
-                      ضع رهانك
-                    </Button>
-                  ) : (
-                    <Button
-                      onClick={cashOut}
-                      disabled={gameState !== 'running'}
-                      className="bg-green-600 hover:bg-green-700 text-white h-full text-lg font-bold"
-                    >
-                      <ArrowRight className="mr-1 h-5 w-5" />
-                      سحب {Math.floor(betAmount * currentMultiplier)}
-                    </Button>
                   )}
                 </div>
-              </div>
+                <CardDescription className="text-gray-400">
+                  {currentGame?.status === 'waiting' 
+                    ? 'السباق سيبدأ قريبًا، استعد للمراهنة!' 
+                    : currentGame?.status === 'running'
+                    ? 'الأسد يطارد الغزالة! اسحب قبل الإمساك بها!'
+                    : 'انتهى السباق! هل كنت محظوظًا؟'}
+                </CardDescription>
+              </CardHeader>
               
-              {/* Potential win */}
-              {isPlayerBetting && gameState === 'running' && (
-                <div className="mt-2 flex justify-between items-center text-sm">
-                  <span className="text-[#DEB887]">ربح محتمل:</span>
-                  <span className="font-bold">× {currentMultiplier.toFixed(2)} = {Math.floor(betAmount * currentMultiplier)}</span>
+              <CardContent>
+                {/* منطقة اللعب - تحتوي على الأسد والغزالة والمؤثرات البصرية */}
+                <div 
+                  ref={gameAreaRef}
+                  className="relative h-64 md:h-96 overflow-hidden rounded-xl border border-amber-900/30"
+                  style={{
+                    background: 'url("/assets/lion-gazelle/background.svg") repeat-x',
+                    backgroundSize: 'auto 100%'
+                  }}
+                >
+                  {/* المضاعف الكبير في منتصف الشاشة */}
+                  <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10">
+                    <div className={\`text-4xl md:text-6xl font-bold \${
+                      currentGame?.status === 'running' 
+                        ? getMultiplierClass(currentGame.currentMultiplier)
+                        : currentGame?.status === 'ended'
+                        ? 'text-red-500 font-extrabold'
+                        : 'text-white'
+                    }\`}>
+                      {currentGame?.status === 'running' 
+                        ? formatMultiplier(currentGame.currentMultiplier)
+                        : currentGame?.status === 'ended'
+                        ? formatMultiplier(currentGame.crashPoint)
+                        : formatMultiplier(1.00)}
+                    </div>
+                  </div>
+                  
+                  {/* الأسد */}
+                  <div 
+                    ref={lionRef}
+                    className="absolute bottom-6 left-10 w-24 h-24 z-20"
+                  >
+                    <div className={\`w-full h-full relative \${currentGame?.status === 'running' ? 'lion-running' : ''}\`}>
+                      <img 
+                        src="/assets/lion-gazelle/lion.svg" 
+                        alt="الأسد" 
+                        className="w-full h-full"
+                      />
+                    </div>
+                  </div>
+                  
+                  {/* الغزالة */}
+                  <div 
+                    ref={gazelleRef}
+                    className="absolute bottom-6 left-60 w-20 h-20 z-20"
+                  >
+                    <div className={\`w-full h-full relative \${currentGame?.status === 'running' ? 'gazelle-running' : ''}\`}>
+                      <img 
+                        src="/assets/lion-gazelle/gazelle.svg" 
+                        alt="الغزالة" 
+                        className="w-full h-full"
+                      />
+                    </div>
+                  </div>
+                  
+                  {/* المسار (سطح الأرض) */}
+                  <div 
+                    className="absolute bottom-0 left-0 w-full h-12 z-10"
+                    style={{
+                      background: 'url("/assets/lion-gazelle/track.svg") repeat-x',
+                      backgroundSize: 'auto 100%'
+                    }}
+                  ></div>
+                  
+                  {/* تأثير نهاية اللعبة */}
+                  {currentGame?.status === 'ended' && (
+                    <div className="absolute inset-0 bg-red-500/20 z-5"></div>
+                  )}
                 </div>
-              )}
-            </div>
+              </CardContent>
+              
+              <CardFooter className="pt-0">
+                <div className="flex flex-col w-full gap-4">
+                  {/* منطقة المراهنة أو السحب */}
+                  <div className="flex flex-col sm:flex-row gap-3 items-center">
+                    {/* حالة الانتظار - يمكن المراهنة */}
+                    {currentGame?.status === 'waiting' && !isPlayerBetting && (
+                      <>
+                        <Input
+                          type="number"
+                          value={betAmount}
+                          onChange={(e) => setBetAmount(parseInt(e.target.value) || 0)}
+                          className="w-full sm:w-1/3 bg-gray-800 border-gray-700 text-white text-left"
+                          placeholder="مبلغ الرهان"
+                          min={1}
+                        />
+                        <Button 
+                          onClick={handlePlaceBet} 
+                          className="w-full sm:w-auto bg-amber-600 hover:bg-amber-700 text-white"
+                          disabled={placeBetMutation.isPending}
+                        >
+                          {placeBetMutation.isPending ? 'جارٍ المراهنة...' : 'المراهنة'}
+                        </Button>
+                      </>
+                    )}
+                    
+                    {/* في حالة اللعب - لاعب يشارك - يمكن السحب */}
+                    {currentGame?.status === 'running' && isPlayerBetting && !isPlayerCashedOut && (
+                      <Button
+                        onClick={handleCashOut}
+                        className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white"
+                        disabled={cashOutMutation.isPending}
+                        size="lg"
+                      >
+                        {cashOutMutation.isPending ? 'جاري السحب...' : \`السحب عند \${formatMultiplier(currentGame.currentMultiplier)}\`}
+                      </Button>
+                    )}
+                    
+                    {/* لاعب قام بالسحب بالفعل - إظهار النتيجة */}
+                    {isPlayerCashedOut && lastCashedOut && (
+                      <div className="text-center w-full">
+                        <p className="text-green-500 font-bold text-lg">
+                          تم السحب بنجاح عند {formatMultiplier(lastCashedOut.multiplier)}
+                        </p>
+                        <p className="text-white">
+                          ربحت <span className="text-green-500 font-bold">{lastCashedOut.profit}</span> رقائق
+                        </p>
+                      </div>
+                    )}
+                    
+                    {/* لاعب غير مشارك وتم انتهاء اللعبة - إظهار الكراش */}
+                    {currentGame?.status === 'ended' && !isPlayerBetting && (
+                      <div className="text-center w-full">
+                        <p className="text-red-500 font-bold text-lg">
+                          تحطمت عند {formatMultiplier(currentGame.crashPoint)}
+                        </p>
+                        <p className="text-gray-300">
+                          انتظر الجولة القادمة للمشاركة
+                        </p>
+                      </div>
+                    )}
+                    
+                    {/* لاعب تم القبض عليه (لم يسحب قبل الكراش) */}
+                    {currentGame?.status === 'ended' && isPlayerBetting && !isPlayerCashedOut && (
+                      <div className="text-center w-full">
+                        <p className="text-red-500 font-bold text-lg">
+                          تم الإمساك بالغزالة!
+                        </p>
+                        <p className="text-white">
+                          خسرت <span className="text-red-500 font-bold">{getCurrentPlayerBet()?.betAmount || 0}</span> رقائق
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* معلومات إضافية - عدد المشاركين وإجمالي الرهانات */}
+                  <div className="flex justify-between text-sm text-gray-400">
+                    <div className="flex items-center gap-1">
+                      <Users className="h-4 w-4" />
+                      <span>{currentGame?.players.length || 0} لاعب</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Coins className="h-4 w-4" />
+                      <span>
+                        {currentGame?.players.reduce((sum, p) => sum + p.betAmount, 0) || 0} رقاقة
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </CardFooter>
+            </Card>
+            
+            {/* علامات تبويب اللاعبين - المتصدرين والإحصائيات */}
+            <Tabs defaultValue="players">
+              <TabsList className="bg-gray-800">
+                <TabsTrigger value="players" className="data-[state=active]:bg-amber-900/30 data-[state=active]:text-amber-500">
+                  اللاعبون
+                </TabsTrigger>
+                <TabsTrigger value="history" className="data-[state=active]:bg-amber-900/30 data-[state=active]:text-amber-500">
+                  السجل
+                </TabsTrigger>
+                <TabsTrigger value="stats" className="data-[state=active]:bg-amber-900/30 data-[state=active]:text-amber-500">
+                  الإحصائيات
+                </TabsTrigger>
+              </TabsList>
+              
+              {/* علامة تبويب اللاعبين */}
+              <TabsContent value="players">
+                <Card className="border-amber-900/50 bg-gradient-to-b from-gray-900/70 to-gray-900/50">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg text-amber-500">اللاعبون النشطون</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {/* اللاعبون المشاركون */}
+                    {activePlayers.length > 0 ? (
+                      <div className="space-y-2 mb-4">
+                        {activePlayers.map((player) => (
+                          <div key={player.userId} className="flex justify-between items-center p-2 bg-gray-800/50 rounded-md">
+                            <div className="flex items-center gap-2">
+                              <div className="w-8 h-8 rounded-full bg-amber-800 flex items-center justify-center">
+                                {player.avatar ? (
+                                  <img src={player.avatar} alt={player.username} className="w-full h-full rounded-full" />
+                                ) : (
+                                  <span>{player.username.charAt(0)}</span>
+                                )}
+                              </div>
+                              <span>{player.username}</span>
+                            </div>
+                            <div className="text-amber-500 font-bold">{player.betAmount}</div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-gray-500 text-center py-4">لا يوجد لاعبون نشطون حاليًا</p>
+                    )}
+                    
+                    {/* الفائزون (سحبوا قبل الكراش) */}
+                    {cashedOutPlayers.length > 0 && (
+                      <>
+                        <h3 className="text-lg font-bold text-green-500 mb-2">اللاعبون الفائزون</h3>
+                        <div className="space-y-2 mb-4">
+                          {cashedOutPlayers.map((player) => (
+                            <div key={player.userId} className="flex justify-between items-center p-2 bg-gray-800/50 rounded-md winner-row">
+                              <div className="flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-full bg-green-800 flex items-center justify-center">
+                                  {player.avatar ? (
+                                    <img src={player.avatar} alt={player.username} className="w-full h-full rounded-full" />
+                                  ) : (
+                                    <span>{player.username.charAt(0)}</span>
+                                  )}
+                                </div>
+                                <span>{player.username}</span>
+                              </div>
+                              <div className="flex flex-col items-end">
+                                <span className="text-white font-bold">{player.profit} رقاقة</span>
+                                <span className={getMultiplierColor(player.cashoutMultiplier || 1)}>
+                                  {formatMultiplier(player.cashoutMultiplier || 1)}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                    
+                    {/* الخاسرون (لم يسحبوا قبل الكراش) */}
+                    {bustedPlayers.length > 0 && (
+                      <>
+                        <h3 className="text-lg font-bold text-red-500 mb-2">اللاعبون الخاسرون</h3>
+                        <div className="space-y-2">
+                          {bustedPlayers.map((player) => (
+                            <div key={player.userId} className="flex justify-between items-center p-2 bg-gray-800/50 rounded-md">
+                              <div className="flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-full bg-red-900 flex items-center justify-center">
+                                  {player.avatar ? (
+                                    <img src={player.avatar} alt={player.username} className="w-full h-full rounded-full" />
+                                  ) : (
+                                    <span>{player.username.charAt(0)}</span>
+                                  )}
+                                </div>
+                                <span>{player.username}</span>
+                              </div>
+                              <div className="text-red-500 font-bold">-{player.betAmount}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              
+              {/* علامة تبويب السجل */}
+              <TabsContent value="history">
+                <Card className="border-amber-900/50 bg-gradient-to-b from-gray-900/70 to-gray-900/50">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg text-amber-500">السجل السابق</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {historyData?.success && historyData.history.length > 0 ? (
+                      <div className="space-y-2">
+                        {historyData.history.map((game: GameHistory) => (
+                          <div key={game.gameId} className="flex justify-between items-center p-2 bg-gray-800/50 rounded-md">
+                            <div className="flex items-center gap-2">
+                              <History className="h-4 w-4 text-gray-500" />
+                              <span className="text-sm text-gray-300">
+                                {new Date(game.endTime).toLocaleTimeString()}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-4">
+                              <span className="text-sm text-gray-300">
+                                {game.playerCount} لاعب
+                              </span>
+                              <span className={\`font-bold \${getMultiplierColor(game.multiplier)}\`}>
+                                {formatMultiplier(game.multiplier)}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-gray-500 text-center py-4">لا توجد سجلات سابقة</p>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              
+              {/* علامة تبويب الإحصائيات */}
+              <TabsContent value="stats">
+                <Card className="border-amber-900/50 bg-gradient-to-b from-gray-900/70 to-gray-900/50">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg text-amber-500">إحصائياتك</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {!user ? (
+                      <div className="text-center py-4">
+                        <AlertTriangle className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
+                        <p className="text-gray-300">يجب تسجيل الدخول لعرض إحصائياتك</p>
+                      </div>
+                    ) : statsData?.success && statsData.stats ? (
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="p-3 bg-gray-800/50 rounded-md flex flex-col items-center">
+                          <span className="text-sm text-gray-400">عدد الألعاب</span>
+                          <span className="text-xl font-bold text-white">
+                            {statsData.stats.totalGames}
+                          </span>
+                        </div>
+                        <div className="p-3 bg-gray-800/50 rounded-md flex flex-col items-center">
+                          <span className="text-sm text-gray-400">عدد الفوز</span>
+                          <span className="text-xl font-bold text-green-500">
+                            {statsData.stats.wins}
+                          </span>
+                        </div>
+                        <div className="p-3 bg-gray-800/50 rounded-md flex flex-col items-center">
+                          <span className="text-sm text-gray-400">أعلى مضاعف</span>
+                          <span className={\`text-xl font-bold \${getMultiplierColor(statsData.stats.bestMultiplier)}\`}>
+                            {formatMultiplier(statsData.stats.bestMultiplier)}
+                          </span>
+                        </div>
+                        <div className="p-3 bg-gray-800/50 rounded-md flex flex-col items-center">
+                          <span className="text-sm text-gray-400">أكبر فوز</span>
+                          <span className="text-xl font-bold text-amber-500">
+                            {statsData.stats.biggestWin}
+                          </span>
+                        </div>
+                        <div className="p-3 bg-gray-800/50 rounded-md flex flex-col items-center">
+                          <span className="text-sm text-gray-400">إجمالي الربح</span>
+                          <span className={\`text-xl font-bold \${statsData.stats.totalProfit >= 0 ? 'text-green-500' : 'text-red-500'}\`}>
+                            {statsData.stats.totalProfit}
+                          </span>
+                        </div>
+                        <div className="p-3 bg-gray-800/50 rounded-md flex flex-col items-center">
+                          <span className="text-sm text-gray-400">معدل الفوز</span>
+                          <span className="text-xl font-bold text-white">
+                            {statsData.stats.totalGames > 0 
+                              ? `${Math.round((statsData.stats.wins / statsData.stats.totalGames) * 100)}%` 
+                              : '0%'}
+                          </span>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-gray-500 text-center py-4">لا توجد إحصائيات متاحة</p>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
           </div>
           
-          {/* Players and game stats - Right side on desktop */}
-          <div className="space-y-4">
-            {/* Game stats */}
-            <div className="bg-[#5D4037] rounded-xl p-4 border-2 border-[#DEB887] shadow-lg">
-              <h3 className="text-lg font-bold text-[#DEB887] mb-3">إحصائيات الجولة</h3>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-[#3E2723] rounded-lg p-2 flex items-center">
-                  <Users className="h-5 w-5 text-[#DEB887] mr-2" />
-                  <div>
-                    <div className="text-xs text-[#DEB887]/70">اللاعبون</div>
-                    <div className="font-bold">{totalPlayers}</div>
-                  </div>
-                </div>
-                <div className="bg-[#3E2723] rounded-lg p-2 flex items-center">
-                  <Coins className="h-5 w-5 text-[#DEB887] mr-2" />
-                  <div>
-                    <div className="text-xs text-[#DEB887]/70">إجمالي الرهانات</div>
-                    <div className="font-bold">{totalBets}</div>
-                  </div>
-                </div>
-                <div className="bg-[#3E2723] rounded-lg p-2 flex items-center">
-                  <Star className="h-5 w-5 text-green-500 mr-2" />
-                  <div>
-                    <div className="text-xs text-[#DEB887]/70">سحبوا بنجاح</div>
-                    <div className="font-bold">{cashedOutPlayers}</div>
-                  </div>
-                </div>
-                <div className="bg-[#3E2723] rounded-lg p-2 flex items-center">
-                  <Clock className="h-5 w-5 text-red-500 mr-2" />
-                  <div>
-                    <div className="text-xs text-[#DEB887]/70">خسروا</div>
-                    <div className="font-bold">{bustedPlayers}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Players list */}
-            <div className="bg-[#5D4037] rounded-xl overflow-hidden border-2 border-[#DEB887] shadow-lg">
-              <div className="p-3 bg-[#3E2723] border-b border-[#DEB887]">
-                <h3 className="text-lg font-bold text-[#DEB887]">اللاعبون</h3>
-              </div>
-              
-              <div className="divide-y divide-[#DEB887]/30 max-h-96 overflow-y-auto">
-                {players.map(player => (
-                  <div key={player.id} className={`p-3 flex justify-between items-center ${player.id === user?.id ? 'bg-[#8B4513]/30' : ''}`}>
-                    <div className="flex items-center">
-                      <div className="w-8 h-8 rounded-full bg-[#3E2723] flex items-center justify-center mr-3 border border-[#DEB887]/50">
-                        {player.id === user?.id ? (
-                          <Crown className="h-4 w-4 text-[#DEB887]" />
-                        ) : (
-                          <Trophy className="h-4 w-4 text-[#DEB887]" />
-                        )}
+          {/* الجانب الأيمن - الإحصائيات واللاعبين */}
+          <div className="space-y-6">
+            {/* أحدث الألعاب والمتصدرين */}
+            <Card className="border-amber-900/50 bg-gradient-to-b from-amber-950/50 to-gray-900/50">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xl text-amber-500">المتصدرون</CardTitle>
+                <CardDescription className="text-gray-400">
+                  أفضل اللاعبين في اللعبة
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {leaderboardData?.success && leaderboardData.leaderboard.length > 0 ? (
+                  <div className="space-y-3">
+                    {leaderboardData.leaderboard.slice(0, 5).map((entry: LeaderboardEntry, index: number) => (
+                      <div key={entry.userId} className="flex justify-between items-center p-2 bg-gray-800/50 rounded-md">
+                        <div className="flex items-center gap-2">
+                          <div className={\`w-6 h-6 rounded-full flex items-center justify-center font-bold \${
+                            index === 0 ? 'bg-yellow-500 text-black' :
+                            index === 1 ? 'bg-gray-300 text-black' :
+                            index === 2 ? 'bg-amber-700 text-white' :
+                            'bg-gray-700 text-white'
+                          }\`}>
+                            {index + 1}
+                          </div>
+                          <span>{entry.username || `لاعب_${entry.userId}`}</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="flex flex-col items-end">
+                            <span className="text-sm text-gray-400">{entry.gamesPlayed} لعبة</span>
+                            <span className="text-amber-500 font-bold">{entry.totalWins}</span>
+                          </div>
+                          <div className={getMultiplierColor(entry.highestMultiplier)}>
+                            {formatMultiplier(entry.highestMultiplier)}
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <div className="font-medium">{player.username}</div>
-                        <div className="text-xs text-[#DEB887]">{player.betAmount} رقاقة</div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      {player.status === 'playing' && (
-                        <div className="text-white font-bold">
-                          مشارك
-                          <div className="inline-block w-2 h-2 bg-amber-500 rounded-full ml-1 animate-pulse"></div>
-                        </div>
-                      )}
-                      {player.status === 'cashed_out' && (
-                        <div className="text-green-500 font-bold">
-                          {player.cashoutMultiplier?.toFixed(2)}x
-                          <span className="block text-xs">+{player.profit}</span>
-                        </div>
-                      )}
-                      {player.status === 'busted' && (
-                        <div className="text-red-500 font-bold">
-                          خسر
-                          <span className="block text-xs">{player.profit}</span>
-                        </div>
-                      )}
-                    </div>
+                    ))}
                   </div>
-                ))}
-                
-                {/* Empty state */}
-                {players.length === 0 && (
-                  <div className="p-6 text-center text-[#DEB887]/70">
-                    <RefreshCw className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                    <p>انتظر الجولة القادمة للانضمام</p>
-                  </div>
+                ) : (
+                  <p className="text-gray-500 text-center py-4">لا يوجد متصدرون حتى الآن</p>
                 )}
-              </div>
-            </div>
+              </CardContent>
+              <CardFooter>
+                <Button variant="outline" className="w-full border-amber-900/50 text-amber-500 hover:bg-amber-950">
+                  عرض المزيد من المتصدرين
+                </Button>
+              </CardFooter>
+            </Card>
+            
+            {/* نصائح اللعبة */}
+            <Card className="border-amber-900/50 bg-gradient-to-b from-amber-950/50 to-gray-900/50">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xl text-amber-500">نصائح اللعبة</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3 text-gray-300">
+                  <li className="flex items-start gap-2">
+                    <TrendingUp className="h-5 w-5 text-amber-500 mt-0.5" />
+                    <span>كلما ارتفع المضاعف، زادت المخاطرة والعائد المحتمل.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <AlertTriangle className="h-5 w-5 text-amber-500 mt-0.5" />
+                    <span>لا تنتظر كثيرًا! الغزالة قد تُمسك في أي لحظة.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Trophy className="h-5 w-5 text-amber-500 mt-0.5" />
+                    <span>ضع استراتيجية للسحب المبكر للحصول على مكاسب قليلة ولكن مستمرة.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Coins className="h-5 w-5 text-amber-500 mt-0.5" />
+                    <span>أدر رصيدك بحكمة، ولا تراهن بأكثر مما يمكنك تحمل خسارته.</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default LionGazelleGame;

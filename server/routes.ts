@@ -5,7 +5,7 @@ import { setupAuth, hashPassword } from "./auth";
 import { setupPokerGame, pokerModule } from "./poker";
 import { z } from "zod";
 import fileUpload from "express-fileupload";
-import lionGazelleRoutes from "./routes/lion-gazelle-routes";
+import lionCrashRouter from "./routes/lion-crash-routes";
 
 // ميدلوير للتحقق من المصادقة
 function ensureAuthenticated(req: Request, res: Response, next: NextFunction) {
@@ -30,9 +30,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   setupPokerGame(app, httpServer);
   
   // API endpoints
-  
-  // إضافة مسارات لعبة الأسد والغزالة
-  app.use('/api/lion-gazelle', lionGazelleRoutes);
   
   // طرق المستخدم الأساسية
   app.get("/api/user", (req, res) => {
@@ -893,6 +890,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("خطأ في إزالة الشارة من المفضلة:", error);
       res.status(500).json({ message: "حدث خطأ أثناء إزالة الشارة من المفضلة" });
     }
+  });
+
+  // إضافة مسارات لعبة الأسد والغزالة من نوع كراش
+  app.use("/api/lion-crash", ensureAuthenticated, lionCrashRouter);
+
+  // معالجة الأخطاء العامة
+  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+    console.error("خطأ عام:", err);
+    res.status(500).json({ 
+      success: false, 
+      message: "حدث خطأ في الخادم",
+      error: process.env.NODE_ENV === 'production' ? undefined : err.message
+    });
   });
 
   return httpServer;

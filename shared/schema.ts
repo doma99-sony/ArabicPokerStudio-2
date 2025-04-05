@@ -376,6 +376,12 @@ export type BadgeCategory = typeof badgeCategories.$inferSelect;
 // تعريف نوع لمستويات الصعوبة في لعبة الأسد والغزالة
 export const lionGameDifficultyEnum = pgEnum('lion_game_difficulty', ['beginner', 'easy', 'medium', 'hard', 'expert']);
 
+// تعريف نوع وضع اللعب في لعبة الأسد والغزالة
+export const lionGameModeEnum = pgEnum('lion_game_mode', ['race', 'crash', 'endless']);
+
+// تعريف حالة لاعب الأسد والغزالة
+export const lionPlayerStatusEnum = pgEnum('lion_player_status', ['betting', 'playing', 'cashed_out', 'busted']);
+
 // تعريف نوع للقوى والتحسينات في لعبة الأسد والغزالة
 export const powerUpTypeEnum = pgEnum('power_up_type', ['speed_boost', 'shield', 'slow_down', 'teleport', 'invisibility', 'double_coins', 'magnet']);
 
@@ -555,3 +561,55 @@ export type LionGameLevel = typeof lionGazelleLevels.$inferSelect;
 export type LionGameUserStats = typeof lionGameUserStats.$inferSelect;
 export type LionGameCharacter = typeof lionGameCharacters.$inferSelect;
 export type LionGamePowerUp = typeof lionGamePowerUps.$inferSelect;
+
+// ------ نظام لعبة الأسد والغزالة - نوع Crash ------
+
+// جدول لعبة الأسد والغزالة من نوع كراش
+export const lionCrashGames = pgTable("lion_crash_games", {
+  id: serial("id").primaryKey(),
+  gameId: text("game_id").notNull().unique(), // معرف اللعبة الفريد
+  status: text("status").notNull().default('waiting'), // waiting, running, ended
+  startTime: timestamp("start_time"), // وقت بدء اللعبة
+  endTime: timestamp("end_time"), // وقت انتهاء اللعبة
+  crashPoint: real("crash_point").notNull(), // نقطة الانهيار (المضاعف)
+  gameHash: text("game_hash"), // هاش اللعبة للتحقق من عدالة النتيجة
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  serverSeed: text("server_seed"), // البذرة الخاصة بالخادم للتحقق من عدالة النتيجة
+  clientSeed: text("client_seed"), // البذرة الخاصة بالعميل للتحقق من عدالة النتيجة
+  totalBetAmount: integer("total_bet_amount").default(0), // إجمالي مبلغ الرهانات
+  totalPayoutAmount: integer("total_payout_amount").default(0), // إجمالي مبلغ الدفعات
+});
+
+// جدول رهانات لعبة الأسد والغزالة من نوع كراش
+export const lionCrashBets = pgTable("lion_crash_bets", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  gameId: text("game_id").notNull().references(() => lionCrashGames.gameId),
+  betAmount: integer("bet_amount").notNull(),
+  cashoutMultiplier: real("cashout_multiplier"), // المضاعف عند السحب (null إذا لم يسحب بعد)
+  profit: integer("profit"), // الربح (سالب إذا كان خسارة)
+  status: lionPlayerStatusEnum("status").notNull().default('betting'),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  autoCashoutAt: real("auto_cashout_at"), // المضاعف المحدد للسحب التلقائي
+});
+
+// مخططات الإدخال للعبة crash
+export const insertLionCrashGameSchema = createInsertSchema(lionCrashGames).omit({
+  id: true,
+  createdAt: true,
+  totalBetAmount: true,
+  totalPayoutAmount: true
+});
+
+export const insertLionCrashBetSchema = createInsertSchema(lionCrashBets).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  profit: true
+});
+
+export type InsertLionCrashGame = z.infer<typeof insertLionCrashGameSchema>;
+export type InsertLionCrashBet = z.infer<typeof insertLionCrashBetSchema>;
+export type LionCrashGame = typeof lionCrashGames.$inferSelect;
+export type LionCrashBet = typeof lionCrashBets.$inferSelect;

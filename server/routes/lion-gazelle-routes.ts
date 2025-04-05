@@ -1,251 +1,202 @@
-import { Router, Request, Response, NextFunction } from 'express';
+import { Router } from 'express';
+import lionGazelleService from '../services/lion-gazelle-service';
+import { storage } from '../storage';
 import { z } from 'zod';
-import { lionGazelleService } from '../services/lion-gazelle-service';
-
-// ميدلوير للتحقق من المصادقة
-function ensureAuthenticated(req: Request, res: Response, next: NextFunction) {
-  if (req.isAuthenticated() && req.user) {
-    // Refresh session
-    req.session.touch();
-    return next();
-  }
-  // Clear any invalid session
-  req.session.destroy((err) => {
-    if (err) console.error("Session destruction error:", err);
-    res.status(401).json({ message: "يجب تسجيل الدخول للوصول إلى هذا المورد" });
-  });
-}
 
 const router = Router();
 
-/**
- * الحصول على جميع مستويات اللعبة
- */
-router.get('/levels', ensureAuthenticated, async (req: Request, res: Response) => {
-  try {
-    const userId = req.user?.id || 0;
-    const levels = await lionGazelleService.getLevels(userId);
-    res.json({ success: true, data: levels });
-  } catch (error: any) {
-    console.error('Error fetching lion-gazelle levels:', error);
-    res.status(500).json({ success: false, error: error.message });
-  }
+// مخطط التحقق من صحة الرهان
+const betSchema = z.object({
+  amount: z.number().int().positive()
 });
 
-/**
- * الحصول على تفاصيل مستوى معين
- */
-router.get('/levels/:id', ensureAuthenticated, async (req: Request, res: Response) => {
+// مخطط التحقق من معرّف اللعبة
+const gameIdSchema = z.object({
+  gameId: z.string()
+});
+
+// الحصول على اللعبة الحالية
+router.get('/current-game', async (req, res) => {
   try {
-    const levelId = parseInt(req.params.id);
-    if (isNaN(levelId)) {
-      return res.status(400).json({ success: false, error: 'معرف المستوى غير صالح' });
+    // التحقق من وجود مستخدم مسجل
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ success: false, message: 'يرجى تسجيل الدخول للمتابعة' });
     }
     
-    const level = await lionGazelleService.getLevelDetails(levelId);
-    res.json({ success: true, data: level });
-  } catch (error: any) {
-    console.error('Error fetching lion-gazelle level details:', error);
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
-/**
- * الحصول على شخصيات المستخدم
- */
-router.get('/characters', ensureAuthenticated, async (req: Request, res: Response) => {
-  try {
-    const userId = req.user?.id || 0;
-    const characters = await lionGazelleService.getUserCharacters(userId);
-    res.json({ success: true, data: characters });
-  } catch (error: any) {
-    console.error('Error fetching user characters:', error);
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
-/**
- * الحصول على تحسينات قوة المستخدم
- */
-router.get('/power-ups', ensureAuthenticated, async (req: Request, res: Response) => {
-  try {
-    const userId = req.user?.id || 0;
-    const powerUps = await lionGazelleService.getUserPowerUps(userId);
-    res.json({ success: true, data: powerUps });
-  } catch (error: any) {
-    console.error('Error fetching user power-ups:', error);
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
-/**
- * شراء شخصية جديدة
- */
-router.post('/purchase-character', ensureAuthenticated, async (req: Request, res: Response) => {
-  try {
-    const schema = z.object({
-      characterId: z.number()
-    });
+    // الحصول على اللعبة الحالية
+    let game = lionGazelleService.getCurrentGame();
     
-    const { characterId } = schema.parse(req.body);
-    const userId = req.user?.id || 0;
-    
-    const result = await lionGazelleService.purchaseCharacter(userId, characterId);
-    
-    if (result.success) {
-      res.json({ success: true, message: result.message });
-    } else {
-      res.status(400).json({ success: false, error: result.message });
+    // إذا لم تكن هناك لعبة حالية، قم بإنشاء واحدة جديدة
+    if (!game) {
+      const gameId = await lionGazelleService.createGame();
+      game = lionGazelleService.getGame(gameId);
     }
-  } catch (error: any) {
-    console.error('Error purchasing character:', error);
-    res.status(500).json({ success: false, error: error.message || 'حدث خطأ أثناء شراء الشخصية' });
+    
+    res.json({ success: true, game });
+  } catch (error) {
+    console.error('Error getting current game:', error);
+    res.status(500).json({ success: false, message: 'حدث خطأ أثناء الحصول على اللعبة الحالية' });
   }
 });
 
-/**
- * شراء تحسين قوة
- */
-router.post('/purchase-power-up', ensureAuthenticated, async (req: Request, res: Response) => {
+// وضع رهان
+router.post('/place-bet', async (req, res) => {
   try {
-    const schema = z.object({
-      powerUpId: z.number(),
-      quantity: z.number().optional().default(1)
-    });
-    
-    const { powerUpId, quantity } = schema.parse(req.body);
-    const userId = req.user?.id || 0;
-    
-    const result = await lionGazelleService.purchasePowerUp(userId, powerUpId, quantity);
-    
-    if (result.success) {
-      res.json({ success: true, message: result.message });
-    } else {
-      res.status(400).json({ success: false, error: result.message });
+    // التحقق من وجود مستخدم مسجل
+    if (!req.isAuthenticated() || !req.user) {
+      return res.status(401).json({ success: false, message: 'يرجى تسجيل الدخول للمتابعة' });
     }
-  } catch (error: any) {
-    console.error('Error purchasing power-up:', error);
-    res.status(500).json({ success: false, error: error.message || 'حدث خطأ أثناء شراء تحسين القوة' });
-  }
-});
-
-/**
- * تجهيز شخصية
- */
-router.post('/equip-character', ensureAuthenticated, async (req: Request, res: Response) => {
-  try {
-    const schema = z.object({
-      characterId: z.number()
-    });
     
-    const { characterId } = schema.parse(req.body);
-    const userId = req.user?.id || 0;
-    
-    const result = await lionGazelleService.equipCharacter(userId, characterId);
-    
-    if (result.success) {
-      res.json({ success: true, message: result.message });
-    } else {
-      res.status(400).json({ success: false, error: result.message });
+    // التحقق من صحة البيانات المرسلة
+    const validationResult = betSchema.safeParse(req.body);
+    if (!validationResult.success) {
+      return res.status(400).json({ success: false, message: 'بيانات الرهان غير صالحة' });
     }
-  } catch (error: any) {
-    console.error('Error equipping character:', error);
-    res.status(500).json({ success: false, error: error.message || 'حدث خطأ أثناء تجهيز الشخصية' });
+    
+    const { amount } = validationResult.data;
+    const userId = req.user.id;
+    
+    // التحقق من رصيد المستخدم
+    const user = await storage.getUser(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'المستخدم غير موجود' });
+    }
+    
+    if (user.chips < amount) {
+      return res.status(400).json({ success: false, message: 'رصيد غير كافٍ' });
+    }
+    
+    // الحصول على اللعبة الحالية
+    let game = lionGazelleService.getCurrentGame();
+    if (!game) {
+      return res.status(400).json({ success: false, message: 'لا توجد لعبة نشطة حالياً' });
+    }
+    
+    // وضع الرهان
+    const result = await lionGazelleService.placeBet(
+      game.gameId,
+      userId,
+      user.username,
+      user.avatar || null,
+      amount
+    );
+    
+    if (!result.success) {
+      return res.status(400).json({ success: false, message: result.message });
+    }
+    
+    // تحديث رصيد المستخدم (خصم قيمة الرهان)
+    await storage.updateUserChips(userId, user.chips - amount);
+    
+    // إعادة اللعبة المحدثة
+    game = lionGazelleService.getGame(game.gameId);
+    
+    res.json({ success: true, message: 'تم وضع الرهان بنجاح', game });
+  } catch (error) {
+    console.error('Error placing bet:', error);
+    res.status(500).json({ success: false, message: 'حدث خطأ أثناء وضع الرهان' });
   }
 });
 
-/**
- * تسجيل نتيجة لعبة
- */
-router.post('/record-result', ensureAuthenticated, async (req: Request, res: Response) => {
+// سحب الرهان (الخروج من اللعبة)
+router.post('/cash-out', async (req, res) => {
   try {
-    const schema = z.object({
-      levelId: z.number(),
-      result: z.enum(['win', 'loss']),
-      gameData: z.object({
-        duration: z.number(),
-        distance: z.number(),
-        coinsCollected: z.number(),
-        powerUpsUsed: z.number(),
-        obstaclesAvoided: z.number(),
-        score: z.number(),
-        multiplier: z.number(),
-        characterUsed: z.number().optional()
-      })
+    // التحقق من وجود مستخدم مسجل
+    if (!req.isAuthenticated() || !req.user) {
+      return res.status(401).json({ success: false, message: 'يرجى تسجيل الدخول للمتابعة' });
+    }
+    
+    // التحقق من صحة البيانات المرسلة
+    const validationResult = gameIdSchema.safeParse(req.body);
+    if (!validationResult.success) {
+      return res.status(400).json({ success: false, message: 'معرّف اللعبة غير صالح' });
+    }
+    
+    const { gameId } = validationResult.data;
+    const userId = req.user.id;
+    
+    // محاولة سحب الرهان
+    const result = await lionGazelleService.cashOut(gameId, userId);
+    
+    if (!result.success) {
+      return res.status(400).json({ success: false, message: result.message });
+    }
+    
+    // تحديث رصيد المستخدم (إضافة الأرباح)
+    const user = await storage.getUser(userId);
+    if (user && result.profit && result.profit > 0) {
+      await storage.updateUserChips(userId, user.chips + result.profit + (user.chips / result.multiplier!));
+    }
+    
+    // إعادة اللعبة المحدثة
+    const game = lionGazelleService.getGame(gameId);
+    
+    res.json({
+      success: true,
+      message: 'تم السحب بنجاح',
+      multiplier: result.multiplier,
+      profit: result.profit,
+      game
     });
-    
-    const { levelId, result, gameData } = schema.parse(req.body);
-    const userId = req.user?.id || 0;
-    
-    const gameResult = await lionGazelleService.recordGameResult(userId, levelId, result, gameData);
-    
-    res.json({ 
-      success: true, 
-      message: gameResult.message,
-      reward: gameResult.reward
-    });
-  } catch (error: any) {
-    console.error('Error recording game result:', error);
-    res.status(500).json({ success: false, error: error.message || 'حدث خطأ أثناء تسجيل نتيجة اللعبة' });
+  } catch (error) {
+    console.error('Error cashing out:', error);
+    res.status(500).json({ success: false, message: 'حدث خطأ أثناء السحب' });
   }
 });
 
-/**
- * الحصول على سجل ألعاب المستخدم
- */
-router.get('/history', ensureAuthenticated, async (req: Request, res: Response) => {
+// الحصول على إحصائيات اللاعب
+router.get('/stats', async (req, res) => {
   try {
-    const userId = req.user?.id || 0;
-    const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+    // التحقق من وجود مستخدم مسجل
+    if (!req.isAuthenticated() || !req.user) {
+      return res.status(401).json({ success: false, message: 'يرجى تسجيل الدخول للمتابعة' });
+    }
     
-    const history = await lionGazelleService.getUserGameHistory(userId, limit);
-    res.json({ success: true, data: history });
-  } catch (error: any) {
-    console.error('Error fetching game history:', error);
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
-/**
- * الحصول على إحصائيات المستخدم
- */
-router.get('/stats', ensureAuthenticated, async (req: Request, res: Response) => {
-  try {
-    const userId = req.user?.id || 0;
+    const userId = req.user.id;
+    
+    // الحصول على إحصائيات اللاعب
     const stats = await lionGazelleService.getUserStats(userId);
-    res.json({ success: true, data: stats });
-  } catch (error: any) {
-    console.error('Error fetching user stats:', error);
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
-/**
- * الحصول على لوحة المتصدرين
- */
-router.get('/leaderboard', async (req: Request, res: Response) => {
-  try {
-    const category = (req.query.category as 'score' | 'coins' | 'distance' | 'wins') || 'score';
-    const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
     
-    const leaderboard = await lionGazelleService.getLeaderboard(category, limit);
-    res.json({ success: true, data: leaderboard });
-  } catch (error: any) {
-    console.error('Error fetching leaderboard:', error);
-    res.status(500).json({ success: false, error: error.message });
+    if (!stats) {
+      return res.status(404).json({ success: false, message: 'لم يتم العثور على إحصائيات' });
+    }
+    
+    res.json({ success: true, stats });
+  } catch (error) {
+    console.error('Error getting user stats:', error);
+    res.status(500).json({ success: false, message: 'حدث خطأ أثناء الحصول على الإحصائيات' });
   }
 });
 
-/**
- * الحصول على نصائح قيمة الخروج الآمن
- */
-router.get('/cashout-tips', async (req: Request, res: Response) => {
+// الحصول على المتصدرين
+router.get('/leaderboard', async (req, res) => {
   try {
-    const tips = await lionGazelleService.getCashoutTips();
-    res.json({ success: true, data: tips });
-  } catch (error: any) {
-    console.error('Error fetching cashout tips:', error);
-    res.status(500).json({ success: false, error: error.message });
+    // التحقق من صحة المعلمات
+    const period = req.query.period as 'daily' | 'weekly' | 'monthly' | 'all_time' || 'all_time';
+    const limit = parseInt(req.query.limit as string) || 10;
+    
+    // الحصول على المتصدرين
+    const leaderboard = await lionGazelleService.getLeaderboard(period, limit);
+    
+    res.json({ success: true, leaderboard });
+  } catch (error) {
+    console.error('Error getting leaderboard:', error);
+    res.status(500).json({ success: false, message: 'حدث خطأ أثناء الحصول على المتصدرين' });
+  }
+});
+
+// الحصول على سجل الألعاب الحديثة
+router.get('/history', async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit as string) || 10;
+    
+    // الحصول على سجل الألعاب
+    const history = await lionGazelleService.getRecentGames(limit);
+    
+    res.json({ success: true, history });
+  } catch (error) {
+    console.error('Error getting game history:', error);
+    res.status(500).json({ success: false, message: 'حدث خطأ أثناء الحصول على سجل الألعاب' });
   }
 });
 

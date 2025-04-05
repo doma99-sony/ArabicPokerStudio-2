@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600">
+  <defs>
+    <linearGradient id="skyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1a237e"/>
+      <stop offset="40%" stop-color="#303f9f"/>
+      <stop offset="80%" stop-color="#7986cb"/>
+      <stop offset="100%" stop-color="#c5cae9"/>
+    </linearGradient>
+    <linearGradient id="groundGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#d7ccc8"/>
+      <stop offset="30%" stop-color="#bcaaa4"/>
+      <stop offset="60%" stop-color="#a1887f"/>
+      <stop offset="100%" stop-color="#8d6e63"/>
+    </linearGradient>
+    <linearGradient id="mountainGradient1" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#6d4c41"/>
+      <stop offset="100%" stop-color="#4e342e"/>
+    </linearGradient>
+    <linearGradient id="mountainGradient2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#795548"/>
+      <stop offset="100%" stop-color="#5d4037"/>
+    </linearGradient>
+    <linearGradient id="sunGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffeb3b"/>
+      <stop offset="100%" stop-color="#ff9800"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- خلفية السماء -->
+  <rect x="0" y="0" width="1200" height="600" fill="url(#skyGradient)"/>
+  
+  <!-- الشمس -->
+  <circle cx="900" cy="150" r="80" fill="url(#sunGradient)"/>
+  <circle cx="900" cy="150" r="100" fill="url(#sunGradient)" opacity="0.3"/>
+  <circle cx="900" cy="150" r="120" fill="url(#sunGradient)" opacity="0.1"/>
+  
+  <!-- الجبال البعيدة -->
+  <path d="M0,350 L200,200 L400,330 L600,180 L800,300 L1000,220 L1200,350 L1200,600 L0,600 Z" fill="url(#mountainGradient1)"/>
+  
+  <!-- الجبال المتوسطة -->
+  <path d="M0,400 L150,300 L300,380 L450,280 L600,380 L750,300 L900,400 L1050,320 L1200,400 L1200,600 L0,600 Z" fill="url(#mountainGradient2)"/>
+  
+  <!-- الأرض / السهل -->
+  <path d="M0,450 C200,420 400,440 600,420 C800,440 1000,420 1200,450 L1200,600 L0,600 Z" fill="url(#groundGradient)"/>
+  
+  <!-- أشجار صغيرة في البعيد -->
+  <circle cx="100" cy="430" r="10" fill="#2e7d32"/>
+  <circle cx="350" cy="425" r="12" fill="#2e7d32"/>
+  <circle cx="700" cy="435" r="15" fill="#2e7d32"/>
+  <circle cx="950" cy="420" r="10" fill="#2e7d32"/>
+  <circle cx="1100" cy="440" r="12" fill="#2e7d32"/>
+  
+  <!-- نباتات صحراوية -->
+  <path d="M150,500 C150,480 140,470 130,470 C120,470 110,480 110,500" fill="none" stroke="#7d6e63" stroke-width="2"/>
+  <path d="M500,520 C500,490 480,470 460,470 C440,470 420,490 420,520" fill="none" stroke="#7d6e63" stroke-width="3"/>
+  <path d="M850,510 C850,490 840,480 830,480 C820,480 810,490 810,510" fill="none" stroke="#7d6e63" stroke-width="2"/>
+  <path d="M1050,500 C1050,480 1040,470 1030,470 C1020,470 1010,480 1010,500" fill="none" stroke="#7d6e63" stroke-width="2"/>
+  
+  <!-- صخور -->
+  <ellipse cx="200" cy="520" rx="30" ry="15" fill="#8d6e63"/>
+  <ellipse cx="600" cy="530" rx="40" ry="20" fill="#8d6e63"/>
+  <ellipse cx="900" cy="510" rx="35" ry="18" fill="#8d6e63"/>
+  
+  <!-- آثار قدمين على الأرض -->
+  <ellipse cx="300" cy="550" rx="10" ry="5" transform="rotate(30,300,550)" fill="#6d4c41" opacity="0.5"/>
+  <ellipse cx="330" cy="560" rx="10" ry="5" transform="rotate(30,330,560)" fill="#6d4c41" opacity="0.5"/>
+  <ellipse cx="360" cy="550" rx="10" ry="5" transform="rotate(30,360,550)" fill="#6d4c41" opacity="0.5"/>
+  <ellipse cx="390" cy="560" rx="10" ry="5" transform="rotate(30,390,560)" fill="#6d4c41" opacity="0.5"/>
+  
+  <ellipse cx="700" cy="550" rx="10" ry="5" transform="rotate(-20,700,550)" fill="#6d4c41" opacity="0.5"/>
+  <ellipse cx="730" cy="560" rx="10" ry="5" transform="rotate(-20,730,560)" fill="#6d4c41" opacity="0.5"/>
+  <ellipse cx="760" cy="550" rx="10" ry="5" transform="rotate(-20,760,550)" fill="#6d4c41" opacity="0.5"/>
+  <ellipse cx="790" cy="560" rx="10" ry="5" transform="rotate(-20,790,560)" fill="#6d4c41" opacity="0.5"/>
+</svg>

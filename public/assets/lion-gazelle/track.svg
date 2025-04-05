@@ -1,39 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 200" width="1000" height="200">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 200">
   <defs>
     <linearGradient id="trackGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#D2B48C"/>
-      <stop offset="100%" style="stop-color:#A0522D"/>
+      <stop offset="0%" stop-color="#d7ccc8"/>
+      <stop offset="100%" stop-color="#a1887f"/>
     </linearGradient>
-    <pattern id="grassPattern" width="20" height="20" patternUnits="userSpaceOnUse">
-      <path d="M0,15 Q5,5 10,15" stroke="#8D744A" stroke-width="1" fill="none"/>
-      <path d="M10,15 Q15,0 20,15" stroke="#8D744A" stroke-width="1" fill="none"/>
-    </pattern>
   </defs>
   
-  <!-- خلفية المسار -->
-  <rect width="1000" height="200" fill="url(#trackGradient)"/>
+  <!-- مسار السباق -->
+  <rect x="0" y="100" width="1200" height="100" fill="url(#trackGradient)"/>
   
-  <!-- تفاصيل على المسار -->
-  <rect width="1000" height="20" y="0" fill="url(#grassPattern)" opacity="0.6"/>
-  <rect width="1000" height="20" y="180" fill="url(#grassPattern)" opacity="0.6"/>
+  <!-- الخط العلوي المنقط -->
+  <path d="M0,100 L1200,100" stroke="#5d4037" stroke-width="3" stroke-dasharray="20,10"/>
   
-  <!-- طريق الركض -->
-  <rect x="0" y="70" width="1000" height="60" fill="#C0A080" opacity="0.7"/>
-  <path d="M0,80 L1000,80" stroke="#A0522D" stroke-width="2" stroke-dasharray="20 10"/>
-  <path d="M0,120 L1000,120" stroke="#A0522D" stroke-width="2" stroke-dasharray="20 10"/>
+  <!-- علامات المسافة -->
+  <line x1="200" y1="95" x2="200" y2="105" stroke="#5d4037" stroke-width="3"/>
+  <line x1="400" y1="95" x2="400" y2="105" stroke="#5d4037" stroke-width="3"/>
+  <line x1="600" y1="95" x2="600" y2="105" stroke="#5d4037" stroke-width="3"/>
+  <line x1="800" y1="95" x2="800" y2="105" stroke="#5d4037" stroke-width="3"/>
+  <line x1="1000" y1="95" x2="1000" y2="105" stroke="#5d4037" stroke-width="3"/>
   
-  <!-- حجارة على الطريق -->
-  <circle cx="100" cy="110" r="5" fill="#777" opacity="0.5"/>
-  <circle cx="300" cy="90" r="4" fill="#777" opacity="0.5"/>
-  <circle cx="500" cy="100" r="6" fill="#777" opacity="0.5"/>
-  <circle cx="700" cy="95" r="4" fill="#777" opacity="0.5"/>
-  <circle cx="900" cy="105" r="5" fill="#777" opacity="0.5"/>
+  <!-- خط النهاية -->
+  <rect x="1150" y="90" width="10" height="120" fill="#ffffff"/>
+  <rect x="1170" y="90" width="10" height="120" fill="#ffffff"/>
   
-  <!-- بقع عشب -->
-  <circle cx="50" cy="40" r="15" fill="#556B2F" opacity="0.3"/>
-  <circle cx="250" cy="160" r="20" fill="#556B2F" opacity="0.3"/>
-  <circle cx="450" cy="30" r="25" fill="#556B2F" opacity="0.3"/>
-  <circle cx="650" cy="170" r="15" fill="#556B2F" opacity="0.3"/>
-  <circle cx="850" cy="40" r="20" fill="#556B2F" opacity="0.3"/>
+  <!-- الاشكال الزخرفية على المسار -->
+  <circle cx="100" cy="150" r="5" fill="#8d6e63" opacity="0.5"/>
+  <circle cx="350" cy="170" r="8" fill="#8d6e63" opacity="0.5"/>
+  <circle cx="700" cy="140" r="6" fill="#8d6e63" opacity="0.5"/>
+  <circle cx="950" cy="160" r="7" fill="#8d6e63" opacity="0.5"/>
+  
+  <!-- آثار أقدام على المسار -->
+  <ellipse cx="150" cy="150" rx="10" ry="5" transform="rotate(30,150,150)" fill="#5d4037" opacity="0.2"/>
+  <ellipse cx="280" cy="160" rx="10" ry="5" transform="rotate(-20,280,160)" fill="#5d4037" opacity="0.2"/>
+  <ellipse cx="450" cy="140" rx="10" ry="5" transform="rotate(15,450,140)" fill="#5d4037" opacity="0.2"/>
+  <ellipse cx="600" cy="170" rx="10" ry="5" transform="rotate(-25,600,170)" fill="#5d4037" opacity="0.2"/>
+  <ellipse cx="780" cy="150" rx="10" ry="5" transform="rotate(10,780,150)" fill="#5d4037" opacity="0.2"/>
+  <ellipse cx="900" cy="145" rx="10" ry="5" transform="rotate(-15,900,145)" fill="#5d4037" opacity="0.2"/>
+  <ellipse cx="1050" cy="165" rx="10" ry="5" transform="rotate(20,1050,165)" fill="#5d4037" opacity="0.2"/>
 </svg>
