@@ -1,0 +1,163 @@
+/* أنماط محددة لصفحة لعبة الأسد والغزالة */
+
+/* يجعل محاكاة الأسد يركض بطريقة طبيعية */
+@keyframes lion-run {
+  0% {
+    transform: translateY(0px) rotate(2deg);
+  }
+  50% {
+    transform: translateY(-4px) rotate(-2deg);
+  }
+  100% {
+    transform: translateY(0px) rotate(2deg);
+  }
+}
+
+/* يجعل محاكاة الغزالة تركض بطريقة طبيعية وأسرع */
+@keyframes gazelle-run {
+  0% {
+    transform: translateY(0px) rotate(3deg);
+  }
+  50% {
+    transform: translateY(-6px) rotate(-1deg);
+  }
+  100% {
+    transform: translateY(0px) rotate(3deg);
+  }
+}
+
+/* محاكاة للغبار خلف الحيوانات أثناء الركض */
+@keyframes dustCloud {
+  0% {
+    opacity: 0.7;
+    transform: translateY(0px) translateX(-5px);
+  }
+  100% {
+    opacity: 0.3;
+    transform: translateY(-10px) translateX(-15px);
+  }
+}
+
+/* تحريك خلفية الإنهيار */
+@keyframes crashPulse {
+  0% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.4;
+  }
+  100% {
+    opacity: 0.2;
+  }
+}
+
+/* تطبيق التحريكات على العناصر */
+.lion-run {
+  animation: lion-run 0.4s infinite;
+  transform-origin: center bottom;
+}
+
+.gazelle-run {
+  animation: gazelle-run 0.3s infinite;
+  transform-origin: center bottom;
+}
+
+.dust-animation {
+  animation: dustCloud 0.8s infinite alternate;
+  filter: blur(1px);
+}
+
+.crash-background {
+  animation: crashPulse 2s infinite;
+}
+
+/* أنماط عامة للعبة */
+.game-viewport {
+  perspective: 1000px;
+  overflow: hidden;
+  position: relative;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.savanna-background {
+  background-size: cover !important;
+  background-position: center !important;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+
+.racing-track {
+  position: absolute;
+  bottom: 0;
+  height: 40px;
+  background-size: 20px 20px !important;
+  background-position: 0px center !important;
+  z-index: 5;
+}
+
+/* تأثيرات خاصة للعبة */
+.sun-glow {
+  position: absolute;
+  top: 80px;
+  right: 100px;
+  width: 150px;
+  height: 150px;
+  background: radial-gradient(circle at center, rgba(255, 240, 155, 0.7) 0%, rgba(255, 240, 155, 0) 70%);
+  border-radius: 50%;
+  z-index: 2;
+  animation: pulse 3s infinite alternate ease-in-out;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+/* تأثير الاهتزاز عند الإنهيار */
+.crash-effect {
+  animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+@keyframes shake {
+  10%, 90% {
+    transform: translate3d(-2px, 0, 0);
+  }
+  
+  20%, 80% {
+    transform: translate3d(4px, 0, 0);
+  }
+
+  30%, 50%, 70% {
+    transform: translate3d(-6px, 0, 0);
+  }
+
+  40%, 60% {
+    transform: translate3d(6px, 0, 0);
+  }
+}
+
+@keyframes blink {
+  0% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0.4;
+  }
+}

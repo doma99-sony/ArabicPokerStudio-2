@@ -72,6 +72,7 @@ function Router() {
       <ProtectedRoute path="/badges" component={BadgesPage} />
       <ProtectedRoute path="/send-chips" component={SendChipsPage} />
       <ProtectedRoute path="/offers" component={OffersPage} />
+      <ProtectedRoute path="/lion-gazelle" component={LionGazelleGame} />
       <Route component={NotFound} />
     </Switch>
   );
