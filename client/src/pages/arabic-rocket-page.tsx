@@ -94,40 +94,39 @@ const ArabicRocketPage = () => {
   };
   
   // توليد نقطة انفجار عشوائية (في الإنتاج، هذا سيأتي من السيرفر)
-  const generateRandomCrashPoint = () => {
-    // تحسين الخوارزمية لتوليد أرقام أعلى وأكثر عدالة
-    // خيارات متعددة لتوليد قيم مختلفة
+  const generateRandomCrashPoint = (): number => {
+    // استخدام نظام محسّن متعدد الطبقات للتوزيع
+    // نظام متقدم يشبه نظام ألعاب Crash الحقيقية
     
-    // اختيار نوع التوزيع عشوائياً (50% كل منهما)
-    const distributionType = Math.random() < 0.5 ? "normal" : "exponential";
+    let crashPoint: number;
+    const randomValue = Math.random();
     
-    let crashPoint = 1.0;
-    
-    if (distributionType === "normal") {
-      // توزيع طبيعي (معظم القيم بين 1.5 و 4)
-      const baseValue = 1.5 + (Math.random() * 2.5);
+    // احتمالية الانفجار المبكر (أقل من 1.5x): 35%
+    if (randomValue < 0.35) {
+      // انفجار مبكر بين 1.01 و 1.5
+      crashPoint = 1.01 + (Math.random() * 0.49);
+    }
+    // احتمالية قيم متوسطة (بين 1.5x و 3x): 40%
+    else if (randomValue < 0.62) { // 0.35 + (0.65 * 0.4) ≈ 0.62
+      // قيم متوسطة بين 1.5 و 3.0
+      crashPoint = 1.5 + (Math.random() * 1.5);
+    }
+    // احتمالية قيم مرتفعة (بين 3x و 10x): 20%
+    else if (randomValue < 0.85) { // 0.62 + (0.38 * 0.6) ≈ 0.85
+      // قيم مرتفعة بين 3.0 و 10.0
+      crashPoint = 3.0 + (Math.random() * 7.0);
+    }
+    // احتمالية قيم عالية جداً (> 10x): 5%
+    else {
+      // استخدام معادلة للتوزيع الأسي للقيم العالية جداً
+      const highValue = 10.0 + (-Math.log(Math.random()) * 5.0);
       
-      // احتمال صغير للقيم المرتفعة (5٪)
-      if (Math.random() < 0.05) {
-        const bonus = Math.random() * 6;
-        crashPoint = baseValue + bonus;
-      } else {
-        crashPoint = baseValue;
-      }
-    } else {
-      // توزيع أسي (احتمال أكبر للقيم المنخفضة مع فرص أقل للقيم المرتفعة)
-      const rand = Math.random();
-      // المعادلة المعدلة تعطي قيم أعلى
-      crashPoint = 1.2 + (rand === 0 ? 0.3 : (1 / (rand * 0.7)) * 1.2);
-      
-      // احتمال صغير جداً للقيم المرتفعة جداً (1٪)
-      if (Math.random() < 0.01) {
-        crashPoint = 10 + (Math.random() * 90); // قيم بين 10 و 100
-      }
+      // تحديد حد أقصى منطقي (50x) مع احتمالية ضئيلة لتجاوزه
+      crashPoint = Math.min(highValue, Math.random() < 0.01 ? 100 : 50);
     }
     
-    // تقريب الرقم إلى رقمين عشريين
-    return Math.floor(crashPoint * 100) / 100;
+    // تقريب النتيجة إلى رقمين عشريين وإرجاعها كرقم
+    return Math.round(crashPoint * 100) / 100;
   };
   
   // وظيفة بدء اللعبة
@@ -255,10 +254,10 @@ const ArabicRocketPage = () => {
     // تنظيف الكانفاس
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // رسم الخلفية
+    // رسم الخلفية (تم تغيير الألوان لتكون أكثر وضوحاً)
     const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    gradient.addColorStop(0, "#0A0A20");
-    gradient.addColorStop(1, "#1A1A35");
+    gradient.addColorStop(0, "#0F2040"); // لون أزرق داكن جديد للجزء العلوي
+    gradient.addColorStop(1, "#1E3050"); // لون أزرق متوسط جديد للجزء السفلي
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
@@ -534,8 +533,8 @@ const ArabicRocketPage = () => {
             <ArrowLeft size={20} />
           </Button>
           <div className="flex items-center">
-            <Rocket className="h-6 w-6 text-red-500 mr-2" />
-            <h1 className="text-xl font-bold text-white">صاروخ عرباوي</h1>
+            <Rocket className="h-7 w-7 text-yellow-500 mr-2 animate-pulse" />
+            <h1 className="text-2xl font-bold text-white bg-gradient-to-r from-red-500 to-yellow-500 bg-clip-text text-transparent">🚀 صاروخ عرباوي 🚀</h1>
           </div>
         </div>
         
