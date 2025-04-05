@@ -91,6 +91,8 @@ export default function LobbyPage() {
       navigate("/zeus-king");
     } else if (gameType === "egypt_queen") {
       navigate("/egypt-queen");
+    } else if (gameType === "arab_poker") {
+      navigate("/arab-poker");
     }
     // ستتم إضافة المزيد من الألعاب لاحقًا
   };
@@ -414,6 +416,60 @@ export default function LobbyPage() {
 
 
 
+                    {/* بوكر العرب - تصميم واضح */}
+                    <div 
+                      className={`relative flex flex-col h-[160px] w-full rounded-xl overflow-hidden shadow-lg mb-4 mt-2 ${activeGameCategory === 'arab_poker' ? 'ring-2 ring-[#D4AF37]' : 'ring-1 ring-[#D4AF37]'} hover:scale-[1.02] transition-all duration-300 cursor-pointer`}
+                      onClick={() => {
+                        setActiveGameCategory('arab_poker');
+                        navigateToGameTables('arab_poker');
+                      }}
+                    >
+                      {/* خلفية اللعبة - لون ثابت */}
+                      <div className="absolute inset-0 bg-[#2C3E50]"></div>
+                      
+                      {/* محتوى البطاقة */}
+                      <div className="relative flex flex-col h-full z-10 p-3">
+                        {/* رأس البطاقة */}
+                        <div className="flex justify-between items-center">
+                          <div className="flex gap-1.5">
+                            <div className="bg-[#D4AF37] text-black font-bold text-xs p-1 px-2 rounded-md">جديد</div>
+                            <div className="bg-red-500 text-white font-bold text-xs p-1 px-2 rounded-md">حصري</div>
+                          </div>
+                          <div className="w-10 h-10 bg-[#1A2530] rounded-full border-2 border-[#D4AF37] flex items-center justify-center">
+                            <span className="text-[#D4AF37] text-lg">♥️</span>
+                          </div>
+                        </div>
+                        
+                        {/* عنوان اللعبة */}
+                        <div className="mt-1 mb-1">
+                          <h3 className="text-[#D4AF37] font-bold text-lg">بوكر العرب</h3>
+                          <div className="mt-0.5 w-full h-0.5 bg-[#D4AF37]"></div>
+                        </div>
+                        
+                        {/* تفاصيل إضافية */}
+                        <div className="my-1 text-xs text-white flex gap-2">
+                          <div className="bg-black/40 rounded-md px-2 py-0.5 border border-[#D4AF37]">
+                            <span className="text-[#D4AF37] font-bold">٣٥٠</span> لاعب
+                          </div>
+                          <div className="bg-black/40 rounded-md px-2 py-0.5 border border-[#D4AF37]">
+                            <span className="text-[#D4AF37] font-bold">١٨</span> طاولة
+                          </div>
+                        </div>
+                        
+                        {/* زر الدخول */}
+                        <div className="mt-auto">
+                          <button 
+                            className="w-full py-1.5 px-3 bg-[#D4AF37] text-black font-bold text-sm rounded-lg flex items-center justify-center gap-2 border border-black/30"
+                          >
+                            <div className="w-5 h-5 rounded-full bg-black/20 flex items-center justify-center">
+                              <span className="text-black">♦</span>
+                            </div>
+                            ابدأ اللعب الآن
+                            <ChevronRight className="mr-1 h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                     {/* نارتو - تصميم واضح */}
                     <div 
                       className={`relative flex flex-col h-[145px] w-full rounded-xl overflow-hidden shadow-lg mb-4 ${activeGameCategory === 'naruto' ? 'ring-2 ring-orange-500' : 'ring-1 ring-orange-500'} hover:scale-[1.02] transition-all duration-300 cursor-pointer`}
