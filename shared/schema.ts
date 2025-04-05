@@ -6,7 +6,7 @@ import { z } from "zod";
 export const userRoleEnum = pgEnum('user_role', ['player', 'vip', 'admin', 'moderator', 'guest']);
 
 // تعريف نوع للعبة
-export const gameTypeEnum = pgEnum('game_type', ['poker', 'naruto', 'domino', 'tekken']);
+export const gameTypeEnum = pgEnum('game_type', ['poker', 'naruto', 'domino', 'tekken', 'arabic_rocket', 'zeus_king', 'egypt_queen']);
 
 // تعريف نوع لحالة الطاولة
 export const tableStatusEnum = pgEnum('table_status', ['available', 'full', 'in_progress', 'maintenance']);

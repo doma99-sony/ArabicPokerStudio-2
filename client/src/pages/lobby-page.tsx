@@ -85,6 +85,12 @@ export default function LobbyPage() {
       navigate("/naruto");
     } else if (gameType === "domino") {
       navigate("/domino");
+    } else if (gameType === "arabic_rocket") {
+      navigate("/arabic-rocket");
+    } else if (gameType === "zeus_king") {
+      navigate("/zeus-king");
+    } else if (gameType === "egypt_queen") {
+      navigate("/egypt-queen");
     }
     // ستتم إضافة المزيد من الألعاب لاحقًا
   };
@@ -568,6 +574,171 @@ export default function LobbyPage() {
                               <span className="text-white">👊</span>
                             </div>
                             استعد للقتال
+                            <ChevronRight className="mr-1 h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* صاروخ عرباوي - تصميم جديد */}
+                    <div 
+                      className={`relative flex flex-col h-[160px] w-full rounded-xl overflow-hidden shadow-lg mb-4 ${activeGameCategory === 'arabic_rocket' ? 'ring-2 ring-green-600' : 'ring-1 ring-green-600'} hover:scale-[1.02] transition-all duration-300 cursor-pointer`}
+                      onClick={() => {
+                        setActiveGameCategory('arabic_rocket');
+                        navigateToGameTables('arabic_rocket');
+                      }}
+                    >
+                      {/* خلفية اللعبة - لون ثابت */}
+                      <div className="absolute inset-0 bg-[#1E5B3C]"></div>
+                      
+                      {/* محتوى البطاقة */}
+                      <div className="relative flex flex-col h-full z-10 p-3">
+                        {/* رأس البطاقة */}
+                        <div className="flex justify-between items-center">
+                          <div className="flex gap-1.5">
+                            <div className="bg-green-500 text-white font-bold text-xs p-1 px-2 rounded-md">جديد</div>
+                            <div className="bg-red-500 text-white font-bold text-xs p-1 px-2 rounded-md">HOT</div>
+                          </div>
+                          <div className="w-10 h-10 bg-green-800 rounded-full border-2 border-green-400 flex items-center justify-center">
+                            <span className="text-white text-lg">🚀</span>
+                          </div>
+                        </div>
+                        
+                        {/* عنوان اللعبة */}
+                        <div className="mt-1 mb-1">
+                          <h3 className="text-green-400 font-bold text-lg">صاروخ عرباوي</h3>
+                          <div className="mt-0.5 w-full h-0.5 bg-green-400"></div>
+                        </div>
+                        
+                        {/* تفاصيل إضافية */}
+                        <div className="my-1 text-xs text-white flex gap-2">
+                          <div className="bg-black/40 rounded-md px-2 py-0.5 border border-green-400">
+                            <span className="text-green-400 font-bold">١٨٠</span> لاعب
+                          </div>
+                          <div className="bg-black/40 rounded-md px-2 py-0.5 border border-green-400">
+                            <span className="text-green-400 font-bold">١٥</span> طاولة
+                          </div>
+                        </div>
+                        
+                        {/* زر الدخول */}
+                        <div className="mt-auto">
+                          <button 
+                            className="w-full py-1.5 px-3 bg-green-500 text-white font-bold text-sm rounded-lg flex items-center justify-center gap-2 border border-black/30"
+                          >
+                            <div className="w-5 h-5 rounded-full bg-black/20 flex items-center justify-center">
+                              <span className="text-white">🚀</span>
+                            </div>
+                            العب الآن
+                            <ChevronRight className="mr-1 h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* الملك زايوس - تصميم جديد */}
+                    <div 
+                      className={`relative flex flex-col h-[160px] w-full rounded-xl overflow-hidden shadow-lg mb-4 ${activeGameCategory === 'zeus_king' ? 'ring-2 ring-yellow-500' : 'ring-1 ring-yellow-500'} hover:scale-[1.02] transition-all duration-300 cursor-pointer`}
+                      onClick={() => {
+                        setActiveGameCategory('zeus_king');
+                        navigateToGameTables('zeus_king');
+                      }}
+                    >
+                      {/* خلفية اللعبة - لون ثابت */}
+                      <div className="absolute inset-0 bg-[#3A2B1D]"></div>
+                      
+                      {/* محتوى البطاقة */}
+                      <div className="relative flex flex-col h-full z-10 p-3">
+                        {/* رأس البطاقة */}
+                        <div className="flex justify-between items-center">
+                          <div className="flex gap-1.5">
+                            <div className="bg-yellow-500 text-black font-bold text-xs p-1 px-2 rounded-md">جديد</div>
+                            <div className="bg-[#D4AF37] text-black font-bold text-xs p-1 px-2 rounded-md">VIP</div>
+                          </div>
+                          <div className="w-10 h-10 bg-yellow-800 rounded-full border-2 border-yellow-400 flex items-center justify-center">
+                            <span className="text-white text-lg">⚡</span>
+                          </div>
+                        </div>
+                        
+                        {/* عنوان اللعبة */}
+                        <div className="mt-1 mb-1">
+                          <h3 className="text-yellow-400 font-bold text-lg">الملك زايوس</h3>
+                          <div className="mt-0.5 w-full h-0.5 bg-yellow-400"></div>
+                        </div>
+                        
+                        {/* تفاصيل إضافية */}
+                        <div className="my-1 text-xs text-white flex gap-2">
+                          <div className="bg-black/40 rounded-md px-2 py-0.5 border border-yellow-400">
+                            <span className="text-yellow-400 font-bold">١٣٥</span> لاعب
+                          </div>
+                          <div className="bg-black/40 rounded-md px-2 py-0.5 border border-yellow-400">
+                            <span className="text-yellow-400 font-bold">١٢</span> طاولة
+                          </div>
+                        </div>
+                        
+                        {/* زر الدخول */}
+                        <div className="mt-auto">
+                          <button 
+                            className="w-full py-1.5 px-3 bg-yellow-500 text-black font-bold text-sm rounded-lg flex items-center justify-center gap-2 border border-black/30"
+                          >
+                            <div className="w-5 h-5 rounded-full bg-black/20 flex items-center justify-center">
+                              <span className="text-white">⚡</span>
+                            </div>
+                            العب الآن
+                            <ChevronRight className="mr-1 h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* ملكه مصر - تصميم جديد */}
+                    <div 
+                      className={`relative flex flex-col h-[160px] w-full rounded-xl overflow-hidden shadow-lg mb-4 ${activeGameCategory === 'egypt_queen' ? 'ring-2 ring-purple-600' : 'ring-1 ring-purple-600'} hover:scale-[1.02] transition-all duration-300 cursor-pointer`}
+                      onClick={() => {
+                        setActiveGameCategory('egypt_queen');
+                        navigateToGameTables('egypt_queen');
+                      }}
+                    >
+                      {/* خلفية اللعبة - لون ثابت */}
+                      <div className="absolute inset-0 bg-[#2D1B43]"></div>
+                      
+                      {/* محتوى البطاقة */}
+                      <div className="relative flex flex-col h-full z-10 p-3">
+                        {/* رأس البطاقة */}
+                        <div className="flex justify-between items-center">
+                          <div className="flex gap-1.5">
+                            <div className="bg-purple-500 text-white font-bold text-xs p-1 px-2 rounded-md">جديد</div>
+                            <div className="bg-pink-500 text-white font-bold text-xs p-1 px-2 rounded-md">HOT</div>
+                          </div>
+                          <div className="w-10 h-10 bg-purple-800 rounded-full border-2 border-purple-400 flex items-center justify-center">
+                            <span className="text-white text-lg">👑</span>
+                          </div>
+                        </div>
+                        
+                        {/* عنوان اللعبة */}
+                        <div className="mt-1 mb-1">
+                          <h3 className="text-purple-400 font-bold text-lg">ملكه مصر</h3>
+                          <div className="mt-0.5 w-full h-0.5 bg-purple-400"></div>
+                        </div>
+                        
+                        {/* تفاصيل إضافية */}
+                        <div className="my-1 text-xs text-white flex gap-2">
+                          <div className="bg-black/40 rounded-md px-2 py-0.5 border border-purple-400">
+                            <span className="text-purple-400 font-bold">١٥٥</span> لاعب
+                          </div>
+                          <div className="bg-black/40 rounded-md px-2 py-0.5 border border-purple-400">
+                            <span className="text-purple-400 font-bold">٩</span> طاولة
+                          </div>
+                        </div>
+                        
+                        {/* زر الدخول */}
+                        <div className="mt-auto">
+                          <button 
+                            className="w-full py-1.5 px-3 bg-purple-600 text-white font-bold text-sm rounded-lg flex items-center justify-center gap-2 border border-black/30"
+                          >
+                            <div className="w-5 h-5 rounded-full bg-black/20 flex items-center justify-center">
+                              <span className="text-white">👑</span>
+                            </div>
+                            العب الآن
                             <ChevronRight className="mr-1 h-4 w-4" />
                           </button>
                         </div>
