@@ -22,6 +22,7 @@ import HowToPlayPage from "@/pages/how-to-play-page";
 import BadgesPage from "@/pages/badges-page";
 import SendChipsPage from "@/pages/send-chips-page";
 import OffersPage from "@/pages/offers-page";
+import ArabicRocketPage from "@/pages/arabic-rocket-page";
 import { ProtectedRoute } from "./lib/protected-route";
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
@@ -61,6 +62,7 @@ function Router() {
       <ProtectedRoute path="/naruto" component={NarutoPage} />
       <ProtectedRoute path="/rankings" component={RankingsPage} />
       <ProtectedRoute path="/domino" component={DominoPage} />
+      <ProtectedRoute path="/arabic-rocket" component={ArabicRocketPage} />
       <ProtectedRoute path="/notifications" component={NotificationsPage} />
       <ProtectedRoute path="/notifications/:messageId" component={NotificationsPage} />
       <ProtectedRoute path="/inventory" component={InventoryPage} />
