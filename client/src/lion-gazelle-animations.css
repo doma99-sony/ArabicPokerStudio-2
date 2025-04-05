@@ -1,0 +1,84 @@
+/* Lion and Gazelle Game Animations */
+
+/* Lion run animation */
+.lion-run {
+  animation: lionRun 0.35s infinite alternate ease-in-out;
+  transform-origin: center bottom;
+}
+
+@keyframes lionRun {
+  0% {
+    transform: translateY(0) rotate(-1deg);
+  }
+  100% {
+    transform: translateY(-10%) rotate(1deg);
+  }
+}
+
+/* Gazelle run animation */
+.gazelle-run {
+  animation: gazelleRun 0.3s infinite alternate ease-in-out;
+  transform-origin: center bottom;
+}
+
+@keyframes gazelleRun {
+  0% {
+    transform: translateY(0) rotate(-2deg);
+  }
+  100% {
+    transform: translateY(-15%) rotate(2deg) translateX(2%);
+  }
+}
+
+/* Dust animation */
+.dust-animation {
+  animation: dust 0.7s infinite alternate ease-in-out;
+}
+
+@keyframes dust {
+  0% {
+    opacity: 0.3;
+    transform: scale(0.8) translateY(0);
+  }
+  100% {
+    opacity: 0.7;
+    transform: scale(1.2) translateY(-20%);
+  }
+}
+
+/* Crash effect for screen shake */
+.crash-effect {
+  animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-5px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(5px);
+  }
+}
+
+/* Blinking animation for crash overlay */
+@keyframes blink {
+  0%, 100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Camera follow effect */
+.camera-track {
+  transition: transform 0.2s ease-out;
+}
+
+/* Enhanced tracking smoothness */
+.smooth-transition {
+  transition: all 0.05s linear;
+}

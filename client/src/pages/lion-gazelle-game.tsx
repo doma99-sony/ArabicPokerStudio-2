@@ -7,6 +7,7 @@ import { Slider } from '@/components/ui/slider';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/use-auth';
+import '../lion-gazelle-animations.css';
 
 interface Player {
   id: number;
@@ -32,9 +33,14 @@ export default function LionGazelleGame() {
   const [bustedAt, setBustedAt] = useState<number | null>(null);
   const [lionPosition, setLionPosition] = useState(0); // 0-100 percentage for animation
   const [gazellePosition, setGazellePosition] = useState(20); // Always a bit ahead of lion
+  const [cameraPosition, setCameraPosition] = useState(0); // Camera position to follow characters
+  const [gameViewportWidth, setGameViewportWidth] = useState(100); // Visible portion size (percentage)
   
   // Refs
   const gameAreaRef = useRef<HTMLDivElement>(null);
+  const gameTrackRef = useRef<HTMLDivElement>(null);
+  const lionRef = useRef<HTMLDivElement>(null);
+  const gazelleRef = useRef<HTMLDivElement>(null);
   const animationFrameRef = useRef<number | null>(null);
   const gameIntervalRef = useRef<NodeJS.Timeout | null>(null);
   
@@ -167,11 +173,27 @@ export default function LionGazelleGame() {
       setCurrentMultiplier(parseFloat(newMultiplier.toFixed(2)));
       
       // Lion catches up to gazelle over time
-      const newLionPosition = Math.min(100, (elapsed / gameSpeed) * 25);
+      const newLionPosition = Math.min(800, (elapsed / gameSpeed) * 120); // Extended range for longer track
       setLionPosition(newLionPosition);
       
       // Gazelle stays ahead but gap closes
-      setGazellePosition(Math.min(100, newLionPosition + 20 - (newLionPosition / 10)));
+      const newGazellePosition = Math.min(800, newLionPosition + 100 - (newLionPosition / 10));
+      setGazellePosition(newGazellePosition);
+      
+      // Camera position follows the action - keeps both characters in frame when possible
+      // Calculate center point between lion and gazelle
+      const centerPoint = (newLionPosition + newGazellePosition) / 2;
+      
+      // Set viewport to follow characters with some margin to see ahead
+      // View size is 100 units wide, so we need to adjust camera to keep both in frame
+      const newCameraPosition = Math.max(0, centerPoint - 50);
+      setCameraPosition(newCameraPosition);
+      
+      // If game is in extended mode (track is longer than initial view), adjust viewport
+      if (newLionPosition > 80 || newGazellePosition > 80) {
+        // Expand the virtual track length
+        setGameViewportWidth(Math.max(100, newGazellePosition + 150));
+      }
       
       // Check if game should end (lion caught gazelle)
       if (newMultiplier >= crashPoint) {
@@ -363,71 +385,90 @@ export default function LionGazelleGame() {
           <div className="lg:col-span-2 space-y-4">
             {/* Game visualization */}
             <div ref={gameAreaRef} className="relative h-64 md:h-80 bg-[#3E2723] rounded-xl overflow-hidden border-2 border-[#DEB887] shadow-lg">
-              {/* Background scenery - Savanna landscape */}
-              <div className="absolute inset-0 bg-no-repeat bg-cover" style={{ backgroundImage: "url('/assets/lion-gazelle/savanna.svg')" }}></div>
-              
-              {/* Lion and Gazelle racing track */}
-              <div className="absolute bottom-0 w-full h-24 bg-no-repeat bg-cover" style={{ backgroundImage: "url('/assets/lion-gazelle/track.svg')" }}></div>
-              
-              {/* Gazelle character with SVG - Only show in running or waiting state */}
-              {(gameState === 'running' || gameState === 'waiting') && (
-                <div 
-                  style={{ left: `${gazellePosition}%` }} 
-                  className="absolute bottom-6 w-16 md:w-20 h-16 md:h-20 transform -translate-x-1/2 transition-all duration-100"
-                  key="gazelle-character"
-                >
-                  <div className="w-full h-full relative">
-                    <img 
-                      src="/assets/lion-gazelle/gazelle.svg" 
-                      alt="Gazelle" 
-                      className="w-full h-full object-contain"
-                      style={{ 
-                        filter: 'drop-shadow(2px 3px 2px rgba(0,0,0,0.3))',
-                        animation: gameState === 'running' ? 'run 0.5s infinite alternate ease-in-out' : 'none'
-                      }}
-                    />
-                    {/* Dust effect behind gazelle - only during running state */}
-                    {gameState === 'running' && (
+              {/* Game world container - this will move with camera position */}
+              <div 
+                ref={gameTrackRef}
+                className="absolute inset-0 overflow-hidden"
+                style={{ 
+                  width: `${gameViewportWidth}%`, 
+                  transform: `translateX(-${cameraPosition}%)`,
+                  transition: 'transform 0.2s ease-out'
+                }}
+              >
+                {/* Extended Savanna background */}
+                <div className="absolute inset-0 bg-repeat-x bg-cover h-full" style={{ 
+                  backgroundImage: "url('/assets/lion-gazelle/savanna.svg')",
+                  width: `${gameViewportWidth}%`,
+                }}></div>
+                
+                {/* Extended racing track */}
+                <div className="absolute bottom-0 bg-repeat-x bg-cover h-24" style={{ 
+                  backgroundImage: "url('/assets/lion-gazelle/track.svg')",
+                  width: `${gameViewportWidth}%`,
+                }}></div>
+                
+                {/* Gazelle character with more realistic animation */}
+                {(gameState === 'running' || gameState === 'waiting') && (
+                  <div 
+                    ref={gazelleRef}
+                    style={{ left: `${gazellePosition * 100 / gameViewportWidth}%` }} 
+                    className="absolute bottom-6 w-16 md:w-20 h-16 md:h-20 transform -translate-x-1/2 transition-all duration-75"
+                    key="gazelle-character"
+                  >
+                    <div className="w-full h-full relative">
                       <img 
-                        src="/assets/lion-gazelle/dust.svg" 
-                        alt="Dust" 
-                        className="absolute -left-8 bottom-0 w-12 h-8 opacity-70"
-                        style={{ animation: 'dust 1s infinite alternate ease-in-out' }}
+                        src="/assets/lion-gazelle/gazelle.svg" 
+                        alt="Gazelle" 
+                        className={`w-full h-full object-contain ${gameState === 'running' ? 'gazelle-run' : ''}`}
+                        style={{ 
+                          filter: 'drop-shadow(2px 3px 2px rgba(0,0,0,0.3))'
+                        }}
                       />
-                    )}
+                      {/* Dust effect behind gazelle - only during running state */}
+                      {gameState === 'running' && (
+                        <img 
+                          src="/assets/lion-gazelle/dust.svg" 
+                          alt="Dust" 
+                          className="absolute -left-8 bottom-0 w-12 h-8 opacity-70 dust-animation"
+                        />
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
-              
-              {/* Lion character with SVG - Only show in running or waiting state */}
-              {(gameState === 'running' || gameState === 'waiting') && (
-                <div 
-                  style={{ left: `${lionPosition}%` }} 
-                  className="absolute bottom-6 w-20 md:w-24 h-20 md:h-24 transform -translate-x-1/2 transition-all duration-100"
-                  key="lion-character"
-                >
-                  <div className="w-full h-full relative">
-                    <img 
-                      src="/assets/lion-gazelle/lion.svg" 
-                      alt="Lion" 
-                      className="w-full h-full object-contain"
-                      style={{ 
-                        filter: 'drop-shadow(3px 4px 3px rgba(0,0,0,0.4))',
-                        animation: gameState === 'running' ? 'run 0.6s infinite alternate ease-in-out' : 'none'
-                      }}
-                    />
-                    {/* Dust effect behind lion - only during running state */}
-                    {gameState === 'running' && (
+                )}
+                
+                {/* Lion character with more realistic animation */}
+                {(gameState === 'running' || gameState === 'waiting') && (
+                  <div 
+                    ref={lionRef}
+                    style={{ left: `${lionPosition * 100 / gameViewportWidth}%` }} 
+                    className="absolute bottom-6 w-20 md:w-24 h-20 md:h-24 transform -translate-x-1/2 transition-all duration-75"
+                    key="lion-character"
+                  >
+                    <div className="w-full h-full relative">
                       <img 
-                        src="/assets/lion-gazelle/dust.svg" 
-                        alt="Dust" 
-                        className="absolute -left-10 bottom-0 w-16 h-10 opacity-80"
-                        style={{ animation: 'dust 1.2s infinite alternate ease-in-out' }}
+                        src="/assets/lion-gazelle/lion.svg" 
+                        alt="Lion" 
+                        className={`w-full h-full object-contain ${gameState === 'running' ? 'lion-run' : ''}`}
+                        style={{ 
+                          filter: 'drop-shadow(3px 4px 3px rgba(0,0,0,0.4))'
+                        }}
                       />
-                    )}
+                      {/* Dust effect behind lion - only during running state */}
+                      {gameState === 'running' && (
+                        <img 
+                          src="/assets/lion-gazelle/dust.svg" 
+                          alt="Dust" 
+                          className="absolute -left-10 bottom-0 w-16 h-10 opacity-80 dust-animation"
+                        />
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
+              
+              {/* Gradient overlay masks for edges to create infinite scroll effect */}
+              <div className="absolute left-0 top-0 bottom-0 w-10 bg-gradient-to-r from-[#3E2723] to-transparent pointer-events-none z-10"></div>
+              <div className="absolute right-0 top-0 bottom-0 w-10 bg-gradient-to-l from-[#3E2723] to-transparent pointer-events-none z-10"></div>
               
               {/* Game state display */}
               <div className="absolute top-4 left-0 right-0 flex flex-col items-center">
@@ -484,8 +525,7 @@ export default function LionGazelleGame() {
                     <img 
                       src="/assets/lion-gazelle/dust.svg" 
                       alt="Dust" 
-                      className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 w-32 h-20 opacity-80"
-                      style={{ animation: 'dust 0.8s infinite alternate ease-in-out' }}
+                      className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 w-32 h-20 opacity-80 dust-animation"
                     />
                   </div>
                 </div>
