@@ -31,9 +31,53 @@ export default function LionGazelleGame() {
   const [trackPosition, setTrackPosition] = useState(0);
   const intervalRef = useRef<number | null>(null);
   
+  // وظيفة إنهاء اللعبة
+  const endGame = (userCashedOut = true) => {
+    setIsRunning(false);
+    setGameEnded(true);
+    
+    // إيقاف الرسوم المتحركة
+    if (lionRef.current && gazelleRef.current) {
+      lionRef.current.style.animation = 'none';
+      gazelleRef.current.style.animation = 'none';
+    }
+    
+    if (userCashedOut) {
+      // اللاعب نجح في الخروج قبل أن يمسك الأسد بالغزالة
+      const winAmount = Math.floor(betAmount * multiplier);
+      setPayout(winAmount);
+      setBalance(prev => prev + winAmount);
+      
+      toast({
+        title: "مبروك!",
+        description: `ربحت ${winAmount} رقاقة بمضاعف ${multiplier}x`,
+        variant: "default",
+      });
+    } else {
+      // الأسد أمسك بالغزالة قبل أن يخرج اللاعب
+      toast({
+        title: "للأسف!",
+        description: "لقد أمسك الأسد بالغزالة، جرب مرة أخرى!",
+        variant: "destructive",
+      });
+    }
+    
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+  };
+
   // وظيفة المراقبة التي تُبقي الأسد والغزالة في الرؤية دائمًا
   useEffect(() => {
-    if (isRunning && trackRef.current && gameAreaRef.current) {
+    // تطبيق التحويل على المسار فقط
+    if (trackRef.current) {
+      trackRef.current.style.transform = `translateX(-${trackPosition}px)`;
+    }
+  }, [trackPosition]);
+  
+  // تحديث موقع المسار بناءً على موقع الغزالة (منفصل)
+  useEffect(() => {
+    if (isRunning && gameAreaRef.current) {
       // حساب موقع الغزالة المرئي
       const gazelleCenterX = gazellePosition.x - trackPosition;
       
@@ -45,11 +89,8 @@ export default function LionGazelleGame() {
         // إذا كانت الغزالة قريبة من الحافة اليمنى، نحرك المسار
         setTrackPosition(prev => prev + (gazelleCenterX - (viewWidth - bufferZone)) / 10);
       }
-      
-      // تطبيق التحويل على المسار
-      trackRef.current.style.transform = `translateX(-${trackPosition}px)`;
     }
-  }, [gazellePosition, isRunning, trackPosition]);
+  }, [gazellePosition.x, isRunning, trackPosition]);
   
   // تحديث مضاعف الرهان والحركة
   useEffect(() => {
@@ -83,7 +124,9 @@ export default function LionGazelleGame() {
         });
         
         // فحص ما إذا تم اصطياد الغزالة (الأسد أقرب من مسافة معينة)
-        if (gazellePosition.x - lionPosition.x < 30 && !caughtGazelle) {
+        const currentLionX = lionPosition.x;
+        const currentGazelleX = gazellePosition.x;
+        if (currentGazelleX - currentLionX < 30 && !caughtGazelle) {
           setCaughtGazelle(true);
           endGame(false);
         }
@@ -96,7 +139,7 @@ export default function LionGazelleGame() {
         clearInterval(moveInterval);
       };
     }
-  }, [isRunning, gameEnded, multiplier, gazellePosition.x, lionPosition.x, caughtGazelle]);
+  }, [isRunning, gameEnded, multiplier, caughtGazelle, betAmount, gazellePosition.x, lionPosition.x]);
   
   // وظيفة بدء اللعبة
   const startGame = () => {
@@ -137,49 +180,6 @@ export default function LionGazelleGame() {
     if (lionRef.current && gazelleRef.current) {
       lionRef.current.style.animation = 'lion-run 0.8s infinite';
       gazelleRef.current.style.animation = 'gazelle-run 0.5s infinite';
-    }
-  };
-  
-  // وظيفة إنهاء اللعبة
-  const endGame = (userCashedOut = true) => {
-    setIsRunning(false);
-    setGameEnded(true);
-    
-    // إيقاف الرسوم المتحركة
-    if (lionRef.current && gazelleRef.current) {
-      if (caughtGazelle || !userCashedOut) {
-        // الأسد أمسك بالغزالة
-        lionRef.current.style.animation = 'none';
-        gazelleRef.current.style.animation = 'none';
-      } else {
-        // الغزالة نجت
-        lionRef.current.style.animation = 'none';
-        gazelleRef.current.style.animation = 'none';
-      }
-    }
-    
-    if (userCashedOut) {
-      // اللاعب نجح في الخروج قبل أن يمسك الأسد بالغزالة
-      const winAmount = Math.floor(betAmount * multiplier);
-      setPayout(winAmount);
-      setBalance(prev => prev + winAmount);
-      
-      toast({
-        title: "مبروك!",
-        description: `ربحت ${winAmount} رقاقة بمضاعف ${multiplier}x`,
-        variant: "default",
-      });
-    } else {
-      // الأسد أمسك بالغزالة قبل أن يخرج اللاعب
-      toast({
-        title: "للأسف!",
-        description: "لقد أمسك الأسد بالغزالة، جرب مرة أخرى!",
-        variant: "destructive",
-      });
-    }
-    
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
     }
   };
   
@@ -452,7 +452,10 @@ export default function LionGazelleGame() {
                   type="number"
                   min="1"
                   value={betAmount}
-                  onChange={(e) => setBetAmount(parseInt(e.target.value) || 0)}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value);
+                    setBetAmount(isNaN(value) ? 0 : value);
+                  }}
                   className="w-full p-2 rounded text-black"
                 />
               </div>
