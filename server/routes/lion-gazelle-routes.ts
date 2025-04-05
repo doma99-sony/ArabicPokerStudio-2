@@ -1,7 +1,20 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { lionGazelleService } from '../services/lion-gazelle-service';
-import { ensureAuthenticated } from '../auth';
+
+// ميدلوير للتحقق من المصادقة
+function ensureAuthenticated(req: Request, res: Response, next: NextFunction) {
+  if (req.isAuthenticated() && req.user) {
+    // Refresh session
+    req.session.touch();
+    return next();
+  }
+  // Clear any invalid session
+  req.session.destroy((err) => {
+    if (err) console.error("Session destruction error:", err);
+    res.status(401).json({ message: "يجب تسجيل الدخول للوصول إلى هذا المورد" });
+  });
+}
 
 const router = Router();
 

@@ -31,6 +31,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // API endpoints
   
+  // إضافة مسارات لعبة الأسد والغزالة
+  app.use('/api/lion-gazelle', lionGazelleRoutes);
+  
   // طرق المستخدم الأساسية
   app.get("/api/user", (req, res) => {
     if (!req.isAuthenticated()) {
