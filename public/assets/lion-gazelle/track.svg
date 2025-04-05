@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 200" width="1000" height="200">
+  <defs>
+    <linearGradient id="trackGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#D2B48C"/>
+      <stop offset="100%" style="stop-color:#A0522D"/>
+    </linearGradient>
+    <pattern id="grassPattern" width="20" height="20" patternUnits="userSpaceOnUse">
+      <path d="M0,15 Q5,5 10,15" stroke="#8D744A" stroke-width="1" fill="none"/>
+      <path d="M10,15 Q15,0 20,15" stroke="#8D744A" stroke-width="1" fill="none"/>
+    </pattern>
+  </defs>
+  
+  <!-- خلفية المسار -->
+  <rect width="1000" height="200" fill="url(#trackGradient)"/>
+  
+  <!-- تفاصيل على المسار -->
+  <rect width="1000" height="20" y="0" fill="url(#grassPattern)" opacity="0.6"/>
+  <rect width="1000" height="20" y="180" fill="url(#grassPattern)" opacity="0.6"/>
+  
+  <!-- طريق الركض -->
+  <rect x="0" y="70" width="1000" height="60" fill="#C0A080" opacity="0.7"/>
+  <path d="M0,80 L1000,80" stroke="#A0522D" stroke-width="2" stroke-dasharray="20 10"/>
+  <path d="M0,120 L1000,120" stroke="#A0522D" stroke-width="2" stroke-dasharray="20 10"/>
+  
+  <!-- حجارة على الطريق -->
+  <circle cx="100" cy="110" r="5" fill="#777" opacity="0.5"/>
+  <circle cx="300" cy="90" r="4" fill="#777" opacity="0.5"/>
+  <circle cx="500" cy="100" r="6" fill="#777" opacity="0.5"/>
+  <circle cx="700" cy="95" r="4" fill="#777" opacity="0.5"/>
+  <circle cx="900" cy="105" r="5" fill="#777" opacity="0.5"/>
+  
+  <!-- بقع عشب -->
+  <circle cx="50" cy="40" r="15" fill="#556B2F" opacity="0.3"/>
+  <circle cx="250" cy="160" r="20" fill="#556B2F" opacity="0.3"/>
+  <circle cx="450" cy="30" r="25" fill="#556B2F" opacity="0.3"/>
+  <circle cx="650" cy="170" r="15" fill="#556B2F" opacity="0.3"/>
+  <circle cx="850" cy="40" r="20" fill="#556B2F" opacity="0.3"/>
+</svg>
