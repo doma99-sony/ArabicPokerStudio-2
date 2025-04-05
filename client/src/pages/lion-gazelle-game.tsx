@@ -397,13 +397,13 @@ export default function LionGazelleGame() {
               >
                 {/* Extended Savanna background */}
                 <div className="absolute inset-0 bg-repeat-x bg-cover h-full" style={{ 
-                  backgroundImage: "url('/assets/lion-gazelle/savanna.svg')",
+                  backgroundImage: "url('assets/lion-gazelle/savanna.svg')",
                   width: `${gameViewportWidth}%`,
                 }}></div>
                 
                 {/* Extended racing track */}
                 <div className="absolute bottom-0 bg-repeat-x bg-cover h-24" style={{ 
-                  backgroundImage: "url('/assets/lion-gazelle/track.svg')",
+                  backgroundImage: "url('assets/lion-gazelle/track.svg')",
                   width: `${gameViewportWidth}%`,
                 }}></div>
                 
@@ -417,7 +417,7 @@ export default function LionGazelleGame() {
                   >
                     <div className="w-full h-full relative">
                       <img 
-                        src="/assets/lion-gazelle/gazelle.svg" 
+                        src="assets/lion-gazelle/gazelle.svg" 
                         alt="Gazelle" 
                         className={`w-full h-full object-contain ${gameState === 'running' ? 'gazelle-run' : ''}`}
                         style={{ 
@@ -427,7 +427,7 @@ export default function LionGazelleGame() {
                       {/* Dust effect behind gazelle - only during running state */}
                       {gameState === 'running' && (
                         <img 
-                          src="/assets/lion-gazelle/dust.svg" 
+                          src="assets/lion-gazelle/dust.svg" 
                           alt="Dust" 
                           className="absolute -left-8 bottom-0 w-12 h-8 opacity-70 dust-animation"
                         />
@@ -446,7 +446,7 @@ export default function LionGazelleGame() {
                   >
                     <div className="w-full h-full relative">
                       <img 
-                        src="/assets/lion-gazelle/lion.svg" 
+                        src="assets/lion-gazelle/lion.svg" 
                         alt="Lion" 
                         className={`w-full h-full object-contain ${gameState === 'running' ? 'lion-run' : ''}`}
                         style={{ 
@@ -456,7 +456,7 @@ export default function LionGazelleGame() {
                       {/* Dust effect behind lion - only during running state */}
                       {gameState === 'running' && (
                         <img 
-                          src="/assets/lion-gazelle/dust.svg" 
+                          src="assets/lion-gazelle/dust.svg" 
                           alt="Dust" 
                           className="absolute -left-10 bottom-0 w-16 h-10 opacity-80 dust-animation"
                         />
@@ -507,7 +507,7 @@ export default function LionGazelleGame() {
                   <div className="relative h-full w-full">
                     {/* Lion in catching position */}
                     <img 
-                      src="/assets/lion-gazelle/lion.svg" 
+                      src="assets/lion-gazelle/lion.svg" 
                       alt="Lion" 
                       className="absolute -right-3 bottom-0 w-20 md:w-24 h-20 md:h-24 object-contain transform rotate-6 scale-110"
                       style={{ filter: 'drop-shadow(3px 4px 3px rgba(0,0,0,0.4))' }}
@@ -515,7 +515,7 @@ export default function LionGazelleGame() {
                     
                     {/* Gazelle in caught position */}
                     <img 
-                      src="/assets/lion-gazelle/gazelle.svg" 
+                      src="assets/lion-gazelle/gazelle.svg" 
                       alt="Gazelle" 
                       className="absolute -left-3 bottom-2 w-16 md:w-20 h-16 md:h-20 object-contain transform -rotate-12"
                       style={{ filter: 'drop-shadow(2px 3px 2px rgba(0,0,0,0.3))' }}
@@ -523,7 +523,7 @@ export default function LionGazelleGame() {
                     
                     {/* Dust cloud from the impact */}
                     <img 
-                      src="/assets/lion-gazelle/dust.svg" 
+                      src="assets/lion-gazelle/dust.svg" 
                       alt="Dust" 
                       className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 w-32 h-20 opacity-80 dust-animation"
                     />

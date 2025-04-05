@@ -411,7 +411,7 @@ export default function LobbyPage() {
 
                     {/* الأسد والغزالة - تصميم واضح */}
                     <div 
-                      className={`relative flex flex-col h-[160px] w-full rounded-xl overflow-hidden shadow-lg mb-4 mt-2 ${activeGameCategory === 'lion_gazelle' ? 'ring-2 ring-[#8B4513]' : 'ring-1 ring-[#8B4513]'} hover:scale-[1.02] transition-all duration-300 cursor-pointer`}
+                      className={`relative flex flex-col h-[160px] w-full rounded-xl overflow-hidden shadow-lg mb-4 mt-2 ${activeGameCategory === 'lion_gazelle' ? 'ring-2 ring-[#8B4513]' : 'ring-1 ring-[#8B4513]'} hover:scale-[1.02] transition-all duration-300 cursor-pointer order-first md:order-none`}
                       onClick={() => {
                         setActiveGameCategory('lion_gazelle');
                         navigateToGameTables('lion_gazelle');
