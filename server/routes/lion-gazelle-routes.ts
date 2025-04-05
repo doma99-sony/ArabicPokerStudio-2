@@ -7,7 +7,8 @@ const router = Router();
 
 // مخطط التحقق من صحة الرهان
 const betSchema = z.object({
-  amount: z.number().int().positive()
+  amount: z.number().int().positive(),
+  autoCashoutAt: z.number().positive().optional()
 });
 
 // مخطط التحقق من معرّف اللعبة
@@ -53,7 +54,7 @@ router.post('/place-bet', async (req, res) => {
       return res.status(400).json({ success: false, message: 'بيانات الرهان غير صالحة' });
     }
     
-    const { amount } = validationResult.data;
+    const { amount, autoCashoutAt } = validationResult.data;
     const userId = req.user.id;
     
     // التحقق من رصيد المستخدم
@@ -78,7 +79,8 @@ router.post('/place-bet', async (req, res) => {
       userId,
       user.username,
       user.avatar || null,
-      amount
+      amount,
+      autoCashoutAt
     );
     
     if (!result.success) {

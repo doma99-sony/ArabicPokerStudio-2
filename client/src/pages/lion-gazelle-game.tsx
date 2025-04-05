@@ -15,6 +15,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import {
   Card,
   CardContent,
@@ -98,6 +100,8 @@ const LionGazelleGame = () => {
   // حالة اللعبة
   const [currentGame, setCurrentGame] = useState<GameState | null>(null);
   const [betAmount, setBetAmount] = useState<number>(10);
+  const [autoCashoutAt, setAutoCashoutAt] = useState<number>(2);
+  const [isAutoCashoutEnabled, setIsAutoCashoutEnabled] = useState<boolean>(false);
   const [isPlayerBetting, setIsPlayerBetting] = useState<boolean>(false);
   const [isPlayerCashedOut, setIsPlayerCashedOut] = useState<boolean>(false);
   const [lastCashedOut, setLastCashedOut] = useState<{multiplier: number, profit: number} | null>(null);
@@ -134,8 +138,8 @@ const LionGazelleGame = () => {
   
   // إجراء المراهنة
   const placeBetMutation = useMutation({
-    mutationFn: async (amount: number) => {
-      return apiRequest('/api/lion-gazelle/place-bet', 'POST', { amount });
+    mutationFn: async (betData: any) => {
+      return apiRequest('/api/lion-gazelle/place-bet', 'POST', betData);
     },
     onSuccess: (data) => {
       if (data.success) {
@@ -334,7 +338,24 @@ const LionGazelleGame = () => {
       return;
     }
     
-    placeBetMutation.mutate(betAmount);
+    // إنشاء كائن البيانات للمراهنة
+    const betData = {
+      amount: betAmount
+    };
+    
+    // إضافة قيمة السحب التلقائي إذا كان مفعلًا
+    if (isAutoCashoutEnabled && autoCashoutAt > 1) {
+      // @ts-ignore
+      betData.autoCashoutAt = autoCashoutAt;
+      
+      toast({
+        title: "تم تفعيل السحب التلقائي",
+        description: `سيتم سحب الرهان تلقائيًا عند مضاعف ${formatMultiplier(autoCashoutAt)}`,
+      });
+    }
+    
+    // @ts-ignore
+    placeBetMutation.mutate(betData);
   };
   
   // وظيفة للسحب
@@ -422,6 +443,25 @@ const LionGazelleGame = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* الجانب الأيسر - منطقة اللعب */}
           <div className="lg:col-span-2">
+            {/* شريط الجولات السابقة */}
+            <div className="bg-gray-800/70 rounded-md p-2 mb-4 overflow-x-auto">
+              <div className="flex gap-2">
+                {historyData?.success && historyData.history.slice(0, 10).map((game: GameHistory) => (
+                  <div 
+                    key={game.gameId} 
+                    className={`w-12 h-12 flex items-center justify-center rounded-md ${
+                      game.multiplier >= 5 ? 'bg-red-900/70 text-red-300' :
+                      game.multiplier >= 3 ? 'bg-amber-900/70 text-amber-300' :
+                      game.multiplier >= 2 ? 'bg-yellow-900/70 text-yellow-300' :
+                      'bg-green-900/70 text-green-300'
+                    }`}
+                  >
+                    <span className="font-bold text-sm">{formatMultiplier(game.multiplier)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
             {/* منطقة اللعب الرئيسية */}
             <Card className="border-amber-900/50 bg-gradient-to-b from-amber-950/50 to-gray-900/50 mb-4">
               <CardHeader className="pb-2">
@@ -433,6 +473,7 @@ const LionGazelleGame = () => {
                     <div className="flex items-center bg-yellow-900/30 rounded-full px-3 py-1">
                       <Clock className="h-4 w-4 text-yellow-500 ml-1.5" />
                       <span className="text-yellow-500 font-bold">{currentGame?.countdown || 0}s</span>
+                      <span className="text-yellow-300 text-xs mr-2">استعداد...</span>
                     </div>
                   )}
                 </div>
@@ -522,23 +563,51 @@ const LionGazelleGame = () => {
                   <div className="flex flex-col sm:flex-row gap-3 items-center">
                     {/* حالة الانتظار - يمكن المراهنة */}
                     {currentGame?.status === 'waiting' && !isPlayerBetting && (
-                      <>
-                        <Input
-                          type="number"
-                          value={betAmount}
-                          onChange={(e) => setBetAmount(parseInt(e.target.value) || 0)}
-                          className="w-full sm:w-1/3 bg-gray-800 border-gray-700 text-white text-left"
-                          placeholder="مبلغ الرهان"
-                          min={1}
-                        />
-                        <Button 
-                          onClick={handlePlaceBet} 
-                          className="w-full sm:w-auto bg-amber-600 hover:bg-amber-700 text-white"
-                          disabled={placeBetMutation.isPending}
-                        >
-                          {placeBetMutation.isPending ? 'جارٍ المراهنة...' : 'المراهنة'}
-                        </Button>
-                      </>
+                      <div className="w-full flex flex-col gap-3">
+                        <div className="flex flex-col sm:flex-row gap-3 w-full">
+                          <Input
+                            type="number"
+                            value={betAmount}
+                            onChange={(e) => setBetAmount(parseInt(e.target.value) || 0)}
+                            className="w-full sm:w-1/3 bg-gray-800 border-gray-700 text-white text-left"
+                            placeholder="مبلغ الرهان"
+                            min={1}
+                          />
+                          <Button 
+                            onClick={handlePlaceBet} 
+                            className="w-full sm:w-auto bg-amber-600 hover:bg-amber-700 text-white"
+                            disabled={placeBetMutation.isPending}
+                          >
+                            {placeBetMutation.isPending ? 'جارٍ المراهنة...' : 'المراهنة'}
+                          </Button>
+                        </div>
+                        
+                        {/* منطقة السحب التلقائي */}
+                        <div className="flex items-center gap-2 bg-gray-800/70 rounded-md p-2">
+                          <div className="flex items-center">
+                            <Switch
+                              checked={isAutoCashoutEnabled}
+                              onCheckedChange={setIsAutoCashoutEnabled}
+                              className="data-[state=checked]:bg-green-600"
+                            />
+                            <Label className="mr-2 text-sm">سحب تلقائي</Label>
+                          </div>
+                          
+                          <div className="flex items-center gap-2 flex-grow">
+                            <Label className="text-sm">عند مضاعف:</Label>
+                            <Input
+                              type="number"
+                              value={autoCashoutAt}
+                              onChange={(e) => setAutoCashoutAt(parseFloat(e.target.value) || 2)}
+                              step={0.1}
+                              min={1.1}
+                              disabled={!isAutoCashoutEnabled}
+                              className="w-20 bg-gray-800 border-gray-700 text-white text-left"
+                            />
+                            <span className="text-amber-500 text-sm">x</span>
+                          </div>
+                        </div>
+                      </div>
                     )}
                     
                     {/* في حالة اللعب - لاعب يشارك - يمكن السحب */}
