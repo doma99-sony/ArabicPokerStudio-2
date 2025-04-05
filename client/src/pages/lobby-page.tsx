@@ -86,14 +86,8 @@ export default function LobbyPage() {
     } else if (gameType === "domino") {
       navigate("/domino");
     } else if (gameType === "lion_gazelle") {
-      // التنقل إلى صفحة البوكر مؤقتاً حتى يتم تطوير لعبة الأسد والغزالة
-      navigate("/poker-tables");
-      // إعلام المستخدم أن اللعبة قيد التطوير
-      toast({
-        title: "لعبة الأسد والغزالة",
-        description: "هذه اللعبة قيد التطوير حالياً. سيتم إطلاقها قريباً!",
-        variant: "default",
-      });
+      // التنقل إلى صفحة لعبة الأسد والغزالة
+      navigate("/lion-gazelle");
     }
     // ستتم إضافة المزيد من الألعاب لاحقًا
   };
