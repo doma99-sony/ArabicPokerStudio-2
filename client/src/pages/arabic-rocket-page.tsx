@@ -95,10 +95,36 @@ const ArabicRocketPage = () => {
   
   // توليد نقطة انفجار عشوائية (في الإنتاج، هذا سيأتي من السيرفر)
   const generateRandomCrashPoint = () => {
-    // توليد رقم عشوائي بتوزيع احتمالي يشبه ألعاب الكراش الحقيقية
-    const rand = Math.random();
-    // معظم القيم ستكون بين 1.0 و 3.0، مع احتمال أقل للقيم الأعلى
-    const crashPoint = 0.9 + (rand === 0 ? 0.1 : (1 / rand) * 0.9);
+    // تحسين الخوارزمية لتوليد أرقام أعلى وأكثر عدالة
+    // خيارات متعددة لتوليد قيم مختلفة
+    
+    // اختيار نوع التوزيع عشوائياً (50% كل منهما)
+    const distributionType = Math.random() < 0.5 ? "normal" : "exponential";
+    
+    let crashPoint = 1.0;
+    
+    if (distributionType === "normal") {
+      // توزيع طبيعي (معظم القيم بين 1.5 و 4)
+      const baseValue = 1.5 + (Math.random() * 2.5);
+      
+      // احتمال صغير للقيم المرتفعة (5٪)
+      if (Math.random() < 0.05) {
+        const bonus = Math.random() * 6;
+        crashPoint = baseValue + bonus;
+      } else {
+        crashPoint = baseValue;
+      }
+    } else {
+      // توزيع أسي (احتمال أكبر للقيم المنخفضة مع فرص أقل للقيم المرتفعة)
+      const rand = Math.random();
+      // المعادلة المعدلة تعطي قيم أعلى
+      crashPoint = 1.2 + (rand === 0 ? 0.3 : (1 / (rand * 0.7)) * 1.2);
+      
+      // احتمال صغير جداً للقيم المرتفعة جداً (1٪)
+      if (Math.random() < 0.01) {
+        crashPoint = 10 + (Math.random() * 90); // قيم بين 10 و 100
+      }
+    }
     
     // تقريب الرقم إلى رقمين عشريين
     return Math.floor(crashPoint * 100) / 100;
@@ -161,10 +187,14 @@ const ArabicRocketPage = () => {
     }
     
     // محاكاة انسحاب اللاعبين الافتراضيين
-    if (Math.random() < 0.05) { // احتمالية انسحاب لاعب مع كل إطار
+    // تعديل احتمالية انسحاب اللاعبين الافتراضيين بناءً على قيمة المضاعف الحالية
+    // كلما زاد المضاعف، زادت احتمالية الانسحاب
+    const withdrawalProbability = Math.min(0.03 + (multiplier - 1) * 0.015, 0.2);
+    
+    if (Math.random() < withdrawalProbability) {
       setActivePlayers(prev => {
         const updatedPlayers = [...prev];
-        const notCashedOutPlayers = updatedPlayers.filter(p => p.cashoutMultiplier === null);
+        const notCashedOutPlayers = updatedPlayers.filter(p => p.cashoutMultiplier === null && p.id !== user?.id);
         
         if (notCashedOutPlayers.length > 0) {
           const randomIndex = Math.floor(Math.random() * notCashedOutPlayers.length);
@@ -186,8 +216,29 @@ const ArabicRocketPage = () => {
     // رسم الصاروخ والخلفية
     drawRocket(multiplier);
     
-    // زيادة المضاعف للإطار التالي (سرعة الزيادة تتغير مع زيادة المضاعف)
-    const nextMultiplier = multiplier + (multiplier * 0.01);
+    // تعديل سرعة الزيادة للمضاعف للإطار التالي
+    // في البداية تكون الزيادة أسرع، ثم تبطئ مع زيادة المضاعف
+    // هذا يجعل اللعبة أكثر إثارة وتوقعاً
+    let incrementFactor = 0.01;
+    
+    if (multiplier > 5) {
+      // تقليل السرعة تدريجياً بعد المضاعف 5x
+      incrementFactor = 0.008;
+    }
+    if (multiplier > 10) {
+      // تقليل السرعة أكثر بعد المضاعف 10x
+      incrementFactor = 0.006;
+    }
+    if (multiplier > 20) {
+      // تقليل السرعة أكثر بعد المضاعف 20x
+      incrementFactor = 0.004;
+    }
+    if (multiplier > 50) {
+      // تقليل السرعة بشكل كبير بعد المضاعف 50x
+      incrementFactor = 0.002;
+    }
+    
+    const nextMultiplier = multiplier + (multiplier * incrementFactor);
     
     // استمرار حلقة الرسم
     animationRef.current = requestAnimationFrame(() => animate(nextMultiplier));
@@ -384,18 +435,41 @@ const ArabicRocketPage = () => {
       return;
     }
     
-    // إضافة اللاعب إلى القائمة
-    setActivePlayers(prev => [
-      ...prev,
-      { id: user.id, username: user.username, betAmount: betAmount, cashoutMultiplier: null, profit: null }
-    ]);
-    
-    setHasBet(true);
-    
-    toast({
-      title: "تم وضع الرهان",
-      description: `رهانك: ${betAmount} رقاقة`,
-    });
+    try {
+      // تحديث الواجهة أولاً للاستجابة الفورية
+      // إضافة اللاعب إلى القائمة
+      setActivePlayers(prev => [
+        ...prev,
+        { id: user.id, username: user.username, betAmount: betAmount, cashoutMultiplier: null, profit: null }
+      ]);
+      
+      setHasBet(true);
+      
+      // تشغيل صوت رهان
+      const audio = new Audio();
+      audio.src = "https://assets.mixkit.co/sfx/preview/mixkit-unlock-game-notification-253.mp3";
+      audio.volume = 0.5;
+      audio.play().catch(error => console.log("خطأ في تشغيل صوت الرهان:", error));
+      
+      // في النسخة النهائية، سنرسل هذا إلى الخادم أيضاً
+      // قم بوضع الكود هنا لإرسال المراهنة إلى الخادم
+      
+      toast({
+        title: "تم وضع الرهان",
+        description: `رهانك: ${betAmount} رقاقة`,
+      });
+    } catch (error) {
+      console.error("خطأ في وضع الرهان:", error);
+      toast({
+        title: "حدث خطأ",
+        description: "لم نتمكن من وضع الرهان، حاول مرة أخرى",
+        variant: "destructive"
+      });
+      
+      // استعادة الحالة في حالة الخطأ
+      setHasBet(false);
+      setActivePlayers(prev => prev.filter(player => player.id !== user?.id));
+    }
   };
   
   // وظيفة سحب الأرباح
@@ -404,23 +478,46 @@ const ArabicRocketPage = () => {
       return;
     }
     
-    const winAmount = Math.floor(betAmount * currentMultiplier);
-    const profit = winAmount - betAmount;
-    
-    // تحديث حالة اللاعب
-    setActivePlayers(prev => prev.map(player => {
-      if (player.id === user?.id) {
-        return { ...player, cashoutMultiplier: currentMultiplier, profit: profit };
-      }
-      return player;
-    }));
-    
-    setHasWithdrawn(true);
-    
-    toast({
-      title: "تم السحب بنجاح!",
-      description: `ربحت ${winAmount} رقاقة (بربح ${profit} رقاقة)`
-    });
+    try {
+      // حساب المبلغ الذي سيربحه اللاعب
+      const winAmount = Math.floor(betAmount * currentMultiplier);
+      const profit = winAmount - betAmount;
+      
+      // تحديث حالة اللاعب في الواجهة أولاً للاستجابة الفورية
+      setActivePlayers(prev => prev.map(player => {
+        if (player.id === user?.id) {
+          return { ...player, cashoutMultiplier: currentMultiplier, profit: profit };
+        }
+        return player;
+      }));
+      
+      // تعيين حالة اللاعب بأنه قام بالسحب
+      setHasWithdrawn(true);
+      
+      // تشغيل صوت النجاح
+      const audio = new Audio();
+      audio.src = "https://assets.mixkit.co/sfx/preview/mixkit-fantasy-game-success-notification-270.mp3";
+      audio.volume = 0.5;
+      audio.play().catch(error => console.log("خطأ في تشغيل صوت السحب:", error));
+      
+      // في النسخة النهائية، سنرسل هذا إلى الخادم أيضاً
+      // قم بوضع الكود هنا لإرسال السحب إلى الخادم
+      
+      toast({
+        title: "تم السحب بنجاح!",
+        description: `ربحت ${winAmount} رقاقة (بربح ${profit} رقاقة)`,
+        variant: currentMultiplier > 2 ? "default" : "default" // يمكن استخدام أنواع مختلفة بناءً على المضاعف
+      });
+    } catch (error) {
+      console.error("خطأ في سحب الأرباح:", error);
+      toast({
+        title: "حدث خطأ",
+        description: "لم نتمكن من سحب أرباحك، حاول مرة أخرى",
+        variant: "destructive"
+      });
+      
+      // لا نقوم باستعادة الحالة هنا لأن اللاعب ربما قد سحب بالفعل قبل حدوث الخطأ
+    }
   };
   
   return (
