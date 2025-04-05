@@ -72,14 +72,17 @@
 /* تطبيق التحريكات على العناصر */
 .lion-run {
   animation: lionRunning 0.4s infinite;
+  transform-origin: center bottom;
 }
 
 .gazelle-run {
   animation: gazelleRunning 0.3s infinite;
+  transform-origin: center bottom;
 }
 
 .dust-animation {
   animation: dustCloud 0.8s infinite alternate;
+  filter: blur(1px);
 }
 
 .crash-background {

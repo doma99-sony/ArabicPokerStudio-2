@@ -356,7 +356,7 @@ export default function LobbyPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
                     {/* بوكر عرباوي - تصميم واضح */}
                     <div 
-                      className={`relative flex flex-col h-[160px] w-full rounded-xl overflow-hidden shadow-lg mb-4 mt-2 ${activeGameCategory === 'poker' ? 'ring-2 ring-[#D4AF37]' : 'ring-1 ring-[#D4AF37]'} hover:scale-[1.02] transition-all duration-300 cursor-pointer`}
+                      className={`relative flex flex-col h-[160px] w-full rounded-xl overflow-hidden shadow-lg mb-4 mt-2 ${activeGameCategory === 'poker' ? 'ring-2 ring-[#D4AF37]' : 'ring-1 ring-[#D4AF37]'} hover:scale-[1.02] transition-all duration-300 cursor-pointer order-first md:order-first`}
                       onClick={() => {
                         setActiveGameCategory('poker');
                         navigateToGameTables('poker');
@@ -409,9 +409,9 @@ export default function LobbyPage() {
                       </div>
                     </div>
 
-                    {/* الأسد والغزالة - تصميم واضح */}
+                    {/* الأسد والغزالة - تصميم واضح - موضع على اليمين */}
                     <div 
-                      className={`relative flex flex-col h-[160px] w-full rounded-xl overflow-hidden shadow-lg mb-4 mt-2 ${activeGameCategory === 'lion_gazelle' ? 'ring-2 ring-[#8B4513]' : 'ring-1 ring-[#8B4513]'} hover:scale-[1.02] transition-all duration-300 cursor-pointer order-first md:order-none`}
+                      className={`relative flex flex-col h-[160px] w-full rounded-xl overflow-hidden shadow-lg mb-4 mt-2 ${activeGameCategory === 'lion_gazelle' ? 'ring-2 ring-[#8B4513]' : 'ring-1 ring-[#8B4513]'} hover:scale-[1.02] transition-all duration-300 cursor-pointer order-2 md:order-2`}
                       onClick={() => {
                         setActiveGameCategory('lion_gazelle');
                         navigateToGameTables('lion_gazelle');
