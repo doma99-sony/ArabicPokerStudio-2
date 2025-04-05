@@ -561,8 +561,23 @@ const LionGazelleGame = () => {
                 <div className="flex flex-col w-full gap-4">
                   {/* منطقة المراهنة أو السحب */}
                   <div className="flex flex-col sm:flex-row gap-3 items-center">
+                    
+                    {/* رسالة تسجيل الدخول إذا لم يكن المستخدم قد سجل الدخول */}
+                    {!user && (
+                      <div className="w-full bg-gray-800/70 rounded-md p-4 text-center">
+                        <h3 className="text-lg font-bold text-amber-500 mb-2">تسجيل الدخول مطلوب</h3>
+                        <p className="text-white mb-3">يرجى تسجيل الدخول للمشاركة في اللعبة ووضع الرهانات</p>
+                        <Button 
+                          onClick={() => navigate('/')}
+                          className="bg-amber-600 hover:bg-amber-700 text-white"
+                        >
+                          العودة للصفحة الرئيسية
+                        </Button>
+                      </div>
+                    )}
+                    
                     {/* حالة الانتظار - يمكن المراهنة */}
-                    {currentGame?.status === 'waiting' && !isPlayerBetting && (
+                    {user && currentGame?.status === 'waiting' && !isPlayerBetting && (
                       <div className="w-full flex flex-col gap-3">
                         <div className="flex flex-col sm:flex-row gap-3 w-full">
                           <Input
