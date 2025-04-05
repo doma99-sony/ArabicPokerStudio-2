@@ -139,7 +139,14 @@ const LionGazelleGame = () => {
   // إجراء المراهنة
   const placeBetMutation = useMutation({
     mutationFn: async (betData: any) => {
-      return apiRequest('/api/lion-gazelle/place-bet', 'POST', betData);
+      const response = await fetch('/api/lion-gazelle/place-bet', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(betData),
+      });
+      return response.json();
     },
     onSuccess: (data) => {
       if (data.success) {
@@ -282,38 +289,36 @@ const LionGazelleGame = () => {
     };
   }, [currentGame, isPlayerBetting, isPlayerCashedOut]);
   
-  // وظيفة لتحديث مواقع الرسوم المتحركة
+  // وظيفة لتحديث رسومات صاروخ الكراش
   const updateAnimationPositions = () => {
-    if (!currentGame || !lionRef.current || !gazelleRef.current) return;
+    if (!currentGame || !gameAreaRef.current) return;
     
-    // حساب موقع الأسد والغزالة بناءً على المضاعف الحالي
-    // مضاعف أعلى = مسافة أقصر بين الأسد والغزالة
-    const baseDistance = 200; // المسافة الأساسية بين الأسد والغزالة
-    const multiplierEffect = (currentGame.currentMultiplier - 1) * 20; // تأثير المضاعف على المسافة
-    const distanceBetween = Math.max(10, baseDistance - multiplierEffect); // يجب أن تكون هناك مسافة دنيا
+    // هنا لا نحتاج لتحديث مواقع الحيوانات لأننا استبدلناها بصاروخ كراش
+    // بدلاً من ذلك، يتم تحديث المسار في SVG بشكل ديناميكي من خلال خاصية d
+    // في عنصر path في خلال العرض
     
-    // تحديث مواقع الأسد والغزالة في CSS
-    // الأسد يتقدم بشكل أسرع مع زيادة المضاعف
-    const lionLeft = 10 + (currentGame.currentMultiplier - 1) * 30;
-    const gazelleLeft = lionLeft + distanceBetween;
-    
-    lionRef.current.style.left = `${lionLeft}px`;
-    gazelleRef.current.style.left = `${gazelleLeft}px`;
-    
-    // إضافة غبار متحرك خلف الأسد للإشارة إلى السرعة
-    if (currentGame.currentMultiplier > 1.5 && lionRef.current.parentNode) {
-      const dustParticle = document.createElement('div');
-      dustParticle.className = 'dust-particle';
-      dustParticle.style.left = `${lionLeft - 5}px`;
-      dustParticle.style.bottom = `${5 + Math.random() * 10}px`;
-      lionRef.current.parentNode.appendChild(dustParticle);
+    // أضف تأثيرات بصرية إضافية اعتماداً على المضاعف
+    if (currentGame.currentMultiplier > 5) {
+      // إضافة تأثير وهج للمضاعف العالي
+      const flashEffect = document.createElement('div');
+      flashEffect.className = 'absolute inset-0 bg-amber-500/10 z-1';
+      flashEffect.style.animation = 'fadeOut 0.5s forwards';
       
-      // إزالة جزيئات الغبار بعد انتهاء الرسوم المتحركة
+      gameAreaRef.current.appendChild(flashEffect);
+      
+      // إزالة التأثير بعد انتهاء الرسوم المتحركة
       setTimeout(() => {
-        if (dustParticle.parentNode === lionRef.current.parentNode) {
-          lionRef.current.parentNode.removeChild(dustParticle);
+        if (flashEffect.parentNode === gameAreaRef.current) {
+          gameAreaRef.current.removeChild(flashEffect);
         }
-      }, 1000);
+      }, 500);
+    }
+    
+    // تحديث مقياس الشبكة ليتناسب مع المضاعف
+    const gridLines = gameAreaRef.current.querySelector('.grid-lines');
+    if (gridLines) {
+      const scaleValue = Math.max(0.5, 1 - (currentGame.currentMultiplier - 1) * 0.05);
+      gridLines.setAttribute('style', `background-size: ${20 * scaleValue}px ${20 * scaleValue}px`);
     }
   };
   
@@ -481,7 +486,7 @@ const LionGazelleGame = () => {
           <span>العودة</span>
         </Button>
         
-        <h1 className="text-2xl font-bold text-amber-500">الأسد والغزالة</h1>
+        <h1 className="text-2xl font-bold text-amber-500">صاروخ كراش</h1>
         
         <div className="flex items-center gap-1">
           <span className="text-amber-500 font-bold">{user?.chips || 0}</span>
@@ -518,7 +523,7 @@ const LionGazelleGame = () => {
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-center">
                   <CardTitle className="text-xl text-amber-500">
-                    حلبة السباق
+                    منطقة الإطلاق
                   </CardTitle>
                   {currentGame?.status === 'waiting' && (
                     <div className="flex items-center bg-yellow-900/30 rounded-full px-3 py-1">
@@ -530,32 +535,43 @@ const LionGazelleGame = () => {
                 </div>
                 <CardDescription className="text-gray-400">
                   {currentGame?.status === 'waiting' 
-                    ? 'السباق سيبدأ قريبًا، استعد للمراهنة!' 
+                    ? 'صاروخ كراش سينطلق قريبًا، استعد للمراهنة!' 
                     : currentGame?.status === 'running'
-                    ? 'الأسد يطارد الغزالة! اسحب قبل الإمساك بها!'
-                    : 'انتهى السباق! هل كنت محظوظًا؟'}
+                    ? 'الصاروخ في تصاعد! اسحب قبل أن يتحطم!'
+                    : 'تحطم الصاروخ! هل كنت محظوظًا؟'}
                 </CardDescription>
               </CardHeader>
               
               <CardContent>
-                {/* منطقة اللعب - تحتوي على الأسد والغزالة والمؤثرات البصرية */}
+                {/* منطقة اللعب - صاروخ كراش */}
                 <div 
                   ref={gameAreaRef}
-                  className="relative h-64 md:h-96 overflow-hidden rounded-xl border border-amber-900/30"
-                  style={{
-                    background: 'url("/assets/lion-gazelle/background.svg") repeat-x',
-                    backgroundSize: 'auto 100%'
-                  }}
+                  className="relative h-64 md:h-96 overflow-hidden rounded-xl border border-amber-900/30 bg-gradient-to-b from-gray-900 to-gray-800"
                 >
+                  {/* شكل الصاروخ (خط متصاعد) */}
+                  <div className={`absolute inset-0 z-0 ${currentGame?.status === 'running' ? 'rocket-line' : ''}`}>
+                    <svg className="w-full h-full" viewBox="0 0 500 300" preserveAspectRatio="none">
+                      {currentGame?.status === 'running' && (
+                        <path 
+                          d={`M 0,300 L ${Math.min(500, (currentGame.currentMultiplier - 1) * 100)},${Math.max(50, 300 - (currentGame.currentMultiplier - 1) * 60)}`} 
+                          stroke="#F59E0B" 
+                          strokeWidth="3" 
+                          fill="none" 
+                          className="rocket-path"
+                        />
+                      )}
+                    </svg>
+                  </div>
+                  
                   {/* المضاعف الكبير في منتصف الشاشة */}
-                  <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10">
+                  <div className="absolute inset-0 flex items-center justify-center z-10">
                     <div className={`text-4xl md:text-6xl font-bold ${
                       currentGame?.status === 'running' 
                         ? getMultiplierClass(currentGame.currentMultiplier)
                         : currentGame?.status === 'ended'
-                        ? 'text-red-500 font-extrabold'
+                        ? 'text-red-500 font-extrabold crash-animation'
                         : 'text-white'
-                    }}`}>
+                    }`}>
                       {currentGame?.status === 'running' 
                         ? formatMultiplier(currentGame.currentMultiplier)
                         : currentGame?.status === 'ended'
@@ -564,33 +580,8 @@ const LionGazelleGame = () => {
                     </div>
                   </div>
                   
-                  {/* الأسد */}
-                  <div 
-                    ref={lionRef}
-                    className="absolute bottom-6 left-10 w-36 h-36 z-20"
-                  >
-                    <div className={`w-full h-full relative ${currentGame?.status === 'running' ? 'lion-running' : ''}`}>
-                      <img 
-                        src="/assets/lion-gazelle/lion-running.png" 
-                        alt="الأسد" 
-                        className="w-full h-full object-contain"
-                      />
-                    </div>
-                  </div>
-                  
-                  {/* الغزالة */}
-                  <div 
-                    ref={gazelleRef}
-                    className="absolute bottom-6 left-60 w-20 h-20 z-20"
-                  >
-                    <div className={`w-full h-full relative ${currentGame?.status === 'running' ? 'gazelle-running' : ''}`}>
-                      <img 
-                        src="/assets/lion-gazelle/gazelle.svg" 
-                        alt="الغزالة" 
-                        className="w-full h-full"
-                      />
-                    </div>
-                  </div>
+                  {/* خطوط الشبكة */}
+                  <div className="absolute inset-0 grid-lines"></div>
                   
                   {/* المسار (سطح الأرض) */}
                   <div 
@@ -717,7 +708,7 @@ const LionGazelleGame = () => {
                     {currentGame?.status === 'ended' && isPlayerBetting && !isPlayerCashedOut && (
                       <div className="text-center w-full">
                         <p className="text-red-500 font-bold text-lg">
-                          تم الإمساك بالغزالة!
+                          تحطم الصاروخ!
                         </p>
                         <p className="text-white">
                           خسرت <span className="text-red-500 font-bold">{getCurrentPlayerBet()?.betAmount || 0}</span> رقائق
