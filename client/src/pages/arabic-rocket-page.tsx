@@ -74,13 +74,23 @@ const ArabicRocketPage = () => {
     setCurrentMultiplier(1.00);
     setHasBet(false);
     setHasWithdrawn(false);
+    setPotentialWin(0);
     
     // محاكاة قيمة الانفجار المستلمة من السيرفر
-    setMaxMultiplier(generateRandomCrashPoint());
+    // نولد قيمة الانفجار مقدمًا بناءً على الخوارزمية
+    const crashValue = generateRandomCrashPoint();
+    console.log("قيمة الانفجار المحددة للجولة:", crashValue);
+    setMaxMultiplier(crashValue);
     
     // بدء العد التنازلي للجولة التالية (5 ثوانٍ)
     let count = 5;
     setCountdown(count);
+    
+    // قبل بدء العد التنازلي، نتأكد من حالة اللعبة
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
+      animationRef.current = 0;
+    }
     
     const countdownInterval = setInterval(() => {
       count--;
@@ -94,35 +104,38 @@ const ArabicRocketPage = () => {
   };
   
   // توليد نقطة انفجار عشوائية (في الإنتاج، هذا سيأتي من السيرفر)
+  // تطبيق خوارزمية 1xBet على أساس التوزيع والقيم
   const generateRandomCrashPoint = (): number => {
-    // استخدام نظام محسّن متعدد الطبقات للتوزيع
-    // نظام متقدم يشبه نظام ألعاب Crash الحقيقية
+    // استخدام نظام التوزيع الهجين (مماثل لـ 1xBet)
     
+    // احتمالية وزّعة حسب نموذج 1xBet
+    const random = Math.random();
     let crashPoint: number;
-    const randomValue = Math.random();
     
-    // احتمالية الانفجار المبكر (أقل من 1.5x): 35%
-    if (randomValue < 0.35) {
-      // انفجار مبكر بين 1.01 و 1.5
-      crashPoint = 1.01 + (Math.random() * 0.49);
+    // الحالة الأكثر شيوعًا (70% من الحالات): 1.05x إلى 2.00x
+    if (random < 0.70) {
+      // القيم العادية منخفضة المكافأة
+      // مدى 1.05x إلى 2.00x
+      crashPoint = 1.05 + (Math.random() * 0.95);
     }
-    // احتمالية قيم متوسطة (بين 1.5x و 3x): 40%
-    else if (randomValue < 0.62) { // 0.35 + (0.65 * 0.4) ≈ 0.62
-      // قيم متوسطة بين 1.5 و 3.0
-      crashPoint = 1.5 + (Math.random() * 1.5);
+    // حالة متوسطة (22% من الحالات): 2.01x إلى 5.00x
+    else if (random < 0.92) {
+      // مدى 2.01x إلى 5.00x
+      crashPoint = 2.01 + (Math.random() * 2.99);
     }
-    // احتمالية قيم مرتفعة (بين 3x و 10x): 20%
-    else if (randomValue < 0.85) { // 0.62 + (0.38 * 0.6) ≈ 0.85
-      // قيم مرتفعة بين 3.0 و 10.0
-      crashPoint = 3.0 + (Math.random() * 7.0);
+    // حالة اكتر قيمة ونادرة (7% من الحالات): 5.01x إلى 20.00x
+    else if (random < 0.99) {
+      // مدى 5.01x إلى 20.00x
+      crashPoint = 5.01 + (Math.random() * 14.99);
     }
-    // احتمالية قيم عالية جداً (> 10x): 5%
+    // حالة نادرة جدًا (1% من الحالات): > 20.00x
     else {
-      // استخدام معادلة للتوزيع الأسي للقيم العالية جداً
-      const highValue = 10.0 + (-Math.log(Math.random()) * 5.0);
-      
-      // تحديد حد أقصى منطقي (50x) مع احتمالية ضئيلة لتجاوزه
-      crashPoint = Math.min(highValue, Math.random() < 0.01 ? 100 : 50);
+      // هنا نستخدم توزيع أسي لاحتمالية رقم كبير (حتى 100x)
+      const e = Math.exp(1);
+      // استخدام معادلة من نوع التوزيع الأسي
+      crashPoint = 20.00 + (-Math.log(1 - (Math.random() * 0.999)) * 10);
+      // تحديد سقف أعلى منطقي
+      if (crashPoint > 150) crashPoint = 150;
     }
     
     // تقريب النتيجة إلى رقمين عشريين وإرجاعها كرقم
@@ -405,17 +418,19 @@ const ArabicRocketPage = () => {
     }
   };
   
-  // وظيفة وضع الرهان
+  // وظيفة وضع الرهان - تم تحسينها لتشبه 1xBet
   const handlePlaceBet = () => {
+    // التحقق من الوقت المناسب للمراهنة
     if (!isGameActive) {
       toast({
         title: "انتظر بدء الجولة التالية",
-        description: "الجولة التالية ستبدأ قريباً",
+        description: "الجولة التالية ستبدأ خلال " + countdown + " ثواني",
         variant: "destructive"
       });
       return;
     }
     
+    // فحص الرهان إذا كان صحيحاً
     if (betAmount <= 0) {
       toast({
         title: "مبلغ الرهان غير صالح",
@@ -425,6 +440,18 @@ const ArabicRocketPage = () => {
       return;
     }
     
+    // فحص إذا كان المستخدم يملك الرصيد الكافي
+    const minimumBet = 10; // الحد الأدنى للرهان 10 رقاقات
+    if (betAmount < minimumBet) {
+      toast({
+        title: "مبلغ الرهان أقل من الحد الأدنى",
+        description: `الحد الأدنى للرهان هو ${minimumBet} رقاقة`,
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // التحقق من الرصيد
     if (!user || user.chips < betAmount) {
       toast({
         title: "رصيد غير كافٍ",
@@ -434,15 +461,44 @@ const ArabicRocketPage = () => {
       return;
     }
     
+    // التحقق من عدم وجود رهان مسبق
+    if (hasBet) {
+      toast({
+        title: "لديك رهان بالفعل!",
+        description: "يمكنك وضع رهان واحد فقط في كل جولة",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     try {
+      // إنشاء معرف فريد للرهان
+      const betId = Date.now();
+      
       // تحديث الواجهة أولاً للاستجابة الفورية
       // إضافة اللاعب إلى القائمة
-      setActivePlayers(prev => [
-        ...prev,
-        { id: user.id, username: user.username, betAmount: betAmount, cashoutMultiplier: null, profit: null }
-      ]);
+      setActivePlayers(prev => {
+        // التحقق من عدم وجود اللاعب بالفعل
+        const existingPlayerIndex = prev.findIndex(p => p.id === user.id);
+        if (existingPlayerIndex >= 0) {
+          return prev; // اللاعب موجود بالفعل، لا نضيفه مرة أخرى
+        }
+        
+        return [
+          ...prev,
+          { 
+            id: user.id, 
+            username: user.username, 
+            betAmount: betAmount,
+            cashoutMultiplier: null, 
+            profit: null 
+          }
+        ];
+      });
       
+      // تحديث حالة المراهنة
       setHasBet(true);
+      setPotentialWin(betAmount); // نبدأ بقيمة الرهان كربح محتمل (1.00x)
       
       // تشغيل صوت رهان
       const audio = new Audio();
@@ -450,12 +506,13 @@ const ArabicRocketPage = () => {
       audio.volume = 0.5;
       audio.play().catch(error => console.log("خطأ في تشغيل صوت الرهان:", error));
       
-      // في النسخة النهائية، سنرسل هذا إلى الخادم أيضاً
-      // قم بوضع الكود هنا لإرسال المراهنة إلى الخادم
+      // في النسخة النهائية، هنا سيتم إرسال طلب إلى السيرفر
+      // placeBet({ userId: user.id, amount: betAmount, betId: betId });
       
       toast({
-        title: "تم وضع الرهان",
-        description: `رهانك: ${betAmount} رقاقة`,
+        title: "تم وضع الرهان بنجاح!",
+        description: `رهان بقيمة ${betAmount} رقاقة`,
+        variant: "default"
       });
     } catch (error) {
       console.error("خطأ في وضع الرهان:", error);
@@ -471,42 +528,110 @@ const ArabicRocketPage = () => {
     }
   };
   
-  // وظيفة سحب الأرباح
+  // وظيفة سحب الأرباح - محسنة كما في 1xBet
   const handleWithdraw = () => {
+    // التحقق من شروط السحب
     if (!isGameActive || !hasBet || hasWithdrawn) {
+      if (!isGameActive) {
+        toast({
+          title: "اللعبة غير نشطة حالياً",
+          description: "انتظر بدء جولة جديدة",
+          variant: "destructive"
+        });
+      } else if (!hasBet) {
+        toast({
+          title: "ليس لديك رهان",
+          description: "يجب وضع رهان أولاً قبل السحب",
+          variant: "destructive"
+        });
+      } else if (hasWithdrawn) {
+        toast({
+          title: "قمت بالسحب بالفعل",
+          description: "لقد قمت بالفعل بسحب أرباحك من هذه الجولة",
+          variant: "destructive"
+        });
+      }
       return;
     }
     
     try {
-      // حساب المبلغ الذي سيربحه اللاعب
-      const winAmount = Math.floor(betAmount * currentMultiplier);
-      const profit = winAmount - betAmount;
-      
-      // تحديث حالة اللاعب في الواجهة أولاً للاستجابة الفورية
-      setActivePlayers(prev => prev.map(player => {
-        if (player.id === user?.id) {
-          return { ...player, cashoutMultiplier: currentMultiplier, profit: profit };
+      // التأخير هنا لمحاكاة الواقعية (0.2 ثانية)
+      // هذا مهم لمنع الغش في ألعاب Crash الحقيقية
+      const withdrawDelay = setTimeout(() => {
+        // حساب المبلغ الذي سيربحه اللاعب بدقة
+        const winAmount = Math.floor(betAmount * currentMultiplier);
+        const profit = winAmount - betAmount;
+        
+        // تسجيل مضاعف السحب الدقيق (في الوقت الفعلي)
+        const exactMultiplier = currentMultiplier;
+        
+        // تحديث حالة اللاعب في الواجهة للاستجابة الفورية
+        setActivePlayers(prev => prev.map(player => {
+          if (player.id === user?.id) {
+            return { 
+              ...player, 
+              cashoutMultiplier: exactMultiplier, 
+              profit: profit 
+            };
+          }
+          return player;
+        }));
+        
+        // تعيين حالة اللاعب بأنه قام بالسحب
+        setHasWithdrawn(true);
+        setPotentialWin(winAmount); // تثبيت قيمة الربح عند السحب
+        
+        // إنشاء بيانات السحب للإرسال إلى الخادم (في النسخة الحقيقية)
+        const cashoutData = {
+          userId: user?.id,
+          betAmount: betAmount,
+          cashoutMultiplier: exactMultiplier,
+          winAmount: winAmount,
+          profit: profit,
+          timestamp: Date.now()
+        };
+        
+        console.log("بيانات السحب:", cashoutData);
+        
+        // في النسخة النهائية، سنرسل هذا إلى الخادم
+        // await cashoutBet(cashoutData);
+        
+        // تشغيل صوت النجاح المناسب حسب قيمة الربح
+        const audio = new Audio();
+        
+        // اختيار الصوت حسب حجم الربح
+        if (exactMultiplier >= 5) {
+          // صوت ربح كبير
+          audio.src = "https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3";
+          audio.volume = 0.7;
+        } else if (exactMultiplier >= 2) {
+          // صوت ربح متوسط
+          audio.src = "https://assets.mixkit.co/sfx/preview/mixkit-fantasy-game-success-notification-270.mp3";
+          audio.volume = 0.6;
+        } else {
+          // صوت ربح صغير
+          audio.src = "https://assets.mixkit.co/sfx/preview/mixkit-unlock-game-notification-253.mp3";
+          audio.volume = 0.5;
         }
-        return player;
-      }));
+        
+        // تشغيل الصوت المناسب
+        audio.play().catch(error => console.log("خطأ في تشغيل صوت السحب:", error));
+        
+        // إظهار رسالة النجاح للمستخدم
+        const message = profit > betAmount ? 
+          `ربحت ${winAmount} رقاقة (بربح قدره ${profit} رقاقة)` : 
+          `ربحت ${winAmount} رقاقة`;
+          
+        toast({
+          title: profit > 1000 ? "ربح كبير! 🔥" : "تم السحب بنجاح!",
+          description: message,
+          variant: exactMultiplier >= 5 ? "success" : "default"
+        });
+      }, 200); // تأخير 200 مللي ثانية لمحاكاة الواقعية
       
-      // تعيين حالة اللاعب بأنه قام بالسحب
-      setHasWithdrawn(true);
+      // تخزين مؤقت التأخير للتنظيف إذا لزم الأمر
+      return () => clearTimeout(withdrawDelay);
       
-      // تشغيل صوت النجاح
-      const audio = new Audio();
-      audio.src = "https://assets.mixkit.co/sfx/preview/mixkit-fantasy-game-success-notification-270.mp3";
-      audio.volume = 0.5;
-      audio.play().catch(error => console.log("خطأ في تشغيل صوت السحب:", error));
-      
-      // في النسخة النهائية، سنرسل هذا إلى الخادم أيضاً
-      // قم بوضع الكود هنا لإرسال السحب إلى الخادم
-      
-      toast({
-        title: "تم السحب بنجاح!",
-        description: `ربحت ${winAmount} رقاقة (بربح ${profit} رقاقة)`,
-        variant: currentMultiplier > 2 ? "default" : "default" // يمكن استخدام أنواع مختلفة بناءً على المضاعف
-      });
     } catch (error) {
       console.error("خطأ في سحب الأرباح:", error);
       toast({
