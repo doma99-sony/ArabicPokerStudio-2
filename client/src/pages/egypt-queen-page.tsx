@@ -78,68 +78,18 @@ export default function EgyptQueenPage() {
   const [chestsOpened, setChestsOpened] = useState(0);
   const [totalBonusWin, setTotalBonusWin] = useState(0);
   
-  // التأكد من اتصال WebSocket عند دخول الصفحة
+  // لا حاجة للاستماع إلى رسائل الخادم هنا، حيث يتم التعامل معها في مكون use-auth.tsx
+  // ورفع تحديثات رصيد اللاعب تلقائياً
+
+  // نحن فقط سنقوم بإدارة متابعة التحديثات في حالة اللاعب
   useEffect(() => {
-    if (user && user.id && !globalWs.isConnected) {
-      console.log('إنشاء اتصال WebSocket في صفحة ملكة مصر');
-      globalWs.connect(user.id);
-    }
+    console.log("تم تحديث معلومات المستخدم في صفحة ملكة مصر:", user?.chips);
     
+    // تنظيف عند تفكيك المكون
     return () => {
-      console.log('الاحتفاظ باتصال WebSocket عند مغادرة صفحة ملكة مصر');
+      console.log('تم مغادرة صفحة ملكة مصر');
     };
-  }, [user, globalWs]);
-  
-  // الاستماع لرسائل WebSocket
-  useEffect(() => {
-    if (globalWs) {
-      // اشتراك في رسائل WebSocket
-      const handleWebSocketMessage = (message: any) => {
-        if (!message) return;
-        
-        // تحديث رصيد اللاعب عند تلقي تحديث الرصيد
-        if (message.type === 'chips_update') {
-          console.log('تم استلام تحديث الرصيد:', message);
-          
-          // إذا كان التحديث متعلق بلعبة ملكة مصر، نعرض رسالة توضيحية
-          if (message.game === 'egypt-queen') {
-            if (message.action === 'slot_bet') {
-              // رسالة خصم الرهان (لا نعرضها هنا لتجنب التكرار)
-            } else if (message.action === 'slot_win' || message.action === 'bonus_win') {
-              // رسالة إضافة الفوز (تم عرضها بالفعل في وظيفة التحقق من الفوز)
-            }
-          }
-          
-          // تحديث حالة المستخدم المحلية
-          setUser(prevUser => {
-            if (!prevUser) return prevUser;
-            return {
-              ...prevUser,
-              chips: message.chips
-            };
-          });
-        }
-        // التعامل مع رسائل الخطأ
-        else if (message.type === 'error') {
-          console.error('خطأ WebSocket:', message.message);
-          toast({
-            title: "خطأ",
-            description: message.message,
-            variant: "destructive"
-          });
-        }
-      };
-      
-      // إضافة مستمع الرسائل
-      globalWs.addMessageHandler('egypt-queen-page', handleWebSocketMessage);
-      
-      // إزالة المستمع عند مغادرة الصفحة
-      return () => {
-        globalWs.removeMessageHandler('egypt-queen-page');
-        console.log('تم إزالة مستمع WebSocket عند مغادرة صفحة ملكة مصر');
-      };
-    }
-  }, [globalWs, toast]);
+  }, [user]);
 
   // تشغيل الموسيقى الخلفية عند تحميل الصفحة
   useEffect(() => {
@@ -524,16 +474,8 @@ export default function EgyptQueenPage() {
           // إرسال المكافأة إلى الخادم (إذا كان المستخدم متصلاً)
           if (user && user.id && globalWs && globalWs.isConnected) {
             try {
-              globalWs.sendMessage({
-                type: 'game_action',
-                data: {
-                  userId: user.id,
-                  action: 'slot_bonus_win',
-                  amount: newTotalBonus,
-                  game: 'egypt-queen',
-                  timestamp: Date.now()
-                }
-              });
+              // استخدام الدالة المناسبة لإرسال إجراء اللعبة
+              globalWs.sendGameAction(-1, 'slot_bonus_win', newTotalBonus);
               
               console.log('تم إرسال معلومات مكافأة السلوت للخادم');
             } catch (error) {
@@ -659,18 +601,9 @@ export default function EgyptQueenPage() {
                 // إرسال معلومات الفوز إلى الخادم
                 if (user && user.id && globalWs && globalWs.isConnected) {
                   try {
-                    globalWs.sendMessage({
-                      type: 'game_action',
-                      data: {
-                        userId: user.id,
-                        action: 'slot_win',
-                        amount: winAmount,
-                        game: 'egypt-queen',
-                        timestamp: Date.now()
-                      }
-                    });
-                    
-                    console.log('تم إرسال معلومات الفوز للخادم');
+                    // استخدام الدالة المناسبة لإرسال إجراء اللعبة
+                    globalWs.sendGameAction(-1, 'slot_win', winAmount);
+                    console.log(`تم إرسال معلومات الفوز للخادم: ${winAmount} رقاقة`);
                   } catch (error) {
                     console.error('فشل في إرسال معلومات الفوز:', error);
                   }
@@ -704,9 +637,10 @@ export default function EgyptQueenPage() {
   
   // دالة لتدوير عجلات السلوت
   const spin = () => {
+    // تجنب تشغيل اللعبة مرة أخرى أثناء الدوران
     if (isSpinning) return;
     
-    // إذا كان لدينا لفات مجانية، نستخدمها
+    // التحقق مما إذا كانت هذه لفة مجانية
     const isFreeSpinUsed = freeSpins > 0;
     
     // التحقق من أن لدى اللاعب رصيد كاف (فقط إذا لم تكن لفة مجانية)
@@ -720,37 +654,29 @@ export default function EgyptQueenPage() {
     }
     
     // إرسال معلومات الرهان إلى الخادم (فقط إذا لم تكن لفة مجانية)
-    if (!isFreeSpinUsed && user && user.id && globalWs && globalWs.isConnected) {
-      try {
-        globalWs.sendMessage({
-          type: 'game_action',
-          action: 'slot_bet',
-          amount: betAmount,
-          data: {
-            game: 'egypt-queen',
-            timestamp: Date.now()
+    if (!isFreeSpinUsed && user && user.id && globalWs) {
+      // استخدام setTimeout لتجنب تحديثات الحالة المتزامنة
+      setTimeout(() => {
+        try {
+          // إرسال الرسالة فقط إذا كان الاتصال مفتوحاً
+          if (globalWs.isConnected) {
+            // إرسال رسالة إجراء اللعبة للخادم
+            globalWs.sendGameAction(-1, 'slot_bet', betAmount);
+            console.log(`تم إرسال معلومات الرهان للخادم: ${betAmount} رقاقة`);
           }
-        });
-        
-        // تحديث الرصيد محلياً للاستجابة السريعة
-        setUser(prevUser => {
-          if (!prevUser) return prevUser;
-          return {
-            ...prevUser,
-            chips: prevUser.chips - betAmount
-          };
-        });
-        
-        console.log(`تم إرسال معلومات الرهان للخادم: ${betAmount} رقاقة`);
-      } catch (error) {
-        console.error('فشل في إرسال معلومات الرهان:', error);
-        toast({
-          title: "خطأ في المراهنة",
-          description: "حدث خطأ أثناء محاولة المراهنة. يرجى المحاولة مرة أخرى.",
-          variant: "destructive"
-        });
-        return;
-      }
+          
+          // لا نقوم بتحديث رصيد المستخدم هنا - سيتم ذلك تلقائياً عندما يرد الخادم
+          
+        } catch (error) {
+          console.error('فشل في إرسال معلومات الرهان:', error);
+          toast({
+            title: "خطأ في المراهنة",
+            description: "حدث خطأ أثناء محاولة المراهنة. يرجى المحاولة مرة أخرى.",
+            variant: "destructive"
+          });
+          return;
+        }
+      }, 0);
     }
     
     // تشغيل صوت النقر
