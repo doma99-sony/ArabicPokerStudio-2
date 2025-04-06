@@ -217,8 +217,10 @@ export class MemStorage implements IStorage {
       if (currentPlayers === maxPlayers) {
         status = "full";
       } else if (currentPlayers > 0) {
-        status = "busy";
+        status = "available"; // تغيير من busy لأنه غير موجود في نوع TableStatus
       }
+      
+      const now = new Date();
       
       const table: GameTable = {
         id: this.currentTableId++,
@@ -226,11 +228,16 @@ export class MemStorage implements IStorage {
         smallBlind,
         bigBlind,
         minBuyIn,
+        maxBuyIn: minBuyIn * 10,
         maxPlayers,
         currentPlayers,
         status,
         category: categoryName, // إضافة فئة الطاولة
-        gameType // إضافة نوع اللعبة
+        gameType, // إضافة نوع اللعبة
+        createdAt: now,
+        updatedAt: now,
+        isVip: false,
+        requiredVipLevel: 0
       };
       
       this.tables.set(table.id, table);
@@ -256,8 +263,10 @@ export class MemStorage implements IStorage {
       if (currentPlayers === maxPlayers) {
         status = "full";
       } else if (currentPlayers > 0) {
-        status = "busy";
+        status = "available"; // تغيير من busy لأنه غير موجود في نوع TableStatus
       }
+      
+      const now = new Date();
       
       const table: GameTable = {
         id: this.currentTableId++,
@@ -265,13 +274,17 @@ export class MemStorage implements IStorage {
         smallBlind,
         bigBlind,
         minBuyIn,
+        maxBuyIn: minBuyIn * 10,
         maxPlayers,
         currentPlayers,
         status,
         category: "الفاجر", // فئة الطاولة
         gameType,
         isVip: true,
-        requiredVipLevel: 1
+        requiredVipLevel: 1,
+        createdAt: now,
+        updatedAt: now,
+        tableSettings: {}
       };
       
       this.tables.set(table.id, table);
@@ -534,24 +547,30 @@ export class MemStorage implements IStorage {
   async createTable(tableData: Partial<GameTable>): Promise<GameTable> {
     const tableId = this.currentTableId++;
     
+    // إنشاء طاولة جديدة مع جميع الحقول المطلوبة
     const newTable: GameTable = {
       id: tableId,
       name: tableData.name || `طاولة ${tableId}`,
       gameType: tableData.gameType || "poker",
       smallBlind: tableData.smallBlind || 10,
-      bigBlind: tableData.bigBlind || 20,
+      bigBlind: tableData.bigBlind || (tableData.smallBlind ? tableData.smallBlind * 2 : 20),
       minBuyIn: tableData.minBuyIn || 200,
       maxBuyIn: tableData.maxBuyIn || 2000,
       maxPlayers: tableData.maxPlayers || 9,
       currentPlayers: 0,
-      status: "available",
+      status: "available" as TableStatus,
       category: tableData.category || "عام",
       tableSettings: tableData.tableSettings || {},
       ownerId: tableData.ownerId,
       isVip: tableData.isVip || false,
       password: tableData.password,
-      requiredVipLevel: tableData.requiredVipLevel
+      requiredVipLevel: tableData.requiredVipLevel || 0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      tableImage: tableData.tableImage
     };
+    
+    console.log(`تم إنشاء طاولة جديدة: ${newTable.name} (${newTable.id})`);
     
     // إضافة الطاولة إلى قائمة الطاولات
     this.tables.set(tableId, newTable);
@@ -676,7 +695,7 @@ export class MemStorage implements IStorage {
       if (table.currentPlayers >= table.maxPlayers) {
         table.status = "full";
       } else if (table.currentPlayers > 0) {
-        table.status = "busy";
+        table.status = "available"; // تغيير من busy لأنه غير موجود في نوع TableStatus
       }
       this.tables.set(tableId, table);
       
@@ -718,7 +737,7 @@ export class MemStorage implements IStorage {
                 if (table.currentPlayers >= table.maxPlayers) {
                   table.status = "full";
                 } else {
-                  table.status = "busy";
+                  table.status = "available"; // تغيير من busy لأنه غير موجود في نوع TableStatus
                 }
                 this.tables.set(tableId, table);
               } else {
@@ -801,7 +820,7 @@ export class MemStorage implements IStorage {
     if (table.currentPlayers <= 0) {
       table.status = "available";
     } else if (table.currentPlayers < table.maxPlayers) {
-      table.status = "busy";
+      table.status = "available"; // تغيير من busy لأنه غير موجود في نوع TableStatus
     }
     this.tables.set(tableId, table);
     
