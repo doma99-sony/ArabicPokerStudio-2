@@ -83,6 +83,10 @@ export default {
           "0%, 100%": { opacity: "0.7" },
           "50%": { opacity: "1" },
         },
+        "bounce-x": {
+          "0%, 100%": { transform: "translateX(0)" },
+          "50%": { transform: "translateX(5px)" },
+        },
         "spin-slow": {
           "0%": { transform: "rotate(0deg)" },
           "100%": { transform: "rotate(360deg)" },
@@ -112,6 +116,7 @@ export default {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "pulse-slow": "pulse-slow 3s ease-in-out infinite",
+        "bounce-x": "bounce-x 1s ease-in-out infinite",
         "spin-slow": "spin-slow 8s linear infinite",
         "float": "float 5s ease-in-out infinite",
         "santa-fly": "santa-fly 20s linear infinite",
