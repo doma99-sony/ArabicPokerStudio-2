@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="#facc15" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+  <!-- تاج يوناني -->
+  <path d="M12 3L16 7L20 3V5L16 8L12 5L8 8L4 5V3L8 7L12 3Z" fill="#facc15" stroke="#facc15" />
+  
+  <!-- وجه مع لحية -->
+  <circle cx="12" cy="13" r="4" fill="#facc15" stroke="#facc15" />
+  <path d="M10 16L9 19" stroke="#facc15" stroke-width="1.5" />
+  <path d="M14 16L15 19" stroke="#facc15" stroke-width="1.5" />
+  <path d="M11 17L10 20" stroke="#facc15" stroke-width="1.5" />
+  <path d="M13 17L14 20" stroke="#facc15" stroke-width="1.5" />
+  
+  <!-- برق - رمز زيوس -->
+  <path d="M14 8L12 13L16 13L10 21" stroke="#facc15" stroke-width="2" />
+  
+  <!-- زخارف إضافية -->
+  <path d="M8 18L16 18" stroke="#facc15" stroke-width="1.5" />
+</svg>

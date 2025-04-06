@@ -266,21 +266,7 @@ export default function LobbyPage() {
               </div>
             </div>
 
-            {/* إضافة أيقونات ملكة مصر والملك زيوس */}
-            <div className="flex items-center gap-2 mr-4">
-              <div className="relative group cursor-pointer" onClick={() => navigate("/egypt-queen")}>
-                <div className="relative w-10 h-10 rounded-full border-2 border-purple-600 bg-black/50 flex items-center justify-center shadow-lg shadow-purple-600/30 hover:shadow-purple-600/50 transition-all duration-300">
-                  <img src="/images/egypt-queen-icon.png" alt="ملكة مصر" className="w-8 h-8 object-cover" />
-                </div>
-                <div className="absolute -bottom-1 -right-1 bg-purple-500 w-3 h-3 rounded-full border border-black animate-pulse"></div>
-              </div>
-              <div className="relative group cursor-pointer" onClick={() => navigate("/zeus-king")}>
-                <div className="relative w-10 h-10 rounded-full border-2 border-yellow-500 bg-black/50 flex items-center justify-center shadow-lg shadow-yellow-500/30 hover:shadow-yellow-500/50 transition-all duration-300">
-                  <img src="/images/zeus-king-icon.png" alt="الملك زيوس" className="w-8 h-8 object-cover" />
-                </div>
-                <div className="absolute -bottom-1 -right-1 bg-yellow-500 w-3 h-3 rounded-full border border-black animate-pulse"></div>
-              </div>
-            </div>
+
 
             {/* أزرار الوصول السريع */}
             <div className="flex items-center gap-2">
@@ -592,6 +578,198 @@ export default function LobbyPage() {
                         </div>
                       </div>
                     </div>
+                    
+                    {/* ملكة مصر - تصميم محسّن مع تأثيرات حركية */}
+                    <div 
+                      className={`relative flex flex-col h-[180px] w-full rounded-xl overflow-hidden shadow-2xl mb-4 transform transition-all duration-500 cursor-pointer group`}
+                      style={{
+                        boxShadow: activeGameCategory === 'egypt_queen' ? 
+                          '0 0 15px 5px rgba(147, 51, 234, 0.5), 0 0 30px 10px rgba(147, 51, 234, 0.2)' : 
+                          '0 10px 25px -5px rgba(0, 0, 0, 0.5)'
+                      }}
+                      onClick={() => {
+                        setActiveGameCategory('egypt_queen');
+                        navigate("/egypt-queen");
+                      }}
+                    >
+                      {/* خلفية اللعبة - تأثيرات متعددة */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-[#4A1D96] to-[#2E1065] transition-all duration-500 group-hover:scale-110"></div>
+                      <div className="absolute inset-0 bg-[url('/images/egyptian-pattern.svg')] bg-cover opacity-15 mix-blend-overlay"></div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                      
+                      {/* إضافة تأثيرات إضاءة متحركة */}
+                      <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-purple-500/5 blur-3xl group-hover:translate-x-5 group-hover:translate-y-5 transition-all duration-700 animate-pulse-slow"></div>
+                      <div className="absolute -bottom-32 -left-32 w-64 h-64 rounded-full bg-purple-500/10 blur-3xl group-hover:translate-x-10 group-hover:translate-y-5 transition-all duration-700"></div>
+                      
+                      {/* إطار متوهج */}
+                      <div className={`absolute inset-0 rounded-xl border-2 ${activeGameCategory === 'egypt_queen' ? 'border-purple-600' : 'border-purple-600/50'} opacity-60 group-hover:opacity-100 transition-all duration-500 z-[1]`}></div>
+                      {activeGameCategory === 'egypt_queen' && (
+                        <div className="absolute inset-0 rounded-xl border-2 border-purple-400/30 animate-pulse-slow"></div>
+                      )}
+                      
+                      {/* محتوى البطاقة */}
+                      <div className="relative flex flex-col h-full z-10 p-3 group-hover:p-4 transition-all duration-500">
+                        {/* رأس البطاقة */}
+                        <div className="flex justify-between items-center">
+                          <div className="flex gap-1.5">
+                            <div className="bg-gradient-to-r from-purple-600 to-purple-400 text-white font-bold text-xs py-1 px-2 rounded-md shadow-md transform group-hover:scale-105 transition-transform duration-300">
+                              جديد
+                            </div>
+                            <div className="bg-gradient-to-r from-[#22c55e] to-[#16a34a] text-white font-bold text-xs py-1 px-2 rounded-md shadow-md flex items-center gap-1 transform group-hover:scale-105 transition-transform duration-300">
+                              <span className="h-1.5 w-1.5 bg-white rounded-full animate-pulse"></span>
+                              HOT
+                            </div>
+                          </div>
+                          <div className="relative">
+                            <div className="absolute inset-0 rounded-full bg-purple-600/30 blur-md animate-pulse-slow"></div>
+                            <div className="relative w-12 h-12 bg-gradient-to-br from-[#4A1D96] to-[#2E1065] rounded-full border-2 border-purple-600 flex items-center justify-center transform group-hover:rotate-12 transition-all duration-500 shadow-lg">
+                              <img src="/images/egypt-queen-icon.svg" alt="ملكة مصر" className="w-8 h-8 object-cover" />
+                            </div>
+                            <span className="absolute h-full w-full top-0 left-0 bg-transparent rounded-full shadow-inner"></span>
+                          </div>
+                        </div>
+                        
+                        {/* عنوان اللعبة */}
+                        <div className="mt-1.5 mb-1.5">
+                          <h3 className="text-purple-400 font-bold text-xl drop-shadow-md transform group-hover:translate-x-1 transition-transform duration-300">ملكة مصر</h3>
+                          <div className="mt-1 w-full h-0.5 bg-gradient-to-r from-purple-600/20 via-purple-400 to-purple-600/20 group-hover:via-purple-300 transition-all duration-500"></div>
+                        </div>
+                        
+                        {/* تفاصيل إضافية */}
+                        <div className="my-1.5 text-xs text-white flex gap-2">
+                          <div className="bg-black/40 backdrop-blur-md rounded-md px-2.5 py-1 border border-purple-600/50 group-hover:border-purple-400 transition-all duration-500 flex items-center gap-1 shadow-md">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-400">
+                              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                              <circle cx="9" cy="7" r="4"></circle>
+                              <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                            <span className="text-purple-400 font-bold">162</span> لاعب
+                          </div>
+                          <div className="bg-black/40 backdrop-blur-md rounded-md px-2.5 py-1 border border-purple-600/50 group-hover:border-purple-400 transition-all duration-500 flex items-center gap-1 shadow-md">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-400">
+                              <rect width="18" height="18" x="3" y="3" rx="2"></rect>
+                              <path d="M3 9h18"></path>
+                              <path d="M9 21V9"></path>
+                            </svg>
+                            <span className="text-purple-400 font-bold">5</span> طاولة
+                          </div>
+                        </div>
+                        
+                        {/* زر الدخول */}
+                        <div className="mt-auto">
+                          <button 
+                            className="w-full py-2 px-3 bg-gradient-to-r from-purple-600 to-purple-400 text-white font-bold text-sm rounded-lg flex items-center justify-center gap-2 border border-black/30 shadow-lg transform group-hover:translate-y-0 group-hover:scale-105 transition-all duration-300"
+                          >
+                            <div className="w-5 h-5 rounded-full bg-black/20 flex items-center justify-center">
+                              <span className="text-white">♕</span>
+                            </div>
+                            ابدأ اللعب الآن
+                            <ChevronRight className="mr-1 h-4 w-4 animate-bounce-x" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* الملك زيوس - تصميم محسّن مع تأثيرات حركية */}
+                    <div 
+                      className={`relative flex flex-col h-[180px] w-full rounded-xl overflow-hidden shadow-2xl mb-4 transform transition-all duration-500 cursor-pointer group`}
+                      style={{
+                        boxShadow: activeGameCategory === 'zeus_king' ? 
+                          '0 0 15px 5px rgba(250, 204, 21, 0.5), 0 0 30px 10px rgba(250, 204, 21, 0.2)' : 
+                          '0 10px 25px -5px rgba(0, 0, 0, 0.5)'
+                      }}
+                      onClick={() => {
+                        setActiveGameCategory('zeus_king');
+                        navigate("/zeus-king");
+                      }}
+                    >
+                      {/* خلفية اللعبة - تأثيرات متعددة */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-[#854D0E] to-[#422006] transition-all duration-500 group-hover:scale-110"></div>
+                      <div className="absolute inset-0 bg-[url('/images/greek-pattern.svg')] bg-cover opacity-15 mix-blend-overlay"></div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                      
+                      {/* إضافة تأثيرات إضاءة متحركة - إضاءة كهربائية لزيوس */}
+                      <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-yellow-500/5 blur-3xl group-hover:translate-x-5 group-hover:translate-y-5 transition-all duration-700 animate-pulse-slow"></div>
+                      <div className="absolute -bottom-32 -left-32 w-64 h-64 rounded-full bg-yellow-500/10 blur-3xl group-hover:translate-x-10 group-hover:translate-y-5 transition-all duration-700"></div>
+                      
+                      {/* تأثيرات خاصة لزيوس: برق */}
+                      <div className="absolute inset-0 overflow-hidden opacity-10 mix-blend-screen">
+                        <div className="absolute h-16 w-1 bg-yellow-400 blur-sm top-0 left-1/4 animate-lightning"></div>
+                        <div className="absolute h-12 w-1 bg-yellow-400 blur-sm top-1/3 right-1/3 animate-lightning-delay"></div>
+                        <div className="absolute h-20 w-1 bg-yellow-400 blur-sm bottom-0 right-1/4 animate-lightning-slow"></div>
+                      </div>
+                      
+                      {/* إطار متوهج */}
+                      <div className={`absolute inset-0 rounded-xl border-2 ${activeGameCategory === 'zeus_king' ? 'border-yellow-500' : 'border-yellow-500/50'} opacity-60 group-hover:opacity-100 transition-all duration-500 z-[1]`}></div>
+                      {activeGameCategory === 'zeus_king' && (
+                        <div className="absolute inset-0 rounded-xl border-2 border-yellow-400/30 animate-pulse-slow"></div>
+                      )}
+                      
+                      {/* محتوى البطاقة */}
+                      <div className="relative flex flex-col h-full z-10 p-3 group-hover:p-4 transition-all duration-500">
+                        {/* رأس البطاقة */}
+                        <div className="flex justify-between items-center">
+                          <div className="flex gap-1.5">
+                            <div className="bg-gradient-to-r from-yellow-500 to-yellow-300 text-black font-bold text-xs py-1 px-2 rounded-md shadow-md transform group-hover:scale-105 transition-transform duration-300">
+                              جديد
+                            </div>
+                            <div className="bg-gradient-to-r from-[#22c55e] to-[#16a34a] text-white font-bold text-xs py-1 px-2 rounded-md shadow-md flex items-center gap-1 transform group-hover:scale-105 transition-transform duration-300">
+                              <span className="h-1.5 w-1.5 bg-white rounded-full animate-pulse"></span>
+                              HOT
+                            </div>
+                          </div>
+                          <div className="relative">
+                            <div className="absolute inset-0 rounded-full bg-yellow-500/30 blur-md animate-pulse-slow"></div>
+                            <div className="relative w-12 h-12 bg-gradient-to-br from-[#854D0E] to-[#422006] rounded-full border-2 border-yellow-500 flex items-center justify-center transform group-hover:rotate-12 transition-all duration-500 shadow-lg">
+                              <img src="/images/zeus-king-icon.svg" alt="الملك زيوس" className="w-8 h-8 object-cover" />
+                            </div>
+                            <span className="absolute h-full w-full top-0 left-0 bg-transparent rounded-full shadow-inner"></span>
+                          </div>
+                        </div>
+                        
+                        {/* عنوان اللعبة */}
+                        <div className="mt-1.5 mb-1.5">
+                          <h3 className="text-yellow-400 font-bold text-xl drop-shadow-md transform group-hover:translate-x-1 transition-transform duration-300">الملك زيوس</h3>
+                          <div className="mt-1 w-full h-0.5 bg-gradient-to-r from-yellow-500/20 via-yellow-400 to-yellow-500/20 group-hover:via-yellow-300 transition-all duration-500"></div>
+                        </div>
+                        
+                        {/* تفاصيل إضافية */}
+                        <div className="my-1.5 text-xs text-white flex gap-2">
+                          <div className="bg-black/40 backdrop-blur-md rounded-md px-2.5 py-1 border border-yellow-500/50 group-hover:border-yellow-400 transition-all duration-500 flex items-center gap-1 shadow-md">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-yellow-400">
+                              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                              <circle cx="9" cy="7" r="4"></circle>
+                              <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                            <span className="text-yellow-400 font-bold">138</span> لاعب
+                          </div>
+                          <div className="bg-black/40 backdrop-blur-md rounded-md px-2.5 py-1 border border-yellow-500/50 group-hover:border-yellow-400 transition-all duration-500 flex items-center gap-1 shadow-md">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-yellow-400">
+                              <rect width="18" height="18" x="3" y="3" rx="2"></rect>
+                              <path d="M3 9h18"></path>
+                              <path d="M9 21V9"></path>
+                            </svg>
+                            <span className="text-yellow-400 font-bold">4</span> طاولة
+                          </div>
+                        </div>
+                        
+                        {/* زر الدخول */}
+                        <div className="mt-auto">
+                          <button 
+                            className="w-full py-2 px-3 bg-gradient-to-r from-yellow-500 to-yellow-300 text-black font-bold text-sm rounded-lg flex items-center justify-center gap-2 border border-black/30 shadow-lg transform group-hover:translate-y-0 group-hover:scale-105 transition-all duration-300"
+                          >
+                            <div className="w-5 h-5 rounded-full bg-black/20 flex items-center justify-center">
+                              <span className="text-white">⚡</span>
+                            </div>
+                            ابدأ اللعب الآن
+                            <ChevronRight className="mr-1 h-4 w-4 animate-bounce-x" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    
                     {/* نارتو - تصميم محسّن مع تأثيرات حركية */}
                     <div 
                       className={`relative flex flex-col h-[180px] w-full rounded-xl overflow-hidden shadow-2xl mb-4 transform transition-all duration-500 cursor-pointer group`}
