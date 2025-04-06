@@ -392,6 +392,81 @@ export function setupPokerGame(app: Express, httpServer: Server) {
             return;
           }
           
+          // التحقق مما إذا كانت هذه إجراءات خاصة بألعاب أخرى مثل آلة ملكة مصر
+          if (data.action === "slot_bet" || data.action === "slot_win" || data.action === "bonus_win") {
+            try {
+              // الحصول على المستخدم
+              const user = await storage.getUser(userId);
+              if (!user) {
+                ws.send(JSON.stringify({ type: "error", message: "المستخدم غير موجود" }));
+                return;
+              }
+              
+              // معالجة المراهنة (خصم من رصيد المستخدم)
+              if (data.action === "slot_bet") {
+                const betAmount = data.amount || 10000;
+                
+                // التحقق من كفاية الرصيد
+                if (user.chips < betAmount) {
+                  ws.send(JSON.stringify({ 
+                    type: "error", 
+                    message: "رصيد غير كاف للمراهنة"
+                  }));
+                  return;
+                }
+                
+                // خصم الرهان من رصيد المستخدم
+                const newChips = user.chips - betAmount;
+                const updatedUser = await storage.updateUserChips(userId, newChips);
+                
+                // إرسال التحديث إلى المستخدم
+                ws.send(JSON.stringify({
+                  type: "chips_update",
+                  chips: newChips,
+                  change: -betAmount,
+                  action: "slot_bet",
+                  game: data.data?.game || "egypt-queen"
+                }));
+                
+                console.log(`مستخدم ${userId} يراهن بمبلغ ${betAmount} في لعبة ${data.data?.game || "egypt-queen"}`);
+              } 
+              // معالجة الفوز (إضافة إلى رصيد المستخدم)
+              else if (data.action === "slot_win" || data.action === "bonus_win") {
+                const winAmount = data.amount || 0;
+                
+                // التحقق من أن مبلغ الفوز إيجابي
+                if (winAmount <= 0) {
+                  return;
+                }
+                
+                // إضافة الفوز إلى رصيد المستخدم
+                const newChips = user.chips + winAmount;
+                const updatedUser = await storage.updateUserChips(userId, newChips);
+                
+                // إرسال التحديث إلى المستخدم
+                ws.send(JSON.stringify({
+                  type: "chips_update",
+                  chips: newChips,
+                  change: winAmount,
+                  action: data.action,
+                  game: data.data?.game || "egypt-queen"
+                }));
+                
+                console.log(`مستخدم ${userId} يفوز بمبلغ ${winAmount} في لعبة ${data.data?.game || "egypt-queen"}`);
+              }
+              
+              return;
+            } catch (error) {
+              console.error("خطأ في معالجة إجراء اللعبة:", error);
+              ws.send(JSON.stringify({ 
+                type: "error", 
+                message: "حدث خطأ أثناء معالجة إجراء اللعبة" 
+              }));
+              return;
+            }
+          }
+          
+          // إجراءات لعبة البوكر العادية
           const tableId = userTables.get(userId);
           if (!tableId) {
             ws.send(JSON.stringify({ type: "error", message: "أنت لست في طاولة" }));

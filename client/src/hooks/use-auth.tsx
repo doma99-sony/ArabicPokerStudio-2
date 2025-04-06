@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 
 type AuthContextType = {
   user: SelectUser | null;
+  setUser: (updater: SelectUser | ((prevUser: SelectUser | null) => SelectUser | null)) => void;
   isLoading: boolean;
   error: Error | null;
   loginMutation: UseMutationResult<SelectUser, Error, LoginData>;
@@ -153,10 +154,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
+  // تنفيذ دالة تحديث المستخدم
+  const setUser = (updater: SelectUser | ((prevUser: SelectUser | null) => SelectUser | null)) => {
+    // تحديث البيانات في كاش البيانات
+    queryClient.setQueryData(["/api/user"], current => {
+      // إذا كان المدخل دالة، استخدمها لتحديث البيانات الحالية
+      if (typeof updater === 'function') {
+        return updater(current as SelectUser | null);
+      }
+      // وإلا، استخدم القيمة الجديدة مباشرة
+      return updater;
+    });
+  };
+  
   return (
     <AuthContext.Provider
       value={{
         user: user ?? null,
+        setUser,
         isLoading,
         error,
         loginMutation,

@@ -275,6 +275,64 @@ export function useGlobalWebSocket() {
     return addMessageListener(type, listener);
   }, [addMessageListener]);
   
+  // مستمعو الرسائل المخصصة (مجموعة من المستمعين لجميع أنواع الرسائل)
+  const customHandlersRef = useRef<Map<string, (message: any) => void>>(new Map());
+  
+  // إضافة مستمع مخصص للرسائل
+  const addMessageHandler = useCallback((handlerId: string, handler: (message: any) => void) => {
+    // تخزين المستمع باستخدام معرف فريد
+    customHandlersRef.current.set(handlerId, handler);
+    
+    // إذا لم يكن لدينا مستمع عام بعد، أضفه الآن
+    if (!customHandlersRef.current.has('_global_listener')) {
+      // إنشاء مستمع عام يوجه الرسائل لجميع المستمعين المسجلين
+      const globalListener = (message: WebSocketMessage) => {
+        // توجيه الرسالة لجميع المستمعين المخصصين
+        customHandlersRef.current.forEach((handler, id) => {
+          if (id !== '_global_listener') {
+            try {
+              handler(message);
+            } catch (error) {
+              console.error(`خطأ في معالج الرسائل ${id}:`, error);
+            }
+          }
+        });
+      };
+      
+      // تسجيل المستمع العام لجميع أنواع الرسائل الممكنة
+      const messageTypes: WebSocketMessageType[] = [
+        'auth', 'join_table', 'rejoin_table', 'leave_table', 
+        'game_action', 'game_state', 'error', 'player_list', 'ping', 'pong'
+      ];
+      
+      // نحن نخزن وظائف الإزالة لكل نوع من الرسائل
+      const removeListeners: (() => void)[] = [];
+      
+      messageTypes.forEach(type => {
+        const removeListener = addMessageListener(type, globalListener);
+        removeListeners.push(removeListener);
+      });
+      
+      // تخزين وظيفة تنظيف لإزالة المستمع العام عند الحاجة
+      customHandlersRef.current.set('_global_listener', () => {
+        removeListeners.forEach(remove => remove());
+      });
+    }
+  }, [addMessageListener]);
+  
+  // إزالة مستمع مخصص
+  const removeMessageHandler = useCallback((handlerId: string) => {
+    // إزالة المستمع باستخدام المعرف
+    customHandlersRef.current.delete(handlerId);
+    
+    // إذا لم يعد هناك مستمعون مخصصون (فقط المستمع العام)، قم بإزالة المستمع العام
+    if (customHandlersRef.current.size === 1 && customHandlersRef.current.has('_global_listener')) {
+      const cleanupGlobalListener = customHandlersRef.current.get('_global_listener') as () => void;
+      cleanupGlobalListener();
+      customHandlersRef.current.delete('_global_listener');
+    }
+  }, []);
+  
   return {
     isConnected,
     error,
@@ -283,6 +341,8 @@ export function useGlobalWebSocket() {
     sendMessage,
     sendGameAction,
     onMessage,
-    lastMessage
+    lastMessage,
+    addMessageHandler,
+    removeMessageHandler
   };
 }
