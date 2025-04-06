@@ -583,6 +583,20 @@ export default function LobbyPage() {
             </button>
           </div>
           
+          {/* VIP */}
+          <div className="relative group">
+            <button 
+              className="relative flex flex-col items-center justify-center p-2 min-w-[60px]"
+              onClick={() => navigate("/vip")}
+            >
+              <div className="bg-gradient-to-br from-[#D4AF37]/80 to-[#FFC800]/90 rounded-full w-12 h-12 border-2 border-[#D4AF37] flex items-center justify-center relative shadow-lg hover:shadow-[#D4AF37]/20 transition-all duration-300 overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-[#D4AF37]/10 via-[#D4AF37]/30 to-[#D4AF37]/10 animate-pulse-slow"></div>
+                <Crown className="h-6 w-6 text-black" />
+              </div>
+              <span className="text-[11px] text-white mt-1 font-bold text-[#D4AF37]">VIP</span>
+            </button>
+          </div>
+          
           {/* لعبها الآن */}
           <div className="relative group -mt-3 z-10">
             <button 
