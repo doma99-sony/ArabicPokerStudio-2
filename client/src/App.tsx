@@ -25,6 +25,7 @@ import OffersPage from "@/pages/offers-page";
 import ArabicRocketPage from "@/pages/arabic-rocket-page";
 import ArabPokerPage from "@/pages/arab-poker-page";
 import ArabPokerGamePage from "@/pages/arab-poker-game-page";
+import EgyptQueenPage from "@/pages/egypt-queen-page";
 import { ProtectedRoute } from "./lib/protected-route";
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
@@ -69,6 +70,7 @@ function Router() {
       <ProtectedRoute path="/rankings" component={RankingsPage} />
       <ProtectedRoute path="/domino" component={DominoPage} />
       <ProtectedRoute path="/arabic-rocket" component={ArabicRocketPage} />
+      <ProtectedRoute path="/egypt-queen" component={EgyptQueenPage} />
       <ProtectedRoute path="/notifications" component={NotificationsPage} />
       <ProtectedRoute path="/notifications/:messageId" component={NotificationsPage} />
       <ProtectedRoute path="/inventory" component={InventoryPage} />
