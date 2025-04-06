@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- خلفية دائرية -->
+  <circle cx="60" cy="60" r="55" fill="#3F2E3E" stroke="#8B6914" stroke-width="4"/>
+  
+  <!-- الكتاب المغلق -->
+  <rect x="30" y="30" width="60" height="60" rx="2" fill="#8B4513" stroke="#5D3A0F" stroke-width="2"/>
+  
+  <!-- غلاف الكتاب بزخارف مصرية -->
+  <rect x="30" y="30" width="60" height="8" fill="#D4AF37" stroke="#8B6914" stroke-width="1"/>
+  <rect x="30" y="82" width="60" height="8" fill="#D4AF37" stroke="#8B6914" stroke-width="1"/>
+  <rect x="84" y="30" width="6" height="60" fill="#8B4513" stroke="#5D3A0F" stroke-width="1"/>
+  
+  <!-- زخارف ورموز هيروغليفية على الكتاب -->
+  <!-- عين حورس -->
+  <path d="M45 50L55 50" stroke="#D4AF37" stroke-width="2"/>
+  <ellipse cx="50" cy="50" rx="7" ry="5" stroke="#D4AF37" stroke-width="2" fill="none"/>
+  <circle cx="50" cy="50" r="2" fill="#D4AF37"/>
+  <path d="M57 50C60 53 65 53 67 53" stroke="#D4AF37" stroke-width="2"/>
+  
+  <!-- رموز هيروغليفية -->
+  <rect x="40" y="60" width="5" height="10" fill="#D4AF37"/>
+  <rect x="50" y="60" width="5" height="10" fill="#D4AF37"/>
+  <rect x="60" y="60" width="5" height="10" fill="#D4AF37"/>
+  <rect x="70" y="60" width="5" height="10" fill="#D4AF37"/>
+  
+  <!-- خطوط أفقية في الكتاب -->
+  <line x1="35" y1="45" x2="80" y2="45" stroke="#D4AF37" stroke-width="1"/>
+  <line x1="35" y1="75" x2="80" y2="75" stroke="#D4AF37" stroke-width="1"/>
+  
+  <!-- أثر لمعان على الكتاب -->
+  <rect x="35" y="35" width="30" height="3" fill="#F5E7A2" fill-opacity="0.7"/>
+  
+  <!-- توهج حول الكتاب - للإشارة إلى خصائصه السحرية كـ scatter -->
+  <rect x="30" y="30" width="60" height="60" rx="2" stroke="#FFD700" stroke-width="1" stroke-opacity="0.8"/>
+  <rect x="28" y="28" width="64" height="64" rx="3" stroke="#FFD700" stroke-width="1" stroke-opacity="0.5"/>
+  <rect x="26" y="26" width="68" height="68" rx="4" stroke="#FFD700" stroke-width="1" stroke-opacity="0.3"/>
+</svg>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- خلفية دائرية -->
+  <circle cx="60" cy="60" r="55" fill="#293462" stroke="#1E264A" stroke-width="4"/>
+  
+  <!-- حرف K بتصميم مصري -->
+  <path d="M40 30L40 90" stroke="#D4AF37" stroke-width="8" stroke-linecap="round"/>
+  <path d="M40 60L75 30" stroke="#D4AF37" stroke-width="8" stroke-linecap="round"/>
+  <path d="M40 60L75 90" stroke="#D4AF37" stroke-width="8" stroke-linecap="round"/>
+  
+  <!-- رمز الفرعون (تاج فرعوني صغير) -->
+  <path d="M75 25C73 20 77 15 80 15C83 15 87 20 85 25" fill="#D4AF37" stroke="#B8860B" stroke-width="1"/>
+  
+  <!-- زخارف هيروغليفية على الحواف -->
+  <circle cx="30" cy="30" r="5" fill="#D4AF37"/>
+  <circle cx="30" cy="90" r="5" fill="#D4AF37"/>
+  <circle cx="75" cy="90" r="5" fill="#D4AF37"/>
+  
+  <!-- خطوط زخرفية مصرية -->
+  <rect x="25" y="45" width="8" height="2" fill="#D4AF37"/>
+  <rect x="25" y="55" width="8" height="2" fill="#D4AF37"/>
+  <rect x="25" y="65" width="8" height="2" fill="#D4AF37"/>
+  <rect x="25" y="75" width="8" height="2" fill="#D4AF37"/>
+  
+  <rect x="87" y="45" width="8" height="2" fill="#D4AF37"/>
+  <rect x="87" y="55" width="8" height="2" fill="#D4AF37"/>
+  <rect x="87" y="65" width="8" height="2" fill="#D4AF37"/>
+  <rect x="87" y="75" width="8" height="2" fill="#D4AF37"/>
+  
+  <!-- توهج خارجي -->
+  <circle cx="60" cy="60" r="57" stroke="#D4AF37" stroke-width="1" stroke-opacity="0.5"/>
+  <circle cx="60" cy="60" r="59" stroke="#D4AF37" stroke-width="1" stroke-opacity="0.3"/>
+</svg>

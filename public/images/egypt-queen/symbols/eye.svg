@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- خلفية دائرية -->
+  <circle cx="60" cy="60" r="55" fill="#2B3A67" stroke="#1E294A" stroke-width="4"/>
+  
+  <!-- عين حورس الرئيسية -->
+  <path d="M20 60C30 40 50 30 60 30C70 30 90 40 100 60C90 80 70 90 60 90C50 90 30 80 20 60Z" fill="white" stroke="#333" stroke-width="2"/>
+  
+  <!-- قزحية العين -->
+  <circle cx="60" cy="60" r="15" fill="#472D2D" stroke="#000" stroke-width="1"/>
+  
+  <!-- بؤبؤ العين -->
+  <circle cx="60" cy="60" r="7" fill="black"/>
+  
+  <!-- لمعة العين -->
+  <circle cx="55" cy="55" r="3" fill="white"/>
+  
+  <!-- زخارف عين حورس المميزة -->
+  <path d="M65 45C70 42 75 42 85 45" stroke="black" stroke-width="3"/>
+  <path d="M65 75C70 78 75 78 85 75" stroke="black" stroke-width="3"/>
+  
+  <!-- علامة أسفل العين -->
+  <path d="M60 90L60 100" stroke="black" stroke-width="3"/>
+  <path d="M45 95L60 100" stroke="black" stroke-width="3"/>
+  
+  <!-- توهج خارجي -->
+  <path d="M20 60C30 40 50 30 60 30C70 30 90 40 100 60C90 80 70 90 60 90C50 90 30 80 20 60Z" stroke="#FFD700" stroke-width="1" stroke-opacity="0.6"/>
+  <path d="M18 60C28 38 50 28 60 28C70 28 92 38 102 60C92 82 70 92 60 92C50 92 28 82 18 60Z" stroke="#FFD700" stroke-width="1" stroke-opacity="0.4"/>
+</svg>

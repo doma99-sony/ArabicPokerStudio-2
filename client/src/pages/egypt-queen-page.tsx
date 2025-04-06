@@ -131,6 +131,13 @@ export default function EgyptQueenPage() {
   
   // دالة لبدء اللعبة
   const startGame = () => {
+    // تشغيل صوت النقر
+    const clickSound = document.getElementById('egypt-click-sound') as HTMLAudioElement;
+    if (clickSound && !isMuted) {
+      clickSound.currentTime = 0;
+      clickSound.play().catch(e => console.error(e));
+    }
+    
     setIsGameStarted(true);
     
     // تشغيل الموسيقى إذا لم تكن مكتومة
@@ -337,7 +344,23 @@ export default function EgyptQueenPage() {
     setTreasureChests(chests);
     setChestsOpened(0);
     setTotalBonusWin(0);
+    
+    // تشغيل صوت بدء لعبة المكافأة
+    const bonusSound = document.getElementById('egypt-bonus-sound') as HTMLAudioElement;
+    if (bonusSound && !isMuted) {
+      bonusSound.currentTime = 0;
+      bonusSound.play().catch(e => console.error(e));
+    }
+    
+    // عرض نافذة لعبة المكافأة
     setBonusGameOpen(true);
+    
+    // إظهار رسالة لعبة المكافأة
+    toast({
+      title: "لعبة المكافأة! 🏺",
+      description: "اختر 3 صناديق للحصول على جوائز إضافية!",
+      variant: "default"
+    });
   };
 
   // دالة لفتح صندوق كنز
@@ -350,6 +373,13 @@ export default function EgyptQueenPage() {
     
     // فتح الصندوق
     updatedChests[index].opened = true;
+    
+    // تشغيل صوت فتح الصندوق
+    const chestOpenSound = document.getElementById('egypt-chest-open-sound') as HTMLAudioElement;
+    if (chestOpenSound && !isMuted) {
+      chestOpenSound.currentTime = 0;
+      chestOpenSound.play().catch(e => console.error(e));
+    }
     
     // تحديث العدد
     const newChestsOpened = chestsOpened + 1;
@@ -372,6 +402,13 @@ export default function EgyptQueenPage() {
     
     // إذا تم فتح 3 صناديق، أغلق اللعبة
     if (newChestsOpened >= 3) {
+      // تشغيل صوت الفوز الكبير
+      const bigWinSound = document.getElementById('egypt-big-win-sound') as HTMLAudioElement;
+      if (bigWinSound && !isMuted) {
+        bigWinSound.currentTime = 0;
+        bigWinSound.play().catch(e => console.error(e));
+      }
+      
       setTimeout(() => {
         // إغلاق لعبة المكافأة بعد ثانيتين
         setBonusGameOpen(false);
@@ -472,17 +509,30 @@ export default function EgyptQueenPage() {
       return;
     }
     
+    // تشغيل صوت النقر
+    const clickSound = document.getElementById('egypt-click-sound') as HTMLAudioElement;
+    if (clickSound && !isMuted) {
+      clickSound.currentTime = 0;
+      clickSound.play().catch(e => console.error(e));
+      
+      // بعد صوت النقر بفترة قصيرة، نشغل صوت الدوران
+      setTimeout(() => {
+        if (spinAudioRef.current && !isMuted) {
+          spinAudioRef.current.currentTime = 0;
+          spinAudioRef.current.play().catch(e => console.error(e));
+        }
+      }, 200);
+    } else if (spinAudioRef.current && !isMuted) {
+      // في حالة عدم وجود صوت النقر، نشغل صوت الدوران مباشرة
+      spinAudioRef.current.currentTime = 0;
+      spinAudioRef.current.play().catch(e => console.error(e));
+    }
+    
     // إعادة تعيين خطوط الفوز
     setWinningLines([]);
     
     // بدء الدوران
     setIsSpinning(true);
-    
-    // تشغيل صوت الدوران
-    if (spinAudioRef.current && !isMuted) {
-      spinAudioRef.current.currentTime = 0;
-      spinAudioRef.current.play().catch(e => console.error(e));
-    }
     
     // تحريك البكرات
     animateReels();
@@ -491,12 +541,28 @@ export default function EgyptQueenPage() {
   // زيادة مبلغ الرهان
   const increaseBet = () => {
     if (isSpinning) return;
+    
+    // تشغيل صوت النقر
+    const clickSound = document.getElementById('egypt-click-sound') as HTMLAudioElement;
+    if (clickSound && !isMuted) {
+      clickSound.currentTime = 0;
+      clickSound.play().catch(e => console.error(e));
+    }
+    
     setBetAmount(prev => Math.min(prev + 10, 200));
   };
   
   // تقليل مبلغ الرهان
   const decreaseBet = () => {
     if (isSpinning) return;
+    
+    // تشغيل صوت النقر
+    const clickSound = document.getElementById('egypt-click-sound') as HTMLAudioElement;
+    if (clickSound && !isMuted) {
+      clickSound.currentTime = 0;
+      clickSound.play().catch(e => console.error(e));
+    }
+    
     setBetAmount(prev => Math.max(prev - 10, 10));
   };
   
@@ -515,53 +581,57 @@ export default function EgyptQueenPage() {
     // تعيين الرموز المرئية لكل نوع
     const symbolMap: Record<SymbolType, { icon: React.ReactNode; description: string }> = {
       "cleopatra": { 
-        icon: <img src="/images/egypt-queen/symbols/cleopatra.png" alt="كليوباترا" className="w-12 h-12 object-contain" 
+        icon: <img src="/images/egypt-queen/symbols/cleopatra.svg" alt="كليوباترا" className="w-16 h-16 object-contain" 
           onError={(e) => (e.currentTarget.textContent = "👸")}/>, 
         description: "كليوباترا" 
       },
       "book": { 
-        icon: <img src="/images/egypt-queen/symbols/book.png" alt="كتاب الأسرار" className="w-12 h-12 object-contain"
+        icon: <img src="/images/egypt-queen/symbols/book.svg" alt="كتاب الأسرار" className="w-16 h-16 object-contain"
           onError={(e) => (e.currentTarget.textContent = "📜")}/>,
         description: "كتاب الأسرار" 
       },
       "eye": { 
-        icon: <img src="/images/egypt-queen/symbols/eye.png" alt="عين حورس" className="w-12 h-12 object-contain"
+        icon: <img src="/images/egypt-queen/symbols/eye.svg" alt="عين حورس" className="w-16 h-16 object-contain"
           onError={(e) => (e.currentTarget.textContent = "👁️")}/>,
         description: "عين حورس" 
       },
       "anubis": { 
-        icon: <img src="/images/egypt-queen/symbols/anubis.png" alt="أنوبيس" className="w-12 h-12 object-contain"
+        icon: <img src="/images/egypt-queen/symbols/anubis.svg" alt="أنوبيس" className="w-16 h-16 object-contain"
           onError={(e) => (e.currentTarget.textContent = "🐺")}/>,
         description: "أنوبيس" 
       },
       "cat": { 
-        icon: <img src="/images/egypt-queen/symbols/cat.png" alt="القط المصري" className="w-12 h-12 object-contain"
+        icon: <img src="/images/egypt-queen/symbols/cat.svg" alt="القط المصري" className="w-16 h-16 object-contain"
           onError={(e) => (e.currentTarget.textContent = "🐱")}/>,
         description: "القط المصري" 
       },
       "wild": { 
-        icon: <img src="/images/egypt-queen/symbols/wild.png" alt="الجوكر" className="w-12 h-12 object-contain"
-          onError={(e) => (e.currentTarget.textContent = "✨")}/>,
+        icon: <span className="text-4xl font-bold text-amber-500">✨</span>, 
         description: "الجوكر" 
       },
       "A": { 
-        icon: <span className="text-4xl font-bold text-red-600">A</span>, 
+        icon: <img src="/images/egypt-queen/symbols/A.svg" alt="A" className="w-16 h-16 object-contain"
+          onError={(e) => (e.currentTarget.textContent = "🅰️")}/>,
         description: "A" 
       },
       "K": { 
-        icon: <span className="text-4xl font-bold text-blue-600">K</span>, 
+        icon: <img src="/images/egypt-queen/symbols/K.svg" alt="K" className="w-16 h-16 object-contain"
+          onError={(e) => (e.currentTarget.textContent = "🎰")}/>,
         description: "K" 
       },
       "Q": { 
-        icon: <span className="text-4xl font-bold text-purple-600">Q</span>, 
+        icon: <img src="/images/egypt-queen/symbols/Q.svg" alt="Q" className="w-16 h-16 object-contain"
+          onError={(e) => (e.currentTarget.textContent = "🎯")}/>,
         description: "Q" 
       },
       "J": { 
-        icon: <span className="text-4xl font-bold text-green-600">J</span>, 
+        icon: <img src="/images/egypt-queen/symbols/J.svg" alt="J" className="w-16 h-16 object-contain"
+          onError={(e) => (e.currentTarget.textContent = "🎲")}/>,
         description: "J" 
       },
       "10": { 
-        icon: <span className="text-4xl font-bold text-yellow-600">10</span>, 
+        icon: <img src="/images/egypt-queen/symbols/10.svg" alt="10" className="w-16 h-16 object-contain"
+          onError={(e) => (e.currentTarget.textContent = "🔟")}/>,
         description: "10" 
       },
     };
@@ -956,8 +1026,17 @@ export default function EgyptQueenPage() {
       
       {/* الصوتيات */}
       <audio ref={audioRef} src="/audio/egypt-theme.mp3"></audio>
-      <audio ref={spinAudioRef} src="/audio/slot-spin.mp3"></audio>
-      <audio ref={winAudioRef} src="/audio/win-sound.mp3"></audio>
+      <audio ref={spinAudioRef} src="/audio/egypt-spin.wav"></audio>
+      <audio ref={winAudioRef} src="/audio/egypt-win.wav"></audio>
+      
+      {/* إضافة عناصر صوت إضافية للعبة المكافأة والنقر */}
+      <audio id="egypt-bonus-sound" src="/audio/egypt-bonus.wav"></audio>
+      <audio id="egypt-click-sound" src="/audio/egypt-click.wav"></audio>
+      <audio id="egypt-chest-open-sound" src="/audio/egypt-chest-open.wav"></audio>
+      <audio id="egypt-big-win-sound" src="/audio/egypt-big-win.wav"></audio>
+      
+      {/* تحميل مكتبة الصوت */}
+      <script src="/audio/egypt-theme.js"></script>
     </div>
   );
 }

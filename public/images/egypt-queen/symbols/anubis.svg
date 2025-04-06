@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- خلفية دائرية -->
+  <circle cx="60" cy="60" r="55" fill="#382933" stroke="#241B21" stroke-width="4"/>
+  
+  <!-- رأس أنوبيس - إله الموت المصري برأس ذئب/كلب -->
+  <path d="M60 20C50 20 40 25 35 35C30 45 30 55 35 65C40 75 45 80 45 90C45 95 50 100 60 100C70 100 75 95 75 90C75 80 80 75 85 65C90 55 90 45 85 35C80 25 70 20 60 20Z" fill="#1E1E24" stroke="#000" stroke-width="2"/>
+  
+  <!-- آذان أنوبيس المميزة -->
+  <path d="M40 30C35 20 40 10 45 10C50 10 50 20 50 25" fill="#1E1E24" stroke="#000" stroke-width="2"/>
+  <path d="M80 30C85 20 80 10 75 10C70 10 70 20 70 25" fill="#1E1E24" stroke="#000" stroke-width="2"/>
+  
+  <!-- تفاصيل الوجه -->
+  <ellipse cx="50" cy="45" rx="5" ry="3" fill="#D4AF37"/> <!-- العين اليسرى ذهبية -->
+  <ellipse cx="70" cy="45" rx="5" ry="3" fill="#D4AF37"/> <!-- العين اليمنى ذهبية -->
+  <path d="M50 60L70 60" stroke="#D4AF37" stroke-width="1"/> <!-- أنف/خطم -->
+  <path d="M60 60L60 70" stroke="#D4AF37" stroke-width="1"/> <!-- أنف طولي -->
+  
+  <!-- قلادة أنوبيس المصرية -->
+  <path d="M40 85C45 90 75 90 80 85" fill="#D4AF37" stroke="#B8860B" stroke-width="2"/>
+  <circle cx="60" cy="87" r="2" fill="#D40000" stroke="#B8860B" stroke-width="1"/>
+  
+  <!-- توهج خارجي باللون الذهبي -->
+  <circle cx="60" cy="60" r="57" stroke="#D4AF37" stroke-width="1" stroke-opacity="0.5"/>
+  <circle cx="60" cy="60" r="59" stroke="#D4AF37" stroke-width="1" stroke-opacity="0.3"/>
+</svg>
