@@ -13,7 +13,6 @@ import { NotificationsButton, GameInstructionsButton } from "@/components/ui/not
 import { LogOut, User, ChevronRight, Loader2, ChevronLeft, ChevronUp, Bell, ShoppingBag, ShoppingCart, Download, Smartphone, ExternalLink, Coins, Trophy, Crown } from "lucide-react";
 import { formatChips } from "@/lib/utils";
 import { HeavySnowEffect, GoldDustEffect } from "@/components/effects/snow-effect";
-import { DragonEffect, FireEmbers } from "@/components/effects/dragon-effect";
 
 export default function LobbyPage() {
   const [location, navigate] = useLocation();
@@ -135,9 +134,6 @@ export default function LobbyPage() {
         <div className="absolute bottom-1/4 right-1/4 w-64 h-64 rounded-full bg-[#D4AF37]/10 blur-3xl animate-pulse-slow opacity-50 mix-blend-screen" style={{ animationDelay: "2s" }}></div>
       </div>
       
-      {/* إضافة تأثير التنين */}
-      <DragonEffect speed={40} fireRate={8000} initialDelay={4000} />
-      <FireEmbers />
 
       {/* Header Bar - تصميم احترافي بجودة عالية مع تأثيرات مذهلة */}
       <header className="relative z-10 py-3 sticky top-0 backdrop-blur-sm">
