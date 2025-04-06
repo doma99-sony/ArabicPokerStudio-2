@@ -184,6 +184,10 @@ export class MemStorage implements IStorage {
     this.createTableCategoryWithNames(["المصريين 1", "المصريين 2", "المصريين 3", "المصريين 4", "المصريين 5", "المصريين 6", "المصريين 7"], 
       100000, 200000, 1000000, 5, "poker");
     
+    // طاولات بوكر العرب - طاولات خاصة (الحلو، الحادق، الحراق)
+    this.createTableCategoryWithNames(["الحلو", "الحادق", "الحراق"], 
+      50, 100, 100000, 9, "arab_poker");
+    
     // طاولات لعبة ناروتو
     this.createTableCategory("سهل", 10, 20, 10000, 2, 5, "naruto");
     this.createTableCategory("متوسط", 50, 100, 50000, 2, 5, "naruto");
