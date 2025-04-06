@@ -106,6 +106,10 @@ export default function LobbyPage() {
       navigate("/egypt-queen");
     } else if (gameType === "arab_poker") {
       navigate("/arab-poker");
+    } else if (gameType === "hunter") {
+      navigate("/hunter-game");
+    } else if (gameType === "baloot") {
+      navigate("/baloot-game");
     }
     // ستتم إضافة المزيد من الألعاب لاحقًا
   };
@@ -356,15 +360,15 @@ export default function LobbyPage() {
           <div className="container mx-auto p-4">
             <div className="flex flex-col">
               {/* العناصر الرئيسية */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-hidden">
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-4 overflow-hidden">
                 {/* تم حذف قسم معلومات اللاعب بناءً على طلب المستخدم */}
 
                 {/* واجهة اختيار الألعاب - قسم عرضي كامل */}
-                <div className="w-full">
+                <div className="w-full md:col-span-3 lg:col-span-3">
                   <div className="p-4">
                     <div className="flex flex-col md:flex-row gap-4 w-full">
                       {/* القسم الأيمن - بوكر عرباوي */}
-                      <div className="md:w-1/2">
+                      <div className="md:w-1/3">
                         <div className="grid grid-cols-1 gap-4 w-full">
                           {/* بوكر عرباوي - تصميم محسّن مع تأثيرات حركية */}
                           <div 
@@ -585,7 +589,8 @@ export default function LobbyPage() {
                       </div>
 
                       {/* القسم الأيسر - الألعاب الأخرى */}
-                      <div className="md:w-1/2">
+                      {/* القسم الأوسط - بطاقات جديدة */}
+                      <div className="md:w-1/3">
                         <div className="grid grid-cols-1 gap-4 w-full">
                           {/* بوكر العرب - تصميم محسّن مع تأثيرات حركية */}
                           <div 
@@ -743,9 +748,87 @@ export default function LobbyPage() {
                             </div>
                           </div>
 
-                          {/* دومينو - تصميم محسّن مع تأثيرات حركية */}
+                          {/* ناروتو (بطاقة تم استرجاعها) */}
                           <div 
                             className={`relative flex flex-col h-[180px] w-full rounded-xl overflow-hidden shadow-2xl mb-4 transform transition-all duration-500 cursor-pointer group`}
+                            style={{
+                              boxShadow: activeGameCategory === 'naruto' ? 
+                                '0 0 15px 5px rgba(249, 115, 22, 0.5), 0 0 30px 10px rgba(249, 115, 22, 0.2)' : 
+                                '0 10px 25px -5px rgba(0, 0, 0, 0.5)'
+                            }}
+                            onClick={() => {
+                              setActiveGameCategory('naruto');
+                              navigateToGameTables('naruto');
+                            }}
+                          >
+                            {/* خلفية اللعبة - تأثيرات متعددة */}
+                            <div className="absolute inset-0 bg-gradient-to-br from-[#7C2D12] to-[#431407] transition-all duration-500 group-hover:scale-110"></div>
+                            <div className="absolute inset-0 bg-[url('/images/naruto-pattern.jpg')] bg-cover opacity-15 mix-blend-overlay"></div>
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                            
+                            {/* إضافة تأثيرات إضاءة متحركة */}
+                            <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-orange-500/5 blur-3xl group-hover:translate-x-5 group-hover:translate-y-5 transition-all duration-700 animate-pulse-slow"></div>
+                            <div className="absolute -bottom-32 -left-32 w-64 h-64 rounded-full bg-orange-500/10 blur-3xl group-hover:translate-x-10 group-hover:translate-y-5 transition-all duration-700"></div>
+                            
+                            {/* إطار متوهج */}
+                            <div className={`absolute inset-0 rounded-xl border-2 ${activeGameCategory === 'naruto' ? 'border-orange-500' : 'border-orange-500/50'} opacity-60 group-hover:opacity-100 transition-all duration-500 z-[1]`}></div>
+                            {activeGameCategory === 'naruto' && (
+                              <div className="absolute inset-0 rounded-xl border-2 border-orange-400/30 animate-pulse-slow"></div>
+                            )}
+                            
+                            {/* محتوى البطاقة */}
+                            <div className="relative flex flex-col h-full z-10 p-3 group-hover:p-4 transition-all duration-500">
+                              {/* رأس البطاقة */}
+                              <div className="flex justify-between items-center">
+                                <div className="flex gap-1.5">
+                                  <div className="bg-orange-600 text-white font-bold text-xs p-1 px-2 rounded-md">خاص</div>
+                                  <div className="bg-[#D4AF37] text-black font-bold text-xs p-1 px-2 rounded-md">متميز</div>
+                                </div>
+                                <div className="w-10 h-10 bg-orange-900 rounded-full border-2 border-orange-400 flex items-center justify-center">
+                                  <span className="text-white text-xl">🍜</span>
+                                </div>
+                              </div>
+                              
+                              {/* عنوان اللعبة */}
+                              <div className="mt-2 mb-2">
+                                <h3 className="text-orange-400 font-bold text-lg">ناروتو نينجا</h3>
+                                <div className="mt-1 w-full h-0.5 bg-orange-400"></div>
+                              </div>
+                              
+                              {/* تفاصيل إضافية */}
+                              <div className="my-1 text-xs text-white flex gap-2">
+                                <div className="bg-black/40 rounded-md px-2 py-0.5 border border-orange-400">
+                                  <span className="text-orange-400 font-bold">١٢٠</span> لاعب
+                                </div>
+                                <div className="bg-black/40 rounded-md px-2 py-0.5 border border-orange-400">
+                                  <span className="text-orange-400 font-bold">٨</span> طاولة
+                                </div>
+                              </div>
+                              
+                              {/* زر الدخول */}
+                              <div className="mt-auto">
+                                <button 
+                                  className="w-full py-2 px-3 bg-orange-600 text-white font-bold text-sm rounded-lg border border-black/30 flex items-center justify-center gap-2"
+                                >
+                                  <div className="w-5 h-5 rounded-full bg-black/20 flex items-center justify-center">
+                                    <span className="text-white">🍥</span>
+                                  </div>
+                                  العب الآن
+                                  <ChevronRight className="mr-1 h-4 w-4" />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+
+                        </div>
+                      </div>
+
+                      {/* القسم الأيسر - الألعاب الأخرى */}
+                      <div className="md:w-1/3">
+                        <div className="grid grid-cols-1 gap-4 w-full">
+                          {/* دومينو - تصميم محسّن مع تأثيرات حركية */}
+                          <div 
+                            className={`relative flex flex-col h-[180px] w-full rounded-xl overflow-hidden shadow-2xl mb-4 mt-2 transform transition-all duration-500 cursor-pointer group`}
                             style={{
                               boxShadow: activeGameCategory === 'domino' ? 
                                 '0 0 15px 5px rgba(34, 211, 238, 0.5), 0 0 30px 10px rgba(34, 211, 238, 0.2)' : 
@@ -814,6 +897,150 @@ export default function LobbyPage() {
                               </div>
                             </div>
                           </div>
+
+                          {/* لعبة الصياد - بطاقة جديدة */}
+                          <div 
+                            className={`relative flex flex-col h-[180px] w-full rounded-xl overflow-hidden shadow-2xl mb-4 transform transition-all duration-500 cursor-pointer group`}
+                            style={{
+                              boxShadow: activeGameCategory === 'hunter' ? 
+                                '0 0 15px 5px rgba(22, 163, 74, 0.5), 0 0 30px 10px rgba(22, 163, 74, 0.2)' : 
+                                '0 10px 25px -5px rgba(0, 0, 0, 0.5)'
+                            }}
+                            onClick={() => {
+                              setActiveGameCategory('hunter');
+                              navigateToGameTables('hunter');
+                            }}
+                          >
+                            {/* خلفية اللعبة - تأثيرات متعددة */}
+                            <div className="absolute inset-0 bg-gradient-to-br from-[#166534] to-[#14532d] transition-all duration-500 group-hover:scale-110"></div>
+                            <div className="absolute inset-0 bg-[url('/images/hunter-pattern.jpg')] bg-cover opacity-15 mix-blend-overlay"></div>
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                            
+                            {/* إضافة تأثيرات إضاءة متحركة */}
+                            <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-green-500/5 blur-3xl group-hover:translate-x-5 group-hover:translate-y-5 transition-all duration-700 animate-pulse-slow"></div>
+                            <div className="absolute -bottom-32 -left-32 w-64 h-64 rounded-full bg-green-500/10 blur-3xl group-hover:translate-x-10 group-hover:translate-y-5 transition-all duration-700"></div>
+                            
+                            {/* إطار متوهج */}
+                            <div className={`absolute inset-0 rounded-xl border-2 ${activeGameCategory === 'hunter' ? 'border-green-500' : 'border-green-500/50'} opacity-60 group-hover:opacity-100 transition-all duration-500 z-[1]`}></div>
+                            {activeGameCategory === 'hunter' && (
+                              <div className="absolute inset-0 rounded-xl border-2 border-green-400/30 animate-pulse-slow"></div>
+                            )}
+                            
+                            {/* محتوى البطاقة */}
+                            <div className="relative flex flex-col h-full z-10 p-3 group-hover:p-4 transition-all duration-500">
+                              {/* رأس البطاقة */}
+                              <div className="flex justify-between items-center">
+                                <div className="flex gap-1.5">
+                                  <div className="bg-green-600 text-white font-bold text-xs p-1 px-2 rounded-md">حصري</div>
+                                  <div className="bg-[#D4AF37] text-black font-bold text-xs p-1 px-2 rounded-md">جديد</div>
+                                </div>
+                                <div className="w-10 h-10 bg-green-900 rounded-full border-2 border-green-400 flex items-center justify-center">
+                                  <span className="text-white text-xl">🏹</span>
+                                </div>
+                              </div>
+                              
+                              {/* عنوان اللعبة */}
+                              <div className="mt-2 mb-2">
+                                <h3 className="text-green-400 font-bold text-lg">لعبة الصياد</h3>
+                                <div className="mt-1 w-full h-0.5 bg-green-400"></div>
+                              </div>
+                              
+                              {/* تفاصيل إضافية */}
+                              <div className="my-1 text-xs text-white flex gap-2">
+                                <div className="bg-black/40 rounded-md px-2 py-0.5 border border-green-400">
+                                  <span className="text-green-400 font-bold">١٥٠</span> لاعب
+                                </div>
+                                <div className="bg-black/40 rounded-md px-2 py-0.5 border border-green-400">
+                                  <span className="text-green-400 font-bold">١٢</span> طاولة
+                                </div>
+                              </div>
+                              
+                              {/* زر الدخول */}
+                              <div className="mt-auto">
+                                <button 
+                                  className="w-full py-2 px-3 bg-green-600 text-white font-bold text-sm rounded-lg border border-black/30 flex items-center justify-center gap-2"
+                                >
+                                  <div className="w-5 h-5 rounded-full bg-black/20 flex items-center justify-center">
+                                    <span className="text-white">🦁</span>
+                                  </div>
+                                  العب الآن
+                                  <ChevronRight className="mr-1 h-4 w-4" />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* لعبة بلوت (بطاقة تم استرجاعها) */}
+                          <div 
+                            className={`relative flex flex-col h-[180px] w-full rounded-xl overflow-hidden shadow-2xl mb-4 transform transition-all duration-500 cursor-pointer group`}
+                            style={{
+                              boxShadow: activeGameCategory === 'baloot' ? 
+                                '0 0 15px 5px rgba(139, 92, 246, 0.5), 0 0 30px 10px rgba(139, 92, 246, 0.2)' : 
+                                '0 10px 25px -5px rgba(0, 0, 0, 0.5)'
+                            }}
+                            onClick={() => {
+                              setActiveGameCategory('baloot');
+                              navigateToGameTables('baloot');
+                            }}
+                          >
+                            {/* خلفية اللعبة - تأثيرات متعددة */}
+                            <div className="absolute inset-0 bg-gradient-to-br from-[#5b21b6] to-[#4c1d95] transition-all duration-500 group-hover:scale-110"></div>
+                            <div className="absolute inset-0 bg-[url('/images/baloot-pattern.jpg')] bg-cover opacity-15 mix-blend-overlay"></div>
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                            
+                            {/* إضافة تأثيرات إضاءة متحركة */}
+                            <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-violet-500/5 blur-3xl group-hover:translate-x-5 group-hover:translate-y-5 transition-all duration-700 animate-pulse-slow"></div>
+                            <div className="absolute -bottom-32 -left-32 w-64 h-64 rounded-full bg-violet-500/10 blur-3xl group-hover:translate-x-10 group-hover:translate-y-5 transition-all duration-700"></div>
+                            
+                            {/* إطار متوهج */}
+                            <div className={`absolute inset-0 rounded-xl border-2 ${activeGameCategory === 'baloot' ? 'border-violet-500' : 'border-violet-500/50'} opacity-60 group-hover:opacity-100 transition-all duration-500 z-[1]`}></div>
+                            {activeGameCategory === 'baloot' && (
+                              <div className="absolute inset-0 rounded-xl border-2 border-violet-400/30 animate-pulse-slow"></div>
+                            )}
+                            
+                            {/* محتوى البطاقة */}
+                            <div className="relative flex flex-col h-full z-10 p-3 group-hover:p-4 transition-all duration-500">
+                              {/* رأس البطاقة */}
+                              <div className="flex justify-between items-center">
+                                <div className="flex gap-1.5">
+                                  <div className="bg-violet-600 text-white font-bold text-xs p-1 px-2 rounded-md">كلاسيكي</div>
+                                  <div className="bg-[#D4AF37] text-black font-bold text-xs p-1 px-2 rounded-md">خليجي</div>
+                                </div>
+                                <div className="w-10 h-10 bg-violet-900 rounded-full border-2 border-violet-400 flex items-center justify-center">
+                                  <span className="text-white text-xl">♣</span>
+                                </div>
+                              </div>
+                              
+                              {/* عنوان اللعبة */}
+                              <div className="mt-2 mb-2">
+                                <h3 className="text-violet-400 font-bold text-lg">بلوت الخليج</h3>
+                                <div className="mt-1 w-full h-0.5 bg-violet-400"></div>
+                              </div>
+                              
+                              {/* تفاصيل إضافية */}
+                              <div className="my-1 text-xs text-white flex gap-2">
+                                <div className="bg-black/40 rounded-md px-2 py-0.5 border border-violet-400">
+                                  <span className="text-violet-400 font-bold">١٩٨</span> لاعب
+                                </div>
+                                <div className="bg-black/40 rounded-md px-2 py-0.5 border border-violet-400">
+                                  <span className="text-violet-400 font-bold">١٥</span> طاولة
+                                </div>
+                              </div>
+                              
+                              {/* زر الدخول */}
+                              <div className="mt-auto">
+                                <button 
+                                  className="w-full py-2 px-3 bg-violet-600 text-white font-bold text-sm rounded-lg border border-black/30 flex items-center justify-center gap-2"
+                                >
+                                  <div className="w-5 h-5 rounded-full bg-black/20 flex items-center justify-center">
+                                    <span className="text-white">♣</span>
+                                  </div>
+                                  العب الآن
+                                  <ChevronRight className="mr-1 h-4 w-4" />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -825,25 +1052,91 @@ export default function LobbyPage() {
         </div>
       </main>
 
-      {/* زر كتم/تشغيل الصوت */}
-      <button 
-        className="fixed bottom-20 right-4 z-50 bg-black/60 p-2 rounded-full border border-[#D4AF37] text-[#D4AF37] hover:bg-black/80 transition-all"
-        onClick={toggleMute}
-      >
-        {videoMuted ? (
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
-        ) : (
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>
-        )}
-      </button>
+      {/* شريط الأيقونات السفلي - تصميم احترافي بتأثيرات رائعة */}
+      <div className="fixed bottom-0 inset-x-0 z-50 py-2 px-4">
+        {/* خلفية الشريط السفلي مع تأثيرات متعددة */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-[#0A3A2A]/90 to-black/80 backdrop-blur-sm shadow-lg"></div>
+        <div className="absolute inset-0 bg-[url('/images/footer-pattern.png')] bg-repeat opacity-5"></div>
+        <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-[#D4AF37]/10 via-[#D4AF37]/30 to-[#D4AF37]/10"></div>
+        
+        {/* حاوية الأيقونات */}
+        <div className="container mx-auto relative flex justify-between items-center z-10">
+          {/* الشعارات والوصلات الاجتماعية */}
+          <div className="flex items-center gap-3">
+            <div className="hidden md:flex">
+              <div className="flex items-center gap-1.5">
+                <div className="relative w-9 h-9 rounded-full border border-[#D4AF37] bg-[#0A3A2A] flex items-center justify-center shadow-md">
+                  <span className="text-[#D4AF37] text-lg font-bold">♠</span>
+                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border border-black animate-pulse"></div>
+                </div>
+                <span className="text-[#D4AF37] text-sm font-semibold hidden lg:inline">بوكر تكساس عرباوي</span>
+              </div>
+            </div>
+            
+            {/* أيقونات التواصل الاجتماعي */}
+            <div className="flex gap-2">
+              <button className="w-8 h-8 rounded-full flex items-center justify-center bg-black/30 border border-[#D4AF37]/30 text-[#D4AF37] hover:bg-[#D4AF37]/10 transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+              </button>
+              <button className="w-8 h-8 rounded-full flex items-center justify-center bg-black/30 border border-[#D4AF37]/30 text-[#D4AF37] hover:bg-[#D4AF37]/10 transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path></svg>
+              </button>
+              <button className="w-8 h-8 rounded-full flex items-center justify-center bg-black/30 border border-[#D4AF37]/30 text-[#D4AF37] hover:bg-[#D4AF37]/10 transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+              </button>
+            </div>
+          </div>
+          
+          {/* الأزرار الرئيسية المركزية */}
+          <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 -translate-y-5 flex gap-3">
+            <button className="w-12 h-12 rounded-full bg-gradient-to-br from-[#D4AF37] to-[#AA8C2C] flex items-center justify-center text-black shadow-lg shadow-[#D4AF37]/20 border-2 border-black/10 hover:scale-105 transition-all">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            </button>
+            <button className="w-12 h-12 rounded-full bg-gradient-to-br from-[#0A3A2A] to-[#051A15] border-2 border-[#D4AF37] flex items-center justify-center text-[#D4AF37] shadow-lg shadow-black/30 hover:scale-105 transition-all">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            </button>
+            <button className="w-12 h-12 rounded-full bg-gradient-to-br from-[#0A3A2A] to-[#051A15] border-2 border-[#D4AF37] flex items-center justify-center text-[#D4AF37] shadow-lg shadow-black/30 hover:scale-105 transition-all">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            </button>
+          </div>
+          
+          {/* روابط وأزرار إضافية */}
+          <div className="flex items-center gap-3">
+            {/* أزرار مفيدة إضافية */}
+            <div className="flex gap-2">
+              <button 
+                className="w-8 h-8 rounded-full flex items-center justify-center bg-black/30 border border-[#D4AF37]/30 text-[#D4AF37] hover:bg-[#D4AF37]/10 transition-all"
+                onClick={toggleMute}
+              >
+                {videoMuted ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>
+                )}
+              </button>
+              <button 
+                className="w-8 h-8 rounded-full flex items-center justify-center bg-black/30 border border-[#D4AF37]/30 text-[#D4AF37] hover:bg-[#D4AF37]/10 transition-all"
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              >
+                <ChevronUp className="h-4 w-4" />
+              </button>
+              <button className="hidden sm:flex w-8 h-8 rounded-full items-center justify-center bg-black/30 border border-[#D4AF37]/30 text-[#D4AF37] hover:bg-[#D4AF37]/10 transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+              </button>
+            </div>
+            
+            {/* معلومات الخصوصية وحقوق الطبع */}
+            <div className="hidden md:flex items-center gap-1 text-gray-400 text-xs">
+              <span>&copy; 2025</span>
+              <span className="text-[#D4AF37]">بوكر عرباوي</span>
+            </div>
+          </div>
+        </div>
+      </div>
 
-      {/* زر سريع للعودة لأعلى الصفحة */}
-      <button 
-        className="fixed bottom-4 right-4 z-50 bg-[#D4AF37] p-2 rounded-full text-black hover:bg-[#FFD700] transition-all shadow-lg"
-        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-      >
-        <ChevronUp className="h-5 w-5" />
-      </button>
+      {/* إضافة هامش سفلي إضافي للمحتوى لتجنب تغطية آخر العناصر بشريط الأدوات */}
+      <div className="h-16"></div>
     </div>
   );
 }
