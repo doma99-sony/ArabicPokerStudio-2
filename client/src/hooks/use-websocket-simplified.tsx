@@ -276,11 +276,29 @@ export function useWebSocket() {
     }
   }, [user, createConnection]);
   
+  // إضافة معالج رسائل عام - يستخدم لاستقبال أي نوع من الرسائل
+  const addMessageListener = useCallback((handler: (message: string) => void) => {
+    const onMessage = (event: MessageEvent) => {
+      handler(event.data);
+    };
+    
+    if (socketRef.current) {
+      socketRef.current.addEventListener('message', onMessage);
+    }
+    
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.removeEventListener('message', onMessage);
+      }
+    };
+  }, []);
+
   // توفير الواجهة العامة
   return {
     status,
     sendMessage,
     registerMessageHandler,
+    addMessageListener,
     isConnected: status === "open",
     reconnect: createConnection
   };

@@ -6,7 +6,7 @@ import { Coins, User, Clock, Loader2, MoreHorizontal, MessageCircle } from "luci
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { formatChips } from "@/lib/utils";
-import { Card, Suit, Value } from "@/types";
+import { Card } from "@/types";
 import { PlayingCard } from "@/components/game/playing-card";
 import { cn } from "@/lib/utils";
 

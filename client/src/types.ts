@@ -1,7 +1,11 @@
+// تعريف أنواع الورق
+export type Suit = "hearts" | "diamonds" | "clubs" | "spades";
+export type Value = "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | "J" | "Q" | "K" | "A";
+
 // تعريف نوع الورقة
 export interface Card {
-  suit: "hearts" | "diamonds" | "clubs" | "spades";
-  value: "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | "J" | "Q" | "K" | "A";
+  suit: Suit;
+  value: Value;
   hidden?: boolean;
   isWinning?: boolean;
 }
@@ -62,7 +66,7 @@ export interface UserBadge {
 export interface GameTable {
   id: number;
   name: string;
-  gameType: "poker" | "naruto" | "domino" | "tekken";
+  gameType: "poker" | "naruto" | "domino" | "tekken" | "arab_poker";
   smallBlind: number;
   bigBlind: number;
   minBuyIn: number;
@@ -155,6 +159,9 @@ export interface GameState {
   tableName?: string;
   round?: number;
   maxRound?: number;
+  userChips?: number; // رقائق المستخدم الحالي
+  maxPlayers?: number; // الحد الأقصى لعدد اللاعبين
+  turnTimeLeft?: number; // الوقت المتبقي للدور الحالي
   // إضافات لمعلومات إضافية
   message?: string; // رسالة النظام
   lastAction?: { // آخر إجراء تم تنفيذه
@@ -162,6 +169,7 @@ export interface GameState {
     action: GameAction;
     amount?: number;
   };
+  gameHistory?: any[]; // سجل أحداث اللعبة
 }
 
 // إحصائيات اللاعب
@@ -208,7 +216,7 @@ export interface GameHistoryItem {
   id: number;
   tableId: number;
   tableName?: string;
-  gameType: "poker" | "naruto" | "domino" | "tekken";
+  gameType: "poker" | "naruto" | "domino" | "tekken" | "arab_poker";
   startedAt: Date;
   endedAt?: Date;
   result: "win" | "loss" | "draw";

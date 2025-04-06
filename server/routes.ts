@@ -291,7 +291,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const gameType = req.params.gameType;
     
     // Validate game type
-    const validGameTypes = ["poker", "naruto", "tekken", "domino"];
+    const validGameTypes = ["poker", "naruto", "tekken", "domino", "arab_poker"];
     if (!validGameTypes.includes(gameType)) {
       return res.status(400).json({ message: "نوع اللعبة غير صالح" });
     }
