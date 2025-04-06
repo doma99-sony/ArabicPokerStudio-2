@@ -30,9 +30,30 @@ export function TableCard({ table, gameType, onJoin }: TableCardProps) {
     // تخزين معرف الطاولة في التخزين المحلي
     localStorage.setItem('lastTableId', tableId.toString());
     
-    // استخدام الصفحة المبسطة بدلاً من الصفحة الأصلية للتغلب على مشكلة التحميل
-    window.location.href = `/game-simple/${tableId}`;
-  }, []);
+    // الحصول على نوع اللعبة من الجدول أو من props
+    const currentGameType = gameType || table.gameType;
+    console.log("نوع اللعبة:", currentGameType, "معرف الطاولة:", tableId);
+    
+    // اختيار المسار المناسب حسب نوع اللعبة
+    let gamePath = `/game-simple/${tableId}`;
+    
+    // استخدام المسار المناسب بناءً على نوع اللعبة
+    if (currentGameType === "arab_poker") {
+      gamePath = `/arab-poker/${tableId}`;
+      console.log("استخدام مسار بوكر العرب:", gamePath);
+    } else if (currentGameType === "naruto") {
+      gamePath = `/naruto/${tableId}`;
+    } else if (currentGameType === "domino") {
+      gamePath = `/domino/${tableId}`;
+    } else if (currentGameType === "tekken") {
+      gamePath = `/tekken/${tableId}`;
+    } else if (currentGameType === "arabic_rocket") {
+      gamePath = `/arabic-rocket/${tableId}`;
+    }
+    
+    console.log("الانتقال إلى المسار:", gamePath);
+    window.location.href = gamePath;
+  }, [gameType, table.gameType]);
 
   // الانضمام للعبة - إما كلاعب نشط أو كمشاهد
   const joinMutation = useMutation({
@@ -155,9 +176,12 @@ export function TableCard({ table, gameType, onJoin }: TableCardProps) {
   };
 
   const handleSeatJoin = () => {
+    console.log("تم النقر على مقعد للانضمام");
     if (onJoin) {
+      console.log("استخدام onJoin callback من الوالد");
       onJoin();
     } else {
+      console.log("استخدام joinMutation الداخلية");
       joinMutation.mutate();
     }
   };
@@ -257,7 +281,16 @@ export function TableCard({ table, gameType, onJoin }: TableCardProps) {
             : "bg-gradient-to-br from-[#D4AF37] to-[#AA8C2C] hover:from-[#E5C04B] hover:to-[#D4AF37] text-[#0A0A0A]"
         }`}
                 disabled={joinMutation.isPending} 
-                onClick={() => onJoin ? onJoin() : joinMutation.mutate()}>
+                onClick={() => {
+                  console.log("نقر على زر الانضمام الرئيسي");
+                  if (onJoin) {
+                    console.log("استخدام onJoin callback مع معرف الطاولة:", table.id);
+                    onJoin();
+                  } else {
+                    console.log("استخدام joinMutation الداخلية مع معرف الطاولة:", table.id);
+                    joinMutation.mutate();
+                  }
+                }}>
           {joinMutation.isPending ? (
             <Loader2 className="h-3 w-3 animate-spin mx-auto" />
           ) : (
@@ -275,7 +308,22 @@ export function TableCard({ table, gameType, onJoin }: TableCardProps) {
           size="sm"
           className="w-full text-xs py-1 px-2 h-auto border-[#D4AF37]/40 text-[#D4AF37] hover:bg-[#D4AF37]/10"
           onClick={() => {
-            window.location.href = `/direct-table/${table.id}`;
+            // الحصول على نوع اللعبة
+            const currentGameType = gameType || table.gameType;
+            console.log("نوع اللعبة للانتقال المباشر:", currentGameType);
+            
+            // استخدام المسار المناسب حسب نوع اللعبة
+            let directPath;
+            if (currentGameType === "arab_poker") {
+              directPath = `/arab-poker/${table.id}`;
+            } else if (currentGameType === "naruto") {
+              directPath = `/naruto/${table.id}`;
+            } else {
+              directPath = `/direct-table/${table.id}`;
+            }
+            
+            console.log("الانتقال المباشر إلى:", directPath);
+            window.location.href = directPath;
           }}
         >
           <ExternalLink size={10} className="ml-1" /> انتقال مباشر
