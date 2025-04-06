@@ -287,8 +287,8 @@ export default function EgyptQueenPage() {
       if (matchCount === 4) multiplier = 2;
       if (matchCount === 5) multiplier = 5;
       
-      // حساب الفوز لهذا الخط
-      const lineWin = baseValue * multiplier * bet / 10;
+      // حساب الفوز لهذا الخط مع تطبيق مضاعف اللفات المجانية
+      const lineWin = baseValue * multiplier * bet / 10 * winMultiplier;
       totalWin += lineWin;
     }
     
@@ -306,7 +306,16 @@ export default function EgyptQueenPage() {
       // منح لفات مجانية
       if (scatterCount >= 3) {
         // تعيين عدد اللفات المجانية بناءً على عدد رموز الـ scatter
-        setFreeSpins(prev => prev + (scatterCount * 3));
+        // 3 كتب = 10 لفات، 4 كتب = 15 لفة، 5 كتب = 20 لفة
+        let spinCount = 10;
+        if (scatterCount === 4) spinCount = 15;
+        if (scatterCount === 5) spinCount = 20;
+        
+        // منح لفات مجانية
+        setFreeSpins(prev => prev + spinCount);
+        
+        // ضبط مضاعف الربح للفات المجانية
+        setWinMultiplier(2); // مضاعف 2x خلال اللفات المجانية
       }
     }
     
@@ -499,8 +508,11 @@ export default function EgyptQueenPage() {
   const spin = () => {
     if (isSpinning) return;
     
-    // التحقق من أن لدى اللاعب رصيد كاف
-    if ((user?.chips || 0) < betAmount) {
+    // إذا كان لدينا لفات مجانية، نستخدمها
+    const isFreeSpinUsed = freeSpins > 0;
+    
+    // التحقق من أن لدى اللاعب رصيد كاف (فقط إذا لم تكن لفة مجانية)
+    if (!isFreeSpinUsed && (user?.chips || 0) < betAmount) {
       toast({
         title: "رصيد غير كاف",
         description: "لا يوجد لديك رصيد كاف للمراهنة",
@@ -517,15 +529,54 @@ export default function EgyptQueenPage() {
       
       // بعد صوت النقر بفترة قصيرة، نشغل صوت الدوران
       setTimeout(() => {
-        if (spinAudioRef.current && !isMuted) {
+        // إذا كانت هذه لفة مجانية، نشغل صوت خاص باللفات المجانية
+        if (isFreeSpinUsed) {
+          const freeSpinSound = document.getElementById('egypt-free-spins-sound') as HTMLAudioElement;
+          if (freeSpinSound && !isMuted) {
+            freeSpinSound.currentTime = 0;
+            freeSpinSound.play().catch(e => console.error(e));
+          }
+        } else if (spinAudioRef.current && !isMuted) {
+          // صوت الدوران العادي
           spinAudioRef.current.currentTime = 0;
           spinAudioRef.current.play().catch(e => console.error(e));
         }
       }, 200);
     } else if (spinAudioRef.current && !isMuted) {
-      // في حالة عدم وجود صوت النقر، نشغل صوت الدوران مباشرة
-      spinAudioRef.current.currentTime = 0;
-      spinAudioRef.current.play().catch(e => console.error(e));
+      // في حالة عدم وجود صوت النقر
+      if (isFreeSpinUsed) {
+        const freeSpinSound = document.getElementById('egypt-free-spins-sound') as HTMLAudioElement;
+        if (freeSpinSound && !isMuted) {
+          freeSpinSound.currentTime = 0;
+          freeSpinSound.play().catch(e => console.error(e));
+        }
+      } else {
+        // صوت الدوران العادي
+        spinAudioRef.current.currentTime = 0;
+        spinAudioRef.current.play().catch(e => console.error(e));
+      }
+    }
+    
+    // إذا كانت لفة مجانية، نقلل العداد
+    if (isFreeSpinUsed) {
+      setFreeSpins(prevSpins => {
+        const remainingSpins = prevSpins - 1;
+        
+        // إذا كانت هذه هي اللفة المجانية الأخيرة
+        if (remainingSpins === 0) {
+          // إعادة تعيين المضاعف عند انتهاء اللفات المجانية
+          setWinMultiplier(1);
+          
+          // إظهار رسالة انتهاء اللفات المجانية
+          toast({
+            title: "انتهت اللفات المجانية! 🎲",
+            description: "استمتع بألعاب ملكة مصر!",
+            variant: "default"
+          });
+        }
+        
+        return remainingSpins;
+      });
     }
     
     // إعادة تعيين خطوط الفوز
@@ -974,27 +1025,41 @@ export default function EgyptQueenPage() {
           
           {/* لوحة التحكم */}
           <div className="bg-[#0C0907] p-4 border-t-2 border-[#D4AF37] flex items-center justify-between">
-            {/* ضبط المراهنة */}
-            <div className="flex items-center gap-2">
-              <Button 
-                className="h-12 w-12 rounded-full bg-[#D4AF37] text-black font-bold text-xl"
-                onClick={decreaseBet}
-                disabled={isSpinning || betAmount <= 10}
-              >
-                -
-              </Button>
+            {/* ضبط المراهنة واللفات المجانية */}
+            <div className="flex items-center gap-4">
+              {/* عرض اللفات المجانية */}
+              {freeSpins > 0 && (
+                <div className="flex flex-col items-center bg-[#8B6914] border border-[#D4AF37] px-4 py-2 rounded-md animate-pulse-slow">
+                  <span className="text-white text-xs">لفات مجانية</span>
+                  <span className="text-[#FFD700] font-bold text-lg">{freeSpins}</span>
+                  {winMultiplier > 1 && (
+                    <span className="text-white text-xs">x{winMultiplier} مضاعف</span>
+                  )}
+                </div>
+              )}
               
-              <div className="bg-black/80 border border-[#D4AF37] px-4 py-2 rounded-md min-w-[100px] text-center">
-                <span className="text-[#D4AF37] font-bold">{betAmount}</span>
+              {/* أزرار الرهان */}
+              <div className="flex items-center gap-2">
+                <Button 
+                  className="h-12 w-12 rounded-full bg-[#D4AF37] text-black font-bold text-xl"
+                  onClick={decreaseBet}
+                  disabled={isSpinning || betAmount <= 10}
+                >
+                  -
+                </Button>
+                
+                <div className="bg-black/80 border border-[#D4AF37] px-4 py-2 rounded-md min-w-[100px] text-center">
+                  <span className="text-[#D4AF37] font-bold">{betAmount}</span>
+                </div>
+                
+                <Button 
+                  className="h-12 w-12 rounded-full bg-[#D4AF37] text-black font-bold text-xl"
+                  onClick={increaseBet}
+                  disabled={isSpinning || betAmount >= 200}
+                >
+                  +
+                </Button>
               </div>
-              
-              <Button 
-                className="h-12 w-12 rounded-full bg-[#D4AF37] text-black font-bold text-xl"
-                onClick={increaseBet}
-                disabled={isSpinning || betAmount >= 200}
-              >
-                +
-              </Button>
             </div>
             
             {/* زر البدء */}
@@ -1034,6 +1099,7 @@ export default function EgyptQueenPage() {
       <audio id="egypt-click-sound" src="/audio/egypt-click.wav"></audio>
       <audio id="egypt-chest-open-sound" src="/audio/egypt-chest-open.wav"></audio>
       <audio id="egypt-big-win-sound" src="/audio/egypt-big-win.wav"></audio>
+      <audio id="egypt-free-spins-sound" src="/audio/egypt-bonus.wav"></audio>
       
       {/* تحميل مكتبة الصوت */}
       <script src="/audio/egypt-theme.js"></script>
