@@ -43,7 +43,7 @@ export default function EgyptQueenPage() {
   const gameContainerRef = useRef<HTMLDivElement>(null);
   const [isMuted, setIsMuted] = useState(false);
   const [isSpinning, setIsSpinning] = useState(false);
-  const [betAmount, setBetAmount] = useState(10);
+  const [betAmount, setBetAmount] = useState(10000);
   const [isGameStarted, setIsGameStarted] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const spinAudioRef = useRef<HTMLAudioElement>(null);
@@ -497,74 +497,158 @@ export default function EgyptQueenPage() {
     }
   };
 
-  // دالة محاكاة دوران البكرات مع تأثير بصري
+  // دالة محاكاة دوران البكرات مع تأثير بصري متطور
   const animateReels = () => {
-    // عدد الإطارات للتحريك
-    const framesCount = 20;
-    let currentFrame = 0;
-    
     // إيقاف أي مؤقت سابق
     if (spinTimer) {
       clearInterval(spinTimer);
     }
     
-    // إنشاء مؤقت لتحريك البكرات
-    const timer = setInterval(() => {
-      currentFrame++;
+    // محاكاة دوران تدريجي للبكرات - كل بكرة تتوقف بعد الأخرى
+    const totalSpinTime = 3000; // 3 ثواني للدوران الكامل
+    const initialSpinFrames = 10; // عدد إطارات الدوران السريع الأولي
+    const reelStopDelay = 300; // الفاصل الزمني بين توقف كل بكرة (بالمللي ثانية)
+    
+    let currentFrame = 0;
+    const totalReels = 5;
+    let stoppedReels = 0;
+    let finalReelsResult = generateNewReels(); // النتيجة النهائية محددة مسبقاً
+    
+    // تحديث الرمز الدوار مع تأثير محسن
+    const updateSpinningReels = () => {
+      // نسخة من الحالة الحالية
+      let updatedReels = [...reels];
       
-      if (currentFrame <= framesCount) {
-        // خلال التحريك، نولد بكرات عشوائية في كل إطار للتأثير البصري
-        setReels(generateNewReels());
-      } else {
-        // عند انتهاء التحريك، نولد النتيجة النهائية
-        const finalReels = generateNewReels();
-        setReels(finalReels);
-        
-        // إيقاف المؤقت
-        clearInterval(timer);
-        setSpinTimer(null);
-        
-        // التحقق من الفوز
-        const wins = checkWinningLines(finalReels);
-        setWinningLines(wins);
-        
-        // حساب مبلغ الفوز
-        if (wins.length > 0) {
-          const winAmount = calculateWinAmount(wins, betAmount);
-          
-          // تشغيل صوت الفوز
-          if (winAudioRef.current && !isMuted) {
-            winAudioRef.current.currentTime = 0;
-            winAudioRef.current.play().catch(e => console.error(e));
-          }
-          
-          // عرض رسالة الفوز
-          toast({
-            title: "مبروك! 🎉",
-            description: `لقد ربحت ${winAmount} رقاقة`,
-            variant: "default"
-          });
-          
-          // هنا يجب إرسال معلومات الفوز إلى الخادم وتحديث رصيد اللاعب
-          // سنقوم بإضافة هذا المنطق لاحقاً
+      // تحديث البكرات التي لا تزال تدور
+      for (let i = stoppedReels; i < totalReels; i++) {
+        // إنشاء بكرة جديدة مع رموز عشوائية
+        const spinningReel: SymbolType[] = [];
+        for (let j = 0; j < 3; j++) {
+          spinningReel.push(generateRandomSymbol());
         }
-        
-        // التحقق من تفعيل لعبة المكافأة عند وجود 3 أو أكثر من رمز الكتاب
-        const scatterCount = countScatters(finalReels);
-        if (scatterCount >= 3) {
-          // بدء لعبة المكافأة بعد ثانية للسماح للاعب برؤية الفوز أولاً
-          setTimeout(() => {
-            setupBonusGame();
-          }, 1000);
-        }
-        
-        // إنهاء حالة الدوران
-        setIsSpinning(false);
+        updatedReels[i] = spinningReel;
       }
-    }, 100); // 100 مللي ثانية بين كل إطار
+      
+      // تحديث الحالة
+      setReels(updatedReels);
+    };
+    
+    // تشغيل صوت النقرة عند توقف كل بكرة
+    const playReelStopSound = () => {
+      const clickSound = document.getElementById('egypt-click-sound') as HTMLAudioElement;
+      if (clickSound && !isMuted) {
+        clickSound.currentTime = 0;
+        clickSound.volume = 0.5;
+        clickSound.play().catch(e => console.error(e));
+      }
+    };
+    
+    // إنشاء مؤقت للتحريك الأولي السريع
+    const initialSpinTimer = setInterval(() => {
+      if (currentFrame < initialSpinFrames) {
+        // تحريك سريع في البداية
+        updateSpinningReels();
+        currentFrame++;
+      } else {
+        // إيقاف المؤقت الأولي والانتقال إلى مرحلة توقف البكرات
+        clearInterval(initialSpinTimer);
+        
+        // بدء توقف البكرات واحدة تلو الأخرى
+        const stopReelsSequentially = () => {
+          if (stoppedReels < totalReels) {
+            // تثبيت رموز البكرة التي ستتوقف
+            let updatedReels = [...reels];
+            updatedReels[stoppedReels] = finalReelsResult[stoppedReels];
+            setReels(updatedReels);
+            
+            // تشغيل صوت توقف البكرة
+            playReelStopSound();
+            
+            // زيادة عداد البكرات المتوقفة
+            stoppedReels++;
+            
+            // استمرار تحريك البكرات المتبقية
+            const spinRemainingTimer = setInterval(() => {
+              updateSpinningReels();
+            }, 100);
+            
+            // جدولة توقف البكرة التالية
+            if (stoppedReels < totalReels) {
+              setTimeout(() => {
+                clearInterval(spinRemainingTimer);
+                stopReelsSequentially();
+              }, reelStopDelay);
+            } else {
+              // عند توقف جميع البكرات، تنظيف وإنهاء
+              clearInterval(spinRemainingTimer);
+              
+              // التحقق من الفوز
+              const wins = checkWinningLines(finalReelsResult);
+              setWinningLines(wins);
+              
+              // حساب مبلغ الفوز
+              if (wins.length > 0) {
+                const winAmount = calculateWinAmount(wins, betAmount);
+                
+                // تشغيل صوت الفوز بعد تأخير قصير
+                setTimeout(() => {
+                  if (winAudioRef.current && !isMuted) {
+                    winAudioRef.current.currentTime = 0;
+                    winAudioRef.current.play().catch(e => console.error(e));
+                  }
+                  
+                  // عرض رسالة الفوز
+                  toast({
+                    title: "مبروك! 🎉",
+                    description: `لقد ربحت ${formatChips(winAmount)} رقاقة`,
+                    variant: "default"
+                  });
+                }, 500);
+                
+                // إرسال معلومات الفوز إلى الخادم
+                if (user && user.id && globalWs && globalWs.isConnected) {
+                  try {
+                    globalWs.sendMessage({
+                      type: 'game_action',
+                      data: {
+                        userId: user.id,
+                        action: 'slot_win',
+                        amount: winAmount,
+                        game: 'egypt-queen',
+                        timestamp: Date.now()
+                      }
+                    });
+                    
+                    console.log('تم إرسال معلومات الفوز للخادم');
+                  } catch (error) {
+                    console.error('فشل في إرسال معلومات الفوز:', error);
+                  }
+                }
+              }
+              
+              // التحقق من تفعيل لعبة المكافأة
+              const scatterCount = countScatters(finalReelsResult);
+              if (scatterCount >= 3) {
+                // بدء لعبة المكافأة بعد ثانية للسماح للاعب برؤية الفوز أولاً
+                setTimeout(() => {
+                  setupBonusGame();
+                }, 1500);
+              }
+              
+              // إنهاء حالة الدوران
+              setSpinTimer(null);
+              setIsSpinning(false);
+            }
+          }
+        };
+        
+        // بدء تسلسل توقف البكرات
+        setTimeout(stopReelsSequentially, 500);
+      }
+    }, 100);
     
     // حفظ مرجع المؤقت
-    setSpinTimer(timer);
+    setSpinTimer(initialSpinTimer);
   };
   
   // دالة لتدوير عجلات السلوت
@@ -652,7 +736,7 @@ export default function EgyptQueenPage() {
     animateReels();
   };
   
-  // زيادة مبلغ الرهان
+  // زيادة مبلغ الرهان (مضاعفة)
   const increaseBet = () => {
     if (isSpinning) return;
     
@@ -663,10 +747,11 @@ export default function EgyptQueenPage() {
       clickSound.play().catch(e => console.error(e));
     }
     
-    setBetAmount(prev => Math.min(prev + 10, 200));
+    // مضاعفة المبلغ
+    setBetAmount(prev => Math.min(prev * 2, 100000));
   };
   
-  // تقليل مبلغ الرهان
+  // تقليل مبلغ الرهان (النصف)
   const decreaseBet = () => {
     if (isSpinning) return;
     
@@ -677,7 +762,8 @@ export default function EgyptQueenPage() {
       clickSound.play().catch(e => console.error(e));
     }
     
-    setBetAmount(prev => Math.max(prev - 10, 10));
+    // تقليل المبلغ إلى النصف
+    setBetAmount(prev => Math.max(Math.floor(prev / 2), 10000));
   };
   
   // دالة للعودة إلى القائمة الرئيسية
@@ -1029,7 +1115,7 @@ export default function EgyptQueenPage() {
       {/* محتوى اللعبة الرئيسي */}
       <div className="flex-1 relative z-10 flex flex-col items-center justify-center p-4" ref={gameContainerRef}>
         {/* حاوية آلة السلوت */}
-        <div className="bg-[#361F10]/90 border-4 border-[#D4AF37] rounded-lg shadow-2xl overflow-hidden backdrop-blur-sm w-full max-w-3xl h-[400px] flex flex-col">
+        <div className="bg-[#361F10]/90 border-4 border-[#D4AF37] rounded-lg shadow-2xl overflow-hidden backdrop-blur-sm w-full max-w-5xl h-[600px] flex flex-col">
           {/* منطقة عرض البكرات (reels) مع شبكة 5×3 */}
           <div className="flex-1 bg-[url('/images/egypt-queen/reels-bg.jpg')] bg-cover bg-center relative p-2">
             {/* خطوط الدفع */}
@@ -1100,17 +1186,18 @@ export default function EgyptQueenPage() {
                     return (
                       <div 
                         key={`${reelIndex}-${symbolIndex}`} 
-                        className={`flex-1 rounded-md flex items-center justify-center
+                        className={`flex-1 rounded-md flex items-center justify-center p-3
                           ${isSpinning ? 'animate-pulse-slow' : ''}
                           ${isWinningSymbol 
-                            ? 'bg-[#D4AF37]/30 border border-[#D4AF37] shadow-[0_0_15px_rgba(212,175,55,0.7)]' 
-                            : 'bg-[#222]/80'}`}
+                            ? 'bg-gradient-to-r from-[#D4AF37]/30 to-[#8B6914]/40 border-2 border-[#FFD700] shadow-[0_0_20px_rgba(255,215,0,0.6)]' 
+                            : 'bg-[#222]/80 hover:bg-[#333]/80 transition-colors duration-300'}`}
                       >
-                        <span className={symbolClass}>
+                        <span className={`${symbolClass} ${isWinningSymbol ? 'scale-110 transform transition-transform duration-300' : ''}`}>
                           {isWinningSymbol ? (
-                            <div className="animate-pulse">
-                              {symbolContent}
-                              <div className="absolute inset-0 bg-[#D4AF37]/10 rounded-md"></div>
+                            <div className="animate-pulse relative">
+                              <div className="z-10 relative">{symbolContent}</div>
+                              <div className="absolute inset-0 bg-[#FFD700]/20 rounded-full animate-ping-slow"></div>
+                              <div className="absolute -inset-3 bg-gradient-to-r from-[#FFD700]/10 to-[#D4AF37]/5 rounded-full animate-pulse-slow"></div>
                             </div>
                           ) : (
                             symbolContent
@@ -1159,36 +1246,38 @@ export default function EgyptQueenPage() {
                 <Button 
                   className="h-12 w-12 rounded-full bg-[#D4AF37] text-black font-bold text-xl"
                   onClick={decreaseBet}
-                  disabled={isSpinning || betAmount <= 10}
+                  disabled={isSpinning || betAmount <= 10000}
+                  title="تنصيف المبلغ"
                 >
-                  -
+                  ½
                 </Button>
                 
-                <div className="bg-black/80 border border-[#D4AF37] px-4 py-2 rounded-md min-w-[100px] text-center">
-                  <span className="text-[#D4AF37] font-bold">{betAmount}</span>
+                <div className="bg-black/80 border border-[#D4AF37] px-4 py-2 rounded-md min-w-[120px] text-center">
+                  <span className="text-[#D4AF37] font-bold">{formatChips(betAmount)}</span>
                 </div>
                 
                 <Button 
                   className="h-12 w-12 rounded-full bg-[#D4AF37] text-black font-bold text-xl"
                   onClick={increaseBet}
-                  disabled={isSpinning || betAmount >= 200}
+                  disabled={isSpinning || betAmount >= 100000}
+                  title="مضاعفة المبلغ"
                 >
-                  +
+                  x2
                 </Button>
               </div>
             </div>
             
             {/* زر البدء */}
             <Button 
-              className={`h-16 w-32 rounded-full ${isSpinning 
+              className={`h-20 w-40 rounded-full ${isSpinning 
                 ? 'bg-gray-600 cursor-not-allowed' 
                 : 'bg-gradient-to-r from-[#D4AF37] to-[#8B6914] hover:from-[#FFD700] hover:to-[#B8860B]'
-              } text-white text-xl font-bold shadow-lg transform transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-2`}
+              } text-white text-2xl font-bold shadow-lg shadow-[#D4AF37]/20 transform transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-2 border-2 border-[#FFD700]/30`}
               onClick={spin}
               disabled={isSpinning}
             >
               {isSpinning ? (
-                <RotateCw className="h-6 w-6 animate-spin" />
+                <RotateCw className="h-8 w-8 animate-spin" />
               ) : (
                 <>دوران</>
               )}
