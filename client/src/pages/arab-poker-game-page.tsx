@@ -56,6 +56,80 @@ export default function ArabPokerGamePage({ params }: { params?: { tableId?: str
     };
   }, [user, tableId, ws]);
   
+  // مراقبة عدد اللاعبين في الطاولة لجلب لاعب افتراضي عند الانتظار
+  useEffect(() => {
+    if (!gameState || !tableId || virtualPlayerRequested) return;
+    
+    const playerCount = gameState.players?.length || 0;
+    
+    // إذا كان هناك لاعب واحد فقط (أنا) ولم نطلب لاعبًا افتراضيًا بعد
+    if (playerCount === 1 && !waitingTimer && !virtualPlayerRequested) {
+      console.log("بدء مؤقت انتظار لاعب افتراضي");
+      // بدء مؤقت لمدة دقيقة واحدة (60 ثانية)
+      const timer = window.setTimeout(() => {
+        console.log("انتهى وقت الانتظار - طلب لاعب افتراضي");
+        // طلب لاعب افتراضي عندما ينتهي المؤقت
+        requestVirtualPlayer();
+      }, 60000); // دقيقة واحدة
+      setWaitingTimer(timer);
+    } 
+    // إذا انضم لاعبون آخرون، نلغي المؤقت
+    else if (playerCount > 1 && waitingTimer) {
+      console.log("انضم لاعبون آخرون - إلغاء طلب لاعب افتراضي");
+      window.clearTimeout(waitingTimer);
+      setWaitingTimer(null);
+    }
+    
+    // تنظيف المؤقت عند إلغاء تحميل المكون
+    return () => {
+      if (waitingTimer) {
+        window.clearTimeout(waitingTimer);
+      }
+    };
+  }, [gameState, virtualPlayerRequested, waitingTimer, tableId]);
+  
+  // طلب لاعب افتراضي من الخادم
+  const requestVirtualPlayer = useCallback(async () => {
+    if (!tableId || !user || virtualPlayerRequested) return;
+    
+    try {
+      console.log("إرسال طلب لاعب افتراضي للخادم");
+      setVirtualPlayerRequested(true);
+      
+      const res = await fetch(`/api/game/${tableId}/add-virtual-player`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ 
+          level: "pro", // مستوى اللاعب الافتراضي - محترف
+          chips: Math.min(5000, gameState?.userChips || 2000) // رقائق مناسبة لرقائق اللاعب
+        })
+      });
+      
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(errorText || "فشل في إضافة لاعب افتراضي");
+      }
+      
+      // تشغيل صوت الانضمام
+      playSound('player_join');
+      
+      toast({
+        title: "تم إضافة لاعب افتراضي",
+        description: "تم إضافة لاعب افتراضي محترف للعب معك",
+        duration: 3000,
+      });
+      
+      // تحديث حالة اللعبة
+      await fetchGameState();
+    } catch (error) {
+      console.error("خطأ في طلب لاعب افتراضي:", error);
+      setVirtualPlayerRequested(false); // إعادة تعيين الحالة للسماح بمحاولة أخرى
+    }
+  }, [tableId, user, virtualPlayerRequested, gameState, fetchGameState, playSound, toast]);
+  
   // استماع لحدث تحديث حالة اللعبة من WebSocket
   useEffect(() => {
     if (ws.status === 'open') {
@@ -95,6 +169,9 @@ export default function ArabPokerGamePage({ params }: { params?: { tableId?: str
                   break;
                 case 'player_win':
                   playSound('win_hand');
+                  break;
+                case 'player_join':
+                  playSound('player_join');
                   break;
               }
             }

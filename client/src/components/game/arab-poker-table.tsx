@@ -22,6 +22,11 @@ interface Player {
   betAmount: number;
   isAllIn: boolean;
   isActive: boolean;
+  isWinner?: boolean;
+  winAmount?: number;
+  handName?: string;
+  profitLoss?: number; // إضافة حقل لتتبع الربح/الخسارة
+  totalBetAmount?: number; // إجمالي الرهانات في الجولة
 }
 
 // تعريف واجهة خصائص طاولة بوكر العرب
@@ -58,6 +63,7 @@ export function ArabPokerTable({ gameState, onAction, isSpectator = false }: Ara
   const [chatMessage, setChatMessage] = useState("");
   const [chatMessages, setChatMessages] = useState<{ username: string; message: string; timestamp: number }[]>([]);
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const previousGameStateRef = useRef<any>(null);
   
   // الحد الأدنى والأقصى للرهان
   const minRaise = gameState.minRaise || gameState.currentBet + gameState.bigBlind;
@@ -65,6 +71,47 @@ export function ArabPokerTable({ gameState, onAction, isSpectator = false }: Ara
   
   // الوقت المتبقي للدور الحالي
   const [timeLeft, setTimeLeft] = useState(gameState.turnTimeLeft || 30);
+  
+  // حساب الربح والخسارة للاعبين
+  useEffect(() => {
+    // نتجاهل إذا لم تكن هناك بيانات سابقة للمقارنة
+    if (!previousGameStateRef.current) {
+      previousGameStateRef.current = JSON.parse(JSON.stringify(gameState));
+      return;
+    }
+    
+    // حساب المكاسب والخسائر عند انتهاء الجولة (showdown)
+    const isShowdown = gameState.gameStatus === "showdown";
+    const wasNotShowdown = previousGameStateRef.current.gameStatus !== "showdown";
+    
+    // فقط عند الانتقال إلى مرحلة كشف الأوراق
+    if (isShowdown && wasNotShowdown) {
+      // حساب الأرباح/الخسائر لكل لاعب
+      const playersWithProfitLoss = gameState.players.map(player => {
+        // إيجاد اللاعب في الحالة السابقة للمقارنة
+        const previousPlayer = previousGameStateRef.current.players.find((p: any) => p.id === player.id);
+        
+        // إذا كان اللاعب جديد، نستخدم قيمة الرهان الحالية
+        const previousChips = previousPlayer ? previousPlayer.chips + previousPlayer.betAmount : player.chips;
+        const currentChips = player.chips;
+        
+        // حساب الفرق (الربح أو الخسارة)
+        const profitLoss = currentChips - previousChips;
+        
+        return {
+          ...player,
+          profitLoss,
+          totalBetAmount: player.betAmount // حفظ إجمالي الرهان
+        };
+      });
+      
+      // تحديث اللاعبين مع معلومات الربح/الخسارة
+      gameState.players = playersWithProfitLoss;
+    }
+    
+    // تحديث المرجع بالحالة الحالية للمقارنة في المرة التالية
+    previousGameStateRef.current = JSON.parse(JSON.stringify(gameState));
+  }, [gameState, gameState.gameStatus]);
   
   // تحديث الوقت المتبقي عند تغير gameState.turnTimeLeft
   useEffect(() => {
@@ -410,12 +457,15 @@ interface PlayerPositionCardProps {
 // مكون بطاقة موقع اللاعب
 function PlayerPositionCard({ player, isDealer, isCurrentTurn, stateColor, showCards }: PlayerPositionCardProps) {
   return (
-    <div className={`bg-black/60 p-2 rounded-lg border ${isCurrentTurn ? 'border-green-400' : 'border-[#D4AF37]/30'} w-36`}>
+    <div className={`bg-black/60 p-2 rounded-lg border ${isCurrentTurn ? 'border-green-400' : player.isWinner ? 'border-[#FFD700]' : 'border-[#D4AF37]/30'} w-36`}>
       {/* حالة الاتصال واسم اللاعب */}
       <div className="flex justify-between items-center mb-1">
         <div className="flex items-center">
           <div className={`h-2 w-2 rounded-full ${stateColor} ml-1`}></div>
-          <div className="text-white text-sm truncate max-w-[90px]">{player.username}</div>
+          <div className="text-white text-sm truncate max-w-[90px]">
+            {player.username}
+            {player.isWinner && <span className="text-yellow-400 mr-1"> 👑</span>}
+          </div>
         </div>
         {isDealer && (
           <div className="bg-[#D4AF37] text-black text-xs px-1 rounded">D</div>
@@ -463,8 +513,31 @@ function PlayerPositionCard({ player, isDealer, isCurrentTurn, stateColor, showC
           {player.folded && (
             <div className="text-red-400 text-xs mt-1">طوى</div>
           )}
+          
+          {/* عرض المكاسب والخسائر */}
+          {player.profitLoss !== undefined && (
+            <div className={`text-xs mt-1 ${player.profitLoss > 0 ? 'text-green-400' : player.profitLoss < 0 ? 'text-red-400' : 'text-gray-400'}`}>
+              {player.profitLoss > 0 ? '+' : ''}{formatChips(player.profitLoss)}
+            </div>
+          )}
+          
+          {/* عرض اسم اليد الفائزة */}
+          {player.handName && showCards && (
+            <div className="bg-black/60 text-[#D4AF37] text-xs mt-1 px-1 rounded">
+              {player.handName}
+            </div>
+          )}
         </div>
       </div>
+      
+      {/* عرض مبلغ الفوز */}
+      {player.winAmount && player.isWinner && (
+        <div className="mt-1 bg-[#FFD700]/20 rounded p-1 text-center">
+          <div className="text-[#FFD700] text-xs font-bold">
+            +{formatChips(player.winAmount)}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
