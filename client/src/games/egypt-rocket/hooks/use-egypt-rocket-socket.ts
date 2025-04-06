@@ -51,7 +51,9 @@ export function useEgyptRocketSocket(): UseEgyptRocketSocket {
       // في الإنتاج، سيتم استخدام عنوان الخادم الحقيقي
       // استخدام النمط "//" لجعل البروتوكول يتوافق مع الصفحة (ws أو wss)
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      return `${protocol}//${window.location.host}/ws/egypt-rocket`;
+      // إضافة عشوائية لمنع التضارب مع اتصالات WebSocket الأخرى
+      const random = Math.floor(Math.random() * 1000000);
+      return `${protocol}//${window.location.host}/ws/egypt-rocket?clientId=${random}`;
     };
 
     const socketUrl = getSocketUrl();

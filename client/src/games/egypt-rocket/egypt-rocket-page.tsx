@@ -18,7 +18,7 @@ import EgyptRocket from "./components/rocket";
 import PlayersList from "./components/players-list";
 import GameHistoryComponent from "./components/game-history";
 import BettingControls from "./components/betting-controls";
-import { useEgyptRocketSocket } from "./hooks/use-egypt-rocket-socket";
+import { useEgyptRocketGame } from "./hooks/use-egypt-rocket-game";
 
 // صفحة لعبة صاروخ مصر
 const EgyptRocketPage = () => {
@@ -27,14 +27,14 @@ const EgyptRocketPage = () => {
   const [isBetPlaced, setIsBetPlaced] = useState<boolean>(false);
   const [isCashedOut, setIsCashedOut] = useState<boolean>(false);
 
-  // استخدام هوك الاتصال بالخادم
+  // استخدام هوك اللعبة الجديد
   const { 
     gameState, 
     placeBet, 
     cashout, 
     isConnected,
     error
-  } = useEgyptRocketSocket();
+  } = useEgyptRocketGame();
 
   // تتبع حالة الرهان والسحب بناءً على حالة اللعبة
   useEffect(() => {
