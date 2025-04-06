@@ -276,11 +276,6 @@ const ArabicRocketPage = () => {
     // زيادة خطوة الرسم لتحريك التأثيرات البصرية
     setCurrentStep(prev => prev + 1);
     
-    // تحديث العداد كل 60 خطوة تقريباً (ثانية واحدة)
-    if (currentStep % 60 === 0) {
-      setGameTimer(prev => prev + 1);
-    }
-    
     // رسم الصاروخ والخلفية
     drawRocket(multiplier);
     
@@ -1304,26 +1299,7 @@ const ArabicRocketPage = () => {
           className="w-full h-full absolute inset-0"
         ></canvas>
         
-        {/* قائمة اللاعبين المنسحبين على الجانب الأيمن - جديد */}
-        <div className="absolute right-4 top-4 bottom-4 w-60 flex flex-col gap-2 overflow-y-auto z-10">
-          <div className="bg-gradient-to-r from-[rgba(128,0,255,0.7)] to-purple-800 rounded-lg p-2 shadow-lg mb-2">
-            <div className="text-center text-white font-bold">اللاعبون المنسحبون</div>
-          </div>
-          
-          {activePlayers.filter(player => player.cashoutMultiplier !== null).map((player, idx) => (
-            <div key={idx} className="bg-gradient-to-r from-[rgba(0,200,100,0.7)] to-green-800 rounded-lg p-2 shadow-lg flex items-center gap-2">
-              <div className="w-10 h-10 rounded-full bg-green-900 flex items-center justify-center text-white font-bold">
-                {player.username.charAt(0)}
-              </div>
-              <div className="flex-1">
-                <div className="text-white font-bold">{player.username}</div>
-                <div className="text-xs text-green-300">
-                  × {player.cashoutMultiplier?.toFixed(2)} • {player.profit && player.profit > 0 ? '+' : ''}{player.profit}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+
         
         {/* الهاشتاج الجانبي للاعبين */}
         <div className="absolute left-4 top-4 bottom-4 w-60 flex flex-col gap-2 overflow-y-auto">
