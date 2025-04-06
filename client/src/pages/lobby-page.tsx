@@ -623,7 +623,7 @@ export default function LobbyPage() {
                           <div className="relative">
                             <div className="absolute inset-0 rounded-full bg-purple-600/30 blur-md animate-pulse-slow"></div>
                             <div className="relative w-12 h-12 bg-gradient-to-br from-[#4A1D96] to-[#2E1065] rounded-full border-2 border-purple-600 flex items-center justify-center transform group-hover:rotate-12 transition-all duration-500 shadow-lg">
-                              <img src="/images/egypt-queen-icon.svg" alt="ملكة مصر" className="w-8 h-8 object-cover" />
+                              <object data="/images/egypt-queen-icon.svg" type="image/svg+xml" className="w-8 h-8" aria-label="ملكة مصر"></object>
                             </div>
                             <span className="absolute h-full w-full top-0 left-0 bg-transparent rounded-full shadow-inner"></span>
                           </div>
@@ -722,7 +722,7 @@ export default function LobbyPage() {
                           <div className="relative">
                             <div className="absolute inset-0 rounded-full bg-yellow-500/30 blur-md animate-pulse-slow"></div>
                             <div className="relative w-12 h-12 bg-gradient-to-br from-[#854D0E] to-[#422006] rounded-full border-2 border-yellow-500 flex items-center justify-center transform group-hover:rotate-12 transition-all duration-500 shadow-lg">
-                              <img src="/images/zeus-king-icon.svg" alt="الملك زيوس" className="w-8 h-8 object-cover" />
+                              <object data="/images/zeus-king-icon.svg" type="image/svg+xml" className="w-8 h-8" aria-label="الملك زيوس"></object>
                             </div>
                             <span className="absolute h-full w-full top-0 left-0 bg-transparent rounded-full shadow-inner"></span>
                           </div>
