@@ -979,32 +979,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
       timestamp: new Date().toISOString()
     });
   });
-
-  // معالجة الصفحات غير الموجودة
-  app.use((req: Request, res: Response) => {
-    // التحقق مما إذا كان الطلب يتعلق بواجهة برمجة التطبيقات API أو ملف ثابت
-    if (req.path.startsWith('/api') || req.path.includes('.')) {
-      // استجابة JSON للطلبات المتعلقة بواجهة برمجة التطبيقات
-      return res.status(404).json({
-        success: false,
-        message: "الصفحة المطلوبة غير موجودة"
+  
+  // إضافة نقطة نهاية للتحقق من حالة المصادقة
+  app.get('/api/auth/check', (req: Request, res: Response) => {
+    try {
+      if (req.isAuthenticated()) {
+        return res.json({ 
+          isAuthenticated: true, 
+          user: req.user
+        });
+      } else {
+        return res.json({ isAuthenticated: false });
+      }
+    } catch (err) {
+      console.error("خطأ في التحقق من حالة المصادقة:", err);
+      return res.status(500).json({ 
+        error: "حدث خطأ أثناء التحقق من حالة المصادقة" 
       });
     }
-    
-    // التعامل مع صفحة المصادقة بشكل خاص
-    if (req.path === '/auth') {
-      // إذا كان الطلب على صفحة المصادقة، نتركها للواجهة الأمامية بغض النظر عن حالة المصادقة
-      return res.status(200).end();
-    }
-    
-    // إذا كان المستخدم مسجل دخوله، نسمح بالوصول إلى جميع المسارات
-    if (req.isAuthenticated()) {
-      return res.status(200).end();
-    }
-    
-    // إذا لم يكن مسجل دخوله، نعيد توجيهه إلى صفحة المصادقة
-    res.redirect('/auth');
   });
+  
+  // إضافة مسار مخصص للتعامل مع صفحة المصادقة
+  app.get('/auth', (req: Request, res: Response, next: NextFunction) => {
+    // إذا كان المستخدم مسجل دخوله وطلب صفحة المصادقة مباشرة، نسمح له بذلك
+    // هذا يمنع حلقات إعادة التوجيه المتكررة
+    // نسمح لـ Vite بمعالجة هذا بدلاً من إعادة التوجيه
+    return next();
+  });
+
+  // معالجة طلبات API غير الموجودة - هذا فقط للمسارات التي تبدأ بـ /api
+  app.use('/api/*', (req: Request, res: Response) => {
+    return res.status(404).json({
+      success: false,
+      message: "نقطة النهاية API المطلوبة غير موجودة"
+    });
+  });
+  
+  // ملاحظة مهمة: نحن لا نضيف معالج catch-all هنا للمسارات الأخرى
+  // هذا يسمح لـ Vite middleware بمعالجة جميع طلبات الواجهة الأمامية
+  // سيتم تنفيذ middleware الخاصة بـ Vite بعد هذه المعالجات في index.ts
 
   // معالجة الأخطاء العامة
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
