@@ -115,9 +115,7 @@ export default function LobbyPage() {
     <div className="h-screen overflow-hidden bg-cover bg-center flex flex-col"
          style={{ backgroundImage: "url('/images/egyptian-background.jpg')" }}>
       
-      {/* إضافة تأثير تساقط بطاقات البوكر */}
-      <HeavyPokerCardsEffect />
-      <SuitSymbolsEffect />
+      {/* تم حذف تأثير تساقط بطاقات البوكر بناءً على طلب المستخدم */}
       
       {/* خلفية الفيديو محسنة - بتأثيرات ضبابية وإضاءة */}
       <div className="fixed inset-0 z-0 overflow-hidden">
@@ -265,6 +263,22 @@ export default function LobbyPage() {
                 <div className="flex items-center mt-0.5">
                   <OnlineUsersCounter />
                 </div>
+              </div>
+            </div>
+
+            {/* إضافة أيقونات ملكة مصر والملك زيوس */}
+            <div className="flex items-center gap-2 mr-4">
+              <div className="relative group cursor-pointer" onClick={() => navigate("/egypt-queen")}>
+                <div className="relative w-10 h-10 rounded-full border-2 border-purple-600 bg-black/50 flex items-center justify-center shadow-lg shadow-purple-600/30 hover:shadow-purple-600/50 transition-all duration-300">
+                  <img src="/images/egypt-queen-icon.png" alt="ملكة مصر" className="w-8 h-8 object-cover" />
+                </div>
+                <div className="absolute -bottom-1 -right-1 bg-purple-500 w-3 h-3 rounded-full border border-black animate-pulse"></div>
+              </div>
+              <div className="relative group cursor-pointer" onClick={() => navigate("/zeus-king")}>
+                <div className="relative w-10 h-10 rounded-full border-2 border-yellow-500 bg-black/50 flex items-center justify-center shadow-lg shadow-yellow-500/30 hover:shadow-yellow-500/50 transition-all duration-300">
+                  <img src="/images/zeus-king-icon.png" alt="الملك زيوس" className="w-8 h-8 object-cover" />
+                </div>
+                <div className="absolute -bottom-1 -right-1 bg-yellow-500 w-3 h-3 rounded-full border border-black animate-pulse"></div>
               </div>
             </div>
 
