@@ -104,6 +104,8 @@ export default function LobbyPage() {
       navigate("/zeus-king");
     } else if (gameType === "egypt_queen") {
       navigate("/egypt-queen");
+    } else if (gameType === "egypt_rocket") {
+      navigate("/egypt-rocket");
     } else if (gameType === "arab_poker") {
       navigate("/arab-poker");
     }
@@ -471,6 +473,17 @@ export default function LobbyPage() {
                       maxBet: 100000,
                       isHot: true,
                       onClick: () => navigate("/arabic-rocket")
+                    },
+                    {
+                      id: "egypt-rocket",
+                      title: "صاروخ مصر",
+                      image: "/attached_assets/image_1743971608301.png",
+                      playerCount: 346,
+                      tableCount: 0,
+                      minBet: 10,
+                      maxBet: 100000,
+                      isNew: true,
+                      onClick: () => navigateToGameTables("egypt_rocket")
                     }
                   ]}
                 />
