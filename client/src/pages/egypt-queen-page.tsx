@@ -943,7 +943,7 @@ export default function EgyptQueenPage() {
   return (
     <div 
       className="h-screen w-full overflow-hidden flex flex-col bg-cover bg-center relative"
-      style={{ backgroundImage: "url('/images/egypt-queen/backgrounds/pyramids-desert.svg')" }}
+      style={{ backgroundImage: "url('/images/egypt-queen/backgrounds/royal-palace-gold.svg')" }}
     >
       {/* نافذة لعبة المكافأة - صناديق الكنز الفرعونية */}
       <Dialog open={bonusGameOpen} onOpenChange={setBonusGameOpen}>

@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="1200" height="800" viewBox="0 0 1200 800">
+  <!-- القاعدة اللونية للقصر الملكي المصري - أرضية وسماء ليلية -->
+  <defs>
+    <linearGradient id="nightSky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#0D1B3E;stop-opacity:1" />
+      <stop offset="40%" style="stop-color:#1E3A6B;stop-opacity:1" />
+      <stop offset="80%" style="stop-color:#355089;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4B6699;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="goldFloor" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#D4AF37;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#F9DF74;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#B88A44;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="royalGold" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#D4AF37;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFDF00;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#D4AF37;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="royalPurple" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#4B0082;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#9370DB;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4B0082;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="marbleColumn" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#E0E0E0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#C0C0C0;stop-opacity:1" />
+    </linearGradient>
+    <radialGradient id="moonGlow" cx="80%" cy="20%" r="5%" fx="80%" fy="20%">
+      <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#BBDEFB;stop-opacity:0.6" />
+    </radialGradient>
+    <filter id="moonBlur" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="5" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    <filter id="goldGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    <pattern id="goldPattern" width="40" height="40" patternUnits="userSpaceOnUse">
+      <rect x="0" y="0" width="40" height="40" fill="url(#royalGold)" opacity="0.5" />
+      <path d="M0,0 L40,40 M40,0 L0,40" stroke="#D4AF37" stroke-width="1" opacity="0.8" />
+    </pattern>
+    <pattern id="hieroglyphics" width="100" height="100" patternUnits="userSpaceOnUse">
+      <rect width="100" height="100" fill="none" />
+      <path d="M20,20 L30,20 L30,40 L20,40 Z" fill="#D4AF37" />
+      <circle cx="50" cy="30" r="10" fill="#D4AF37" />
+      <path d="M70,20 L80,20 L75,40 Z" fill="#D4AF37" />
+      <path d="M20,60 L30,60 L30,80 L20,80 Z" fill="#D4AF37" />
+      <path d="M50,60 C50,70 60,70 60,60 C60,50 50,50 50,60 Z" fill="#D4AF37" />
+      <path d="M70,60 L80,60 L80,70 L85,70 L85,80 L70,80 Z" fill="#D4AF37" />
+    </pattern>
+  </defs>
+
+  <!-- السماء الليلية والأرضية الذهبية -->
+  <rect x="0" y="0" width="1200" height="500" fill="url(#nightSky)" />
+  <rect x="0" y="500" width="1200" height="300" fill="url(#goldFloor)" />
+  
+  <!-- القمر المتوهج -->
+  <circle cx="950" cy="150" r="60" fill="url(#moonGlow)" filter="url(#moonBlur)" />
+  
+  <!-- النجوم المتلألئة -->
+  <g opacity="0.8">
+    <circle cx="100" cy="100" r="1.5" fill="white" />
+    <circle cx="200" cy="50" r="1" fill="white" />
+    <circle cx="300" cy="150" r="1.2" fill="white" />
+    <circle cx="400" cy="75" r="1" fill="white" />
+    <circle cx="500" cy="125" r="1.3" fill="white" />
+    <circle cx="600" cy="50" r="1.1" fill="white" />
+    <circle cx="700" cy="100" r="1.4" fill="white" />
+    <circle cx="150" cy="200" r="1" fill="white" />
+    <circle cx="250" cy="175" r="1.2" fill="white" />
+    <circle cx="350" cy="225" r="1" fill="white" />
+    <circle cx="450" cy="200" r="1.1" fill="white" />
+    <circle cx="550" cy="175" r="1" fill="white" />
+    <circle cx="650" cy="225" r="1.3" fill="white" />
+    <circle cx="750" cy="200" r="1" fill="white" />
+    <circle cx="850" cy="100" r="1.5" fill="white" />
+    <circle cx="100" cy="300" r="1.2" fill="white" />
+    <circle cx="200" cy="350" r="1" fill="white" />
+    <circle cx="300" cy="325" r="1.3" fill="white" />
+    <circle cx="400" cy="275" r="1.1" fill="white" />
+    <circle cx="500" cy="300" r="1" fill="white" />
+    <circle cx="600" cy="350" r="1.4" fill="white" />
+    <circle cx="700" cy="325" r="1.2" fill="white" />
+  </g>
+  
+  <!-- الدرجات الذهبية للقصر -->
+  <rect x="200" y="500" width="800" height="20" fill="url(#royalGold)" />
+  <rect x="250" y="480" width="700" height="20" fill="url(#royalGold)" />
+  <rect x="300" y="460" width="600" height="20" fill="url(#royalGold)" />
+  
+  <!-- واجهة القصر الرئيسية ذات الطراز الفرعوني -->
+  <rect x="350" y="280" width="500" height="180" fill="url(#royalPurple)" />
+  <rect x="350" y="280" width="500" height="180" fill="url(#hieroglyphics)" opacity="0.3" />
+  
+  <!-- زخارف ذهبية على واجهة القصر -->
+  <rect x="350" y="280" width="500" height="10" fill="url(#royalGold)" />
+  <rect x="350" y="450" width="500" height="10" fill="url(#royalGold)" />
+  <rect x="350" y="280" width="10" height="180" fill="url(#royalGold)" />
+  <rect x="840" y="280" width="10" height="180" fill="url(#royalGold)" />
+  
+  <!-- باب القصر المهيب -->
+  <rect x="550" y="350" width="100" height="110" fill="url(#goldPattern)" />
+  <rect x="550" y="350" width="100" height="110" stroke="url(#royalGold)" stroke-width="5" fill="none" />
+  
+  <!-- أعمدة القصر الرخامية -->
+  <!-- العمود 1 -->
+  <rect x="375" y="300" width="30" height="150" fill="url(#marbleColumn)" />
+  <ellipse cx="390" cy="300" rx="18" ry="10" fill="url(#royalGold)" />
+  <ellipse cx="390" cy="450" rx="18" ry="8" fill="url(#royalGold)" />
+  
+  <!-- العمود 2 -->
+  <rect x="450" y="300" width="30" height="150" fill="url(#marbleColumn)" />
+  <ellipse cx="465" cy="300" rx="18" ry="10" fill="url(#royalGold)" />
+  <ellipse cx="465" cy="450" rx="18" ry="8" fill="url(#royalGold)" />
+  
+  <!-- العمود 3 -->
+  <rect x="720" y="300" width="30" height="150" fill="url(#marbleColumn)" />
+  <ellipse cx="735" cy="300" rx="18" ry="10" fill="url(#royalGold)" />
+  <ellipse cx="735" cy="450" rx="18" ry="8" fill="url(#royalGold)" />
+  
+  <!-- العمود 4 -->
+  <rect x="795" y="300" width="30" height="150" fill="url(#marbleColumn)" />
+  <ellipse cx="810" cy="300" rx="18" ry="10" fill="url(#royalGold)" />
+  <ellipse cx="810" cy="450" rx="18" ry="8" fill="url(#royalGold)" />
+  
+  <!-- سقف القصر -->
+  <rect x="325" y="250" width="550" height="30" fill="url(#royalGold)" />
+  <path d="M 325,250 L 325,280 L 875,280 L 875,250 L 325,250 Z M 340,255 L 860,255 L 860,275 L 340,275 Z" fill="#D4AF37" />
+  
+  <!-- رموز فرعونية كبيرة على واجهة القصر -->
+  <g transform="translate(600, 340)" filter="url(#goldGlow)">
+    <circle cx="0" cy="0" r="25" stroke="#D4AF37" stroke-width="3" fill="none" />
+    <path d="M -15,-15 L 15,15 M -15,15 L 15,-15" stroke="#D4AF37" stroke-width="3" />
+  </g>
+  
+  <!-- تماثيل أبو الهول الذهبية -->
+  <g transform="translate(250, 500)">
+    <path d="M 0,0 C 0,-20 10,-30 20,-40 C 30,-50 40,-55 50,-55 C 60,-55 70,-50 80,-40 C 90,-30 100,-15 100,0 Z" fill="url(#royalGold)" />
+    <path d="M 20,-40 C 25,-45 30,-50 40,-50 C 50,-50 60,-45 65,-40 C 50,-38 35,-38 20,-40 Z" fill="#B88A44" />
+  </g>
+  
+  <g transform="translate(850, 500)">
+    <path d="M 0,0 C 0,-20 10,-30 20,-40 C 30,-50 40,-55 50,-55 C 60,-55 70,-50 80,-40 C 90,-30 100,-15 100,0 Z" fill="url(#royalGold)" />
+    <path d="M 20,-40 C 25,-45 30,-50 40,-50 C 50,-50 60,-45 65,-40 C 50,-38 35,-38 20,-40 Z" fill="#B88A44" />
+  </g>
+  
+  <!-- مشاعل مضاءة على جانبي المدخل -->
+  <g transform="translate(520, 380)">
+    <rect x="-5" y="0" width="10" height="30" fill="#B88A44" />
+    <path d="M 0,-15 C -10,-25 -5,-35 0,-40 C 5,-35 10,-25 0,-15 Z" fill="#FF9800" />
+    <path d="M 0,-15 C -5,-20 -2,-25 0,-30 C 2,-25 5,-20 0,-15 Z" fill="#FFEB3B" />
+  </g>
+  
+  <g transform="translate(680, 380)">
+    <rect x="-5" y="0" width="10" height="30" fill="#B88A44" />
+    <path d="M 0,-15 C -10,-25 -5,-35 0,-40 C 5,-35 10,-25 0,-15 Z" fill="#FF9800" />
+    <path d="M 0,-15 C -5,-20 -2,-25 0,-30 C 2,-25 5,-20 0,-15 Z" fill="#FFEB3B" />
+  </g>
+  
+  <!-- درج وأرضية القصر الذهبية -->
+  <path d="M 200,520 L 1000,520 L 950,570 L 250,570 Z" fill="#D4AF37" opacity="0.7" />
+  <path d="M 250,570 L 950,570 L 900,620 L 300,620 Z" fill="#D4AF37" opacity="0.6" />
+  <path d="M 300,620 L 900,620 L 850,670 L 350,670 Z" fill="#D4AF37" opacity="0.5" />
+  
+  <!-- انعكاسات ضوء القمر على الأرضية -->
+  <path d="M 900,500 C 920,510 940,520 950,540 C 940,550 930,560 920,570 C 910,560 900,550 890,540 C 900,520 890,510 900,500 Z" fill="white" opacity="0.2" />
+  
+  <!-- أنماط زخرفية ذهبية على الواجهة -->
+  <path d="M 350,300 L 850,300 M 350,330 L 850,330 M 350,360 L 850,360 M 350,390 L 850,390 M 350,420 L 850,420" stroke="#D4AF37" stroke-width="2" opacity="0.8" />
+  
+  <!-- أعمدة صغيرة فوق سقف القصر -->
+  <g transform="translate(350, 240)">
+    <rect x="-5" y="-20" width="10" height="20" fill="url(#marbleColumn)" />
+    <ellipse cx="0" cy="-20" rx="8" ry="4" fill="url(#royalGold)" />
+  </g>
+  
+  <g transform="translate(450, 240)">
+    <rect x="-5" y="-20" width="10" height="20" fill="url(#marbleColumn)" />
+    <ellipse cx="0" cy="-20" rx="8" ry="4" fill="url(#royalGold)" />
+  </g>
+  
+  <g transform="translate(550, 240)">
+    <rect x="-5" y="-20" width="10" height="20" fill="url(#marbleColumn)" />
+    <ellipse cx="0" cy="-20" rx="8" ry="4" fill="url(#royalGold)" />
+  </g>
+  
+  <g transform="translate(650, 240)">
+    <rect x="-5" y="-20" width="10" height="20" fill="url(#marbleColumn)" />
+    <ellipse cx="0" cy="-20" rx="8" ry="4" fill="url(#royalGold)" />
+  </g>
+  
+  <g transform="translate(750, 240)">
+    <rect x="-5" y="-20" width="10" height="20" fill="url(#marbleColumn)" />
+    <ellipse cx="0" cy="-20" rx="8" ry="4" fill="url(#royalGold)" />
+  </g>
+  
+  <g transform="translate(850, 240)">
+    <rect x="-5" y="-20" width="10" height="20" fill="url(#marbleColumn)" />
+    <ellipse cx="0" cy="-20" rx="8" ry="4" fill="url(#royalGold)" />
+  </g>
+  
+  <!-- تاج ملكي كبير فوق مدخل القصر -->
+  <g transform="translate(600, 220)">
+    <path d="M -30,0 L 30,0 L 0,-40 Z" fill="url(#royalGold)" filter="url(#goldGlow)" />
+    <circle cx="-15" cy="-10" r="5" fill="#9C27B0" />
+    <circle cx="0" cy="-25" r="5" fill="#9C27B0" />
+    <circle cx="15" cy="-10" r="5" fill="#9C27B0" />
+  </g>
+
+  <!-- نخلتان ذهبيتان على جانبي القصر -->
+  <g transform="translate(150, 500)">
+    <rect x="-5" y="-80" width="10" height="80" fill="#B88A44" />
+    <path d="M 0,-80 C -20,-70 -30,-50 -20,-30 C -10,-60 10,-60 20,-30 C 30,-50 20,-70 0,-80 Z" fill="#D4AF37" />
+    <path d="M 0,-60 C -15,-50 -20,-40 -15,-30 C -5,-50 5,-50 15,-30 C 20,-40 15,-50 0,-60 Z" fill="#D4AF37" />
+  </g>
+  
+  <g transform="translate(1050, 500)">
+    <rect x="-5" y="-80" width="10" height="80" fill="#B88A44" />
+    <path d="M 0,-80 C -20,-70 -30,-50 -20,-30 C -10,-60 10,-60 20,-30 C 30,-50 20,-70 0,-80 Z" fill="#D4AF37" />
+    <path d="M 0,-60 C -15,-50 -20,-40 -15,-30 C -5,-50 5,-50 15,-30 C 20,-40 15,-50 0,-60 Z" fill="#D4AF37" />
+  </g>
+</svg>
