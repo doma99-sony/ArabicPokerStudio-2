@@ -95,6 +95,12 @@ export function CreateTableDialog({ isOpen, onClose, gameType }: CreateTableDial
 
       const result = await response.json();
       
+      // تخزين معرف الطاولة في localStorage
+      if (result.tableId) {
+        console.log("تم إنشاء طاولة جديدة بمعرف:", result.tableId);
+        localStorage.setItem('lastTableId', result.tableId.toString());
+      }
+      
       toast({
         title: "تم إنشاء الطاولة بنجاح",
         description: "يتم توجيهك إلى الطاولة الآن...",
@@ -103,7 +109,9 @@ export function CreateTableDialog({ isOpen, onClose, gameType }: CreateTableDial
       // انتقل إلى صفحة الطاولة
       onClose();
       setTimeout(() => {
-        navigate(`/${gameType}/${result.tableId}`);
+        // تحويل نوع اللعبة من "arab_poker" إلى "arab-poker" للمسار
+        const pathGameType = gameType === "arab_poker" ? "arab-poker" : gameType;
+        navigate(`/${pathGameType}/${result.tableId}`);
       }, 500);
     } catch (error) {
       console.error("Error creating table:", error);

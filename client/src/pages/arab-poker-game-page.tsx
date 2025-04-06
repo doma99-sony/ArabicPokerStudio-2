@@ -23,14 +23,35 @@ export default function ArabPokerGamePage({ params }: { params?: { tableId?: str
   const [waitingTimer, setWaitingTimer] = useState<number | null>(null);
   const [virtualPlayerRequested, setVirtualPlayerRequested] = useState(false);
   
-  // استخراج معرف الطاولة من الباراميترات - العدد بالإنجليزية
-  const tableId = params && params.tableId ? parseInt(params.tableId) : null;
+  // استخراج معرف الطاولة من الباراميترات أو من التخزين المحلي إذا كان غير متوفر
+  const [tableId, setTableId] = useState<number | null>(() => {
+    // أولاً: محاولة استخدام معرف الطاولة من الباراميترات
+    if (params && params.tableId && !isNaN(parseInt(params.tableId))) {
+      return parseInt(params.tableId);
+    }
+    
+    // ثانياً: محاولة استخدام معرف الطاولة المخزن في localStorage
+    const storedId = localStorage.getItem('lastTableId');
+    if (storedId && !isNaN(parseInt(storedId))) {
+      return parseInt(storedId);
+    }
+    
+    // إذا لم يتم العثور على أي معرف صالح
+    return null;
+  });
   
   // تسجيل معلومات debugging
   useEffect(() => {
     console.log("معلمات العنوان في صفحة ArabPokerGamePage:", params);
     console.log("معرف الطاولة المحلل:", tableId);
-  }, [params, tableId]);
+    console.log("معرف الطاولة المخزن في localStorage:", localStorage.getItem('lastTableId'));
+    
+    // تحديث الباراميترات في عنوان URL إذا كان معرف الطاولة موجوداً ولكن ليس في params
+    if (tableId && (!params || !params.tableId)) {
+      console.log("تحديث عنوان URL بمعرف الطاولة:", tableId);
+      navigate(`/arab-poker/${tableId}`, { replace: true });
+    }
+  }, [params, tableId, navigate]);
   
   // استخدام WebSocket
   const ws = useWebSocket();
@@ -194,19 +215,17 @@ export default function ArabPokerGamePage({ params }: { params?: { tableId?: str
       return;
     }
     
-    if (!params || !params.tableId) {
-      setError("معرف الطاولة مفقود");
+    // تحقق من صحة معرف الطاولة
+    if (!tableId) {
+      // إذا وصلنا هنا ولم يكن هناك معرف طاولة، فلنرجع إلى صفحة طاولات بوكر العرب
+      console.error("معرف الطاولة مفقود بعد كل محاولات استخراجه - الرجوع إلى صفحة الطاولات");
+      setError("معرف الطاولة مفقود. الرجاء اختيار طاولة من القائمة.");
       return;
     }
     
-    // التحقق من صحة معرف الطاولة
-    const parsedTableId = parseInt(params.tableId);
-    
-    if (isNaN(parsedTableId)) {
-      console.error(`معرف الطاولة '${params.tableId}' غير صالح`);
-      setError("معرف الطاولة غير صحيح، الرجاء استخدام معرف رقمي");
-      return;
-    }
+    // حفظ معرف الطاولة في التخزين المحلي للرجوع إليه لاحقاً
+    localStorage.setItem('lastTableId', tableId.toString());
+    console.log("تم حفظ معرف الطاولة في التخزين المحلي:", tableId);
     
     // إنشاء اتصال WebSocket جديد عند تحميل الصفحة إذا لم يكن موجوداً
     if (ws.status !== 'open') {
@@ -221,7 +240,7 @@ export default function ArabPokerGamePage({ params }: { params?: { tableId?: str
     return () => {
       console.log('الاحتفاظ باتصال WebSocket عند مغادرة صفحة بوكر العرب');
     };
-  }, [user, params, ws, fetchGameState, navigate]);
+  }, [user, tableId, ws, fetchGameState, navigate]);
   
   // دالة لطلب لاعب افتراضي (مساعدة)
   const handleRequestVirtualPlayer = useCallback(() => {

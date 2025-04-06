@@ -19,6 +19,17 @@ export default function ArabPokerPage() {
   const [showRankPopup, setShowRankPopup] = useState(false);
   const [showCreateTableDialog, setShowCreateTableDialog] = useState(false);
   
+  // وظيفة لمعالجة الانضمام إلى طاولة مع تخزين المعرف في localStorage
+  const handleJoinTable = (tableId: number) => {
+    if (tableId) {
+      console.log("الانضمام إلى الطاولة رقم:", tableId);
+      // تخزين معرف الطاولة في localStorage قبل الانتقال إليها
+      localStorage.setItem('lastTableId', tableId.toString());
+      // توجيه المستخدم إلى صفحة الطاولة
+      navigate(`/arab-poker/${tableId}`);
+    }
+  };
+  
   // استخدام WebSocket لاتصال مستمر مع الخادم
   const ws = useWebSocket();
   
@@ -83,6 +94,8 @@ export default function ArabPokerPage() {
       return tableCategory.includes(category);
     });
   };
+  
+
 
   if (!user) {
     return (
@@ -191,7 +204,7 @@ export default function ArabPokerPage() {
                       key={table.id} 
                       table={table}
                       gameType="arab_poker"
-                      onJoin={() => navigate(`/arab-poker/${table.id}`)}
+                      onJoin={() => handleJoinTable(table.id)}
                     />
                   ))}
                 </div>
@@ -214,7 +227,7 @@ export default function ArabPokerPage() {
                       key={table.id} 
                       table={table}
                       gameType="arab_poker"
-                      onJoin={() => navigate(`/arab-poker/${table.id}`)}
+                      onJoin={() => handleJoinTable(table.id)}
                     />
                   ))}
                 </div>
@@ -237,7 +250,7 @@ export default function ArabPokerPage() {
                       key={table.id} 
                       table={table}
                       gameType="arab_poker"
-                      onJoin={() => navigate(`/arab-poker/${table.id}`)}
+                      onJoin={() => handleJoinTable(table.id)}
                     />
                   ))}
                 </div>
@@ -260,7 +273,7 @@ export default function ArabPokerPage() {
                       key={table.id} 
                       table={table}
                       gameType="arab_poker"
-                      onJoin={() => navigate(`/arab-poker/${table.id}`)}
+                      onJoin={() => handleJoinTable(table.id)}
                     />
                   ))}
                 </div>
