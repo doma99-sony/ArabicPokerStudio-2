@@ -6,29 +6,16 @@ import { GameTable } from "@/types";
 import { TableCard } from "@/components/lobby/table-card";
 import { Button } from "@/components/ui/button";
 import { OnlineUsersCounter } from "@/components/ui/online-users-badge";
-import { Loader2, ArrowRight, Coins, Plus, Table2 } from "lucide-react";
+import { Loader2, ArrowRight, Coins } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { formatChips, formatToEnglishNumbers } from "@/lib/utils";
+import { formatChips } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
-import { CreateTableDialog } from "@/components/create-table-dialog";
 
 export default function ArabPokerPage() {
   const [, navigate] = useLocation();
   const { user } = useAuth();
   const [activePokerLevel, setActivePokerLevel] = useState("نوب");
   const [showRankPopup, setShowRankPopup] = useState(false);
-  const [showCreateTableDialog, setShowCreateTableDialog] = useState(false);
-  
-  // وظيفة لمعالجة الانضمام إلى طاولة مع تخزين المعرف في localStorage
-  const handleJoinTable = (tableId: number) => {
-    if (tableId) {
-      console.log("الانضمام إلى الطاولة رقم:", tableId);
-      // تخزين معرف الطاولة في localStorage قبل الانتقال إليها
-      localStorage.setItem('lastTableId', tableId.toString());
-      // توجيه المستخدم إلى صفحة الطاولة
-      navigate(`/arab-poker/${tableId}`);
-    }
-  };
   
   // استخدام WebSocket لاتصال مستمر مع الخادم
   const ws = useWebSocket();
@@ -94,8 +81,6 @@ export default function ArabPokerPage() {
       return tableCategory.includes(category);
     });
   };
-  
-
 
   if (!user) {
     return (
@@ -150,16 +135,7 @@ export default function ArabPokerPage() {
           {/* Tabs for different levels */}
           <Tabs defaultValue="نوب" className="w-full" onValueChange={setActivePokerLevel}>
             <div className="bg-black/40 p-2 rounded-lg mb-3">
-              <div className="flex justify-between items-center mb-2">
-                <h2 className="text-lg font-bold text-[#D4AF37] mr-2">مستويات بوكر العرب</h2>
-                <Button 
-                  className="bg-[#D4AF37] text-black hover:bg-[#E5C04B] flex items-center"
-                  onClick={() => setShowCreateTableDialog(true)}
-                >
-                  <Plus className="h-4 w-4 ml-2" />
-                  إنشاء طاولة جديدة
-                </Button>
-              </div>
+              <h2 className="text-lg font-bold text-[#D4AF37] mb-2 mr-2">مستويات بوكر العرب</h2>
               <TabsList className="grid grid-cols-4 bg-black/40 p-1 rounded-lg">
                 <TabsTrigger 
                   value="نوب" 
@@ -198,13 +174,13 @@ export default function ArabPokerPage() {
                   <p className="text-[#D4AF37]">لا توجد طاولات متاحة حالياً، تحقق لاحقاً</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                   {getTablesByCategory('نوب').map((table) => (
                     <TableCard 
                       key={table.id} 
                       table={table}
                       gameType="arab_poker"
-                      onJoin={() => handleJoinTable(table.id)}
+                      onJoin={() => navigate(`/game/${table.id}`)}
                     />
                   ))}
                 </div>
@@ -221,13 +197,13 @@ export default function ArabPokerPage() {
                   <p className="text-[#D4AF37]">لا توجد طاولات متاحة حالياً، تحقق لاحقاً</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                   {getTablesByCategory('متوسط').map((table) => (
                     <TableCard 
                       key={table.id} 
                       table={table}
                       gameType="arab_poker"
-                      onJoin={() => handleJoinTable(table.id)}
+                      onJoin={() => navigate(`/game/${table.id}`)}
                     />
                   ))}
                 </div>
@@ -244,13 +220,13 @@ export default function ArabPokerPage() {
                   <p className="text-[#D4AF37]">لا توجد طاولات متاحة حالياً، تحقق لاحقاً</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                   {getTablesByCategory('محترف').map((table) => (
                     <TableCard 
                       key={table.id} 
                       table={table}
                       gameType="arab_poker"
-                      onJoin={() => handleJoinTable(table.id)}
+                      onJoin={() => navigate(`/game/${table.id}`)}
                     />
                   ))}
                 </div>
@@ -267,13 +243,13 @@ export default function ArabPokerPage() {
                   <p className="text-[#D4AF37]">لا توجد طاولات متاحة حالياً، تحقق لاحقاً</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                   {getTablesByCategory('الفاجر').map((table) => (
                     <TableCard 
                       key={table.id} 
                       table={table}
                       gameType="arab_poker"
-                      onJoin={() => handleJoinTable(table.id)}
+                      onJoin={() => navigate(`/game/${table.id}`)}
                     />
                   ))}
                 </div>
@@ -339,13 +315,6 @@ export default function ArabPokerPage() {
           </p>
         </div>
       </footer>
-      
-      {/* نافذة إنشاء طاولة جديدة */}
-      <CreateTableDialog 
-        isOpen={showCreateTableDialog} 
-        onClose={() => setShowCreateTableDialog(false)}
-        gameType="arab_poker"
-      />
     </div>
   );
 }
