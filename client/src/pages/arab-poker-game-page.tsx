@@ -7,6 +7,7 @@ import { Loader2, Users, ArrowLeft, X, Volume2, VolumeX } from "lucide-react";
 import { ArabPokerTable } from "@/components/game/arab-poker-table";
 import { useSoundSystem } from "@/hooks/use-sound-system";
 import { useWebSocket } from "@/hooks/use-websocket-simplified";
+import { handleApiResponse } from "@/lib/utils";
 import type { GameState } from "@/types";
 
 export default function ArabPokerGamePage({ params }: { params?: { tableId?: string } }) {
@@ -76,12 +77,8 @@ export default function ArabPokerGamePage({ params }: { params?: { tableId?: str
         return;
       }
       
-      if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(errorText || "فشل في جلب حالة اللعبة");
-      }
-      
-      const data = await res.json();
+      // استخدام الدالة المساعدة لمعالجة الاستجابة
+      const data = await handleApiResponse(res, "فشل في جلب حالة اللعبة");
       
       // تحقق مما إذا كان المستخدم مشاهداً
       if (data.isSpectator) {
@@ -117,10 +114,8 @@ export default function ArabPokerGamePage({ params }: { params?: { tableId?: str
         })
       });
       
-      if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(errorText || "فشل في إضافة لاعب افتراضي");
-      }
+      // استخدام الدالة المساعدة لمعالجة الاستجابة
+      await handleApiResponse(res, "فشل في إضافة لاعب افتراضي. يرجى المحاولة مرة أخرى لاحقاً.");
       
       // تشغيل صوت الانضمام
       playSound('player_join');
@@ -162,10 +157,8 @@ export default function ArabPokerGamePage({ params }: { params?: { tableId?: str
         body: JSON.stringify(payload)
       });
       
-      if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(errorText || "فشل في تنفيذ الإجراء");
-      }
+      // استخدام الدالة المساعدة لمعالجة الاستجابة
+      await handleApiResponse(res, "فشل في تنفيذ الإجراء. يرجى المحاولة مرة أخرى.");
       
       // تحديث حالة اللعبة بعد تنفيذ الإجراء
       await fetchGameState();
@@ -191,9 +184,21 @@ export default function ArabPokerGamePage({ params }: { params?: { tableId?: str
         credentials: "include",
       });
       
-      if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(errorText || "فشل في مغادرة الطاولة");
+      // حالة خاصة: إذا كان الخطأ 404، فهذا يعني أن الطاولة قد تم إغلاقها بالفعل
+      if (res.status === 404) {
+        console.error("الطاولة غير موجودة عند محاولة مغادرتها:", tableId);
+        // إذا كانت الطاولة غير موجودة، نعتبر أنها مغلقة ونعود إلى القائمة الرئيسية
+        navigate("/arab-poker");
+        return;
+      }
+      
+      // لكل الحالات الأخرى، نستخدم الدالة المساعدة
+      try {
+        await handleApiResponse(res, "فشل في مغادرة الطاولة");
+      } catch (error) {
+        // حتى في حالة حدوث خطأ، نعيد اللاعب إلى قائمة الطاولات
+        console.error("خطأ أثناء معالجة مغادرة الطاولة:", error);
+        throw new Error("فشل في مغادرة الطاولة. سنعيدك إلى القائمة الرئيسية على أي حال.");
       }
       
       // العودة إلى صفحة قائمة طاولات بوكر العرب

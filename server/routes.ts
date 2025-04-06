@@ -966,9 +966,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // إضافة مسارات لعبة الأسد والغزالة من نوع كراش
   // Removed Lion Crash routes
 
+  // معالجة الصفحات غير الموجودة
+  app.use((req: Request, res: Response) => {
+    // التحقق مما إذا كان الطلب يتعلق بواجهة برمجة التطبيقات API أو ملف ثابت
+    if (req.path.startsWith('/api') || req.path.includes('.')) {
+      // استجابة JSON للطلبات المتعلقة بواجهة برمجة التطبيقات
+      return res.status(404).json({
+        success: false,
+        message: "الصفحة المطلوبة غير موجودة"
+      });
+    }
+    
+    // إعادة توجيه إلى صفحة المصادقة للصفحات الأخرى
+    res.redirect('/auth');
+  });
+
   // معالجة الأخطاء العامة
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     console.error("خطأ عام:", err);
+    
+    // التأكد من إرسال استجابة JSON صحيحة دائمًا
     res.status(500).json({ 
       success: false, 
       message: "حدث خطأ في الخادم",
