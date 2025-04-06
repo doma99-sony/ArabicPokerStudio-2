@@ -72,7 +72,9 @@ export default function EgyptQueenPage() {
   
   // حالة لعبة المكافأة (الصناديق الفرعونية)
   const [bonusGameOpen, setBonusGameOpen] = useState(false);
-  const [treasureChests, setTreasureChests] = useState<Array<{opened: boolean, reward: number}>>([]);
+  // تعريف أنواع صناديق الكنز
+  type TreasureChestValues = 'normal' | 'special' | 'golden';
+  const [treasureChests, setTreasureChests] = useState<Array<{opened: boolean, reward: number, type: TreasureChestValues}>>([]);
   const [chestsOpened, setChestsOpened] = useState(0);
   const [totalBonusWin, setTotalBonusWin] = useState(0);
   
@@ -340,14 +342,31 @@ export default function EgyptQueenPage() {
   // دالة إعداد لعبة المكافأة - صناديق الكنز الفرعونية
   const setupBonusGame = () => {
     // إنشاء 5 صناديق للكنز
-    const chests = Array(5).fill(null).map(() => {
-      // إنشاء جائزة عشوائية بين 10 و 100 مضروبة في مستوى الرهان
-      const rewardMultiplier = Math.floor(Math.random() * 10) + 1;
+    const chests: Array<{opened: boolean, reward: number, type: TreasureChestValues}> = Array(5).fill(null).map(() => {
+      // إنشاء جائزة عشوائية تتناسب مع مستوى الرهان
+      // زيادة نطاق المكافآت المحتملة لتكون أكثر إثارة
+      // صندوق واحد على الأقل سيحتوي على مكافأة كبيرة
+      // القيمة الأساسية بين 5 و 30 مضروبة في مستوى الرهان
+      const rewardMultiplier = Math.floor(Math.random() * 25) + 5;
+      // تحديد نوع الصندوق عشوائيًا 
+      const chestType: TreasureChestValues = Math.random() < 0.2 ? 'special' : 'normal';
       return {
         opened: false,
-        reward: rewardMultiplier * betAmount
+        reward: rewardMultiplier * betAmount,
+        // إضافة نوع الصندوق للحصول على تأثيرات بصرية مختلفة
+        type: chestType
       };
     });
+    
+    // التأكد من وجود صندوق واحد على الأقل ذو قيمة عالية جداً (50-100x)
+    const luckyIndex = Math.floor(Math.random() * 5);
+    const superRewardMultiplier = Math.floor(Math.random() * 50) + 50;
+    // تعريف الصندوق الذهبي (الخاص بالمكافأة الكبيرة)
+    chests[luckyIndex] = {
+      opened: false,
+      reward: superRewardMultiplier * betAmount,
+      type: 'golden'
+    };
     
     // إعادة تعيين المتغيرات
     setTreasureChests(chests);
@@ -367,7 +386,7 @@ export default function EgyptQueenPage() {
     // إظهار رسالة لعبة المكافأة
     toast({
       title: "لعبة المكافأة! 🏺",
-      description: "اختر 3 صناديق للحصول على جوائز إضافية!",
+      description: "اختر 3 صناديق للحصول على جوائز إضافية من كنوز الفراعنة!",
       variant: "default"
     });
   };
@@ -383,11 +402,20 @@ export default function EgyptQueenPage() {
     // فتح الصندوق
     updatedChests[index].opened = true;
     
-    // تشغيل صوت فتح الصندوق
-    const chestOpenSound = document.getElementById('egypt-chest-open-sound') as HTMLAudioElement;
-    if (chestOpenSound && !isMuted) {
-      chestOpenSound.currentTime = 0;
-      chestOpenSound.play().catch(e => console.error(e));
+    // تحديد نوع الصوت بناءً على نوع الصندوق
+    let soundElement;
+    
+    if (updatedChests[index].type === 'golden') {
+      // صوت مميز للكنز الذهبي
+      soundElement = document.getElementById('egypt-big-win-sound') as HTMLAudioElement;
+    } else {
+      // صوت عادي لفتح الصندوق
+      soundElement = document.getElementById('egypt-chest-open-sound') as HTMLAudioElement;
+    }
+    
+    if (soundElement && !isMuted) {
+      soundElement.currentTime = 0;
+      soundElement.play().catch(e => console.error(e));
     }
     
     // تحديث العدد
@@ -402,35 +430,70 @@ export default function EgyptQueenPage() {
     setChestsOpened(newChestsOpened);
     setTotalBonusWin(newTotalBonus);
     
+    // تحديد نوع الرسالة بناءً على نوع الصندوق وقيمة المكافأة
+    let messageTitle = "كنز فرعوني! 💰";
+    let messageVariant = "default";
+    
+    if (updatedChests[index].type === 'golden') {
+      messageTitle = "كنز ذهبي عظيم! 👑✨";
+      messageVariant = "default";
+    } else if (updatedChests[index].type === 'special') {
+      messageTitle = "كنز مميز! 🏺✨";
+    }
+    
     // عرض رسالة بالمكافأة التي تم الحصول عليها
     toast({
-      title: "كنز فرعوني! 💰",
+      title: messageTitle,
       description: `وجدت ${chestReward} رقاقة في هذا الصندوق!`,
-      variant: "default"
+      variant: messageVariant as any
     });
     
-    // إذا تم فتح 3 صناديق، أغلق اللعبة
+    // إذا تم فتح 3 صناديق، أغلق اللعبة بعد عرض النتائج
     if (newChestsOpened >= 3) {
-      // تشغيل صوت الفوز الكبير
-      const bigWinSound = document.getElementById('egypt-big-win-sound') as HTMLAudioElement;
-      if (bigWinSound && !isMuted) {
-        bigWinSound.currentTime = 0;
-        bigWinSound.play().catch(e => console.error(e));
-      }
-      
+      // تأثير التأخير للجوائز المتتالية
       setTimeout(() => {
-        // إغلاق لعبة المكافأة بعد ثانيتين
-        setBonusGameOpen(false);
+        // تشغيل صوت الفوز الكبير
+        const bigWinSound = document.getElementById('egypt-big-win-sound') as HTMLAudioElement;
+        if (bigWinSound && !isMuted) {
+          bigWinSound.currentTime = 0;
+          bigWinSound.play().catch(e => console.error(e));
+        }
         
-        // عرض الفوز الإجمالي
-        toast({
-          title: "مكافأة كاملة! 🏆",
-          description: `مجموع المكافأة: ${newTotalBonus} رقاقة!`,
-          variant: "default"
-        });
-        
-        // هنا نضيف المنطق لإرسال الفوز إلى الخادم
-      }, 2000);
+        // إغلاق لعبة المكافأة بعد فترة
+        setTimeout(() => {
+          setBonusGameOpen(false);
+          
+          // عرض الفوز الإجمالي
+          toast({
+            title: "مكافأة كاملة! 🏆",
+            description: `مجموع المكافأة: ${newTotalBonus} رقاقة!`,
+            variant: "default"
+          });
+          
+          // إرسال المكافأة إلى الخادم (إذا كان المستخدم متصلاً)
+          if (user && user.id && globalWs && globalWs.isConnected) {
+            try {
+              globalWs.sendMessage({
+                type: 'game_action',
+                data: {
+                  userId: user.id,
+                  action: 'slot_bonus_win',
+                  amount: newTotalBonus,
+                  game: 'egypt-queen',
+                  timestamp: Date.now()
+                }
+              });
+              
+              console.log('تم إرسال معلومات مكافأة السلوت للخادم');
+            } catch (error) {
+              console.error('فشل في إرسال معلومات المكافأة:', error);
+            }
+          } else {
+            // حفظ في المتصفح مؤقتاً إذا لم يكن هناك اتصال بالخادم
+            console.log('لا يمكن إرسال معلومات المكافأة للخادم - المستخدم غير متصل');
+          }
+        }, 2000);
+      }, 500);
     }
   };
 
@@ -799,32 +862,76 @@ export default function EgyptQueenPage() {
           
           {/* عرض صناديق الكنز */}
           <div className="grid grid-cols-5 gap-4 my-8">
-            {treasureChests.map((chest, index) => (
-              <div 
-                key={index}
-                className={`h-32 cursor-pointer transition-all duration-300 transform ${
-                  chest.opened ? 'scale-105 bg-[#D4AF37]/10' : 'hover:scale-105 hover:bg-[#D4AF37]/5 bg-[#2D1B09]'
-                } border-2 border-[#D4AF37] rounded-md flex flex-col items-center justify-center relative overflow-hidden`}
-                onClick={() => !chest.opened && openTreasureChest(index)}
-              >
-                {chest.opened ? (
-                  // صندوق مفتوح يعرض المكافأة
-                  <div className="flex flex-col items-center gap-1">
-                    <GiftIcon className="h-12 w-12 text-[#D4AF37]" />
-                    <span className="font-bold text-xl text-white">{chest.reward}</span>
-                  </div>
-                ) : (
-                  // صندوق مغلق
-                  <div className="flex flex-col items-center">
-                    <Gift className="h-16 w-16 text-[#D4AF37]" />
-                  </div>
-                )}
-                {/* تأثير لامع على الصندوق المفتوح */}
-                {chest.opened && (
-                  <div className="absolute inset-0 bg-[#D4AF37]/10 animate-pulse"></div>
-                )}
-              </div>
-            ))}
+            {treasureChests.map((chest, index) => {
+              // تحديد الفئة والمظهر حسب نوع الصندوق
+              let chestBorderClass = "border-[#D4AF37]";
+              let chestIconColor = "text-[#D4AF37]";
+              let chestGlowEffect = "";
+              let chestBackground = chest.opened ? 'bg-[#D4AF37]/10' : 'hover:bg-[#D4AF37]/5 bg-[#2D1B09]';
+              
+              // مظهر خاص للصناديق الذهبية
+              if (chest.type === 'golden') {
+                chestBorderClass = "border-[#FFD700]";
+                chestIconColor = "text-[#FFD700]";
+                chestGlowEffect = "shadow-[0_0_15px_rgba(255,215,0,0.5)]";
+                chestBackground = chest.opened ? 'bg-gradient-to-b from-[#5A3805]/30 to-[#FFD700]/20' : 'hover:bg-[#5A3805]/30 bg-gradient-to-b from-[#3A2604] to-[#2D1B09]';
+              } 
+              // مظهر للصناديق المميزة
+              else if (chest.type === 'special') {
+                chestBorderClass = "border-[#F5DEB3]";
+                chestIconColor = "text-[#F5DEB3]";
+                chestGlowEffect = "shadow-[0_0_10px_rgba(245,222,179,0.3)]";
+                chestBackground = chest.opened ? 'bg-[#F5DEB3]/10' : 'hover:bg-[#F5DEB3]/5 bg-[#2D1B09]';
+              }
+              
+              return (
+                <div 
+                  key={index}
+                  className={`h-32 cursor-pointer transition-all duration-300 transform ${
+                    chest.opened ? 'scale-105' : 'hover:scale-105'
+                  } ${chestBackground} border-2 ${chestBorderClass} rounded-md flex flex-col items-center justify-center relative overflow-hidden ${chestGlowEffect}`}
+                  onClick={() => !chest.opened && openTreasureChest(index)}
+                >
+                  {chest.opened ? (
+                    // صندوق مفتوح يعرض المكافأة
+                    <div className="flex flex-col items-center gap-1">
+                      {chest.type === 'golden' ? (
+                        <Sparkles className={`h-12 w-12 ${chestIconColor} animate-pulse`} />
+                      ) : (
+                        <GiftIcon className={`h-12 w-12 ${chestIconColor}`} />
+                      )}
+                      <span className={`font-bold text-xl ${chest.type === 'golden' ? 'text-[#FFD700]' : 'text-white'}`}>
+                        {chest.reward}
+                      </span>
+                    </div>
+                  ) : (
+                    // صندوق مغلق
+                    <div className="flex flex-col items-center">
+                      {chest.type === 'golden' ? (
+                        <>
+                          <Gift className={`h-16 w-16 ${chestIconColor}`} />
+                          <div className="absolute inset-0 bg-[#FFD700]/5 animate-pulse-slow"></div>
+                        </>
+                      ) : chest.type === 'special' ? (
+                        <Gift className={`h-16 w-16 ${chestIconColor}`} />
+                      ) : (
+                        <Gift className={`h-16 w-16 ${chestIconColor}`} />
+                      )}
+                    </div>
+                  )}
+                  {/* تأثير لامع على الصندوق المفتوح */}
+                  {chest.opened && (
+                    <div className={`absolute inset-0 ${
+                      chest.type === 'golden' 
+                        ? 'bg-[#FFD700]/15 animate-pulse-fast' 
+                        : chest.type === 'special'
+                          ? 'bg-[#F5DEB3]/10 animate-pulse' 
+                          : 'bg-[#D4AF37]/10 animate-pulse'
+                    }`}></div>
+                  )}
+                </div>
+              );
+            })}
           </div>
           
           {/* عداد الصناديق المفتوحة والمجموع */}
