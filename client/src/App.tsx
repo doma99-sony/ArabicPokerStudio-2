@@ -43,6 +43,8 @@ import { BackgroundMusicProvider } from "@/components/background-music";
 // استيراد المكونات والأدوات الجديدة
 import { useGlobalWebSocket } from "@/hooks/use-global-websocket";
 import { useSessionManager } from "@/hooks/use-session-manager";
+import { WebSocketInitializer } from "@/components/websocket-initializer";
+import { ConnectionIndicator } from "@/components/ui/connection-indicator";
 
 
 function Router() {
@@ -173,6 +175,9 @@ function App() {
         {/* تضمين مزود الموسيقى الخلفية في جميع الحالات لضمان تشغيلها في كل الشاشات */}
         <BackgroundMusicProvider />
         
+        {/* إضافة مكون WebSocketInitializer لضمان استمرارية الاتصال في جميع الصفحات */}
+        <WebSocketInitializer />
+        
         {/* إذا كانت شاشة البداية مفعلة، اعرضها وإلا اعرض التطبيق الرئيسي */}
         {showSplash ? (
           <SplashScreen onComplete={() => {
@@ -185,6 +190,7 @@ function App() {
             <Router />
             <WelcomeMessageNotification />
             <LandscapeNotice />
+            <ConnectionIndicator />
             <Toaster />
           </>
         )}

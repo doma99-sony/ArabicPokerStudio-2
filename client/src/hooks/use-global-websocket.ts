@@ -58,10 +58,23 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
     // إذا كان الاتصال قائماً بالفعل أو في طور الاتصال، لا تفعل شيئاً
     if (connection || connecting) return;
     
+    // تخزين معرف المستخدم في localStorage للاستعادة في حالة انقطاع الاتصال
+    localStorage.setItem('userId', userId.toString());
+    
+    // إعادة تعيين عدد محاولات إعادة الاتصال عند الاتصال المتعمد
+    localStorage.setItem('wsReconnectAttempts', '0');
+    
     set({ connecting: true, userId });
     
     const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${wsProtocol}//${window.location.host}/ws?sid=${Date.now()}-${Math.random().toString(36).substring(2)}&uid=${userId}&ts=${Date.now()}`;
+    // نُضيف علامة مميزة للجلسة للتمييز بين الجلسات المختلفة
+    const sessionToken = localStorage.getItem('sessionToken') || 
+      `${Date.now()}-${Math.random().toString(36).substring(2)}`;
+    
+    // تخزين علامة الجلسة
+    localStorage.setItem('sessionToken', sessionToken);
+    
+    const wsUrl = `${wsProtocol}//${window.location.host}/ws?sid=${sessionToken}&uid=${userId}&ts=${Date.now()}`;
     
     console.log("إنشاء اتصال WebSocket عمومي جديد:", wsUrl);
     
@@ -118,16 +131,37 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
       console.log(`تم إغلاق اتصال WebSocket العمومي (كود: ${event.code})`, event.reason);
       set({ isConnected: false, connection: null });
       
-      // إعادة الاتصال تلقائياً بعد 3 ثوانٍ إذا لم يكن الإغلاق متعمداً
-      if (event.code !== 1000 && event.code !== 1001) {
-        console.log("جدولة إعادة اتصال WebSocket العمومي...");
-        setTimeout(() => {
-          const state = get();
-          if (state.userId) {
-            state.connect(state.userId);
+      // محاولة إعادة الاتصال تلقائياً بغض النظر عن سبب الإغلاق 
+      // للحفاظ على الاتصال حتى عند تغيير الصفحات
+      console.log("جدولة إعادة اتصال WebSocket العمومي...");
+      
+      // استراتيجية إعادة اتصال تدريجية - زيادة فترة الانتظار مع المحاولات
+      let reconnectAttempts = localStorage.getItem('wsReconnectAttempts') 
+        ? parseInt(localStorage.getItem('wsReconnectAttempts') || '0') 
+        : 0;
+      
+      // زيادة عدد المحاولات وتخزينه
+      reconnectAttempts++;
+      localStorage.setItem('wsReconnectAttempts', reconnectAttempts.toString());
+      
+      // حساب فترة الانتظار بين المحاولات (1-10 ثوانٍ)
+      const delay = Math.min(3000 * Math.pow(1.2, Math.min(reconnectAttempts, 5)), 10000);
+      
+      setTimeout(() => {
+        const state = get();
+        if (state.userId) {
+          console.log(`محاولة إعادة اتصال #${reconnectAttempts}`);
+          state.connect(state.userId);
+        } else {
+          // استعادة معرف المستخدم من التخزين المحلي إذا كان متاحاً
+          const storedUserId = localStorage.getItem('userId');
+          if (storedUserId) {
+            const userId = parseInt(storedUserId);
+            console.log(`استعادة اتصال للمستخدم ${userId} من التخزين المحلي`);
+            state.connect(userId);
           }
-        }, 3000);
-      }
+        }
+      }, delay);
     };
     
     ws.onerror = (event) => {
@@ -146,6 +180,11 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
         console.error("خطأ أثناء إغلاق اتصال WebSocket:", error);
       }
     }
+    
+    // مسح معلومات المستخدم من التخزين المحلي عند تسجيل الخروج المتعمد
+    localStorage.removeItem('userId');
+    localStorage.removeItem('wsReconnectAttempts');
+    // لا نقوم بمسح sessionToken للحفاظ على معرف الجلسة للتتبع
     
     set({ isConnected: false, connection: null, userId: null });
   },

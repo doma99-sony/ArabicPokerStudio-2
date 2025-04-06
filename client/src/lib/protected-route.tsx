@@ -3,6 +3,7 @@ import { Loader2 } from "lucide-react";
 import { Redirect, Route, useLocation } from "wouter";
 import { useEffect } from "react";
 import { redirectToHome } from "@/components/navigation/home-redirect";
+import { useGlobalWebSocket } from "@/hooks/use-global-websocket";
 
 export function ProtectedRoute({
   path,
@@ -13,6 +14,7 @@ export function ProtectedRoute({
 }) {
   const { user, isLoading, loginGuestMutation } = useAuth();
   const [location] = useLocation();
+  const { connect, isConnected } = useGlobalWebSocket();
   
   // حفظ المسار الحالي في حال الانتقال إلى صفحة تسجيل الدخول
   useEffect(() => {
@@ -33,6 +35,14 @@ export function ProtectedRoute({
       }
     }
   }, [user, isLoading, location, loginGuestMutation]);
+  
+  // ضمان استمرارية اتصال WebSocket بعد تسجيل الدخول وفي كل الصفحات المحمية
+  useEffect(() => {
+    if (user && user.id && !isConnected) {
+      console.log(`إنشاء/إعادة اتصال WebSocket للمستخدم ${user.id} في الصفحة المحمية: ${path}`);
+      connect(user.id);
+    }
+  }, [user, isConnected, connect, path]);
   
   // عرض حالة التحميل
   if (isLoading || loginGuestMutation.isPending) {

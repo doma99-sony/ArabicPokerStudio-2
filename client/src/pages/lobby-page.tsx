@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { useWebSocket } from "@/hooks/use-websocket-simplified";
+import { useGlobalWebSocket } from "@/hooks/use-global-websocket";
 import { GameType } from "@shared/types";
 import { ChatBox } from "@/components/lobby/chat-box";
 import { Button } from "@/components/ui/button";
@@ -24,19 +25,30 @@ export default function LobbyPage() {
   
   // استخدام WebSocket لاتصال مستمر مع الخادم
   const ws = useWebSocket();
+  const globalWs = useGlobalWebSocket();
   
   // تأكد من إنشاء اتصال WebSocket جديد عند تحميل الصفحة
   useEffect(() => {
-    if (user && ws.status !== 'open') {
-      console.log('إنشاء اتصال WebSocket في الصفحة الرئيسية');
-      ws.reconnect(); // استخدام reconnect من النسخة المبسطة
+    if (user) {
+      // استخدام اتصال عمومي مستمر مع نظام WebSocket المركزي
+      if (!globalWs.isConnected && user.id) {
+        console.log('إنشاء اتصال WebSocket عمومي في الصفحة الرئيسية');
+        globalWs.connect(user.id);
+      }
+      
+      // استخدام الاتصال المحلي المبسط للشات وأدوات الصفحة الرئيسية
+      if (ws.status !== 'open') {
+        console.log('إنشاء اتصال WebSocket مبسط إضافي في الصفحة الرئيسية');
+        ws.reconnect(); // استخدام reconnect من النسخة المبسطة
+      }
     }
     
     // تنظيف عند مغادرة الصفحة، نحتفظ بالاتصال مفتوحاً
     return () => {
       console.log('الاحتفاظ باتصال WebSocket عند مغادرة الصفحة الرئيسية');
+      // لا نقوم بإغلاق الاتصال عند مغادرة الصفحة
     };
-  }, [user, ws]);
+  }, [user, ws, globalWs]);
 
   // التحكم في كتم/تشغيل الصوت
   const toggleMute = () => {
