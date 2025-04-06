@@ -18,6 +18,7 @@ const ArabicRocketPage = () => {
   
   // حالة اللعبة
   const [isGameActive, setIsGameActive] = useState(false);
+  const [isBettingPhase, setIsBettingPhase] = useState(true); // متغير جديد لتتبع ما إذا كانت مرحلة الرهان نشطة
   const [countdown, setCountdown] = useState(0);
   const [currentMultiplier, setCurrentMultiplier] = useState(1.00);
   const [maxMultiplier, setMaxMultiplier] = useState(0); // نقطة الانفجار
@@ -78,6 +79,7 @@ const ArabicRocketPage = () => {
     // إعادة تعيين حالة اللعبة بالكامل
     setExploded(false);
     setIsGameActive(false);
+    setIsBettingPhase(true); // تمكين مرحلة الرهان
     setCurrentMultiplier(1.00);
     setHasBet(false);
     setHasWithdrawn(false);
@@ -90,9 +92,9 @@ const ArabicRocketPage = () => {
     console.log("قيمة الانفجار المحددة للجولة:", crashValue);
     setMaxMultiplier(crashValue);
     
-    // بدء العد التنازلي للجولة التالية (5 ثوانٍ)
+    // بدء العد التنازلي للجولة التالية (10 ثوانٍ)
     // استخدام متغير خارج الدالة للتأكد من التحديث المناسب
-    let count = 5;
+    let count = 10; // تعديل وقت العد التنازلي إلى 10 ثواني
     setCountdown(count);
     
     // إيقاف أي عدادات سابقة لمنع المشاكل
@@ -166,6 +168,7 @@ const ArabicRocketPage = () => {
   // وظيفة بدء اللعبة
   const startGame = () => {
     setIsGameActive(true);
+    setIsBettingPhase(false); // إيقاف مرحلة الرهان عند بدء اللعبة الفعلية
     
     // اضافة لاعبين افتراضيين
     setActivePlayers([
@@ -384,15 +387,19 @@ const ArabicRocketPage = () => {
       // رسم الانفجار الرئيسي
       drawExplosion(ctx, canvas.width / 2, canvas.height / 2, explosionSize);
     } else {
-      // حساب موقع الصاروخ مع مسار منحني وحركة تمايل للصاروخ
+      // حساب موقع الصاروخ مع مسار منحني وحركة تمايل للصاروخ 
+      // تعديل الموضع ليكون أكثر تطابقاً مع الصورة المرجعية - موضع جانبي
       const heightProgress = Math.min((multiplier - 1) / 6, 0.85); // الارتفاع الأقصى قبل نهاية الشاشة
-      const maxHeight = canvas.height - 150;
+      const maxHeight = canvas.height - 120;
       const yPosition = canvas.height - (heightProgress * maxHeight) - 50;
       
       // حركة تمايل للصاروخ
-      const wobbleAmount = Math.min(5, multiplier / 3); // زيادة التمايل مع زيادة المضاعف
-      const wobble = Math.sin(currentStep / 8) * wobbleAmount;
-      const xPosition = canvas.width / 2 + wobble;
+      const wobbleAmount = Math.min(4, multiplier / 4); // زيادة التمايل مع زيادة المضاعف (أقل من السابق)
+      const wobble = Math.sin(currentStep / 10) * wobbleAmount;
+      
+      // تغيير موضع الصاروخ ليكون بالثلث الأول من العرض (أكثر جانبية)
+      // بناء على الصورة المرجعية التي تظهر الصاروخ يتحرك بشكل جانبي وليس وسط الشاشة
+      const xPosition = (canvas.width / 3) + wobble;
       
       // تأثيرات إضافية للسرعات العالية
       if (multiplier > 5) {
@@ -948,13 +955,33 @@ const ArabicRocketPage = () => {
   
   // وظيفة وضع الرهان - محسنة للتأكد من عملها بشكل صحيح
   const handlePlaceBet = () => {
-    console.log("محاولة وضع رهان. حالة اللعبة:", isGameActive);
+    console.log("محاولة وضع رهان. حالة اللعبة:", isGameActive, "حالة الرهان:", isBettingPhase);
     
-    // التحقق من الوقت المناسب للمراهنة
-    if (!isGameActive) {
+    // التحقق مما إذا كان وقت الرهان
+    if (!isBettingPhase) {
+      toast({
+        title: "انتهى وقت المراهنة",
+        description: "يمكنك وضع الرهان فقط خلال مرحلة العد التنازلي قبل بدء اللعبة",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // التحقق من حالة اللعبة
+    if (isGameActive) {
+      toast({
+        title: "اللعبة قيد التشغيل",
+        description: "لا يمكن وضع رهان أثناء تشغيل اللعبة، انتظر الجولة التالية",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // التحقق مما إذا كانت الجولة على وشك البدء
+    if (countdown <= 0) {
       toast({
         title: "انتظر بدء الجولة التالية",
-        description: "الجولة التالية ستبدأ خلال " + countdown + " ثواني",
+        description: "الجولة التالية ستبدأ قريباً",
         variant: "destructive"
       });
       return;
@@ -1081,6 +1108,16 @@ const ArabicRocketPage = () => {
   
   // وظيفة سحب الأرباح - محسنة كما في 1xBet
   const handleWithdraw = () => {
+    // التحقق من أن اللعبة نشطة وليست في مرحلة الرهان
+    if (isBettingPhase) {
+      toast({
+        title: "اللعبة في مرحلة المراهنة",
+        description: "لا يمكن سحب الأرباح خلال مرحلة المراهنة",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     // التحقق من شروط السحب
     if (!isGameActive || !hasBet || hasWithdrawn) {
       if (!isGameActive) {
@@ -1262,6 +1299,27 @@ const ArabicRocketPage = () => {
           className="w-full h-full absolute inset-0"
         ></canvas>
         
+        {/* قائمة اللاعبين المنسحبين على الجانب الأيمن - جديد */}
+        <div className="absolute right-4 top-4 bottom-4 w-60 flex flex-col gap-2 overflow-y-auto z-10">
+          <div className="bg-gradient-to-r from-[rgba(128,0,255,0.7)] to-purple-800 rounded-lg p-2 shadow-lg mb-2">
+            <div className="text-center text-white font-bold">اللاعبون المنسحبون</div>
+          </div>
+          
+          {activePlayers.filter(player => player.cashoutMultiplier !== null).map((player, idx) => (
+            <div key={idx} className="bg-gradient-to-r from-[rgba(0,200,100,0.7)] to-green-800 rounded-lg p-2 shadow-lg flex items-center gap-2">
+              <div className="w-10 h-10 rounded-full bg-green-900 flex items-center justify-center text-white font-bold">
+                {player.username.charAt(0)}
+              </div>
+              <div className="flex-1">
+                <div className="text-white font-bold">{player.username}</div>
+                <div className="text-xs text-green-300">
+                  × {player.cashoutMultiplier?.toFixed(2)} • {player.profit && player.profit > 0 ? '+' : ''}{player.profit}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        
         {/* الهاشتاج الجانبي للاعبين */}
         <div className="absolute left-4 top-4 bottom-4 w-60 flex flex-col gap-2 overflow-y-auto">
           {/* Active player bets */}
@@ -1327,8 +1385,11 @@ const ArabicRocketPage = () => {
           
           {/* Display current multiplier in the center */}
           {isGameActive && (
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-8xl font-bold text-white">
-              {currentMultiplier.toFixed(2)}<span className="text-blue-400">x</span>
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20">
+              <div className="text-8xl font-bold text-white bg-black/30 backdrop-blur-sm px-6 py-3 rounded-2xl shadow-xl">
+                <span className="text-yellow-400">{currentMultiplier.toFixed(2)}</span>
+                <span className="text-blue-400">x</span>
+              </div>
             </div>
           )}
           
@@ -1346,6 +1407,14 @@ const ArabicRocketPage = () => {
                 <div className="text-xl text-gray-300">
                   {exploded ? "انتظر الجولة التالية..." : "الجولة التالية تبدأ قريباً"}
                 </div>
+                
+                {isBettingPhase && !exploded && (
+                  <div className="mt-4">
+                    <div className="bg-green-600 text-white px-4 py-2 rounded-full animate-pulse font-bold">
+                      وقت المراهنة! ضع رهانك الآن
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -1376,8 +1445,9 @@ const ArabicRocketPage = () => {
               <button 
                 className="bg-gradient-to-b from-yellow-400 to-yellow-600 text-black font-bold py-2 px-4 rounded-md shadow-md"
                 onClick={handlePlaceBet}
+                disabled={!isBettingPhase || isGameActive || hasBet}
               >
-                BET
+                الرهان
               </button>
             </div>
           </div>
@@ -1401,10 +1471,11 @@ const ArabicRocketPage = () => {
             </div>
             <div className="w-24 bg-gradient-to-b from-blue-600 to-blue-800 flex items-center justify-center">
               <button 
-                className="bg-gradient-to-b from-yellow-400 to-yellow-600 text-black font-bold py-2 px-4 rounded-md shadow-md"
+                className="bg-gradient-to-b from-green-400 to-green-600 text-black font-bold py-2 px-4 rounded-md shadow-md"
                 onClick={handleWithdraw}
+                disabled={!isGameActive || hasWithdrawn}
               >
-                BET
+                سحب
               </button>
             </div>
           </div>
