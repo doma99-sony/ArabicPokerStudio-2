@@ -613,19 +613,39 @@ export default function AuthPage() {
   }, [controls]);
 
   return (
-    <div className="fixed inset-0 overflow-hidden bg-black flex items-center justify-center">
-      {/* فيديو خلفية مع طبقة داكنة */}
-      <div className="absolute inset-0 overflow-hidden z-0">
+    <div className="fixed inset-0 overflow-hidden flex items-center justify-center bg-cover bg-center" 
+         style={{ backgroundImage: "url('/images/egyptian-background.jpg')" }}>
+      
+      {/* خلفية مع تأثيرات متعددة */}
+      <div className="absolute inset-0 z-0 overflow-hidden">
+        {/* فيديو خلفية مع طبقات متعددة للحصول على تأثير عصري وفاخر */}
         <video 
           autoPlay 
           loop 
           muted 
           playsInline
-          className="absolute w-full h-full object-cover opacity-20"
+          className="absolute w-full h-full object-cover scale-110 transform-gpu"
+          style={{ filter: "brightness(0.4) saturate(1.2) contrast(1.3)" }}
         >
-          <source src="/assets/background-video.mp4" type="video/mp4" />
+          <source src="/assets/backgrounds/poker-background.mp4" type="video/mp4" />
         </video>
-        <div className="absolute inset-0 bg-black/70"></div>
+        
+        {/* طبقات تأثير متعددة */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0A3A2A]/70 via-black/80 to-[#0A3A2A]/70 mix-blend-multiply"></div>
+        <div className="absolute inset-0 bg-[url('/assets/backgrounds/gradient-poker-table-background_23-2151085419 (1).jpg')] bg-cover opacity-20 mix-blend-soft-light"></div>
+        
+        {/* إضافة سحب متحركة */}
+        <div className="absolute inset-0 bg-[url('/images/fog-overlay.png')] bg-cover opacity-10 mix-blend-overlay animate-float-slow pointer-events-none"></div>
+        
+        {/* توهجات ضوئية */}
+        <div className="absolute top-1/3 left-1/4 w-96 h-96 rounded-full bg-[#D4AF37]/10 blur-3xl animate-pulse-slow opacity-60 mix-blend-screen"></div>
+        <div className="absolute bottom-1/3 right-1/4 w-96 h-96 rounded-full bg-[#D4AF37]/10 blur-3xl animate-pulse-slow opacity-50 mix-blend-screen" style={{ animationDelay: "2s" }}></div>
+        <div className="absolute top-1/4 right-1/4 w-64 h-64 rounded-full bg-[#D4AF37]/10 blur-3xl animate-pulse-slow opacity-60 mix-blend-screen" style={{ animationDelay: "4s" }}></div>
+        <div className="absolute bottom-1/4 left-1/4 w-64 h-64 rounded-full bg-[#D4AF37]/10 blur-3xl animate-pulse-slow opacity-50 mix-blend-screen" style={{ animationDelay: "3s" }}></div>
+        
+        {/* تدرجات إضافية */}
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-black/90 to-transparent h-32 pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/90 to-transparent h-32 pointer-events-none"></div>
       </div>
       
       {/* صورة كازينو مستقبلية على الجانب الأيسر - خفية على الموبايل */}

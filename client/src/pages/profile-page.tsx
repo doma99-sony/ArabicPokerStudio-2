@@ -167,9 +167,26 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen py-2 bg-deepBlack">
-      <div className="container mx-auto px-2">
-        <div className="max-w-4xl mx-auto bg-slate/20 rounded-lg overflow-hidden border border-gold/10">
+    <div className="min-h-screen py-2 bg-cover bg-center" 
+         style={{ backgroundImage: "url('/images/egyptian-background.jpg')" }}>
+      {/* خلفية مشابهة للصفحة الرئيسية لكن مع تأثيرات مختلفة */}
+      <div className="fixed inset-0 z-0 overflow-hidden">
+        {/* طبقات تأثير متعددة للحصول على مظهر محترف */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0A3A2A]/70 via-black/80 to-[#0A3A2A]/70 mix-blend-multiply"></div>
+        <div className="absolute inset-0 bg-[url('/assets/backgrounds/gradient-poker-table-background_23-2151085419 (1).jpg')] bg-cover opacity-20 mix-blend-soft-light"></div>
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-black/80 to-transparent h-32 pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 to-transparent h-32 pointer-events-none"></div>
+        
+        {/* إضافة سحب متحركة */}
+        <div className="absolute inset-0 bg-[url('/images/fog-overlay.png')] bg-cover opacity-10 mix-blend-overlay animate-float-slow pointer-events-none"></div>
+        
+        {/* إضافة تلميعات ضوئية متحركة */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-[#D4AF37]/10 blur-3xl animate-pulse-slow opacity-60 mix-blend-screen"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 rounded-full bg-[#D4AF37]/10 blur-3xl animate-pulse-slow opacity-50 mix-blend-screen" style={{ animationDelay: "2s" }}></div>
+      </div>
+      
+      <div className="container mx-auto px-2 relative z-10">
+        <div className="max-w-4xl mx-auto bg-slate-900/40 backdrop-blur-sm rounded-lg overflow-hidden border border-[#D4AF37]/20 shadow-xl shadow-black/50">
           {/* صورة الغلاف */}
           <div className="relative h-48 md:h-64 overflow-hidden">
             {profile.coverPhoto ? (

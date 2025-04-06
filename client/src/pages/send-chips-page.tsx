@@ -322,9 +322,27 @@ export default function SendChipsPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-cover bg-center relative"
+         style={{ backgroundImage: "url('/images/egyptian-background.jpg')" }}>
+      
+      {/* خلفية مشابهة للصفحات الأخرى لكن مع تأثيرات مختلفة */}
+      <div className="fixed inset-0 z-0 overflow-hidden">
+        {/* طبقات تأثير متعددة للحصول على مظهر محترف */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0A3A2A]/70 via-black/80 to-[#0A3A2A]/70 mix-blend-multiply"></div>
+        <div className="absolute inset-0 bg-[url('/assets/backgrounds/gradient-poker-table-background_23-2151085419 (1).jpg')] bg-cover opacity-20 mix-blend-soft-light"></div>
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-black/80 to-transparent h-32 pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 to-transparent h-32 pointer-events-none"></div>
+        
+        {/* إضافة سحب متحركة */}
+        <div className="absolute inset-0 bg-[url('/images/fog-overlay.png')] bg-cover opacity-10 mix-blend-overlay animate-float-slow pointer-events-none"></div>
+        
+        {/* إضافة تلميعات ضوئية متحركة */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-[#D4AF37]/10 blur-3xl animate-pulse-slow opacity-60 mix-blend-screen"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 rounded-full bg-[#D4AF37]/10 blur-3xl animate-pulse-slow opacity-50 mix-blend-screen" style={{ animationDelay: "2s" }}></div>
+      </div>
+      
       {/* Header */}
-      <div className="bg-gradient-to-b from-[#1B4D3E] to-black/90 p-4 flex items-center justify-between">
+      <div className="relative z-10 bg-gradient-to-b from-[#1B4D3E]/90 to-black/90 p-4 flex items-center justify-between backdrop-blur-sm border-b border-[#D4AF37]/20 shadow-md">
         <div className="flex items-center">
           <Button 
             variant="ghost" 
