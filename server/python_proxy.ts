@@ -18,28 +18,41 @@ const PYTHON_SERVER_URL = `http://${PYTHON_SERVER_HOST}:${PYTHON_SERVER_PORT}`;
 let pythonProcess: any = null;
 
 export function setupPythonProxy(app: any) {
-  const router = app.Router ? app.Router() : app;
+  const router = Router();
   // محاولة تشغيل خادم بايثون
   startPythonServer();
 
   // مسار API للتحقق من حالة الخادم
-  router.get('/api/egypt-rocket/server-status', (req: Request, res: Response) => {
-    res.json({
-      running: isPythonServerRunning(),
-      port: PYTHON_SERVER_PORT,
-      url: PYTHON_SERVER_URL
-    });
+  router.get('/api/egypt-rocket/status', (req: Request, res: Response) => {
+    const running = isPythonServerRunning();
+    console.log(`Checking Python server status: ${running ? 'running' : 'not running'}`);
+    
+    if (running) {
+      return res.json({
+        running: true,
+        port: PYTHON_SERVER_PORT,
+        url: PYTHON_SERVER_URL
+      });
+    } else {
+      return res.status(503).json({
+        running: false,
+        message: 'خادم بايثون غير متاح حالياً'
+      });
+    }
   });
 
   // وسيط لمسارات الـ API الأخرى
   router.use('/api/egypt-rocket', (req: Request, res: Response) => {
     // نوجه جميع الطلبات إلى خادم بايثون
     if (!isPythonServerRunning()) {
+      console.log('Python server not running, returning 503');
       return res.status(503).json({
         error: 'Python server is not running',
         message: 'خادم بايثون غير متاح حالياً'
       });
     }
+
+    console.log(`Proxying request to Python server: ${req.method} ${req.url}`);
 
     // إنشاء الطلب الموجه
     const proxyReq = http.request({
@@ -76,6 +89,9 @@ export function setupPythonProxy(app: any) {
     }
   });
 
+  // إضافة المسارات إلى التطبيق
+  app.use(router);
+
   // وسيط لـ WebSocket
   const websocketProxy = (server: any) => {
     // إنشاء خادم WebSocket
@@ -83,22 +99,33 @@ export function setupPythonProxy(app: any) {
     
     // معالجة ترقية الاتصال إلى WebSocket
     server.on('upgrade', (request: any, socket: any, head: any) => {
-      const pathname = new URL(request.url, `http://${request.headers.host}`).pathname;
-      
-      // معالجة طلبات WebSocket الخاصة بلعبة صاروخ مصر
-      if (pathname === '/ws/egypt-rocket') {
-        wss.handleUpgrade(request, socket, head, (ws: any) => {
-          wss.emit('connection', ws, request);
-        });
+      // التأكد من وجود العنوان
+      if (!request.url) {
+        console.error('Invalid request URL in upgrade event');
+        socket.destroy();
+        return;
+      }
+
+      try {
+        const pathname = new URL(request.url, `http://${request.headers.host}`).pathname;
+        
+        // معالجة طلبات WebSocket الخاصة بلعبة صاروخ مصر
+        if (pathname === '/ws/egypt-rocket') {
+          console.log('Upgrading connection to WebSocket for Egypt Rocket');
+          
+          wss.handleUpgrade(request, socket, head, (ws: any) => {
+            wss.emit('connection', ws, request);
+          });
+        }
+      } catch (error) {
+        console.error('Error in WebSocket upgrade handling:', error);
+        socket.destroy();
       }
     });
     
     // معالجة الاتصالات الجديدة
     wss.on('connection', (ws: any, request: any) => {
-      console.log('اتصال WebSocket جديد للعبة صاروخ مصر');
-      
-      // إعادة توجيه اتصال WebSocket إلى خادم بايثون
-      // في هذه المرحلة ستكون البيانات مخزنة محلياً، لاحقاً سيتم ربطها بخادم بايثون
+      console.log('New WebSocket connection for Egypt Rocket game');
       
       // إرسال بيانات حالة اللعبة الافتراضية
       const initialGameState = {
@@ -112,18 +139,19 @@ export function setupPythonProxy(app: any) {
         }
       };
       
-      ws.send(JSON.stringify(initialGameState));
+      try {
+        ws.send(JSON.stringify(initialGameState));
+      } catch (error) {
+        console.error('Error sending initial game state:', error);
+      }
       
       // استماع للرسائل من العميل
       ws.on('message', (message: any) => {
         try {
-          const data = JSON.parse(message);
-          console.log('رسالة واردة من العميل:', data);
+          const data = JSON.parse(message.toString());
+          console.log('Message from client:', data);
           
           // معالجة الرسائل من العميل وفقاً لنوعها
-          // هنا سيتم إضافة المنطق الكامل للعبة أو ربطها بخادم بايثون
-          
-          // للاختبار، نرسل استجابة بسيطة
           if (data.type === 'place_bet') {
             ws.send(JSON.stringify({
               type: 'bet_response',
@@ -138,13 +166,18 @@ export function setupPythonProxy(app: any) {
             }));
           }
         } catch (error) {
-          console.error('خطأ في معالجة رسالة WebSocket:', error);
+          console.error('Error processing WebSocket message:', error);
         }
       });
       
       // معالجة إغلاق الاتصال
       ws.on('close', () => {
-        console.log('تم إغلاق اتصال WebSocket للعبة صاروخ مصر');
+        console.log('WebSocket connection closed for Egypt Rocket game');
+      });
+
+      // معالجة الأخطاء
+      ws.on('error', (error: any) => {
+        console.error('WebSocket error:', error);
       });
     });
     
@@ -157,19 +190,36 @@ export function setupPythonProxy(app: any) {
 // تشغيل خادم بايثون
 function startPythonServer() {
   if (isPythonServerRunning()) {
+    console.log('Python server already running, skipping start');
     return;
   }
 
   try {
-    // استخدام سكريبت shell لتشغيل خادم بايثون
-    const scriptPath = path.join(process.cwd(), 'start-python-server.sh');
-
-    console.log(`Starting Python server with script: ${scriptPath}`);
+    console.log('Starting Python server...');
     
-    pythonProcess = spawn('/bin/bash', [scriptPath], {
-      env: { ...process.env, ROCKET_PORT: PYTHON_SERVER_PORT.toString() },
-      stdio: ['inherit', 'inherit', 'inherit']
+    // تشغيل خادم بايثون مباشرة
+    pythonProcess = spawn('python3', ['-m', 'python.egypt_rocket_server'], {
+      env: { 
+        ...process.env, 
+        ROCKET_PORT: PYTHON_SERVER_PORT.toString(),
+        PYTHONUNBUFFERED: '1'
+      },
+      stdio: ['ignore', 'pipe', 'pipe']
     });
+
+    // سجل الإخراج
+    if (pythonProcess.stdout) {
+      pythonProcess.stdout.on('data', (data) => {
+        console.log(`Python server output: ${data.toString().trim()}`);
+      });
+    }
+
+    // سجل الأخطاء
+    if (pythonProcess.stderr) {
+      pythonProcess.stderr.on('data', (data) => {
+        console.error(`Python server error: ${data.toString().trim()}`);
+      });
+    }
 
     pythonProcess.on('error', (err: Error) => {
       console.error('Failed to start Python server:', err);
@@ -184,27 +234,37 @@ function startPythonServer() {
     // تأكد من إغلاق عملية بايثون عند إيقاف تشغيل الخادم الرئيسي
     process.on('exit', () => {
       if (pythonProcess) {
+        console.log('Killing Python server process on application exit');
         pythonProcess.kill();
       }
     });
+    
+    console.log('Python server process started');
   } catch (error) {
     console.error('Error starting Python server:', error);
+    pythonProcess = null;
   }
 }
 
 // التحقق من حالة خادم بايثون
 function isPythonServerRunning(): boolean {
-  return pythonProcess !== null && !pythonProcess.killed;
+  const isRunning = pythonProcess !== null && !pythonProcess.killed;
+  console.log(`Checking if Python server is running: ${isRunning}`);
+  return isRunning;
 }
 
 // دالة لإعادة تشغيل خادم بايثون
 export function restartPythonServer() {
+  console.log('Restarting Python server...');
+  
   if (pythonProcess) {
+    console.log('Killing existing Python server process');
     pythonProcess.kill();
     pythonProcess = null;
   }
   
   setTimeout(() => {
+    console.log('Starting new Python server process');
     startPythonServer();
   }, 1000);
 }
