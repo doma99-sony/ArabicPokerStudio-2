@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, hashPassword } from "./auth";
 import { setupPokerGame, pokerModule } from "./poker";
+import { setupPythonProxy } from "./python_proxy";
 import { z } from "zod";
 import fileUpload from "express-fileupload";
 
@@ -27,6 +28,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Set up poker game routes and WebSocket server
   const httpServer = createServer(app);
   setupPokerGame(app, httpServer);
+  
+  // Set up Python proxy for Egypt Rocket game
+  const pythonProxy = setupPythonProxy(app);
+  
+  // Set up WebSocket proxy for Egypt Rocket game
+  if (pythonProxy && pythonProxy.websocketProxy) {
+    pythonProxy.websocketProxy(httpServer);
+    console.log("تم إعداد وسيط WebSocket للعبة صاروخ مصر");
+  }
   
   // API endpoints
   
