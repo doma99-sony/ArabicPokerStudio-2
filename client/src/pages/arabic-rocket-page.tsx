@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Rocket, TrendingUp, Clock, Users, BarChart3, ChevronRight, DollarSign, Award } from "lucide-react";
+import { ArrowLeft, Rocket, TrendingUp, Clock, Users, BarChart3, ChevronRight, DollarSign, Award, Home, Plus, Minus, FastForward, RefreshCw, RotateCw, Info } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import ChatBox from "../components/chat-box";
@@ -28,6 +28,7 @@ const ArabicRocketPage = () => {
   const [hasWithdrawn, setHasWithdrawn] = useState(false);
   const [potentialWin, setPotentialWin] = useState(0);
   const [exploded, setExploded] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0); // متغير لتتبع خطوات الرسم للتأثيرات البصرية
   
   // بيانات اللاعبين
   const [activePlayers, setActivePlayers] = useState<Array<{
@@ -81,6 +82,7 @@ const ArabicRocketPage = () => {
     setHasBet(false);
     setHasWithdrawn(false);
     setPotentialWin(0);
+    setCurrentStep(0); // إعادة تعيين خطوة الرسم
     
     // توليد قيمة انفجار جديدة لهذه الجولة
     // استخدام الخوارزمية المحسنة التي تشبه 1xBet
@@ -268,6 +270,9 @@ const ArabicRocketPage = () => {
       });
     }
     
+    // زيادة خطوة الرسم لتحريك التأثيرات البصرية
+    setCurrentStep(prev => prev + 1);
+    
     // رسم الصاروخ والخلفية
     drawRocket(multiplier);
     
@@ -307,158 +312,638 @@ const ArabicRocketPage = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     
+    // حفظ حالة الكانفاس
+    ctx.save();
+    
     // تنظيف الكانفاس
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // رسم الخلفية (تم تغيير الألوان لتكون أكثر وضوحاً)
-    const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    gradient.addColorStop(0, "#0F2040"); // لون أزرق داكن جديد للجزء العلوي
-    gradient.addColorStop(1, "#1E3050"); // لون أزرق متوسط جديد للجزء السفلي
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    // إضافة نجوم في الخلفية
+    // رسم النجوم في الخلفية (هذه الوظيفة الآن تحتوي على رسم الخلفية)
     drawStars(ctx, canvas.width, canvas.height);
     
+    // كود مسار الحركة في الخلفية
+    if (!exploded && multiplier > 1.5) {
+      // رسم مسار متوهج للصاروخ
+      const pathProgress = Math.min((multiplier - 1) / 10, 1);
+      const pathLength = Math.max(50, pathProgress * (canvas.height - 150));
+      
+      // تدرج لوني للمسار
+      const pathGradient = ctx.createLinearGradient(
+        canvas.width / 2, canvas.height,
+        canvas.width / 2, canvas.height - pathLength
+      );
+      pathGradient.addColorStop(0, 'rgba(150, 100, 255, 0.05)');
+      pathGradient.addColorStop(1, 'rgba(150, 100, 255, 0.01)');
+      
+      // رسم مسار عريض خفيف خلف الصاروخ
+      ctx.fillStyle = pathGradient;
+      ctx.beginPath();
+      ctx.ellipse(
+        canvas.width / 2, canvas.height - pathLength / 2,
+        40 + (multiplier * 5), pathLength / 2,
+        0, 0, Math.PI * 2
+      );
+      ctx.fill();
+    }
+    
     if (exploded) {
-      // رسم الانفجار
-      drawExplosion(ctx, canvas.width / 2, canvas.height / 2, 50 + Math.random() * 30);
+      // رسم الانفجار مع تأثيرات متغيرة
+      const baseSize = 80;
+      const pulseFactor = 1 + Math.sin(currentStep / 7) * 0.1;
+      const explosionSize = baseSize * pulseFactor + Math.min(100, currentStep / 2);
+      
+      // إضافة تأثير توهج حول الانفجار
+      const explosionGlow = ctx.createRadialGradient(
+        canvas.width / 2, canvas.height / 2, 0,
+        canvas.width / 2, canvas.height / 2, explosionSize * 2
+      );
+      explosionGlow.addColorStop(0, 'rgba(255, 50, 0, 0.3)');
+      explosionGlow.addColorStop(0.4, 'rgba(255, 0, 0, 0.1)');
+      explosionGlow.addColorStop(1, 'rgba(100, 0, 0, 0)');
+      
+      ctx.fillStyle = explosionGlow;
+      ctx.beginPath();
+      ctx.arc(canvas.width / 2, canvas.height / 2, explosionSize * 2, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // رسم موجات صدمة متحركة
+      const shockwaveCount = 3;
+      for (let i = 0; i < shockwaveCount; i++) {
+        const waveDelay = i * 20;
+        const waveProgress = Math.max(0, Math.min(1, (currentStep - waveDelay) / 60));
+        const waveSize = waveProgress * explosionSize * 1.5;
+        const waveOpacity = Math.max(0, 0.7 - waveProgress);
+        
+        ctx.strokeStyle = `rgba(255, 200, 50, ${waveOpacity})`;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(canvas.width / 2, canvas.height / 2, waveSize, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      
+      // رسم الانفجار الرئيسي
+      drawExplosion(ctx, canvas.width / 2, canvas.height / 2, explosionSize);
     } else {
-      // حساب موقع الصاروخ (يتحرك من الأسفل إلى الأعلى)
-      const progress = Math.min((multiplier - 1) / 4, 1); // نسبة التقدم (1x - 5x)
-      const yPosition = canvas.height - (progress * (canvas.height - 100));
+      // حساب موقع الصاروخ مع مسار منحني وحركة تمايل للصاروخ
+      const heightProgress = Math.min((multiplier - 1) / 6, 0.85); // الارتفاع الأقصى قبل نهاية الشاشة
+      const maxHeight = canvas.height - 150;
+      const yPosition = canvas.height - (heightProgress * maxHeight) - 50;
+      
+      // حركة تمايل للصاروخ
+      const wobbleAmount = Math.min(5, multiplier / 3); // زيادة التمايل مع زيادة المضاعف
+      const wobble = Math.sin(currentStep / 8) * wobbleAmount;
+      const xPosition = canvas.width / 2 + wobble;
+      
+      // تأثيرات إضافية للسرعات العالية
+      if (multiplier > 5) {
+        // إضافة تأثير انحناء الضوء حول الصاروخ
+        const speedStreaks = 12;
+        const streakLength = multiplier * 4;
+        
+        ctx.lineWidth = 1;
+        ctx.globalAlpha = 0.3;
+        
+        for (let i = 0; i < speedStreaks; i++) {
+          const angle = (i / speedStreaks) * Math.PI * 2;
+          const streakX = xPosition + Math.cos(angle) * 40;
+          const streakY = yPosition + Math.sin(angle) * 20;
+          
+          const gradient = ctx.createLinearGradient(
+            streakX, streakY,
+            streakX + Math.cos(angle) * streakLength,
+            streakY + Math.sin(angle) * streakLength
+          );
+          gradient.addColorStop(0, 'rgba(200, 100, 255, 0.8)');
+          gradient.addColorStop(1, 'rgba(100, 50, 255, 0)');
+          
+          ctx.strokeStyle = gradient;
+          ctx.beginPath();
+          ctx.moveTo(streakX, streakY);
+          ctx.lineTo(
+            streakX + Math.cos(angle) * streakLength,
+            streakY + Math.sin(angle) * streakLength
+          );
+          ctx.stroke();
+        }
+        
+        ctx.globalAlpha = 1.0;
+      }
+      
+      // تأثير تمايل أقوى لرسم دخان الصاروخ
+      const smokeWobble = wobble * 1.2;
+      const smokeXPosition = canvas.width / 2 + smokeWobble;
+      
+      // تعديل حجم الدخان بناءً على المضاعف
+      const smokeScale = Math.min(1.5, 1 + (multiplier - 1) / 10);
+      const smokeYOffset = 40 * smokeScale;
+      
+      // حفظ وتعديل حالة السياق لتكبير الدخان
+      ctx.save();
+      ctx.translate(smokeXPosition, yPosition + smokeYOffset);
+      ctx.scale(smokeScale, smokeScale);
+      ctx.translate(-smokeXPosition, -(yPosition + smokeYOffset));
       
       // رسم دخان الصاروخ
-      drawRocketSmoke(ctx, canvas.width / 2, yPosition + 40);
+      drawRocketSmoke(ctx, smokeXPosition, yPosition + smokeYOffset);
+      
+      // استعادة حالة السياق
+      ctx.restore();
+      
+      // تطبيق دوران طفيف للصاروخ للإحساس بالحركة
+      const rotationAngle = (wobble / 30) * (Math.PI / 180 * 15); // تحويل التمايل إلى زاوية دوران
+      
+      ctx.save();
+      ctx.translate(xPosition, yPosition);
+      ctx.rotate(rotationAngle);
+      ctx.translate(-xPosition, -yPosition);
       
       // رسم الصاروخ
-      drawRocketShape(ctx, canvas.width / 2, yPosition);
+      drawRocketShape(ctx, xPosition, yPosition);
+      
+      ctx.restore();
+      
+      // إضافة تأثير توهج حول الصاروخ للسرعات العالية
+      if (multiplier > 3) {
+        const glowRadius = 30 + (multiplier * 3);
+        const glowOpacity = Math.min(0.4, (multiplier - 3) / 10);
+        
+        const glowGradient = ctx.createRadialGradient(
+          xPosition, yPosition, 0,
+          xPosition, yPosition, glowRadius
+        );
+        glowGradient.addColorStop(0, `rgba(255, 200, 0, ${glowOpacity})`);
+        glowGradient.addColorStop(1, 'rgba(255, 100, 0, 0)');
+        
+        ctx.fillStyle = glowGradient;
+        ctx.beginPath();
+        ctx.arc(xPosition, yPosition, glowRadius, 0, Math.PI * 2);
+        ctx.fill();
+      }
     }
     
-    // عرض المضاعف الحالي
-    ctx.font = 'bold 24px Arial';
-    ctx.textAlign = 'center';
-    
+    // استخدام وظيفة عرض المضاعف المحسنة
     if (exploded) {
-      ctx.fillStyle = 'red';
-      ctx.fillText(`انفجر عند ${maxMultiplier.toFixed(2)}x!`, canvas.width / 2, 40);
+      displayMultiplier(ctx, maxMultiplier, false);
     } else {
-      ctx.fillStyle = 'white';
-      ctx.fillText(`${multiplier.toFixed(2)}x`, canvas.width / 2, 40);
+      displayMultiplier(ctx, multiplier, true);
     }
+    
+    // استعادة حالة الكانفاس
+    ctx.restore();
   };
   
   // رسم شكل الصاروخ
   const drawRocketShape = (ctx: CanvasRenderingContext2D, x: number, y: number) => {
-    // جسم الصاروخ
-    ctx.fillStyle = '#E63946'; // أحمر
+    // حفظ السياق الحالي
+    ctx.save();
+    
+    // تطبيق تأثير التوهج للصاروخ
+    const gradient = ctx.createRadialGradient(x, y, 10, x, y, 80);
+    gradient.addColorStop(0, 'rgba(255, 165, 0, 0.3)');
+    gradient.addColorStop(1, 'rgba(255, 165, 0, 0)');
+    ctx.fillStyle = gradient;
     ctx.beginPath();
-    ctx.moveTo(x, y - 30); // رأس الصاروخ
-    ctx.lineTo(x + 20, y + 20); // الجانب الأيمن
-    ctx.lineTo(x - 20, y + 20); // الجانب الأيسر
+    ctx.arc(x, y, 80, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // جسم الصاروخ - كابسولة فضائية
+    ctx.fillStyle = '#FF9900'; // لون برتقالي ذهبي
+    ctx.beginPath();
+    ctx.ellipse(x, y - 10, 25, 40, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // نافذة الكابسولة
+    ctx.fillStyle = '#66CCFF'; // لون أزرق فاتح
+    ctx.beginPath();
+    ctx.ellipse(x, y - 15, 12, 20, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // تفاصيل داخل النافذة
+    ctx.fillStyle = '#FFFFFF'; // لون أبيض
+    ctx.beginPath();
+    ctx.ellipse(x, y - 15, 8, 15, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // لهب الصاروخ
+    const flameGradient = ctx.createLinearGradient(x, y + 40, x, y + 80);
+    flameGradient.addColorStop(0, '#FF3300');
+    flameGradient.addColorStop(0.5, '#FFCC00');
+    flameGradient.addColorStop(1, 'rgba(255, 255, 0, 0.5)');
+    
+    ctx.fillStyle = flameGradient;
+    ctx.beginPath();
+    ctx.moveTo(x - 15, y + 30);
+    ctx.quadraticCurveTo(x, y + 90, x + 15, y + 30);
     ctx.closePath();
     ctx.fill();
     
-    // جسم الصاروخ (الأسطوانة)
-    ctx.fillStyle = '#F1FAEE'; // أبيض مصفر
+    // أضواء وتفاصيل الصاروخ
+    // ضوء 1
+    ctx.fillStyle = '#FFFF00'; // أصفر
     ctx.beginPath();
-    ctx.rect(x - 10, y + 20, 20, 40);
+    ctx.arc(x - 18, y - 10, 3, 0, Math.PI * 2);
     ctx.fill();
     
-    // النافذة
-    ctx.fillStyle = '#A8DADC'; // أزرق فاتح
+    // ضوء 2
+    ctx.fillStyle = '#33FF33'; // أخضر
     ctx.beginPath();
-    ctx.arc(x, y + 30, 5, 0, Math.PI * 2);
+    ctx.arc(x + 18, y - 10, 3, 0, Math.PI * 2);
     ctx.fill();
     
-    // الزعانف
-    ctx.fillStyle = '#1D3557'; // أزرق داكن
-    // الزعنفة اليسرى
+    // خطوط تفاصيل الكابسولة
+    ctx.strokeStyle = '#CC6600';
+    ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(x - 10, y + 40);
-    ctx.lineTo(x - 25, y + 60);
-    ctx.lineTo(x - 10, y + 60);
-    ctx.closePath();
-    ctx.fill();
+    ctx.ellipse(x, y - 10, 25, 40, 0, 0, Math.PI * 2);
+    ctx.stroke();
     
-    // الزعنفة اليمنى
-    ctx.beginPath();
-    ctx.moveTo(x + 10, y + 40);
-    ctx.lineTo(x + 25, y + 60);
-    ctx.lineTo(x + 10, y + 60);
-    ctx.closePath();
-    ctx.fill();
-    
-    // قاعدة الصاروخ
-    ctx.fillStyle = '#457B9D'; // أزرق متوسط
-    ctx.beginPath();
-    ctx.rect(x - 15, y + 60, 30, 5);
-    ctx.fill();
+    // إعادة الحالة المحفوظة
+    ctx.restore();
   };
   
   // رسم دخان الصاروخ
   const drawRocketSmoke = (ctx: CanvasRenderingContext2D, x: number, y: number) => {
-    const particles = 10;
+    ctx.save();
     
-    for (let i = 0; i < particles; i++) {
-      const size = Math.random() * 15 + 5;
-      const xOffset = (Math.random() - 0.5) * 20;
-      const yOffset = Math.random() * 30 + 10;
+    // دخان وهالة متوهجة
+    const particlesCount = 20;
+    
+    // طبقات اللهب المتدرجة
+    const flameColors = [
+      { color: 'rgba(255, 50, 0, 0.8)', size: 10 },   // طبقة داخلية: برتقالي داكن
+      { color: 'rgba(255, 150, 0, 0.7)', size: 15 },  // وسط: برتقالي
+      { color: 'rgba(255, 220, 0, 0.5)', size: 20 },  // خارجي: أصفر
+    ];
+    
+    // رسم طبقات اللهب
+    flameColors.forEach(layer => {
+      for (let i = 0; i < particlesCount / 2; i++) {
+        const size = (Math.random() * layer.size) + 5;
+        const xOffset = (Math.random() - 0.5) * 25;
+        const yOffset = Math.random() * 40 + 25;
+        
+        ctx.fillStyle = layer.color;
+        ctx.beginPath();
+        ctx.arc(x + xOffset, y + yOffset, size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    });
+    
+    // إضافة شرر متطاير
+    for (let i = 0; i < 7; i++) {
+      const size = Math.random() * 3 + 1;
+      const angle = Math.random() * Math.PI;
+      const distance = Math.random() * 60 + 40;
+      const sparkX = x + Math.cos(angle) * distance * (Math.random() > 0.5 ? 1 : -1);
+      const sparkY = y + Math.sin(angle) * distance + Math.random() * 30;
       
-      ctx.fillStyle = `rgba(255, 165, 0, ${Math.random() * 0.5 + 0.2})`; // برتقالي (النار)
+      // شرارة بلون متوهج
+      const sparkOpacity = Math.random() * 0.7 + 0.3;
+      ctx.fillStyle = `rgba(255, ${Math.floor(Math.random() * 200 + 55)}, 0, ${sparkOpacity})`;
+      ctx.beginPath();
+      ctx.arc(sparkX, sparkY, size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    
+    // هالة متوهجة للصاروخ
+    const glowGradient = ctx.createRadialGradient(x, y + 20, 5, x, y + 20, 40);
+    glowGradient.addColorStop(0, 'rgba(255, 200, 0, 0.3)');
+    glowGradient.addColorStop(1, 'rgba(255, 100, 0, 0)');
+    
+    ctx.fillStyle = glowGradient;
+    ctx.beginPath();
+    ctx.arc(x, y + 20, 40, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // دخان
+    const smokeParticlesCount = 8;
+    const smokeColors = [
+      'rgba(200, 200, 200, 0.2)',
+      'rgba(180, 180, 180, 0.15)',
+      'rgba(150, 150, 150, 0.1)'
+    ];
+    
+    for (let i = 0; i < smokeParticlesCount; i++) {
+      const size = Math.random() * 15 + 8;
+      const xOffset = (Math.random() - 0.5) * 40;
+      const yOffset = Math.random() * 50 + 50;
+      
+      const colorIndex = Math.floor(Math.random() * smokeColors.length);
+      ctx.fillStyle = smokeColors[colorIndex];
       ctx.beginPath();
       ctx.arc(x + xOffset, y + yOffset, size, 0, Math.PI * 2);
       ctx.fill();
     }
     
-    for (let i = 0; i < particles / 2; i++) {
-      const size = Math.random() * 10 + 3;
-      const xOffset = (Math.random() - 0.5) * 30;
-      const yOffset = Math.random() * 40 + 30;
-      
-      ctx.fillStyle = `rgba(200, 200, 200, ${Math.random() * 0.3 + 0.1})`; // رمادي (الدخان)
-      ctx.beginPath();
-      ctx.arc(x + xOffset, y + yOffset, size, 0, Math.PI * 2);
-      ctx.fill();
-    }
+    ctx.restore();
   };
   
   // رسم النجوم في الخلفية
   const drawStars = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-    const starCount = 100;
+    ctx.save();
     
-    for (let i = 0; i < starCount; i++) {
+    // رسم خلفية الكون العميق مع تأثير ضبابي
+    const spaceGradient = ctx.createLinearGradient(0, 0, width, height);
+    spaceGradient.addColorStop(0, '#050A30');  // لون أزرق داكن للفضاء البعيد
+    spaceGradient.addColorStop(1, '#0A1940');  // لون أزرق داكن مائل للأرجواني
+    
+    ctx.fillStyle = spaceGradient;
+    ctx.fillRect(0, 0, width, height);
+    
+    // رسم سديم نجمي بعيد
+    const nebulaCount = 3;
+    for (let i = 0; i < nebulaCount; i++) {
+      const nebulaX = Math.random() * width;
+      const nebulaY = Math.random() * height;
+      const nebulaSize = Math.random() * 200 + 100;
+      
+      // إنشاء تدرج لوني للسديم
+      const nebulaGradient = ctx.createRadialGradient(
+        nebulaX, nebulaY, 0,
+        nebulaX, nebulaY, nebulaSize
+      );
+      
+      // ألوان متنوعة للسدم
+      const nebulaColors = [
+        ['rgba(128, 0, 255, 0.03)', 'rgba(128, 0, 255, 0)'],  // أرجواني
+        ['rgba(0, 128, 255, 0.02)', 'rgba(0, 128, 255, 0)'],  // أزرق
+        ['rgba(255, 0, 128, 0.02)', 'rgba(255, 0, 128, 0)']   // وردي
+      ];
+      
+      const colorIndex = i % nebulaColors.length;
+      nebulaGradient.addColorStop(0, nebulaColors[colorIndex][0]);
+      nebulaGradient.addColorStop(1, nebulaColors[colorIndex][1]);
+      
+      ctx.fillStyle = nebulaGradient;
+      ctx.beginPath();
+      ctx.arc(nebulaX, nebulaY, nebulaSize, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    
+    // رسم النجوم المتلألئة
+    const starTypes = [
+      { count: 80, size: [0.5, 1.5], opacity: [0.5, 0.9], color: '#FFFFFF' },   // نجوم صغيرة بيضاء
+      { count: 40, size: [1, 2], opacity: [0.6, 1], color: '#F0F8FF' },          // نجوم متوسطة زرقاء فاتحة
+      { count: 20, size: [1.5, 3], opacity: [0.7, 1], color: '#FFFFD0' }         // نجوم كبيرة صفراء فاتحة
+    ];
+    
+    // رسم جميع أنواع النجوم
+    starTypes.forEach(type => {
+      for (let i = 0; i < type.count; i++) {
+        const x = Math.random() * width;
+        const y = Math.random() * height;
+        const size = Math.random() * (type.size[1] - type.size[0]) + type.size[0];
+        const opacity = Math.random() * (type.opacity[1] - type.opacity[0]) + type.opacity[0];
+        
+        // رسم توهج حول النجوم الكبيرة
+        if (size > 1.5) {
+          const glowSize = size * 3;
+          const glowGradient = ctx.createRadialGradient(x, y, 0, x, y, glowSize);
+          glowGradient.addColorStop(0, `rgba(255, 255, 255, ${opacity * 0.3})`);
+          glowGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+          
+          ctx.fillStyle = glowGradient;
+          ctx.beginPath();
+          ctx.arc(x, y, glowSize, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        
+        // نمط النجمة نفسها
+        ctx.fillStyle = `${type.color}${Math.floor(opacity * 255).toString(16).padStart(2, '0')}`;
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    });
+    
+    // رسم النجوم المتلألئة
+    const twinkleStars = 15;
+    for (let i = 0; i < twinkleStars; i++) {
       const x = Math.random() * width;
       const y = Math.random() * height;
-      const size = Math.random() * 2 + 0.5;
-      const opacity = Math.random() * 0.8 + 0.2;
+      const size = Math.random() * 2 + 1.5;
       
-      ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
+      // رسم النجمة المتوهجة
+      const gradient = ctx.createRadialGradient(x, y, 0, x, y, size * 3);
+      gradient.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
+      gradient.addColorStop(0.1, 'rgba(255, 255, 255, 0.3)');
+      gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.arc(x, y, size * 3, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // رسم النجمة نفسها
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
       ctx.beginPath();
       ctx.arc(x, y, size, 0, Math.PI * 2);
       ctx.fill();
     }
+    
+    ctx.restore();
   };
   
+  // عرض المضاعف مع تأثيرات بصرية
+  const displayMultiplier = (ctx: CanvasRenderingContext2D, value: number, isActive: boolean, color: string = '#FFFFFF') => {
+    ctx.save();
+    
+    const displayX = ctx.canvas.width / 2;
+    const displayY = 50;
+    
+    if (isActive) {
+      // تغيير حجم ولون النص حسب قيمة المضاعف
+      let fontSize = 28;
+      let textColor = color;
+      let glowColor = 'rgba(100, 100, 255, 0.7)';
+      let pulseFactor = 1;
+      
+      if (value >= 2) {
+        fontSize = 32;
+        textColor = '#FFFF88';
+        glowColor = 'rgba(200, 200, 0, 0.7)';
+      }
+      
+      if (value >= 5) {
+        fontSize = 36;
+        textColor = '#FFCC00';
+        glowColor = 'rgba(255, 150, 0, 0.8)';
+        // تأثير نبض للأرقام الكبيرة
+        pulseFactor = 1 + Math.sin(currentStep / 5) * 0.1;
+      }
+      
+      if (value >= 10) {
+        fontSize = 40;
+        textColor = '#FF5500';
+        glowColor = 'rgba(255, 80, 0, 0.9)';
+        pulseFactor = 1 + Math.sin(currentStep / 4) * 0.15;
+      }
+      
+      // تطبيق تأثير النبض
+      ctx.translate(displayX, displayY);
+      ctx.scale(pulseFactor, pulseFactor);
+      ctx.translate(-displayX, -displayY);
+      
+      // تأثير توهج للنص
+      ctx.shadowColor = glowColor;
+      ctx.shadowBlur = 10;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
+      
+      ctx.font = `bold ${fontSize}px Arial, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.fillStyle = textColor;
+      ctx.fillText(`${value.toFixed(2)}x`, displayX, displayY);
+      
+      // إضافة حدود للنص للقراءة الأفضل
+      if (value >= 5) {
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = 1;
+        ctx.strokeText(`${value.toFixed(2)}x`, displayX, displayY);
+      }
+    } else if (exploded) {
+      // عرض المضاعف في حالة الانفجار
+      const shakeAmount = Math.max(0, 5 - (currentStep / 10));
+      const shakeX = (Math.random() - 0.5) * shakeAmount;
+      const shakeY = (Math.random() - 0.5) * shakeAmount;
+      
+      ctx.font = 'bold 32px Arial, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#FF3333';
+      ctx.strokeStyle = '#990000';
+      ctx.lineWidth = 2;
+      
+      // تأثير ظل للنص
+      ctx.shadowColor = 'rgba(255, 0, 0, 0.8)';
+      ctx.shadowBlur = 10;
+      ctx.shadowOffsetX = 2;
+      ctx.shadowOffsetY = 2;
+      
+      const text = `انفجر عند ${value.toFixed(2)}x!`;
+      ctx.fillText(text, displayX + shakeX, displayY + shakeY);
+      ctx.strokeText(text, displayX + shakeX, displayY + shakeY);
+    } else {
+      // عرض المضاعف في حالة الانتظار
+      ctx.font = 'bold 28px Arial, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = color;
+      
+      // تأثير وميض خفيف أثناء العد التنازلي
+      if (countdown < 3 && countdown > 0) {
+        const blinkOpacity = Math.sin(currentStep / 4) * 0.3 + 0.7;
+        ctx.globalAlpha = blinkOpacity;
+      }
+      
+      ctx.fillText(`${value.toFixed(2)}x`, displayX, displayY);
+    }
+    
+    ctx.restore();
+  };
+
   // رسم الانفجار
   const drawExplosion = (ctx: CanvasRenderingContext2D, x: number, y: number, radius: number) => {
-    const particleCount = 30;
-    const colors = ['#FF5733', '#FFC300', '#FF3333', '#FFBE33', '#FFEA00'];
+    ctx.save();
     
-    for (let i = 0; i < particleCount; i++) {
+    // توهج مركزي
+    const glowGradient = ctx.createRadialGradient(x, y, 0, x, y, radius * 1.2);
+    glowGradient.addColorStop(0, 'rgba(255, 80, 0, 0.8)');
+    glowGradient.addColorStop(0.4, 'rgba(255, 50, 0, 0.6)');
+    glowGradient.addColorStop(0.7, 'rgba(255, 30, 0, 0.4)');
+    glowGradient.addColorStop(1, 'rgba(255, 0, 0, 0)');
+    
+    ctx.fillStyle = glowGradient;
+    ctx.beginPath();
+    ctx.arc(x, y, radius * 1.2, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // مركز الانفجار
+    const coreGradient = ctx.createRadialGradient(x, y, 0, x, y, radius * 0.4);
+    coreGradient.addColorStop(0, 'rgba(255, 255, 200, 1)');
+    coreGradient.addColorStop(0.4, 'rgba(255, 200, 50, 0.9)');
+    coreGradient.addColorStop(1, 'rgba(255, 100, 0, 0.8)');
+    
+    ctx.fillStyle = coreGradient;
+    ctx.beginPath();
+    ctx.arc(x, y, radius * 0.4, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // جزيئات متطايرة
+    const particlesCount = 50;
+    const explosionColors = [
+      '#FFFF00', // أصفر
+      '#FF5500', // برتقالي
+      '#FF0000', // أحمر
+      '#FFAA00', // ذهبي
+      '#FF2200'  // أحمر ناري
+    ];
+    
+    // جزيئات متطايرة رئيسية
+    for (let i = 0; i < particlesCount; i++) {
       const angle = Math.random() * Math.PI * 2;
       const distance = Math.random() * radius;
+      const particleSize = Math.random() * 20 + 8;
+      
       const particleX = x + Math.cos(angle) * distance;
       const particleY = y + Math.sin(angle) * distance;
-      const size = Math.random() * 15 + 5;
       
-      const colorIndex = Math.floor(Math.random() * colors.length);
-      ctx.fillStyle = colors[colorIndex];
+      const colorIndex = Math.floor(Math.random() * explosionColors.length);
       
+      // رسم هالة حول الجزيئات الكبيرة
+      if (particleSize > 15) {
+        const particleGlow = ctx.createRadialGradient(
+          particleX, particleY, 0,
+          particleX, particleY, particleSize * 1.5
+        );
+        particleGlow.addColorStop(0, `${explosionColors[colorIndex]}AA`);
+        particleGlow.addColorStop(1, 'rgba(255, 100, 0, 0)');
+        
+        ctx.fillStyle = particleGlow;
+        ctx.beginPath();
+        ctx.arc(particleX, particleY, particleSize * 1.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      
+      // رسم الجزيئة نفسها
+      ctx.fillStyle = explosionColors[colorIndex];
       ctx.beginPath();
-      ctx.arc(particleX, particleY, size, 0, Math.PI * 2);
+      ctx.arc(particleX, particleY, particleSize, 0, Math.PI * 2);
       ctx.fill();
     }
+    
+    // شرر صغير متطاير
+    const sparkCount = 80;
+    for (let i = 0; i < sparkCount; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const distance = Math.random() * (radius * 1.5);
+      const sparkSize = Math.random() * 3 + 1;
+      
+      const sparkX = x + Math.cos(angle) * distance;
+      const sparkY = y + Math.sin(angle) * distance;
+      
+      // لون الشرر يعتمد على المسافة
+      const sparkBrightness = Math.max(0, 1 - (distance / (radius * 1.5)));
+      const sparkColor = `rgba(255, ${Math.floor(255 * sparkBrightness)}, 0, ${sparkBrightness})`;
+      
+      ctx.fillStyle = sparkColor;
+      ctx.beginPath();
+      ctx.arc(sparkX, sparkY, sparkSize, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    
+    // موجات الصدمة
+    const shockwaves = 3;
+    for (let i = 0; i < shockwaves; i++) {
+      const waveRadius = radius * (0.4 + (i * 0.25));
+      const opacity = 0.8 - (i * 0.2);
+      
+      ctx.strokeStyle = `rgba(255, 200, 70, ${opacity})`;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(x, y, waveRadius, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    
+    ctx.restore();
   };
   
   // وظيفة وضع الرهان - محسنة للتأكد من عملها بشكل صحيح
@@ -711,9 +1196,9 @@ const ArabicRocketPage = () => {
   };
   
   return (
-    <div className="h-screen w-full flex flex-col bg-[#0F172A] overflow-hidden">
+    <div className="h-screen w-full flex flex-col bg-black overflow-hidden">
       {/* Header */}
-      <div className="bg-[#1E293B] text-white p-4 flex justify-between items-center border-b border-[#334155] shadow-md">
+      <div className="bg-[#1E1E3F] text-white p-2 flex justify-between items-center shadow-lg">
         <div className="flex items-center gap-2">
           <Button
             variant="ghost"
@@ -721,289 +1206,207 @@ const ArabicRocketPage = () => {
             className="h-8 w-8 text-white"
             onClick={() => navigate("/")}
           >
-            <ArrowLeft size={20} />
+            <Home size={18} />
           </Button>
           <div className="flex items-center">
-            <Rocket className="h-7 w-7 text-yellow-500 mr-2 animate-pulse" />
-            <h1 className="text-2xl font-bold text-white bg-gradient-to-r from-red-500 to-yellow-500 bg-clip-text text-transparent">🚀 صاروخ عرباوي 🚀</h1>
+            <h1 className="text-xl font-bold text-white bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">CRASH</h1>
           </div>
         </div>
         
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 bg-[#334155] p-1 px-3 rounded-full">
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 bg-[#2D2D6A] p-1 px-3 rounded-full">
             <div className="bg-yellow-500 p-1 rounded-full">
               <DollarSign size={14} className="text-[#1E293B]" />
             </div>
             <span className="font-bold">{user?.chips || 0}</span>
           </div>
           
-          <div className="hidden md:flex items-center gap-2">
-            <Button variant="ghost" className="bg-[#334155] text-white hover:bg-[#475569]">
-              <Award className="h-4 w-4 mr-2" />
-              <span>المكافآت</span>
-            </Button>
-            
-            <Button variant="ghost" className="bg-[#334155] text-white hover:bg-[#475569]">
-              <BarChart3 className="h-4 w-4 mr-2" />
-              <span>الإحصائيات</span>
-            </Button>
-          </div>
+          <Button variant="ghost" size="icon" className="text-blue-400">
+            <Info size={18} />
+          </Button>
+        </div>
+      </div>
+      
+      {/* Top stats bar */}
+      <div className="bg-gradient-to-r from-blue-900 to-purple-900 p-2 flex justify-between items-center">
+        <div className="flex items-center gap-2">
+          <DollarSign size={18} className="text-yellow-400" />
+          <span className="text-yellow-400 font-bold">30.05M</span>
+        </div>
+        <div className="flex space-x-1 text-xs overflow-auto">
+          {[2.78, 9.18, 4.58, 2.83, 3.00, 1.19, 1.46, 1.10, 2.71, 1.43, 1.30, 10.17, 1.87, 1.08, 1.28, 1.32, 4.56].map((val, idx) => (
+            <div 
+              key={idx}
+              className={`px-2 py-1 rounded ${
+                val < 1.5 ? 'bg-red-600 text-white' : 
+                val > 5 ? 'bg-green-500 text-white' : 
+                'bg-blue-600 text-white'
+              }`}
+            >
+              {val.toFixed(2)}
+            </div>
+          ))}
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-green-400 text-xs">112ms</span>
         </div>
       </div>
       
       {/* Main Content */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* Game Section */}
-        <div className="flex-1 flex flex-col p-4 md:p-6 overflow-y-auto">
-          {/* Top Section - Game Canvas & Controls */}
-          <Card className="bg-[#1E293B] border-[#334155] mb-4 overflow-hidden">
-            <div className="relative">
-              {/* الكانفاس */}
-              <canvas 
-                ref={canvasRef}
-                width={800}
-                height={400}
-                className="w-full h-[400px] bg-[#0A0A20]"
-              ></canvas>
-              
-              {/* Overlay for countdown */}
-              {!isGameActive && (
-                <div className="absolute inset-0 bg-black/80 flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="text-5xl font-bold text-white mb-2">
-                      {exploded ? (
-                        <div className="text-red-500 animate-pulse">انفجر!</div>
-                      ) : (
-                        countdown
-                      )}
-                    </div>
-                    <div className="text-lg text-gray-300">
-                      {exploded ? "انتظر الجولة التالية..." : "الجولة التالية تبدأ قريباً"}
-                    </div>
-                  </div>
-                </div>
-              )}
+      <div className="flex-1 relative bg-gradient-to-b from-[#0A0F2D] to-[#202060] overflow-hidden">
+        {/* الكانفاس */}
+        <canvas 
+          ref={canvasRef}
+          width={800}
+          height={400}
+          className="w-full h-full absolute inset-0"
+        ></canvas>
+        
+        {/* الهاشتاج الجانبي للاعبين */}
+        <div className="absolute left-4 top-4 bottom-4 w-60 flex flex-col gap-2 overflow-y-auto">
+          {/* Active player bets */}
+          <div className="bg-gradient-to-r from-purple-800 to-[rgba(128,0,255,0.7)] rounded-lg p-2 shadow-lg">
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-white font-bold">9,680</span>
+              <span className="text-xs bg-blue-700 rounded px-2 py-0.5 text-white">x 2.6</span>
             </div>
-            
-            {/* Controls Section */}
-            <div className="p-4 bg-[#1E293B] border-t border-[#334155]">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Bet Input Section */}
-                <div className="space-y-2">
-                  <label className="text-sm text-gray-300">مبلغ الرهان:</label>
-                  <div className="flex gap-2">
-                    <Input
-                      type="number"
-                      min={1}
-                      value={betAmount}
-                      onChange={(e) => setBetAmount(parseInt(e.target.value) || 0)}
-                      className="bg-[#0F172A] border-[#334155] text-white"
-                      disabled={hasBet || !isGameActive}
-                    />
-                    <Button
-                      variant="outline"
-                      className="border-[#334155] text-white hover:bg-[#334155]"
-                      onClick={() => setBetAmount(prevAmount => Math.max(1, prevAmount / 2))}
-                      disabled={hasBet || !isGameActive}
-                    >
-                      1/2
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="border-[#334155] text-white hover:bg-[#334155]"
-                      onClick={() => setBetAmount(prevAmount => prevAmount * 2)}
-                      disabled={hasBet || !isGameActive}
-                    >
-                      2×
-                    </Button>
-                  </div>
-                </div>
-                
-                {/* Auto Cashout Section */}
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Label htmlFor="auto-cashout" className="text-sm text-gray-300">سحب تلقائي:</Label>
-                    <Switch
-                      id="auto-cashout"
-                      checked={isAutoCashoutEnabled}
-                      onCheckedChange={setIsAutoCashoutEnabled}
-                      disabled={hasBet || !isGameActive}
-                    />
-                  </div>
-                  <div className="flex gap-2">
-                    <Input
-                      type="number"
-                      min={1.01}
-                      step={0.01}
-                      value={autoCashoutValue}
-                      onChange={(e) => setAutoCashoutValue(parseFloat(e.target.value) || 1.01)}
-                      className="bg-[#0F172A] border-[#334155] text-white"
-                      disabled={!isAutoCashoutEnabled || hasBet || !isGameActive}
-                    />
-                    <span className="flex items-center text-white">×</span>
-                  </div>
-                </div>
-                
-                {/* Action Buttons */}
-                <div className="flex flex-col gap-2 justify-end">
-                  {!hasBet ? (
-                    <Button
-                      className="bg-green-600 text-white hover:bg-green-700 h-full"
-                      disabled={!isGameActive || hasBet}
-                      onClick={handlePlaceBet}
-                    >
-                      راهن الآن
-                    </Button>
+            <div className="text-center bg-purple-900/50 rounded py-1 text-white">
+              1300
+            </div>
+          </div>
+          
+          <div className="bg-gradient-to-r from-purple-800 to-[rgba(128,0,255,0.7)] rounded-lg p-2 shadow-lg">
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-white font-bold">8.69M</span>
+              <span className="text-xs bg-blue-700 rounded px-2 py-0.5 text-white">x 2.8</span>
+            </div>
+            <div className="text-center bg-purple-900/50 rounded py-1 text-white">
+              ابن الوليد
+            </div>
+          </div>
+          
+          <div className="bg-gradient-to-r from-purple-800 to-[rgba(128,0,255,0.7)] rounded-lg p-2 shadow-lg">
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-white font-bold">89,000</span>
+              <span className="text-xs bg-blue-700 rounded px-2 py-0.5 text-white">x 1.9</span>
+            </div>
+            <div className="text-center bg-purple-900/50 rounded py-1 text-white">
+              عبد الرحمن
+            </div>
+          </div>
+          
+          <div className="bg-gradient-to-r from-purple-800 to-[rgba(128,0,255,0.7)] rounded-lg p-2 shadow-lg">
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-white font-bold">41,600</span>
+              <span className="text-xs bg-blue-700 rounded px-2 py-0.5 text-white">x 1.25</span>
+            </div>
+            <div className="text-center bg-purple-900/50 rounded py-1 text-white">
+              فرعون
+            </div>
+          </div>
+          
+          <div className="bg-gradient-to-r from-purple-800 to-[rgba(128,0,255,0.7)] rounded-lg p-2 shadow-lg">
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-white font-bold">30,000</span>
+              <span className="text-xs bg-blue-700 rounded px-2 py-0.5 text-white">x 3.1</span>
+            </div>
+            <div className="text-center bg-purple-900/50 rounded py-1 text-white">
+              ابو حمزة
+            </div>
+          </div>
+          
+          <div className="bg-gradient-to-r from-purple-800 to-[rgba(128,0,255,0.7)] rounded-lg p-2 shadow-lg">
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-white font-bold">25,000</span>
+              <span className="text-xs bg-blue-700 rounded px-2 py-0.5 text-white">x 1.6</span>
+            </div>
+            <div className="text-center bg-purple-900/50 rounded py-1 text-white">
+              صقر الصحراء
+            </div>
+          </div>
+          
+          {/* Display current multiplier in the center */}
+          {isGameActive && (
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-8xl font-bold text-white">
+              {currentMultiplier.toFixed(2)}<span className="text-blue-400">x</span>
+            </div>
+          )}
+          
+          {/* Countdown overlay */}
+          {!isGameActive && (
+            <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+              <div className="text-center">
+                <div className="text-7xl font-bold text-white mb-2">
+                  {exploded ? (
+                    <div className="text-red-500 animate-pulse">انفجر عند {maxMultiplier.toFixed(2)}x!</div>
                   ) : (
-                    <Button
-                      className="bg-red-600 text-white hover:bg-red-700 h-full"
-                      disabled={!isGameActive || hasWithdrawn || !hasBet}
-                      onClick={handleWithdraw}
-                    >
-                      <div className="flex flex-col items-center">
-                        <span>اسحب الآن</span>
-                        <span className="text-lg font-bold">{potentialWin.toFixed(0)}</span>
-                      </div>
-                    </Button>
+                    countdown
                   )}
                 </div>
-              </div>
-            </div>
-            
-            {/* Stats Bar */}
-            <div className="p-4 pt-0">
-              <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                <div className="bg-[#0F172A] p-3 rounded-lg">
-                  <div className="text-gray-400 flex items-center gap-1 mb-1">
-                    <TrendingUp size={14} />
-                    <span>أعلى مضاعف اليوم</span>
-                  </div>
-                  <div className="text-xl font-bold text-white">7.65×</div>
-                </div>
-                
-                <div className="bg-[#0F172A] p-3 rounded-lg">
-                  <div className="text-gray-400 flex items-center gap-1 mb-1">
-                    <Clock size={14} />
-                    <span>متوسط الانفجار</span>
-                  </div>
-                  <div className="text-xl font-bold text-white">2.87×</div>
-                </div>
-                
-                <div className="bg-[#0F172A] p-3 rounded-lg">
-                  <div className="text-gray-400 flex items-center gap-1 mb-1">
-                    <Users size={14} />
-                    <span>عدد اللاعبين</span>
-                  </div>
-                  <div className="text-xl font-bold text-white">{activePlayers.length}</div>
-                </div>
-                
-                <div className="bg-[#0F172A] p-3 rounded-lg">
-                  <div className="text-gray-400 flex items-center gap-1 mb-1">
-                    <DollarSign size={14} />
-                    <span>إجمالي الرهانات</span>
-                  </div>
-                  <div className="text-xl font-bold text-white">
-                    {activePlayers.reduce((sum, player) => sum + player.betAmount, 0)}
-                  </div>
+                <div className="text-xl text-gray-300">
+                  {exploded ? "انتظر الجولة التالية..." : "الجولة التالية تبدأ قريباً"}
                 </div>
               </div>
             </div>
-          </Card>
-          
-          {/* Bottom Section - History & Players */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Last Results */}
-            <Card className="bg-[#1E293B] border-[#334155] col-span-1">
-              <div className="p-4 border-b border-[#334155]">
-                <h3 className="text-lg font-bold text-white">آخر النتائج</h3>
-              </div>
-              <div className="p-4 grid grid-cols-5 gap-2">
-                {previousGames.map((multiplier, index) => (
-                  <div 
-                    key={index}
-                    className={`p-2 rounded-md text-center font-bold ${
-                      multiplier < 1.2 ? 'bg-red-500/20 text-red-400' : 
-                      multiplier < 2 ? 'bg-yellow-500/20 text-yellow-400' : 
-                      'bg-green-500/20 text-green-400'
-                    }`}
-                  >
-                    {multiplier.toFixed(2)}×
-                  </div>
-                ))}
-              </div>
-            </Card>
-            
-            {/* Players List */}
-            <Card className="bg-[#1E293B] border-[#334155] col-span-1 md:col-span-2 overflow-hidden">
-              <div className="p-4 border-b border-[#334155]">
-                <h3 className="text-lg font-bold text-white">اللاعبون</h3>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-white">
-                  <thead className="bg-[#0F172A] text-gray-400 text-sm">
-                    <tr>
-                      <th className="p-3 text-right">اللاعب</th>
-                      <th className="p-3 text-right">الرهان</th>
-                      <th className="p-3 text-right">المضاعف</th>
-                      <th className="p-3 text-right">الربح/الخسارة</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {activePlayers.map(player => (
-                      <tr 
-                        key={player.id} 
-                        className={`border-t border-[#334155] ${
-                          player.id === user?.id ? 'bg-[#0F172A]/30' : ''
-                        }`}
-                      >
-                        <td className="p-3">
-                          <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-full bg-[#334155] flex items-center justify-center text-sm">
-                              {player.username.charAt(0)}
-                            </div>
-                            <span>{player.username}</span>
-                            {player.id === user?.id && (
-                              <span className="text-xs bg-[#334155] px-2 py-0.5 rounded-full">أنت</span>
-                            )}
-                          </div>
-                        </td>
-                        <td className="p-3">{player.betAmount}</td>
-                        <td className="p-3">
-                          {player.cashoutMultiplier ? (
-                            <span className="text-green-400">{player.cashoutMultiplier.toFixed(2)}×</span>
-                          ) : (
-                            player.profit !== null ? (
-                              <span className="text-red-400">انفجر</span>
-                            ) : (
-                              <span className="animate-pulse">جاري...</span>
-                            )
-                          )}
-                        </td>
-                        <td className="p-3">
-                          {player.profit !== null ? (
-                            <span className={player.profit >= 0 ? 'text-green-400' : 'text-red-400'}>
-                              {player.profit >= 0 ? '+' : ''}{player.profit}
-                            </span>
-                          ) : (
-                            '-'
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </Card>
-          </div>
+          )}
         </div>
-        
-        {/* Chat Section */}
-        <div className="hidden md:block w-80 bg-[#1E293B] border-l border-[#334155] overflow-hidden shrink-0">
-          <div className="p-4 border-b border-[#334155]">
-            <h3 className="text-lg font-bold text-white">الدردشة</h3>
+      </div>
+      
+      {/* Bottom Controls */}
+      <div className="bg-gradient-to-r from-blue-900 to-purple-900 p-2">
+        <div className="grid grid-cols-2 gap-2">
+          {/* Left Controls */}
+          <div className="flex bg-blue-800 rounded-lg overflow-hidden">
+            <div className="flex-1 p-2">
+              <div className="text-xs text-center text-white mb-1">مبلغ الرهان</div>
+              <div className="flex">
+                <button className="bg-blue-700 text-white px-3 py-1 rounded-l">
+                  <Minus size={16} />
+                </button>
+                <div className="flex-1 bg-blue-900 text-white text-center py-1 font-bold">
+                  3,000,000
+                </div>
+                <button className="bg-blue-700 text-white px-3 py-1 rounded-r">
+                  <Plus size={16} />
+                </button>
+              </div>
+              <div className="text-xs text-center text-white mt-1">90.00</div>
+            </div>
+            <div className="w-24 bg-gradient-to-b from-blue-600 to-blue-800 flex items-center justify-center">
+              <button 
+                className="bg-gradient-to-b from-yellow-400 to-yellow-600 text-black font-bold py-2 px-4 rounded-md shadow-md"
+                onClick={handlePlaceBet}
+              >
+                BET
+              </button>
+            </div>
           </div>
-          <div className="h-full">
-            <ChatBox />
+          
+          {/* Right Controls */}
+          <div className="flex bg-blue-800 rounded-lg overflow-hidden">
+            <div className="flex-1 p-2">
+              <div className="text-xs text-center text-white mb-1">هدف المضاعف</div>
+              <div className="flex">
+                <button className="bg-blue-700 text-white px-3 py-1 rounded-l">
+                  <Minus size={16} />
+                </button>
+                <div className="flex-1 bg-blue-900 text-white text-center py-1 font-bold">
+                  1,000,000
+                </div>
+                <button className="bg-blue-700 text-white px-3 py-1 rounded-r">
+                  <Plus size={16} />
+                </button>
+              </div>
+              <div className="text-xs text-center text-white mt-1">1.01 × سحب تلقائي</div>
+            </div>
+            <div className="w-24 bg-gradient-to-b from-blue-600 to-blue-800 flex items-center justify-center">
+              <button 
+                className="bg-gradient-to-b from-yellow-400 to-yellow-600 text-black font-bold py-2 px-4 rounded-md shadow-md"
+                onClick={handleWithdraw}
+              >
+                BET
+              </button>
+            </div>
           </div>
         </div>
       </div>
