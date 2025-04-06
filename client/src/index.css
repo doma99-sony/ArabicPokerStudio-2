@@ -84,7 +84,7 @@
   }
 }
 
-/* تأثيرات التنين والنار */
+/* تأثيرات التنين والنار - محسنة لأنمي لتجربة واقعية */
 @keyframes wing-flap {
   0%, 100% { transform: scaleY(1); }
   50% { transform: scaleY(0.85); }
@@ -112,6 +112,17 @@
   }
 }
 
+@keyframes float-fire-particle {
+  0% { 
+    transform: translateX(0) translateY(0) rotate(0deg);
+    opacity: 0.8;
+  }
+  100% { 
+    transform: translateX(-400px) translateY(-200px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
 @keyframes ash-particles {
   0% {
     transform: translateY(0) translateX(0);
@@ -126,18 +137,38 @@
   }
 }
 
+@keyframes fire-ambient {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 0.3; }
+}
+
+@keyframes dragon-hover {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-15px); }
+}
+
+@keyframes dragon-fly-path {
+  0% { offset-distance: 0%; }
+  100% { offset-distance: 100%; }
+}
+
+@keyframes dragon-breathe {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(1.05); }
+}
+
 .animate-wing {
-  animation: wing-flap 1s ease-in-out infinite;
+  animation: wing-flap 1.2s ease-in-out infinite;
   transform-origin: right center;
 }
 
 .animate-tail {
-  animation: tail-wag 2s ease-in-out infinite;
+  animation: tail-wag 2.5s ease-in-out infinite;
   transform-origin: left center;
 }
 
 .animate-fire {
-  animation: fire-pulse 0.3s ease-in-out infinite;
+  animation: fire-pulse 0.25s ease-in-out infinite;
   transform-origin: right center;
 }
 
@@ -145,8 +176,24 @@
   animation: float-embers var(--duration, 5s) ease-out infinite;
 }
 
+.animate-float-fire-particle {
+  animation: float-fire-particle 2s ease-out infinite;
+}
+
 .animate-pulse-fast {
   animation: pulse 0.5s ease-in-out infinite;
+}
+
+.animate-fire-ambient {
+  animation: fire-ambient 2s ease-in-out infinite;
+}
+
+.animate-dragon-hover {
+  animation: dragon-hover 5s ease-in-out infinite;
+}
+
+.animate-dragon-breathe {
+  animation: dragon-breathe 4s ease-in-out infinite;
 }
 
 .fire-ash-particles {
