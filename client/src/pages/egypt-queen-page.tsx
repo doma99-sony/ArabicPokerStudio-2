@@ -80,18 +80,24 @@ export default function EgyptQueenPage() {
   
   // التأكد من اتصال WebSocket عند دخول الصفحة
   useEffect(() => {
-    if (user && user.id && !globalWs.isConnected) {
+    // نتحقق فقط إذا كان المستخدم موجودًا ولديه معرف صحيح
+    if (user && user.id && user.id > 0 && !globalWs.isConnected) {
       console.log('إنشاء اتصال WebSocket في صفحة ملكة مصر');
+      // محاولة الاتصال
       globalWs.connect(user.id);
     }
     
     return () => {
       console.log('الاحتفاظ باتصال WebSocket عند مغادرة صفحة ملكة مصر');
     };
-  }, [user, globalWs]);
+  }, []);
   
   // الاستماع لرسائل WebSocket
   useEffect(() => {
+    // تخزين مراجع للدوال المطلوبة لمنع إعادة الإنشاء
+    const userSetter = setUser;
+    const toastFn = toast;
+    
     if (globalWs) {
       // اشتراك في رسائل WebSocket
       const handleWebSocketMessage = (message: any) => {
@@ -101,17 +107,8 @@ export default function EgyptQueenPage() {
         if (message.type === 'chips_update') {
           console.log('تم استلام تحديث الرصيد:', message);
           
-          // إذا كان التحديث متعلق بلعبة ملكة مصر، نعرض رسالة توضيحية
-          if (message.game === 'egypt-queen') {
-            if (message.action === 'slot_bet') {
-              // رسالة خصم الرهان (لا نعرضها هنا لتجنب التكرار)
-            } else if (message.action === 'slot_win' || message.action === 'bonus_win') {
-              // رسالة إضافة الفوز (تم عرضها بالفعل في وظيفة التحقق من الفوز)
-            }
-          }
-          
           // تحديث حالة المستخدم المحلية
-          setUser(prevUser => {
+          userSetter(prevUser => {
             if (!prevUser) return prevUser;
             return {
               ...prevUser,
@@ -122,7 +119,7 @@ export default function EgyptQueenPage() {
         // التعامل مع رسائل الخطأ
         else if (message.type === 'error') {
           console.error('خطأ WebSocket:', message.message);
-          toast({
+          toastFn({
             title: "خطأ",
             description: message.message,
             variant: "destructive"
@@ -139,7 +136,7 @@ export default function EgyptQueenPage() {
         console.log('تم إزالة مستمع WebSocket عند مغادرة صفحة ملكة مصر');
       };
     }
-  }, [globalWs, toast]);
+  }, [globalWs]);
 
   // تشغيل الموسيقى الخلفية عند تحميل الصفحة
   useEffect(() => {
