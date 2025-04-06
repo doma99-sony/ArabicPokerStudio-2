@@ -244,7 +244,7 @@ export function GameActions({
           `}>
             <Clock className={`w-5 h-5 ${timeLeft <= 3 ? 'text-red-500 animate-spin' : 'text-amber-500'}`} />
             <div className="flex items-center">
-              <span className={`text-lg font-bold ${
+              <span className={`text-lg font-bold font-arabic-numbers ${
                 timeLeft <= 3 ? 'text-red-500 animate-pulse' : 
                 timeLeft <= 6 ? 'text-amber-400' : 
                 'text-white'
@@ -345,7 +345,7 @@ export function GameActions({
                     <span className="font-medium">{canCheck ? "متابعة" : "مجاراة"}</span>
                   </div>
                   {!canCheck && (
-                    <span className="text-xs text-green-200/80 mr-6">
+                    <span className="text-xs text-green-200/80 mr-6 font-arabic-numbers">
                       {currentBet.toLocaleString()} رقاقة
                     </span>
                   )}
@@ -382,7 +382,7 @@ export function GameActions({
                     <span className="font-medium">{canBet ? "رهان" : "زيادة"}</span>
                   </div>
                   {minRaise > 0 && (
-                    <span className="text-xs text-amber-200/80 mr-6">
+                    <span className="text-xs text-amber-200/80 mr-6 font-arabic-numbers">
                       {minRaise.toLocaleString()}+ رقاقة
                     </span>
                   )}
@@ -427,7 +427,7 @@ export function GameActions({
                     </svg>
                     <span className="font-bold">كل الرقائق!</span>
                   </div>
-                  <span className="text-xs text-red-200/90 mr-6">
+                  <span className="text-xs text-red-200/90 mr-6 font-arabic-numbers">
                     {playerChips.toLocaleString()} رقاقة
                   </span>
                 </div>

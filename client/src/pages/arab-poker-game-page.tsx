@@ -23,179 +23,11 @@ export default function ArabPokerGamePage({ params }: { params?: { tableId?: str
   const [waitingTimer, setWaitingTimer] = useState<number | null>(null);
   const [virtualPlayerRequested, setVirtualPlayerRequested] = useState(false);
   
-  // استخراج معرف الطاولة من الباراميترات
+  // استخراج معرف الطاولة من الباراميترات - العدد بالإنجليزية
   const tableId = params && params.tableId ? parseInt(params.tableId) : null;
   
   // استخدام WebSocket
   const ws = useWebSocket();
-  
-  // تأكد من وجود المستخدم ومعرف الطاولة
-  useEffect(() => {
-    if (!user) {
-      navigate("/auth");
-      return;
-    }
-    
-    if (!tableId || isNaN(tableId)) {
-      setError("معرف الطاولة غير صحيح");
-      return;
-    }
-    
-    // إنشاء اتصال WebSocket جديد عند تحميل الصفحة إذا لم يكن موجوداً
-    if (ws.status !== 'open') {
-      console.log('إنشاء اتصال WebSocket في صفحة بوكر العرب');
-      ws.reconnect();
-    }
-    
-    // طلب حالة اللعبة الأولية
-    fetchGameState();
-    
-    // تنظيف عند مغادرة الصفحة
-    return () => {
-      console.log('الاحتفاظ باتصال WebSocket عند مغادرة صفحة بوكر العرب');
-    };
-  }, [user, tableId, ws]);
-  
-  // مراقبة عدد اللاعبين في الطاولة لجلب لاعب افتراضي عند الانتظار
-  useEffect(() => {
-    if (!gameState || !tableId || virtualPlayerRequested) return;
-    
-    const playerCount = gameState.players?.length || 0;
-    
-    // إذا كان هناك لاعب واحد فقط (أنا) ولم نطلب لاعبًا افتراضيًا بعد
-    if (playerCount === 1 && !waitingTimer && !virtualPlayerRequested) {
-      console.log("بدء مؤقت انتظار لاعب افتراضي");
-      // بدء مؤقت لمدة دقيقة واحدة (60 ثانية)
-      const timer = window.setTimeout(() => {
-        console.log("انتهى وقت الانتظار - طلب لاعب افتراضي");
-        // طلب لاعب افتراضي عندما ينتهي المؤقت
-        requestVirtualPlayer();
-      }, 60000); // دقيقة واحدة
-      setWaitingTimer(timer);
-    } 
-    // إذا انضم لاعبون آخرون، نلغي المؤقت
-    else if (playerCount > 1 && waitingTimer) {
-      console.log("انضم لاعبون آخرون - إلغاء طلب لاعب افتراضي");
-      window.clearTimeout(waitingTimer);
-      setWaitingTimer(null);
-    }
-    
-    // تنظيف المؤقت عند إلغاء تحميل المكون
-    return () => {
-      if (waitingTimer) {
-        window.clearTimeout(waitingTimer);
-      }
-    };
-  }, [gameState, virtualPlayerRequested, waitingTimer, tableId]);
-  
-  // طلب لاعب افتراضي من الخادم
-  const requestVirtualPlayer = useCallback(async () => {
-    if (!tableId || !user || virtualPlayerRequested) return;
-    
-    try {
-      console.log("إرسال طلب لاعب افتراضي للخادم");
-      setVirtualPlayerRequested(true);
-      
-      const res = await fetch(`/api/game/${tableId}/add-virtual-player`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({ 
-          level: "pro", // مستوى اللاعب الافتراضي - محترف
-          chips: Math.min(5000, gameState?.userChips || 2000) // رقائق مناسبة لرقائق اللاعب
-        })
-      });
-      
-      if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(errorText || "فشل في إضافة لاعب افتراضي");
-      }
-      
-      // تشغيل صوت الانضمام
-      playSound('player_join');
-      
-      toast({
-        title: "تم إضافة لاعب افتراضي",
-        description: "تم إضافة لاعب افتراضي محترف للعب معك",
-        duration: 3000,
-      });
-      
-      // تحديث حالة اللعبة
-      await fetchGameState();
-    } catch (error) {
-      console.error("خطأ في طلب لاعب افتراضي:", error);
-      setVirtualPlayerRequested(false); // إعادة تعيين الحالة للسماح بمحاولة أخرى
-    }
-  }, [tableId, user, virtualPlayerRequested, gameState, fetchGameState, playSound, toast]);
-  
-  // استماع لحدث تحديث حالة اللعبة من WebSocket
-  useEffect(() => {
-    if (ws.status === 'open') {
-      ws.addMessageListener((message) => {
-        try {
-          const data = JSON.parse(message);
-          
-          // تحديث حالة اللعبة عند استلام حدث ذي صلة
-          if (data.type === 'game_update' && data.tableId === tableId) {
-            setGameState(data.gameState);
-            
-            // تشغيل أصوات مناسبة للأحداث
-            if (data.event) {
-              switch (data.event) {
-                case 'new_round':
-                  playSound('shuffle');
-                  break;
-                case 'player_fold':
-                  playSound('fold');
-                  break;
-                case 'player_check':
-                  playSound('check');
-                  break;
-                case 'player_call':
-                  playSound('call');
-                  break;
-                case 'player_raise':
-                  playSound('raise');
-                  break;
-                case 'player_all_in':
-                  playSound('all_in');
-                  break;
-                case 'flop_dealt':
-                case 'turn_dealt':
-                case 'river_dealt':
-                  playSound('card_flip');
-                  break;
-                case 'player_win':
-                  playSound('win_hand');
-                  break;
-                case 'player_join':
-                  playSound('player_join');
-                  break;
-              }
-            }
-          }
-          
-          // معالجة الأخطاء من الخادم
-          if (data.type === 'error') {
-            toast({
-              title: "خطأ",
-              description: data.message,
-              variant: "destructive",
-            });
-          }
-          
-          // معالجة الانضمام كمشاهد
-          if (data.type === 'spectator_joined' && data.userId === user?.id) {
-            setIsSpectator(true);
-          }
-        } catch (err) {
-          console.error("خطأ في معالجة رسالة WebSocket:", err);
-        }
-      });
-    }
-  }, [ws, tableId, playSound, user]);
   
   // جلب حالة اللعبة من الخادم
   const fetchGameState = useCallback(async () => {
@@ -237,7 +69,49 @@ export default function ArabPokerGamePage({ params }: { params?: { tableId?: str
       setIsLoading(false);
     }
   }, [tableId, user, navigate]);
-  
+
+  // طلب لاعب افتراضي من الخادم
+  const requestVirtualPlayer = useCallback(async () => {
+    if (!tableId || !user || virtualPlayerRequested) return;
+    
+    try {
+      console.log("إرسال طلب لاعب افتراضي للخادم");
+      setVirtualPlayerRequested(true);
+      
+      const res = await fetch(`/api/game/${tableId}/add-virtual-player`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ 
+          level: "pro", // مستوى اللاعب الافتراضي - محترف (بوت)
+          chips: Math.min(5000, gameState?.userChips || 2000) // رقائق مناسبة لرقائق اللاعب
+        })
+      });
+      
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(errorText || "فشل في إضافة لاعب افتراضي");
+      }
+      
+      // تشغيل صوت الانضمام
+      playSound('player_join');
+      
+      toast({
+        title: "تم إضافة لاعب افتراضي",
+        description: "تم إضافة لاعب افتراضي محترف للعب معك",
+        duration: 3000,
+      });
+      
+      // تحديث حالة اللعبة
+      await fetchGameState();
+    } catch (error) {
+      console.error("خطأ في طلب لاعب افتراضي:", error);
+      setVirtualPlayerRequested(false); // إعادة تعيين الحالة للسماح بمحاولة أخرى
+    }
+  }, [tableId, user, virtualPlayerRequested, gameState, fetchGameState, playSound, toast]);
+
   // تنفيذ إجراء في اللعبة (طي، تمرير، مجاراة، زيادة، كل الرقائق)
   const performAction = useCallback(async (action: string, amount?: number) => {
     if (!tableId || !user || isActionLoading) return;
@@ -306,6 +180,139 @@ export default function ArabPokerGamePage({ params }: { params?: { tableId?: str
       });
     }
   }, [tableId, user, navigate, toast]);
+
+  // تأكد من وجود المستخدم ومعرف الطاولة
+  useEffect(() => {
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
+    
+    if (!tableId || isNaN(tableId)) {
+      setError("معرف الطاولة غير صحيح");
+      return;
+    }
+    
+    // إنشاء اتصال WebSocket جديد عند تحميل الصفحة إذا لم يكن موجوداً
+    if (ws.status !== 'open') {
+      console.log('إنشاء اتصال WebSocket في صفحة بوكر العرب');
+      ws.reconnect();
+    }
+    
+    // طلب حالة اللعبة الأولية
+    fetchGameState();
+    
+    // تنظيف عند مغادرة الصفحة
+    return () => {
+      console.log('الاحتفاظ باتصال WebSocket عند مغادرة صفحة بوكر العرب');
+    };
+  }, [user, tableId, ws, fetchGameState, navigate]);
+  
+  // دالة لطلب لاعب افتراضي (مساعدة)
+  const handleRequestVirtualPlayer = useCallback(() => {
+    if (requestVirtualPlayer) {
+      requestVirtualPlayer();
+    }
+  }, [requestVirtualPlayer]);
+
+  // مراقبة عدد اللاعبين في الطاولة لجلب لاعب افتراضي عند الانتظار
+  useEffect(() => {
+    if (!gameState || !tableId || virtualPlayerRequested) return;
+    
+    const playerCount = gameState.players?.length || 0;
+    
+    // إذا كان هناك لاعب واحد فقط (أنا) ولم نطلب لاعبًا افتراضيًا بعد
+    if (playerCount === 1 && !waitingTimer && !virtualPlayerRequested) {
+      console.log("بدء مؤقت انتظار لاعب افتراضي");
+      // بدء مؤقت لمدة دقيقة واحدة (60 ثانية)
+      const timer = window.setTimeout(() => {
+        console.log("انتهى وقت الانتظار - طلب لاعب افتراضي");
+        // طلب لاعب افتراضي عندما ينتهي المؤقت
+        handleRequestVirtualPlayer();
+      }, 60000); // دقيقة واحدة
+      setWaitingTimer(timer);
+    } 
+    // إذا انضم لاعبون آخرون، نلغي المؤقت
+    else if (playerCount > 1 && waitingTimer) {
+      console.log("انضم لاعبون آخرون - إلغاء طلب لاعب افتراضي");
+      window.clearTimeout(waitingTimer);
+      setWaitingTimer(null);
+    }
+    
+    // تنظيف المؤقت عند إلغاء تحميل المكون
+    return () => {
+      if (waitingTimer) {
+        window.clearTimeout(waitingTimer);
+      }
+    };
+  }, [gameState, virtualPlayerRequested, waitingTimer, tableId, handleRequestVirtualPlayer]);
+  
+  // استماع لحدث تحديث حالة اللعبة من WebSocket
+  useEffect(() => {
+    if (ws.status === 'open') {
+      ws.addMessageListener((message) => {
+        try {
+          const data = JSON.parse(message);
+          
+          // تحديث حالة اللعبة عند استلام حدث ذي صلة
+          if (data.type === 'game_update' && data.tableId === tableId) {
+            setGameState(data.gameState);
+            
+            // تشغيل أصوات مناسبة للأحداث
+            if (data.event) {
+              switch (data.event) {
+                case 'new_round':
+                  playSound('shuffle');
+                  break;
+                case 'player_fold':
+                  playSound('fold');
+                  break;
+                case 'player_check':
+                  playSound('check');
+                  break;
+                case 'player_call':
+                  playSound('call');
+                  break;
+                case 'player_raise':
+                  playSound('raise');
+                  break;
+                case 'player_all_in':
+                  playSound('all_in');
+                  break;
+                case 'flop_dealt':
+                case 'turn_dealt':
+                case 'river_dealt':
+                  playSound('card_flip');
+                  break;
+                case 'player_win':
+                  playSound('win_hand');
+                  break;
+                case 'player_join':
+                  playSound('player_join');
+                  break;
+              }
+            }
+          }
+          
+          // معالجة الأخطاء من الخادم
+          if (data.type === 'error') {
+            toast({
+              title: "خطأ",
+              description: data.message,
+              variant: "destructive",
+            });
+          }
+          
+          // معالجة الانضمام كمشاهد
+          if (data.type === 'spectator_joined' && data.userId === user?.id) {
+            setIsSpectator(true);
+          }
+        } catch (err) {
+          console.error("خطأ في معالجة رسالة WebSocket:", err);
+        }
+      });
+    }
+  }, [ws, tableId, playSound, user, toast]);
   
   // إذا كان هناك خطأ
   if (error) {
@@ -358,7 +365,7 @@ export default function ArabPokerGamePage({ params }: { params?: { tableId?: str
         <div className="flex items-center">
           <div className="flex items-center bg-black/40 px-3 py-1 rounded-full border border-[#D4AF37]/30 ml-4">
             <Users className="h-5 w-5 text-[#D4AF37] ml-2" />
-            <span className="text-white">
+            <span className="text-white font-arabic-numbers">
               {gameState.players?.length || 0} / {gameState.maxPlayers || 9}
             </span>
           </div>
@@ -379,7 +386,7 @@ export default function ArabPokerGamePage({ params }: { params?: { tableId?: str
       {/* طاولة اللعب */}
       <main className="max-w-5xl mx-auto">
         <ArabPokerTable 
-          gameState={gameState}
+          gameState={gameState as any}
           onAction={performAction}
           isSpectator={isSpectator}
         />

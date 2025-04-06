@@ -138,6 +138,16 @@
   }
 }
 
+/* Classes for Arabic/English number display */
+.font-arabic-numbers {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+  direction: ltr; /* Ensure numbers are always displayed left-to-right */
+  unicode-bidi: embed;
+  /* Ensure only numbers are affected */
+  display: inline-block;
+}
+
 /* Global animations */
 @keyframes fadeIn {
   from {

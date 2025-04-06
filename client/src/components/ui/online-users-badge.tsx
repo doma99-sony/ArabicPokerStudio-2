@@ -23,7 +23,7 @@ export function OnlineUsersCounter() {
       <Users className="h-4 w-4 text-[#D4AF37] ml-2" />
       <div className="flex flex-col items-start">
         <span>المستخدمين المتصلين</span>
-        <span className="font-bold text-[#D4AF37]">{onlineUsers}</span>
+        <span className="font-bold text-[#D4AF37] font-arabic-numbers">{onlineUsers}</span>
       </div>
       <div className={`w-2 h-2 rounded-full mr-2 ml-2 ${
         status === 'open' ? 'bg-green-500' : 'bg-red-500'

@@ -233,17 +233,20 @@ export function TableCard({ table, gameType, onJoin }: TableCardProps) {
         <div className="flex items-center justify-between text-xs">
           <div className="flex items-center">
             <Users size={12} className="text-[#D4AF37] ml-1" />
-            <span>{table.currentPlayers}/{table.maxPlayers}</span>
+            <span className="font-arabic-numbers">{table.currentPlayers}/{table.maxPlayers}</span>
           </div>
           <div className="flex items-center">
             <DollarSign size={12} className="text-[#D4AF37] ml-1" />
-            <span>{formatChips(table.smallBlind)}/{formatChips(table.bigBlind)}</span>
+            <span className="font-arabic-numbers">{formatChips(table.smallBlind)}/{formatChips(table.bigBlind)}</span>
           </div>
         </div>
         <div className="border-t border-[#D4AF37]/20 pt-1 text-xs">
           <div className="flex justify-between">
             <span>الحد الأدنى:</span>
-            <span className="font-bold text-[#D4AF37] flex items-center"><Coins className="ml-1 h-3 w-3" /> {formatChips(table.minBuyIn)}</span>
+            <span className="font-bold text-[#D4AF37] flex items-center">
+              <Coins className="ml-1 h-3 w-3" />
+              <span className="font-arabic-numbers">{formatChips(table.minBuyIn)}</span>
+            </span>
           </div>
         </div>
       </CardContent>

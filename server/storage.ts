@@ -18,15 +18,29 @@ import {
   GameTable, 
   TableStatus, 
   GameState, 
-  PlayerPosition,
   GameAction,
   PlayerStats,
-  Achievement,
   GameHistoryItem,
   PlayerProfile,
-  GameType,
-  BadgeEffect
-} from "../client/src/types";
+  GameType
+} from "../shared/types";
+
+// األإنجازات (غير موجودة في ملف shared/types)
+interface Achievement {
+  id: string;
+  name: string;
+  icon: string;
+  unlocked: boolean;
+  description: string;
+}
+
+// تأثيرات الشارات (غير موجودة في ملف shared/types)
+interface BadgeEffect {
+  type: "glow" | "rotate" | "pulse" | "bounce";
+  intensity?: number;
+  color?: string;
+  activationMode: "hover" | "always" | "click";
+}
 import { createDeck, shuffleDeck, dealCards, remainingCards } from "../client/src/lib/card-utils";
 import { GameRoom, createGameRoom } from "./game-room";
 
@@ -44,6 +58,7 @@ export interface IStorage {
   getGameTables(): Promise<GameTable[]>;
   getGameTablesByType(gameType: GameType): Promise<GameTable[]>;
   getGameTable(tableId: number): Promise<GameTable | undefined>;
+  createTable(tableData: Partial<GameTable>): Promise<GameTable>;
   removeVirtualPlayers(): Promise<void>; // إضافة وظيفة لإزالة اللاعبين الوهميين
   
   // Game state operations
@@ -513,6 +528,38 @@ export class MemStorage implements IStorage {
   
   async getGameTable(tableId: number): Promise<GameTable | undefined> {
     return this.tables.get(tableId);
+  }
+  
+  // إنشاء طاولة جديدة
+  async createTable(tableData: Partial<GameTable>): Promise<GameTable> {
+    const tableId = this.currentTableId++;
+    
+    const newTable: GameTable = {
+      id: tableId,
+      name: tableData.name || `طاولة ${tableId}`,
+      gameType: tableData.gameType || "poker",
+      smallBlind: tableData.smallBlind || 10,
+      bigBlind: tableData.bigBlind || 20,
+      minBuyIn: tableData.minBuyIn || 200,
+      maxBuyIn: tableData.maxBuyIn || 2000,
+      maxPlayers: tableData.maxPlayers || 9,
+      currentPlayers: 0,
+      status: "available",
+      category: tableData.category || "عام",
+      tableSettings: tableData.tableSettings || {},
+      ownerId: tableData.ownerId,
+      isVip: tableData.isVip || false,
+      password: tableData.password,
+      requiredVipLevel: tableData.requiredVipLevel
+    };
+    
+    // إضافة الطاولة إلى قائمة الطاولات
+    this.tables.set(tableId, newTable);
+    
+    // إنشاء غرفة لعبة جديدة مرتبطة بهذه الطاولة
+    this.gameRooms.set(tableId, createGameRoom(newTable));
+    
+    return newTable;
   }
   
   // إزالة اللاعبين الوهميين من جميع الطاولات

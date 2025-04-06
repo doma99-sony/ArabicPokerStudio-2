@@ -5,7 +5,7 @@ import { useSoundSystem } from "@/hooks/use-sound-system";
 import { Coins, User, Clock, Loader2, MoreHorizontal, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { formatChips } from "@/lib/utils";
+import { formatChips, formatToEnglishNumbers } from "@/lib/utils";
 import { Card } from "@/types";
 import { PlayingCard } from "@/components/game/playing-card";
 import { cn } from "@/lib/utils";
@@ -175,7 +175,7 @@ export function ArabPokerTable({ gameState, onAction, isSpectator = false }: Ara
         <div className="absolute inset-10 rounded-full border-2 border-[#ffffff20]"></div>
         <div className="absolute inset-8 flex items-center justify-center">
           <div className="text-center">
-            <div className="text-2xl font-bold text-[#D4AF37]">
+            <div className="text-2xl font-bold text-[#D4AF37] font-arabic-numbers">
               {formatChips(gameState.pot)}
             </div>
             <div className="text-sm text-[#D4AF37]/60">الرهان المركزي</div>
@@ -223,8 +223,8 @@ export function ArabPokerTable({ gameState, onAction, isSpectator = false }: Ara
       
       {/* معلومات الطاولة */}
       <div className="absolute top-4 right-4 bg-black/60 p-2 rounded-lg border border-[#D4AF37]/30 z-20">
-        <div className="text-xs text-[#D4AF37]/80">الرهانات: {gameState.smallBlind}/{gameState.bigBlind}</div>
-        <div className="text-xs text-[#D4AF37]/80">الجولة: #{gameState.round}</div>
+        <div className="text-xs text-[#D4AF37]/80 font-arabic-numbers">الرهانات: {formatToEnglishNumbers(gameState.smallBlind)}/{formatToEnglishNumbers(gameState.bigBlind)}</div>
+        <div className="text-xs text-[#D4AF37]/80 font-arabic-numbers">الجولة: #{formatToEnglishNumbers(gameState.round)}</div>
       </div>
       
       {/* مواقع اللاعبين */}
@@ -262,8 +262,8 @@ export function ArabPokerTable({ gameState, onAction, isSpectator = false }: Ara
             <div className="text-[#D4AF37] font-bold">دورك للعب</div>
             <div className="flex items-center">
               <Clock className="h-4 w-4 text-[#D4AF37] ml-1" />
-              <div className={`text-sm font-medium ${timeLeft <= 5 ? 'text-red-500' : 'text-[#D4AF37]'}`}>
-                {timeLeft}
+              <div className={`text-sm font-medium font-arabic-numbers ${timeLeft <= 5 ? 'text-red-500' : 'text-[#D4AF37]'}`}>
+                {formatToEnglishNumbers(timeLeft)}
               </div>
             </div>
           </div>
@@ -330,8 +330,8 @@ export function ArabPokerTable({ gameState, onAction, isSpectator = false }: Ara
           {canRaise && (
             <div className="mt-2">
               <div className="flex justify-between text-xs text-[#D4AF37]/80 mb-1">
-                <span>{formatChips(minRaise)}</span>
-                <span>{formatChips(maxBet)}</span>
+                <span className="font-arabic-numbers">{formatChips(minRaise)}</span>
+                <span className="font-arabic-numbers">{formatChips(maxBet)}</span>
               </div>
               <Slider
                 className="mt-0"
@@ -381,7 +381,7 @@ export function ArabPokerTable({ gameState, onAction, isSpectator = false }: Ara
                     <span className="text-[#D4AF37] text-sm font-medium">{msg.username}:</span>
                     <span className="text-white text-sm ml-1">{msg.message}</span>
                   </div>
-                  <div className="text-white/40 text-xs">
+                  <div className="text-white/40 text-xs font-arabic-numbers">
                     {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </div>
                 </div>
@@ -501,11 +501,11 @@ function PlayerPositionCard({ player, isDealer, isCurrentTurn, stateColor, showC
         <div className="flex flex-col items-end">
           <div className="flex items-center">
             <Coins className="h-3 w-3 text-[#D4AF37] ml-1" />
-            <span className="text-[#D4AF37] text-xs">{formatChips(player.chips)}</span>
+            <span className="text-[#D4AF37] text-xs font-arabic-numbers">{formatChips(player.chips)}</span>
           </div>
           
           {player.betAmount > 0 && (
-            <div className="text-white/80 text-xs mt-1">
+            <div className="text-white/80 text-xs mt-1 font-arabic-numbers">
               {player.isAllIn ? "كل الرقائق" : formatChips(player.betAmount)}
             </div>
           )}
@@ -516,7 +516,7 @@ function PlayerPositionCard({ player, isDealer, isCurrentTurn, stateColor, showC
           
           {/* عرض المكاسب والخسائر */}
           {player.profitLoss !== undefined && (
-            <div className={`text-xs mt-1 ${player.profitLoss > 0 ? 'text-green-400' : player.profitLoss < 0 ? 'text-red-400' : 'text-gray-400'}`}>
+            <div className={`text-xs mt-1 font-arabic-numbers ${player.profitLoss > 0 ? 'text-green-400' : player.profitLoss < 0 ? 'text-red-400' : 'text-gray-400'}`}>
               {player.profitLoss > 0 ? '+' : ''}{formatChips(player.profitLoss)}
             </div>
           )}
@@ -533,7 +533,7 @@ function PlayerPositionCard({ player, isDealer, isCurrentTurn, stateColor, showC
       {/* عرض مبلغ الفوز */}
       {player.winAmount && player.isWinner && (
         <div className="mt-1 bg-[#FFD700]/20 rounded p-1 text-center">
-          <div className="text-[#FFD700] text-xs font-bold">
+          <div className="text-[#FFD700] text-xs font-bold font-arabic-numbers">
             +{formatChips(player.winAmount)}
           </div>
         </div>

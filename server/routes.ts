@@ -304,6 +304,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Create a new table
+  app.post("/api/tables/:gameType", ensureAuthenticated, async (req, res) => {
+    
+    const gameType = req.params.gameType;
+    
+    // Validate game type
+    const validGameTypes = ["poker", "naruto", "tekken", "domino", "arab_poker"];
+    if (!validGameTypes.includes(gameType)) {
+      return res.status(400).json({ message: "نوع اللعبة غير صالح" });
+    }
+    
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "غير مصرح" });
+      }
+      
+      // Validate request parameters
+      const tableSchema = z.object({
+        name: z.string().min(3).max(50),
+        smallBlind: z.number().min(10),
+        maxPlayers: z.number().min(2).max(9),
+        minBuyIn: z.number().min(20),
+        maxBuyIn: z.number().min(100),
+        category: z.string().min(1),
+        isPrivate: z.boolean().optional(),
+        password: z.string().optional(),
+        createdBy: z.number(),
+      });
+      
+      const validatedData = tableSchema.parse(req.body);
+      
+      // Ensure the creator is the authenticated user
+      if (validatedData.createdBy !== req.user.id) {
+        return res.status(403).json({ message: "غير مسموح بإنشاء طاولة نيابة عن مستخدم آخر" });
+      }
+      
+      console.log(`إنشاء طاولة جديدة بواسطة المستخدم ${req.user.id} لنوع اللعبة ${gameType}`);
+      
+      // Create the table
+      const tableData = {
+        name: validatedData.name,
+        gameType: gameType as any,
+        smallBlind: validatedData.smallBlind,
+        bigBlind: validatedData.smallBlind * 2, // الرهان الكبير ضعف الرهان الصغير
+        minBuyIn: validatedData.minBuyIn,
+        maxBuyIn: validatedData.maxBuyIn,
+        maxPlayers: validatedData.maxPlayers,
+        currentPlayers: 0,
+        status: "available" as const,
+        ownerId: req.user.id,
+        isVip: false,
+        password: validatedData.isPrivate ? validatedData.password : undefined,
+        tableSettings: {
+          category: validatedData.category,
+        },
+      };
+      
+      const newTable = await storage.createTable(tableData);
+      
+      res.status(201).json({ 
+        message: "تم إنشاء الطاولة بنجاح", 
+        tableId: newTable.id 
+      });
+    } catch (error) {
+      console.error("Error creating table:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "بيانات الطاولة غير صالحة", errors: error.errors });
+      }
+      res.status(500).json({ message: "حدث خطأ أثناء إنشاء الطاولة" });
+    }
+  });
+  
   // Join a table
   app.post("/api/game/:tableId/join", ensureAuthenticated, async (req, res) => {
     const tableId = parseInt(req.params.tableId);

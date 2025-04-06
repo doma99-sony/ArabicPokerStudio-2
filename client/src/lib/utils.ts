@@ -6,17 +6,44 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
- * تنسيق قيمة الرقائق (الشيبس) للعرض 
+ * تنسيق قيمة الرقائق (الشيبس) للعرض باستخدام الأرقام الإنجليزية
  * مثال: 1000 -> 1K, 1500 -> 1.5K, 1000000 -> 1M, 1000000000 -> 1B
  */
 export function formatChips(amount: number): string {
-  if (amount >= 1000000000) {
-    return `${(amount / 1000000000).toFixed(amount % 1000000000 === 0 ? 0 : 1)}B`;
-  } else if (amount >= 1000000) {
-    return `${(amount / 1000000).toFixed(amount % 1000000 === 0 ? 0 : 1)}M`;
-  } else if (amount >= 1000) {
-    return `${(amount / 1000).toFixed(amount % 1000 === 0 ? 0 : 1)}K`;
-  } else {
-    return amount.toString();
-  }
+  const formatter = new Intl.NumberFormat('en-US', {
+    maximumFractionDigits: 1,
+    notation: 'compact',
+    compactDisplay: 'short'
+  });
+  
+  return formatter.format(amount);
+}
+
+/**
+ * تنسيق الرقم ليظهر بالأرقام الإنجليزية
+ * هذه الدالة تضمن أن جميع الأرقام تظهر بالإنجليزية بدلاً من العربية
+ */
+export function formatToEnglishNumbers(value: number | string): string {
+  if (value === undefined || value === null) return '';
+  
+  // تحويل القيمة إلى نص
+  const strValue = value.toString();
+  
+  // تنسيق النص باستخدام أرقام إنجليزية
+  const formatted = new Intl.NumberFormat('en-US').format(
+    parseFloat(strValue.replace(/,/g, ''))
+  );
+  
+  return formatted;
+}
+
+/**
+ * تنسيق المبلغ النقدي باستخدام رمز الدولار $ والأرقام الإنجليزية
+ */
+export function formatCurrency(amount: number): string {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0
+  }).format(amount);
 }

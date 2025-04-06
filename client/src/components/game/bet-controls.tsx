@@ -99,7 +99,7 @@ export function BetControls({
           <span className="text-white text-sm font-semibold">مبلغ الرهان</span>
         </div>
         <div className="bg-black/50 px-3 py-1 rounded-full border border-[#D4AF37]/30">
-          <span className="text-gold font-bold text-lg">
+          <span className="text-gold font-bold text-lg font-arabic-numbers">
             {formatChips(betAmount)}
           </span>
         </div>
@@ -127,13 +127,13 @@ export function BetControls({
       <div className="flex justify-between text-xs text-white/60 px-1 -mt-1">
         <div className="flex flex-col items-center">
           <span className="text-gold/80 mb-1">الحد الأدنى</span>
-          <span className="bg-black/30 px-2 py-0.5 rounded border border-gold/10">
+          <span className="bg-black/30 px-2 py-0.5 rounded border border-gold/10 font-arabic-numbers">
             {formatChips(minBet)}
           </span>
         </div>
         <div className="flex flex-col items-center">
           <span className="text-gold/80 mb-1">الحد الأقصى</span>
-          <span className="bg-black/30 px-2 py-0.5 rounded border border-gold/10">
+          <span className="bg-black/30 px-2 py-0.5 rounded border border-gold/10 font-arabic-numbers">
             {formatChips(maxBet)}
           </span>
         </div>
@@ -148,7 +148,7 @@ export function BetControls({
           min={minBet}
           max={maxBet}
           step={100}
-          className="flex-grow text-right bg-black/30 border-gold/20 text-white focus-visible:ring-gold/30 focus-visible:ring-offset-0 focus-visible:border-gold/50 text-lg"
+          className="flex-grow text-right bg-black/30 border-gold/20 text-white focus-visible:ring-gold/30 focus-visible:ring-offset-0 focus-visible:border-gold/50 text-lg font-arabic-numbers"
         />
         
         <div className="flex space-x-1 rtl:space-x-reverse">

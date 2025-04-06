@@ -8,9 +8,9 @@ import { Button } from "@/components/ui/button";
 import { OnlineUsersCounter } from "@/components/ui/online-users-badge";
 import { Loader2, ArrowRight, Coins, Plus, Table2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { formatChips } from "@/lib/utils";
+import { formatChips, formatToEnglishNumbers } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
-import { CreateTableDialog } from "@/components/dialogs/create-table-dialog";
+import { CreateTableDialog } from "@/components/create-table-dialog";
 
 export default function ArabPokerPage() {
   const [, navigate] = useLocation();
