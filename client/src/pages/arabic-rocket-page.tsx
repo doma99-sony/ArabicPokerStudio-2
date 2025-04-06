@@ -30,14 +30,6 @@ const ArabicRocketPage = () => {
   const [potentialWin, setPotentialWin] = useState(0);
   const [exploded, setExploded] = useState(false);
   const [currentStep, setCurrentStep] = useState(0); // متغير لتتبع خطوات الرسم للتأثيرات البصرية
-  const [gameTimer, setGameTimer] = useState(0); // عداد اللعبة (بالثواني)
-  
-  // وظيفة لتنسيق الوقت بتنسيق mm:ss
-  const formatTime = (seconds: number): string => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = Math.floor(seconds % 60);
-    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-  };
   
   // بيانات اللاعبين
   const [activePlayers, setActivePlayers] = useState<Array<{
@@ -177,7 +169,6 @@ const ArabicRocketPage = () => {
   const startGame = () => {
     setIsGameActive(true);
     setIsBettingPhase(false); // إيقاف مرحلة الرهان عند بدء اللعبة الفعلية
-    setGameTimer(0); // إعادة تعيين العداد عند بدء اللعبة
     
     // اضافة لاعبين افتراضيين
     setActivePlayers([
@@ -1407,16 +1398,7 @@ const ArabicRocketPage = () => {
             </div>
           )}
           
-          {/* العداد في منتصف الشاشة حتى أثناء اللعب */}
-          {isGameActive && (
-            <div className="absolute top-1/4 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30">
-              <div className="bg-black/70 backdrop-blur-sm px-6 py-2 rounded-full shadow-xl">
-                <div className="text-4xl font-bold text-yellow-500 text-center">
-                  {formatTime(gameTimer)}
-                </div>
-              </div>
-            </div>
-          )}
+
           
           {/* Countdown overlay */}
           {!isGameActive && (
