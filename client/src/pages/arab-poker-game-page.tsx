@@ -20,6 +20,8 @@ export default function ArabPokerGamePage({ params }: { params?: { tableId?: str
   const [error, setError] = useState<string | null>(null);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
   const [isActionLoading, setIsActionLoading] = useState(false);
+  const [waitingTimer, setWaitingTimer] = useState<number | null>(null);
+  const [virtualPlayerRequested, setVirtualPlayerRequested] = useState(false);
   
   // استخراج معرف الطاولة من الباراميترات
   const tableId = params && params.tableId ? parseInt(params.tableId) : null;
