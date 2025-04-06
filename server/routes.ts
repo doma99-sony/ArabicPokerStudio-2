@@ -971,6 +971,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // إضافة مسارات لعبة الأسد والغزالة من نوع كراش
   // Removed Lion Crash routes
 
+  // إضافة نقطة نهاية للتحقق من حالة الخادم
+  app.get('/health', (req: Request, res: Response) => {
+    res.status(200).json({
+      status: 'ok',
+      server: 'running',
+      timestamp: new Date().toISOString()
+    });
+  });
+
   // معالجة الصفحات غير الموجودة
   app.use((req: Request, res: Response) => {
     // التحقق مما إذا كان الطلب يتعلق بواجهة برمجة التطبيقات API أو ملف ثابت
@@ -982,16 +991,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
     
-    // إعادة توجيه إلى صفحة المصادقة للصفحات الأخرى
-    // تجنب حلقة التوجيه المستمرة إذا كان المسار هو /auth
+    // التعامل مع صفحة المصادقة بشكل خاص
     if (req.path === '/auth') {
-      // إذا كان الطلب بالفعل على صفحة المصادقة، نترك خادم الواجهة الأمامية يتعامل معه
-      // سنقوم بتمرير الطلب للواجهة الأمامية عن طريق إرسال استجابة فارغة
-      // هذا سيسمح لـ React/Vite بعرض صفحة تسجيل الدخول بشكل صحيح
-      res.status(200).end();
-    } else {
-      res.redirect('/auth');
+      // إذا كان الطلب على صفحة المصادقة، نتركها للواجهة الأمامية بغض النظر عن حالة المصادقة
+      return res.status(200).end();
     }
+    
+    // إذا كان المستخدم مسجل دخوله، نسمح بالوصول إلى جميع المسارات
+    if (req.isAuthenticated()) {
+      return res.status(200).end();
+    }
+    
+    // إذا لم يكن مسجل دخوله، نعيد توجيهه إلى صفحة المصادقة
+    res.redirect('/auth');
   });
 
   // معالجة الأخطاء العامة
