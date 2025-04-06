@@ -13,6 +13,7 @@ import { RemoveVirtualPlayersButton } from "@/components/remove-virtual-players-
 import { NotificationsButton, GameInstructionsButton } from "@/components/ui/notifications-system";
 import { LogOut, User, ChevronRight, Loader2, ChevronLeft, ChevronUp, Bell, ShoppingBag, ShoppingCart, Download, Smartphone, ExternalLink, Coins, Trophy, Crown } from "lucide-react";
 import { formatChips } from "@/lib/utils";
+import { HeavySnowEffect, GoldDustEffect } from "@/components/effects/snow-effect";
 import { HeavyPokerCardsEffect, SuitSymbolsEffect } from "@/components/effects/poker-cards-effect";
 
 export default function LobbyPage() {
