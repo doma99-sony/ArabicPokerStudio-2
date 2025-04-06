@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="1200" height="800" viewBox="0 0 1200 800">
+  <!-- القاعدة اللونية للصحراء والسماء - غروب الشمس -->
+  <defs>
+    <linearGradient id="sunsetSky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1A237E;stop-opacity:1" />
+      <stop offset="20%" style="stop-color:#303F9F;stop-opacity:1" />
+      <stop offset="40%" style="stop-color:#7E57C2;stop-opacity:1" />
+      <stop offset="60%" style="stop-color:#E57373;stop-opacity:1" />
+      <stop offset="80%" style="stop-color:#FFB74D;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFD54F;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="desertGround" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD54F;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF8F00;stop-opacity:1" />
+    </linearGradient>
+    <radialGradient id="sunsetGlow" cx="50%" cy="50%" r="70%" fx="50%" fy="50%">
+      <stop offset="0%" style="stop-color:#FF9800;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#FF5722;stop-opacity:0" />
+    </radialGradient>
+    <linearGradient id="templeStone" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#E8D8B2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#C1A980;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="templeShadow" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#A18960;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7F6B48;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadowBlur" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="5" result="blur" />
+    </filter>
+  </defs>
+
+  <!-- السماء وقت الغروب والأرض -->
+  <rect x="0" y="0" width="1200" height="500" fill="url(#sunsetSky)" />
+  <rect x="0" y="500" width="1200" height="300" fill="url(#desertGround)" />
+  
+  <!-- توهج غروب الشمس -->
+  <circle cx="600" cy="250" r="300" fill="url(#sunsetGlow)" opacity="0.7" />
+  
+  <!-- النيل في الخلفية -->
+  <path d="M 0,550 C 150,530 300,560 450,540 C 600,520 750,550 900,530 C 1050,510 1200,540 1200,540 L 1200,580 C 1050,560 900,590 750,570 C 600,550 450,580 300,560 C 150,540 0,570 0,570 Z" fill="#3F51B5" opacity="0.7" />
+  <path d="M 0,550 C 150,530 300,560 450,540 C 600,520 750,550 900,530 C 1050,510 1200,540 1200,540 L 1200,555 C 1050,535 900,565 750,545 C 600,525 450,555 300,535 C 150,515 0,545 0,545 Z" fill="#7986CB" opacity="0.5" />
+  
+  <!-- واجهة المعبد الرئيسية -->
+  <!-- قاعدة المعبد -->
+  <rect x="350" y="450" width="500" height="50" fill="url(#templeStone)" />
+  
+  <!-- السلالم المؤدية للمعبد -->
+  <polygon points="400,500 800,500 750,550 450,550" fill="url(#templeShadow)" />
+  <polygon points="450,550 750,550 700,600 500,600" fill="url(#templeStone)" />
+  
+  <!-- أعمدة المعبد الرئيسية -->
+  <!-- العمود 1 -->
+  <rect x="400" y="300" width="40" height="150" fill="url(#templeStone)" />
+  <ellipse cx="420" cy="300" rx="25" ry="15" fill="url(#templeStone)" />
+  <ellipse cx="420" cy="450" rx="25" ry="10" fill="url(#templeShadow)" />
+  
+  <!-- العمود 2 -->
+  <rect x="470" y="300" width="40" height="150" fill="url(#templeStone)" />
+  <ellipse cx="490" cy="300" rx="25" ry="15" fill="url(#templeStone)" />
+  <ellipse cx="490" cy="450" rx="25" ry="10" fill="url(#templeShadow)" />
+  
+  <!-- العمود 3 -->
+  <rect x="540" y="300" width="40" height="150" fill="url(#templeStone)" />
+  <ellipse cx="560" cy="300" rx="25" ry="15" fill="url(#templeStone)" />
+  <ellipse cx="560" cy="450" rx="25" ry="10" fill="url(#templeShadow)" />
+  
+  <!-- العمود 4 -->
+  <rect x="610" y="300" width="40" height="150" fill="url(#templeStone)" />
+  <ellipse cx="630" cy="300" rx="25" ry="15" fill="url(#templeStone)" />
+  <ellipse cx="630" cy="450" rx="25" ry="10" fill="url(#templeShadow)" />
+  
+  <!-- العمود 5 -->
+  <rect x="680" y="300" width="40" height="150" fill="url(#templeStone)" />
+  <ellipse cx="700" cy="300" rx="25" ry="15" fill="url(#templeStone)" />
+  <ellipse cx="700" cy="450" rx="25" ry="10" fill="url(#templeShadow)" />
+  
+  <!-- العمود 6 -->
+  <rect x="750" y="300" width="40" height="150" fill="url(#templeStone)" />
+  <ellipse cx="770" cy="300" rx="25" ry="15" fill="url(#templeStone)" />
+  <ellipse cx="770" cy="450" rx="25" ry="10" fill="url(#templeShadow)" />
+  
+  <!-- سقف المعبد -->
+  <rect x="375" y="250" width="450" height="50" fill="url(#templeStone)" />
+  <path d="M 375,250 L 375,300 L 825,300 L 825,250 L 375,250 Z M 400,260 L 800,260 L 800,290 L 400,290 Z" fill="url(#templeShadow)" />
+  
+  <!-- نقوش هيروغليفية بسيطة -->
+  <rect x="445" y="200" width="300" height="50" fill="url(#templeStone)" />
+  <rect x="460" y="210" width="10" height="30" fill="#A18960" rx="2" ry="2" />
+  <rect x="480" y="210" width="10" height="30" fill="#A18960" rx="2" ry="2" />
+  <circle cx="500" cy="225" r="10" fill="#A18960" />
+  <rect x="520" y="210" width="10" height="30" fill="#A18960" rx="2" ry="2" />
+  <path d="M 540,210 L 550,210 L 550,225 L 560,225 L 560,210 L 570,210 L 570,240 L 540,240 Z" fill="#A18960" />
+  <rect x="580" y="210" width="10" height="30" fill="#A18960" rx="2" ry="2" />
+  <circle cx="600" cy="225" r="10" fill="#A18960" />
+  <path d="M 620,210 L 640,210 L 650,220 L 640,230 L 620,230 Z" fill="#A18960" />
+  <rect x="660" y="210" width="10" height="30" fill="#A18960" rx="2" ry="2" />
+  <circle cx="680" cy="225" r="10" fill="#A18960" />
+  <rect x="700" y="210" width="10" height="30" fill="#A18960" rx="2" ry="2" />
+  <rect x="720" y="210" width="10" height="30" fill="#A18960" rx="2" ry="2" />
+  
+  <!-- زخارف مصرية على الأعمدة -->
+  <path d="M 405,350 L 435,350 M 405,370 L 435,370 M 405,390 L 435,390 M 405,410 L 435,410" stroke="#A18960" stroke-width="2" />
+  <path d="M 475,350 L 505,350 M 475,370 L 505,370 M 475,390 L 505,390 M 475,410 L 505,410" stroke="#A18960" stroke-width="2" />
+  <path d="M 545,350 L 575,350 M 545,370 L 575,370 M 545,390 L 575,390 M 545,410 L 575,410" stroke="#A18960" stroke-width="2" />
+  <path d="M 615,350 L 645,350 M 615,370 L 645,370 M 615,390 L 645,390 M 615,410 L 645,410" stroke="#A18960" stroke-width="2" />
+  <path d="M 685,350 L 715,350 M 685,370 L 715,370 M 685,390 L 715,390 M 685,410 L 715,410" stroke="#A18960" stroke-width="2" />
+  <path d="M 755,350 L 785,350 M 755,370 L 785,370 M 755,390 L 785,390 M 755,410 L 785,410" stroke="#A18960" stroke-width="2" />
+  
+  <!-- نجوم في السماء -->
+  <g opacity="0.7">
+    <circle cx="100" cy="100" r="1.5" fill="white" />
+    <circle cx="200" cy="150" r="1" fill="white" />
+    <circle cx="300" cy="100" r="1.2" fill="white" />
+    <circle cx="900" cy="100" r="1" fill="white" />
+    <circle cx="950" cy="150" r="1.3" fill="white" />
+    <circle cx="1000" cy="100" r="1.1" fill="white" />
+    <circle cx="1050" cy="150" r="1.4" fill="white" />
+    <circle cx="1100" cy="100" r="1" fill="white" />
+    <circle cx="1150" cy="50" r="1.2" fill="white" />
+  </g>
+  
+  <!-- نخيل متناثر حول المعبد -->
+  <g transform="translate(200, 500)">
+    <rect x="-5" y="0" width="10" height="70" fill="#795548" />
+    <path d="M 0,-10 C -10,0 -20,10 -30,15 C -20,15 -10,20 0,20 C 10,20 20,15 30,15 C 20,10 10,0 0,-10 Z" fill="#4CAF50" />
+    <path d="M 0,0 C -10,10 -20,20 -30,25 C -20,25 -10,30 0,30 C 10,30 20,25 30,25 C 20,20 10,10 0,0 Z" fill="#4CAF50" />
+    <path d="M 0,10 C -10,20 -20,30 -30,35 C -20,35 -10,40 0,40 C 10,40 20,35 30,35 C 20,30 10,20 0,10 Z" fill="#4CAF50" />
+  </g>
+  
+  <g transform="translate(900, 520)">
+    <rect x="-5" y="0" width="10" height="70" fill="#795548" />
+    <path d="M 0,-10 C -10,0 -20,10 -30,15 C -20,15 -10,20 0,20 C 10,20 20,15 30,15 C 20,10 10,0 0,-10 Z" fill="#4CAF50" />
+    <path d="M 0,0 C -10,10 -20,20 -30,25 C -20,25 -10,30 0,30 C 10,30 20,25 30,25 C 20,20 10,10 0,0 Z" fill="#4CAF50" />
+    <path d="M 0,10 C -10,20 -20,30 -30,35 C -20,35 -10,40 0,40 C 10,40 20,35 30,35 C 20,30 10,20 0,10 Z" fill="#4CAF50" />
+  </g>
+  
+  <g transform="translate(1050, 480)">
+    <rect x="-5" y="0" width="10" height="70" fill="#795548" />
+    <path d="M 0,-10 C -10,0 -20,10 -30,15 C -20,15 -10,20 0,20 C 10,20 20,15 30,15 C 20,10 10,0 0,-10 Z" fill="#4CAF50" />
+    <path d="M 0,0 C -10,10 -20,20 -30,25 C -20,25 -10,30 0,30 C 10,30 20,25 30,25 C 20,20 10,10 0,0 Z" fill="#4CAF50" />
+    <path d="M 0,10 C -10,20 -20,30 -30,35 C -20,35 -10,40 0,40 C 10,40 20,35 30,35 C 20,30 10,20 0,10 Z" fill="#4CAF50" />
+  </g>
+  
+  <!-- تأثير تدرج للصحراء -->
+  <path d="M 0,600 C 200,580 400,610 600,590 C 800,570 1000,600 1200,580 L 1200,800 L 0,800 Z" fill="#FF8F00" opacity="0.3" />
+  <path d="M 0,650 C 200,630 400,660 600,640 C 800,620 1000,650 1200,630 L 1200,800 L 0,800 Z" fill="#F57C00" opacity="0.2" />
+  
+  <!-- تمثال رع (إله الشمس) بسيط -->
+  <g transform="translate(200, 500) scale(0.5)">
+    <rect x="-20" y="0" width="40" height="100" fill="#C1A980" />
+    <circle cx="0" cy="-20" r="40" fill="#FFB74D" />
+    <path d="M -40,-20 L 40,-20 L 0,-60 Z" fill="#FFB74D" />
+  </g>
+  
+  <!-- مسلة مصرية -->
+  <g transform="translate(950, 500) scale(0.6)">
+    <polygon points="0,-150 30,0 -30,0" fill="#E8D8B2" />
+    <rect x="-20" y="0" width="40" height="30" fill="#C1A980" />
+  </g>
+</svg>

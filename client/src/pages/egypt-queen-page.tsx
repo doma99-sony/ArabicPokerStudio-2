@@ -784,7 +784,7 @@ export default function EgyptQueenPage() {
     return (
       <div 
         className="h-screen w-full overflow-hidden flex flex-col items-center justify-center bg-cover bg-center relative"
-        style={{ backgroundImage: "url('/images/egypt-queen/lobby-bg.jpg')" }}
+        style={{ backgroundImage: "url('/images/egypt-queen/backgrounds/egyptian-temple.svg')" }}
       >
         {/* تأثير الغبار الذهبي */}
         <GoldDustEffect />
@@ -846,101 +846,110 @@ export default function EgyptQueenPage() {
   return (
     <div 
       className="h-screen w-full overflow-hidden flex flex-col bg-cover bg-center relative"
-      style={{ backgroundImage: "url('/images/egypt-queen/game-bg.jpg')" }}
+      style={{ backgroundImage: "url('/images/egypt-queen/backgrounds/pyramids-desert.svg')" }}
     >
       {/* نافذة لعبة المكافأة - صناديق الكنز الفرعونية */}
       <Dialog open={bonusGameOpen} onOpenChange={setBonusGameOpen}>
-        <DialogContent className="bg-gradient-to-b from-[#4C2708] to-[#331B05] border-4 border-[#D4AF37] p-6 max-w-3xl mx-auto">
-          <DialogHeader>
-            <DialogTitle className="text-3xl text-center text-[#D4AF37] font-bold">
-              لعبة الكنوز الفرعونية 🏺
-            </DialogTitle>
-            <DialogDescription className="text-xl text-center text-white/80">
-              اختر 3 صناديق لاكتشاف الكنوز المخفية!
-            </DialogDescription>
-          </DialogHeader>
-          
-          {/* عرض صناديق الكنز */}
-          <div className="grid grid-cols-5 gap-4 my-8">
-            {treasureChests.map((chest, index) => {
-              // تحديد الفئة والمظهر حسب نوع الصندوق
-              let chestBorderClass = "border-[#D4AF37]";
-              let chestIconColor = "text-[#D4AF37]";
-              let chestGlowEffect = "";
-              let chestBackground = chest.opened ? 'bg-[#D4AF37]/10' : 'hover:bg-[#D4AF37]/5 bg-[#2D1B09]';
+        <DialogContent 
+          className="border-4 border-[#D4AF37] p-6 max-w-3xl mx-auto bg-cover bg-center overflow-hidden relative"
+          style={{
+            backgroundImage: "url('/images/egypt-queen/backgrounds/nile-queen.svg')",
+            backgroundColor: "#000"
+          }}
+        >
+          <div className="absolute inset-0 bg-black/60"></div>
+          <div className="relative z-10">
+            <DialogHeader>
+              <DialogTitle className="text-3xl text-center text-[#D4AF37] font-bold">
+                لعبة الكنوز الفرعونية 🏺
+              </DialogTitle>
+              <DialogDescription className="text-xl text-center text-white/80">
+                اختر 3 صناديق لاكتشاف الكنوز المخفية!
+              </DialogDescription>
+            </DialogHeader>
+            
+            {/* عرض صناديق الكنز */}
+            <div className="grid grid-cols-5 gap-4 my-8">
+              {treasureChests.map((chest, index) => {
+                // تحديد الفئة والمظهر حسب نوع الصندوق
+                let chestBorderClass = "border-[#D4AF37]";
+                let chestIconColor = "text-[#D4AF37]";
+                let chestGlowEffect = "";
+                let chestBackground = chest.opened ? 'bg-[#D4AF37]/10' : 'hover:bg-[#D4AF37]/5 bg-[#2D1B09]';
+                
+                // مظهر خاص للصناديق الذهبية
+                if (chest.type === 'golden') {
+                  chestBorderClass = "border-[#FFD700]";
+                  chestIconColor = "text-[#FFD700]";
+                  chestGlowEffect = "shadow-[0_0_15px_rgba(255,215,0,0.5)]";
+                  chestBackground = chest.opened ? 'bg-gradient-to-b from-[#5A3805]/30 to-[#FFD700]/20' : 'hover:bg-[#5A3805]/30 bg-gradient-to-b from-[#3A2604] to-[#2D1B09]';
+                } 
+                // مظهر للصناديق المميزة
+                else if (chest.type === 'special') {
+                  chestBorderClass = "border-[#F5DEB3]";
+                  chestIconColor = "text-[#F5DEB3]";
+                  chestGlowEffect = "shadow-[0_0_10px_rgba(245,222,179,0.3)]";
+                  chestBackground = chest.opened ? 'bg-[#F5DEB3]/10' : 'hover:bg-[#F5DEB3]/5 bg-[#2D1B09]';
+                }
               
-              // مظهر خاص للصناديق الذهبية
-              if (chest.type === 'golden') {
-                chestBorderClass = "border-[#FFD700]";
-                chestIconColor = "text-[#FFD700]";
-                chestGlowEffect = "shadow-[0_0_15px_rgba(255,215,0,0.5)]";
-                chestBackground = chest.opened ? 'bg-gradient-to-b from-[#5A3805]/30 to-[#FFD700]/20' : 'hover:bg-[#5A3805]/30 bg-gradient-to-b from-[#3A2604] to-[#2D1B09]';
-              } 
-              // مظهر للصناديق المميزة
-              else if (chest.type === 'special') {
-                chestBorderClass = "border-[#F5DEB3]";
-                chestIconColor = "text-[#F5DEB3]";
-                chestGlowEffect = "shadow-[0_0_10px_rgba(245,222,179,0.3)]";
-                chestBackground = chest.opened ? 'bg-[#F5DEB3]/10' : 'hover:bg-[#F5DEB3]/5 bg-[#2D1B09]';
-              }
-              
-              return (
-                <div 
-                  key={index}
-                  className={`h-32 cursor-pointer transition-all duration-300 transform ${
-                    chest.opened ? 'scale-105' : 'hover:scale-105'
-                  } ${chestBackground} border-2 ${chestBorderClass} rounded-md flex flex-col items-center justify-center relative overflow-hidden ${chestGlowEffect}`}
-                  onClick={() => !chest.opened && openTreasureChest(index)}
-                >
-                  {chest.opened ? (
-                    // صندوق مفتوح يعرض المكافأة
-                    <div className="flex flex-col items-center gap-1">
-                      {chest.type === 'golden' ? (
-                        <Sparkles className={`h-12 w-12 ${chestIconColor} animate-pulse`} />
-                      ) : (
-                        <GiftIcon className={`h-12 w-12 ${chestIconColor}`} />
-                      )}
-                      <span className={`font-bold text-xl ${chest.type === 'golden' ? 'text-[#FFD700]' : 'text-white'}`}>
-                        {chest.reward}
-                      </span>
-                    </div>
-                  ) : (
-                    // صندوق مغلق
-                    <div className="flex flex-col items-center">
-                      {chest.type === 'golden' ? (
-                        <>
+                return (
+                  <div 
+                    key={index}
+                    className={`h-32 cursor-pointer transition-all duration-300 transform ${
+                      chest.opened ? 'scale-105' : 'hover:scale-105'
+                    } ${chestBackground} border-2 ${chestBorderClass} rounded-md flex flex-col items-center justify-center relative overflow-hidden ${chestGlowEffect}`}
+                    onClick={() => !chest.opened && openTreasureChest(index)}
+                  >
+                    {chest.opened ? (
+                      // صندوق مفتوح يعرض المكافأة
+                      <div className="flex flex-col items-center gap-1">
+                        {chest.type === 'golden' ? (
+                          <Sparkles className={`h-12 w-12 ${chestIconColor} animate-pulse`} />
+                        ) : (
+                          <GiftIcon className={`h-12 w-12 ${chestIconColor}`} />
+                        )}
+                        <span className={`font-bold text-xl ${chest.type === 'golden' ? 'text-[#FFD700]' : 'text-white'}`}>
+                          {chest.reward}
+                        </span>
+                      </div>
+                    ) : (
+                      // صندوق مغلق
+                      <div className="flex flex-col items-center">
+                        {chest.type === 'golden' ? (
+                          <>
+                            <Gift className={`h-16 w-16 ${chestIconColor}`} />
+                            <div className="absolute inset-0 bg-[#FFD700]/5 animate-pulse-slow"></div>
+                          </>
+                        ) : chest.type === 'special' ? (
                           <Gift className={`h-16 w-16 ${chestIconColor}`} />
-                          <div className="absolute inset-0 bg-[#FFD700]/5 animate-pulse-slow"></div>
-                        </>
-                      ) : chest.type === 'special' ? (
-                        <Gift className={`h-16 w-16 ${chestIconColor}`} />
-                      ) : (
-                        <Gift className={`h-16 w-16 ${chestIconColor}`} />
-                      )}
-                    </div>
-                  )}
-                  {/* تأثير لامع على الصندوق المفتوح */}
-                  {chest.opened && (
-                    <div className={`absolute inset-0 ${
-                      chest.type === 'golden' 
-                        ? 'bg-[#FFD700]/15 animate-pulse-fast' 
-                        : chest.type === 'special'
-                          ? 'bg-[#F5DEB3]/10 animate-pulse' 
-                          : 'bg-[#D4AF37]/10 animate-pulse'
-                    }`}></div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-          
-          {/* عداد الصناديق المفتوحة والمجموع */}
-          <div className="flex flex-col items-center gap-2">
-            <div className="bg-[#0F0904] border border-[#D4AF37] rounded-md px-4 py-2 text-center w-full">
-              <span className="text-white text-lg">الصناديق المفتوحة: <span className="text-[#D4AF37] font-bold">{chestsOpened}/3</span></span>
+                        ) : (
+                          <Gift className={`h-16 w-16 ${chestIconColor}`} />
+                        )}
+                      </div>
+                    )}
+                    {/* تأثير لامع على الصندوق المفتوح */}
+                    {chest.opened && (
+                      <div className={`absolute inset-0 ${
+                        chest.type === 'golden' 
+                          ? 'bg-[#FFD700]/15 animate-pulse-fast' 
+                          : chest.type === 'special'
+                            ? 'bg-[#F5DEB3]/10 animate-pulse' 
+                            : 'bg-[#D4AF37]/10 animate-pulse'
+                      }`}></div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
-            <div className="bg-[#0F0904] border border-[#D4AF37] rounded-md px-4 py-2 text-center w-full">
-              <span className="text-white text-lg">مجموع المكافآت: <span className="text-[#D4AF37] font-bold">{totalBonusWin}</span></span>
+            
+            {/* عداد الصناديق المفتوحة والمجموع */}
+            <div className="flex flex-col items-center gap-2">
+              <div className="bg-[#0F0904] border border-[#D4AF37] rounded-md px-4 py-2 text-center w-full">
+                <span className="text-white text-lg">الصناديق المفتوحة: <span className="text-[#D4AF37] font-bold">{chestsOpened}/3</span></span>
+              </div>
+              <div className="bg-[#0F0904] border border-[#D4AF37] rounded-md px-4 py-2 text-center w-full">
+                <span className="text-white text-lg">مجموع المكافآت: <span className="text-[#D4AF37] font-bold">{totalBonusWin}</span></span>
+              </div>
             </div>
           </div>
         </DialogContent>
