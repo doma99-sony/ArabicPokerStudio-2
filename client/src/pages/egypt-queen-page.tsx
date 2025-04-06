@@ -1,12 +1,39 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useGlobalWebSocket } from "@/hooks/use-global-websocket";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Coins, ArrowLeft, Volume2, VolumeX, Trophy, Settings, Info, RotateCw } from "lucide-react";
+import { 
+  Coins, ArrowLeft, Volume2, VolumeX, Trophy, Settings, 
+  Info, RotateCw, Sparkles, Gift, GiftIcon, X 
+} from "lucide-react";
 import { formatChips } from "@/lib/utils";
 import { GoldDustEffect } from "@/components/effects/snow-effect";
 import { useLocation } from "wouter";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
+// تعريف أنواع رموز اللعبة
+type SymbolType = 
+  | "cleopatra" // كليوباترا (رمز عالي القيمة)
+  | "book" // كتاب الأسرار (Scatter)
+  | "eye" // عين حورس
+  | "anubis" // أنوبيس
+  | "cat" // القط المصري
+  | "A" | "K" | "Q" | "J" | "10" // الرموز التقليدية للبطاقات
+  | "wild"; // الجوكر (يمكن أن يحل محل أي رمز)
+
+// واجهة تمثل موضع الرمز في البكرات
+interface ReelPosition {
+  row: number;
+  col: number;
+  symbol: SymbolType;
+}
 
 export default function EgyptQueenPage() {
   const [location, navigate] = useLocation();
@@ -21,6 +48,33 @@ export default function EgyptQueenPage() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const spinAudioRef = useRef<HTMLAudioElement>(null);
   const winAudioRef = useRef<HTMLAudioElement>(null);
+  
+  // حالة البكرات - 5 بكرات × 3 صفوف
+  const [reels, setReels] = useState<SymbolType[][]>([
+    ["cat", "A", "cleopatra"],
+    ["eye", "book", "K"],
+    ["cleopatra", "anubis", "Q"],
+    ["J", "wild", "cat"],
+    ["book", "10", "anubis"],
+  ]);
+  
+  // مؤقت الدوران للحصول على تأثير الحركة
+  const [spinTimer, setSpinTimer] = useState<NodeJS.Timeout | null>(null);
+  
+  // حالة الخطوط الفائزة
+  const [winningLines, setWinningLines] = useState<ReelPosition[][]>([]);
+  
+  // عدد اللفات المجانية المتبقية
+  const [freeSpins, setFreeSpins] = useState(0);
+  
+  // مضاعف الفوز الحالي
+  const [winMultiplier, setWinMultiplier] = useState(1);
+  
+  // حالة لعبة المكافأة (الصناديق الفرعونية)
+  const [bonusGameOpen, setBonusGameOpen] = useState(false);
+  const [treasureChests, setTreasureChests] = useState<Array<{opened: boolean, reward: number}>>([]);
+  const [chestsOpened, setChestsOpened] = useState(0);
+  const [totalBonusWin, setTotalBonusWin] = useState(0);
   
   // التأكد من اتصال WebSocket عند دخول الصفحة
   useEffect(() => {
@@ -87,6 +141,323 @@ export default function EgyptQueenPage() {
     }
   };
   
+  // دالة مساعدة لإنشاء رمز عشوائي
+  const generateRandomSymbol = (): SymbolType => {
+    const allSymbols: SymbolType[] = [
+      "cleopatra", "book", "eye", "anubis", "cat", 
+      "A", "K", "Q", "J", "10", "wild"
+    ];
+    
+    // توزيع وزن الاحتمالات - الرموز ذات القيمة العالية أقل احتمالية
+    const weights = {
+      "cleopatra": 1, // نادر
+      "book": 1,      // نادر (Scatter)
+      "wild": 1,      // نادر (يمكن أن يحل محل أي رمز)
+      "eye": 2,       // أقل شيوعاً
+      "anubis": 2,    // أقل شيوعاً
+      "cat": 3,       // متوسط الشيوع
+      "A": 4,         // شائع
+      "K": 4,         // شائع
+      "Q": 5,         // شائع جداً
+      "J": 5,         // شائع جداً
+      "10": 5,        // شائع جداً
+    };
+    
+    // إنشاء مصفوفة موزونة للسحب العشوائي
+    const weightedArray: SymbolType[] = [];
+    
+    for (const symbol of allSymbols) {
+      const weight = weights[symbol as keyof typeof weights];
+      for (let i = 0; i < weight; i++) {
+        weightedArray.push(symbol);
+      }
+    }
+    
+    // اختيار رمز عشوائي من المصفوفة الموزونة
+    const randomIndex = Math.floor(Math.random() * weightedArray.length);
+    return weightedArray[randomIndex];
+  };
+  
+  // دالة لإنشاء بكرات عشوائية جديدة
+  const generateNewReels = (): SymbolType[][] => {
+    const newReels: SymbolType[][] = [];
+    
+    // إنشاء 5 بكرات كل منها بـ 3 صفوف
+    for (let i = 0; i < 5; i++) {
+      const reel: SymbolType[] = [];
+      for (let j = 0; j < 3; j++) {
+        reel.push(generateRandomSymbol());
+      }
+      newReels.push(reel);
+    }
+    
+    return newReels;
+  };
+  
+  // دالة للتحقق من خطوط الفوز
+  const checkWinningLines = (reelsState: SymbolType[][]): ReelPosition[][] => {
+    const winningLines: ReelPosition[][] = [];
+    
+    // خطوط الدفع (3 خطوط أفقية)
+    // خط الصف العلوي
+    checkLine(reelsState, 0, winningLines);
+    // خط الصف الأوسط
+    checkLine(reelsState, 1, winningLines);
+    // خط الصف السفلي
+    checkLine(reelsState, 2, winningLines);
+    
+    return winningLines;
+  };
+  
+  // دالة مساعدة للتحقق من خط فوز محدد
+  const checkLine = (reelsState: SymbolType[][], row: number, winningLines: ReelPosition[][]) => {
+    const line: ReelPosition[] = [];
+    
+    // الرمز المرجعي (الأول في الخط)
+    const firstSymbol = reelsState[0][row];
+    let matchCount = 1;
+    
+    // إضافة الرمز الأول إلى الخط
+    line.push({ row, col: 0, symbol: firstSymbol });
+    
+    // التحقق من بقية الرموز في نفس الصف
+    for (let col = 1; col < reelsState.length; col++) {
+      const currentSymbol = reelsState[col][row];
+      
+      // إذا كان الرمز الحالي يتطابق مع الأول أو كان "wild"
+      if (currentSymbol === firstSymbol || currentSymbol === "wild" || firstSymbol === "wild") {
+        matchCount++;
+        line.push({ row, col, symbol: currentSymbol });
+      } else {
+        break; // توقف عند أول رمز غير متطابق
+      }
+    }
+    
+    // إذا كان هناك 3 رموز متطابقة على الأقل، فهناك فوز
+    if (matchCount >= 3) {
+      winningLines.push(line);
+    }
+  };
+  
+  // حساب قيمة الفوز بناءً على خطوط الفوز والرموز والرهان
+  const calculateWinAmount = (winningLines: ReelPosition[][], bet: number): number => {
+    let totalWin = 0;
+    
+    // قيم الرموز
+    const symbolValues = {
+      "cleopatra": 10, // أعلى قيمة
+      "book": 0,       // يعامل بشكل خاص (scatter)
+      "wild": 8,       // قيمة عالية
+      "anubis": 6,     
+      "eye": 5,
+      "cat": 4,
+      "A": 3,
+      "K": 3,
+      "Q": 2,
+      "J": 2,
+      "10": 1,
+    };
+    
+    // حساب القيمة لكل خط فائز
+    for (const line of winningLines) {
+      // تحديد قيمة الرمز الأساسي (مع مراعاة الـ wild)
+      const baseSymbol = line[0].symbol === "wild" && line.length > 1 
+        ? line[1].symbol 
+        : line[0].symbol;
+      
+      // تجاهل خطوط الـ scatter (سيتم التعامل معها بشكل منفصل)
+      if (baseSymbol === "book") continue;
+      
+      // عدد الرموز المتطابقة
+      const matchCount = line.length;
+      
+      // القيمة الأساسية للرمز
+      const baseValue = symbolValues[baseSymbol as keyof typeof symbolValues];
+      
+      // حساب القيمة بناءً على عدد التطابقات
+      // 3 رموز = 1x القيمة، 4 رموز = 2x القيمة، 5 رموز = 5x القيمة
+      let multiplier = 1;
+      if (matchCount === 4) multiplier = 2;
+      if (matchCount === 5) multiplier = 5;
+      
+      // حساب الفوز لهذا الخط
+      const lineWin = baseValue * multiplier * bet / 10;
+      totalWin += lineWin;
+    }
+    
+    // إضافة مكافأة خاصة إذا كان هناك 3 أو أكثر من رمز "book" (scatter) في أي مكان
+    const scatterCount = countScatters(reels);
+    if (scatterCount >= 3) {
+      // 3 scatters = 5x الرهان، 4 scatters = 20x الرهان، 5 scatters = 50x الرهان
+      let scatterMultiplier = 0;
+      if (scatterCount === 3) scatterMultiplier = 5;
+      if (scatterCount === 4) scatterMultiplier = 20;
+      if (scatterCount === 5) scatterMultiplier = 50;
+      
+      totalWin += scatterMultiplier * bet;
+      
+      // منح لفات مجانية
+      if (scatterCount >= 3) {
+        // تعيين عدد اللفات المجانية بناءً على عدد رموز الـ scatter
+        setFreeSpins(prev => prev + (scatterCount * 3));
+      }
+    }
+    
+    return Math.round(totalWin);
+  };
+  
+  // دالة مساعدة لعد رموز الـ scatter في أي مكان على الشاشة
+  const countScatters = (reelsState: SymbolType[][]): number => {
+    let count = 0;
+    
+    for (let col = 0; col < reelsState.length; col++) {
+      for (let row = 0; row < reelsState[col].length; row++) {
+        if (reelsState[col][row] === "book") {
+          count++;
+        }
+      }
+    }
+    
+    return count;
+  };
+  
+  // دالة إعداد لعبة المكافأة - صناديق الكنز الفرعونية
+  const setupBonusGame = () => {
+    // إنشاء 5 صناديق للكنز
+    const chests = Array(5).fill(null).map(() => {
+      // إنشاء جائزة عشوائية بين 10 و 100 مضروبة في مستوى الرهان
+      const rewardMultiplier = Math.floor(Math.random() * 10) + 1;
+      return {
+        opened: false,
+        reward: rewardMultiplier * betAmount
+      };
+    });
+    
+    // إعادة تعيين المتغيرات
+    setTreasureChests(chests);
+    setChestsOpened(0);
+    setTotalBonusWin(0);
+    setBonusGameOpen(true);
+  };
+
+  // دالة لفتح صندوق كنز
+  const openTreasureChest = (index: number) => {
+    // تجنب فتح صندوق سبق فتحه
+    if (treasureChests[index].opened) return;
+    
+    // نسخ حالة الصناديق
+    const updatedChests = [...treasureChests];
+    
+    // فتح الصندوق
+    updatedChests[index].opened = true;
+    
+    // تحديث العدد
+    const newChestsOpened = chestsOpened + 1;
+    
+    // إضافة الجائزة إلى المجموع
+    const chestReward = updatedChests[index].reward;
+    const newTotalBonus = totalBonusWin + chestReward;
+    
+    // تحديث الحالة
+    setTreasureChests(updatedChests);
+    setChestsOpened(newChestsOpened);
+    setTotalBonusWin(newTotalBonus);
+    
+    // عرض رسالة بالمكافأة التي تم الحصول عليها
+    toast({
+      title: "كنز فرعوني! 💰",
+      description: `وجدت ${chestReward} رقاقة في هذا الصندوق!`,
+      variant: "default"
+    });
+    
+    // إذا تم فتح 3 صناديق، أغلق اللعبة
+    if (newChestsOpened >= 3) {
+      setTimeout(() => {
+        // إغلاق لعبة المكافأة بعد ثانيتين
+        setBonusGameOpen(false);
+        
+        // عرض الفوز الإجمالي
+        toast({
+          title: "مكافأة كاملة! 🏆",
+          description: `مجموع المكافأة: ${newTotalBonus} رقاقة!`,
+          variant: "default"
+        });
+        
+        // هنا نضيف المنطق لإرسال الفوز إلى الخادم
+      }, 2000);
+    }
+  };
+
+  // دالة محاكاة دوران البكرات مع تأثير بصري
+  const animateReels = () => {
+    // عدد الإطارات للتحريك
+    const framesCount = 20;
+    let currentFrame = 0;
+    
+    // إيقاف أي مؤقت سابق
+    if (spinTimer) {
+      clearInterval(spinTimer);
+    }
+    
+    // إنشاء مؤقت لتحريك البكرات
+    const timer = setInterval(() => {
+      currentFrame++;
+      
+      if (currentFrame <= framesCount) {
+        // خلال التحريك، نولد بكرات عشوائية في كل إطار للتأثير البصري
+        setReels(generateNewReels());
+      } else {
+        // عند انتهاء التحريك، نولد النتيجة النهائية
+        const finalReels = generateNewReels();
+        setReels(finalReels);
+        
+        // إيقاف المؤقت
+        clearInterval(timer);
+        setSpinTimer(null);
+        
+        // التحقق من الفوز
+        const wins = checkWinningLines(finalReels);
+        setWinningLines(wins);
+        
+        // حساب مبلغ الفوز
+        if (wins.length > 0) {
+          const winAmount = calculateWinAmount(wins, betAmount);
+          
+          // تشغيل صوت الفوز
+          if (winAudioRef.current && !isMuted) {
+            winAudioRef.current.currentTime = 0;
+            winAudioRef.current.play().catch(e => console.error(e));
+          }
+          
+          // عرض رسالة الفوز
+          toast({
+            title: "مبروك! 🎉",
+            description: `لقد ربحت ${winAmount} رقاقة`,
+            variant: "default"
+          });
+          
+          // هنا يجب إرسال معلومات الفوز إلى الخادم وتحديث رصيد اللاعب
+          // سنقوم بإضافة هذا المنطق لاحقاً
+        }
+        
+        // التحقق من تفعيل لعبة المكافأة عند وجود 3 أو أكثر من رمز الكتاب
+        const scatterCount = countScatters(finalReels);
+        if (scatterCount >= 3) {
+          // بدء لعبة المكافأة بعد ثانية للسماح للاعب برؤية الفوز أولاً
+          setTimeout(() => {
+            setupBonusGame();
+          }, 1000);
+        }
+        
+        // إنهاء حالة الدوران
+        setIsSpinning(false);
+      }
+    }, 100); // 100 مللي ثانية بين كل إطار
+    
+    // حفظ مرجع المؤقت
+    setSpinTimer(timer);
+  };
+  
   // دالة لتدوير عجلات السلوت
   const spin = () => {
     if (isSpinning) return;
@@ -101,6 +472,10 @@ export default function EgyptQueenPage() {
       return;
     }
     
+    // إعادة تعيين خطوط الفوز
+    setWinningLines([]);
+    
+    // بدء الدوران
     setIsSpinning(true);
     
     // تشغيل صوت الدوران
@@ -109,32 +484,8 @@ export default function EgyptQueenPage() {
       spinAudioRef.current.play().catch(e => console.error(e));
     }
     
-    // محاكاة الدوران (هنا سنضيف لاحقاً منطق لعبة السلوت الحقيقي)
-    setTimeout(() => {
-      setIsSpinning(false);
-      
-      // محاكاة الفوز (50% احتمالية)
-      const isWin = Math.random() > 0.5;
-      
-      if (isWin) {
-        const winAmount = betAmount * (Math.floor(Math.random() * 5) + 1);
-        
-        // تشغيل صوت الفوز
-        if (winAudioRef.current && !isMuted) {
-          winAudioRef.current.currentTime = 0;
-          winAudioRef.current.play().catch(e => console.error(e));
-        }
-        
-        toast({
-          title: "مبروك! 🎉",
-          description: `لقد ربحت ${winAmount} رقاقة`,
-          variant: "default"
-        });
-        
-        // هنا يجب إرسال معلومات الفوز إلى الخادم وتحديث رصيد اللاعب
-        // سنقوم بإضافة هذا المنطق لاحقاً
-      }
-    }, 3000);
+    // تحريك البكرات
+    animateReels();
   };
   
   // زيادة مبلغ الرهان
@@ -157,6 +508,91 @@ export default function EgyptQueenPage() {
   // تبديل كتم الصوت
   const toggleMute = () => {
     setIsMuted(!isMuted);
+  };
+  
+  // دالة لعرض رمز معين باستخدام الصور أو الرموز التعبيرية
+  const renderSymbol = (symbol: SymbolType, isWinning: boolean = false): React.ReactNode => {
+    // تعيين الرموز المرئية لكل نوع
+    const symbolMap: Record<SymbolType, { icon: React.ReactNode; description: string }> = {
+      "cleopatra": { 
+        icon: <img src="/images/egypt-queen/symbols/cleopatra.png" alt="كليوباترا" className="w-12 h-12 object-contain" 
+          onError={(e) => (e.currentTarget.textContent = "👸")}/>, 
+        description: "كليوباترا" 
+      },
+      "book": { 
+        icon: <img src="/images/egypt-queen/symbols/book.png" alt="كتاب الأسرار" className="w-12 h-12 object-contain"
+          onError={(e) => (e.currentTarget.textContent = "📜")}/>,
+        description: "كتاب الأسرار" 
+      },
+      "eye": { 
+        icon: <img src="/images/egypt-queen/symbols/eye.png" alt="عين حورس" className="w-12 h-12 object-contain"
+          onError={(e) => (e.currentTarget.textContent = "👁️")}/>,
+        description: "عين حورس" 
+      },
+      "anubis": { 
+        icon: <img src="/images/egypt-queen/symbols/anubis.png" alt="أنوبيس" className="w-12 h-12 object-contain"
+          onError={(e) => (e.currentTarget.textContent = "🐺")}/>,
+        description: "أنوبيس" 
+      },
+      "cat": { 
+        icon: <img src="/images/egypt-queen/symbols/cat.png" alt="القط المصري" className="w-12 h-12 object-contain"
+          onError={(e) => (e.currentTarget.textContent = "🐱")}/>,
+        description: "القط المصري" 
+      },
+      "wild": { 
+        icon: <img src="/images/egypt-queen/symbols/wild.png" alt="الجوكر" className="w-12 h-12 object-contain"
+          onError={(e) => (e.currentTarget.textContent = "✨")}/>,
+        description: "الجوكر" 
+      },
+      "A": { 
+        icon: <span className="text-4xl font-bold text-red-600">A</span>, 
+        description: "A" 
+      },
+      "K": { 
+        icon: <span className="text-4xl font-bold text-blue-600">K</span>, 
+        description: "K" 
+      },
+      "Q": { 
+        icon: <span className="text-4xl font-bold text-purple-600">Q</span>, 
+        description: "Q" 
+      },
+      "J": { 
+        icon: <span className="text-4xl font-bold text-green-600">J</span>, 
+        description: "J" 
+      },
+      "10": { 
+        icon: <span className="text-4xl font-bold text-yellow-600">10</span>, 
+        description: "10" 
+      },
+    };
+    
+    // استخدام رموز تعبيرية احتياطية إذا تعذر تحميل الصور
+    const fallbackSymbols: Record<SymbolType, string> = {
+      "cleopatra": "👸",
+      "book": "📜",
+      "eye": "👁️",
+      "anubis": "🐺",
+      "cat": "🐱",
+      "wild": "✨",
+      "A": "🅰️",
+      "K": "🎰",
+      "Q": "🎯",
+      "J": "🎲",
+      "10": "🔟",
+    };
+    
+    // إذا كان رمزاً فائزاً، أضف تأثيرات إضافية
+    if (isWinning) {
+      return (
+        <div className="relative animate-pulse">
+          {symbolMap[symbol].icon}
+          <div className="absolute inset-0 bg-[#D4AF37]/20 rounded-full animate-ping-slow"></div>
+        </div>
+      );
+    }
+    
+    // في حالة عدم الفوز، عرض الرمز العادي
+    return symbolMap[symbol].icon || <span className="text-4xl">{fallbackSymbols[symbol]}</span>;
   };
   
   // إذا لم تبدأ اللعبة بعد، اعرض شاشة البداية
@@ -228,6 +664,60 @@ export default function EgyptQueenPage() {
       className="h-screen w-full overflow-hidden flex flex-col bg-cover bg-center relative"
       style={{ backgroundImage: "url('/images/egypt-queen/game-bg.jpg')" }}
     >
+      {/* نافذة لعبة المكافأة - صناديق الكنز الفرعونية */}
+      <Dialog open={bonusGameOpen} onOpenChange={setBonusGameOpen}>
+        <DialogContent className="bg-gradient-to-b from-[#4C2708] to-[#331B05] border-4 border-[#D4AF37] p-6 max-w-3xl mx-auto">
+          <DialogHeader>
+            <DialogTitle className="text-3xl text-center text-[#D4AF37] font-bold">
+              لعبة الكنوز الفرعونية 🏺
+            </DialogTitle>
+            <DialogDescription className="text-xl text-center text-white/80">
+              اختر 3 صناديق لاكتشاف الكنوز المخفية!
+            </DialogDescription>
+          </DialogHeader>
+          
+          {/* عرض صناديق الكنز */}
+          <div className="grid grid-cols-5 gap-4 my-8">
+            {treasureChests.map((chest, index) => (
+              <div 
+                key={index}
+                className={`h-32 cursor-pointer transition-all duration-300 transform ${
+                  chest.opened ? 'scale-105 bg-[#D4AF37]/10' : 'hover:scale-105 hover:bg-[#D4AF37]/5 bg-[#2D1B09]'
+                } border-2 border-[#D4AF37] rounded-md flex flex-col items-center justify-center relative overflow-hidden`}
+                onClick={() => !chest.opened && openTreasureChest(index)}
+              >
+                {chest.opened ? (
+                  // صندوق مفتوح يعرض المكافأة
+                  <div className="flex flex-col items-center gap-1">
+                    <GiftIcon className="h-12 w-12 text-[#D4AF37]" />
+                    <span className="font-bold text-xl text-white">{chest.reward}</span>
+                  </div>
+                ) : (
+                  // صندوق مغلق
+                  <div className="flex flex-col items-center">
+                    <Gift className="h-16 w-16 text-[#D4AF37]" />
+                  </div>
+                )}
+                {/* تأثير لامع على الصندوق المفتوح */}
+                {chest.opened && (
+                  <div className="absolute inset-0 bg-[#D4AF37]/10 animate-pulse"></div>
+                )}
+              </div>
+            ))}
+          </div>
+          
+          {/* عداد الصناديق المفتوحة والمجموع */}
+          <div className="flex flex-col items-center gap-2">
+            <div className="bg-[#0F0904] border border-[#D4AF37] rounded-md px-4 py-2 text-center w-full">
+              <span className="text-white text-lg">الصناديق المفتوحة: <span className="text-[#D4AF37] font-bold">{chestsOpened}/3</span></span>
+            </div>
+            <div className="bg-[#0F0904] border border-[#D4AF37] rounded-md px-4 py-2 text-center w-full">
+              <span className="text-white text-lg">مجموع المكافآت: <span className="text-[#D4AF37] font-bold">{totalBonusWin}</span></span>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+      
       {/* تأثير الغبار الذهبي */}
       <GoldDustEffect />
       
@@ -303,24 +793,113 @@ export default function EgyptQueenPage() {
       <div className="flex-1 relative z-10 flex flex-col items-center justify-center p-4" ref={gameContainerRef}>
         {/* حاوية آلة السلوت */}
         <div className="bg-[#361F10]/90 border-4 border-[#D4AF37] rounded-lg shadow-2xl overflow-hidden backdrop-blur-sm w-full max-w-3xl h-[400px] flex flex-col">
-          {/* منطقة عرض البكرات (reels) - سنضيف المنطق اللازم لاحقاً */}
-          <div className="flex-1 bg-[url('/images/egypt-queen/reels-bg.jpg')] bg-cover bg-center relative grid grid-cols-5 gap-1 p-2">
-            {/* سيتم إضافة البكرات هنا بمنطق حقيقي لاحقاً */}
-            <div className="bg-[#222]/80 rounded-md flex items-center justify-center">
-              <span className="text-6xl">🐱</span>
+          {/* منطقة عرض البكرات (reels) مع شبكة 5×3 */}
+          <div className="flex-1 bg-[url('/images/egypt-queen/reels-bg.jpg')] bg-cover bg-center relative p-2">
+            {/* خطوط الدفع */}
+            <div className="absolute inset-0 flex flex-col justify-between p-2 z-10 pointer-events-none">
+              <div className="border-l-4 border-r-4 border-[#D4AF37] h-[30%] rounded-md border-opacity-50"></div>
+              <div className="border-l-4 border-r-4 border-[#D4AF37] h-[30%] rounded-md border-opacity-70"></div>
+              <div className="border-l-4 border-r-4 border-[#D4AF37] h-[30%] rounded-md border-opacity-50"></div>
             </div>
-            <div className="bg-[#222]/80 rounded-md flex items-center justify-center">
-              <span className="text-6xl">🪲</span>
+            
+            {/* إطار البكرات - عرض البكرات 5×3 */}
+            <div className="grid grid-cols-5 gap-1 h-full relative z-20">
+              {reels.map((reel, reelIndex) => (
+                <div key={reelIndex} className="flex flex-col gap-1">
+                  {reel.map((symbol, symbolIndex) => {
+                    // تحديد ما إذا كان هذا الرمز جزءاً من خط فائز
+                    const isWinningSymbol = winningLines.some(line => 
+                      line.some(pos => pos.col === reelIndex && pos.row === symbolIndex)
+                    );
+                    
+                    // تعيين الرموز المرئية لكل نوع
+                    let symbolContent;
+                    let symbolClass = "text-4xl";
+                    
+                    switch(symbol) {
+                      case "cleopatra":
+                        symbolContent = "👸";
+                        break;
+                      case "book":
+                        symbolContent = "📜";
+                        break;
+                      case "eye":
+                        symbolContent = "👁️";
+                        break;
+                      case "anubis":
+                        symbolContent = "🐺";
+                        break;
+                      case "cat":
+                        symbolContent = "🐱";
+                        break;
+                      case "wild":
+                        symbolContent = "✨";
+                        symbolClass = "text-5xl text-[#D4AF37]";
+                        break;
+                      case "A":
+                        symbolContent = "A";
+                        symbolClass = "text-4xl font-bold text-red-600";
+                        break;
+                      case "K":
+                        symbolContent = "K";
+                        symbolClass = "text-4xl font-bold text-blue-600";
+                        break;
+                      case "Q":
+                        symbolContent = "Q";
+                        symbolClass = "text-4xl font-bold text-purple-600";
+                        break;
+                      case "J":
+                        symbolContent = "J";
+                        symbolClass = "text-4xl font-bold text-green-600";
+                        break;
+                      case "10":
+                        symbolContent = "10";
+                        symbolClass = "text-4xl font-bold text-yellow-600";
+                        break;
+                      default:
+                        symbolContent = "?";
+                    }
+                    
+                    return (
+                      <div 
+                        key={`${reelIndex}-${symbolIndex}`} 
+                        className={`flex-1 rounded-md flex items-center justify-center
+                          ${isSpinning ? 'animate-pulse-slow' : ''}
+                          ${isWinningSymbol 
+                            ? 'bg-[#D4AF37]/30 border border-[#D4AF37] shadow-[0_0_15px_rgba(212,175,55,0.7)]' 
+                            : 'bg-[#222]/80'}`}
+                      >
+                        <span className={symbolClass}>
+                          {isWinningSymbol ? (
+                            <div className="animate-pulse">
+                              {symbolContent}
+                              <div className="absolute inset-0 bg-[#D4AF37]/10 rounded-md"></div>
+                            </div>
+                          ) : (
+                            symbolContent
+                          )}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
             </div>
-            <div className="bg-[#222]/80 rounded-md flex items-center justify-center">
-              <span className="text-6xl">👑</span>
-            </div>
-            <div className="bg-[#222]/80 rounded-md flex items-center justify-center">
-              <span className="text-6xl">🧿</span>
-            </div>
-            <div className="bg-[#222]/80 rounded-md flex items-center justify-center">
-              <span className="text-6xl">📜</span>
-            </div>
+            
+            {/* عرض اللفات المجانية إذا كانت متاحة */}
+            {freeSpins > 0 && (
+              <div className="absolute top-0 right-0 bg-[#D4AF37] text-black font-bold px-4 py-2 rounded-bl-lg z-30 flex items-center">
+                <Sparkles className="w-4 h-4 mr-1" /> 
+                <span>{freeSpins} لفة مجانية</span>
+              </div>
+            )}
+            
+            {/* عرض المضاعف إذا كان أكثر من 1 */}
+            {winMultiplier > 1 && (
+              <div className="absolute top-0 left-0 bg-[#D4AF37] text-black font-bold px-4 py-2 rounded-br-lg z-30">
+                <span>مضاعف {winMultiplier}×</span>
+              </div>
+            )}
           </div>
           
           {/* لوحة التحكم */}
