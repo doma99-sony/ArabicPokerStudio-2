@@ -106,6 +106,24 @@ function App() {
   useEffect(() => {
     initializePerformanceOptimizations();
     
+    // تحميل سكريبت تأثيرات الصوت الخاصة بالرعد والبرق
+    const loadThunderScript = () => {
+      const script = document.createElement('script');
+      script.src = '/sounds/thunder.js';
+      script.async = true;
+      script.defer = true;
+      script.onload = () => {
+        console.log('تم تحميل سكريبت تأثيرات الصوت الخاصة بالرعد والبرق بنجاح');
+      };
+      script.onerror = (error) => {
+        console.error('فشل في تحميل سكريبت تأثيرات الصوت', error);
+      };
+      document.body.appendChild(script);
+    };
+    
+    // تحميل سكريبت تأثيرات الصوت
+    loadThunderScript();
+    
     // تعطيل حركات الصفحة الغير ضرورية على الهواتف المحمولة
     if ('ontouchstart' in window) {
       // تحسين متابعة حركات اللمس

@@ -101,7 +101,7 @@ export default function LobbyPage() {
     <div className="h-screen overflow-hidden bg-cover bg-center flex flex-col"
          style={{ backgroundImage: "url('/images/egyptian-background.jpg')" }}>
       
-      {/* خلفية الفيديو محسنة - بتأثيرات ضبابية وإضاءة */}
+      {/* خلفية الفيديو محسنة - بتأثيرات ضبابية وإضاءة وبرق ورعد */}
       <div className="fixed inset-0 z-0 overflow-hidden">
         <video
           ref={videoRef}
@@ -120,10 +120,40 @@ export default function LobbyPage() {
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-black/80 to-transparent h-32 pointer-events-none"></div>
         <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 to-transparent h-32 pointer-events-none"></div>
         
+        {/* إضافة تأثيرات البرق والرعد */}
+        <div className="lightning-effect absolute inset-0 bg-white/0 opacity-0 mix-blend-overlay pointer-events-none"></div>
+        <div className="lightning-effect-delayed absolute inset-0 bg-white/0 opacity-0 mix-blend-overlay pointer-events-none" style={{ animationDelay: '7.5s' }}></div>
+        <div className="lightning-effect-distant absolute inset-0 bg-blue-100/0 opacity-0 mix-blend-overlay pointer-events-none" style={{ animationDelay: '15.2s' }}></div>
+        
+        {/* إضافة سحب متحركة */}
+        <div className="absolute inset-0 bg-[url('/images/fog-overlay.png')] bg-cover opacity-10 mix-blend-overlay animate-float-slow pointer-events-none"></div>
+        <div className="absolute inset-0 bg-[url('/images/fog-overlay2.png')] bg-cover opacity-5 mix-blend-overlay animate-float-slow-reverse pointer-events-none" style={{ animationDelay: '5s' }}></div>
+        
         {/* إضافة تلميعات ضوئية متحركة */}
         <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-[#D4AF37]/10 blur-3xl animate-pulse-slow opacity-60 mix-blend-screen"></div>
         <div className="absolute bottom-1/4 right-1/4 w-64 h-64 rounded-full bg-[#D4AF37]/10 blur-3xl animate-pulse-slow opacity-50 mix-blend-screen" style={{ animationDelay: "2s" }}></div>
+        
+        {/* إضافة وميض البرق في أماكن مختلفة */}
+        <div className="absolute top-0 left-1/4 w-1 h-screen bg-gradient-to-b from-blue-100/0 via-blue-100/20 to-blue-100/0 lightning-streak opacity-0"></div>
+        <div className="absolute top-0 right-1/3 w-0.5 h-screen bg-gradient-to-b from-blue-100/0 via-blue-100/30 to-blue-100/0 lightning-streak-delayed opacity-0" style={{ animationDelay: '7.5s' }}></div>
+        <div className="absolute top-10 left-1/2 w-0.5 h-96 bg-gradient-to-b from-blue-100/0 via-blue-100/30 to-blue-100/0 lightning-streak-distant opacity-0" style={{ animationDelay: '15.2s' }}></div>
+        
+        {/* نقاط ضوء متحركة تظهر عند حدوث البرق */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="lightning-glow w-full h-full flex items-center justify-center opacity-0">
+            <div className="w-1/2 h-1/2 rounded-full bg-blue-100/20 blur-3xl"></div>
+          </div>
+        </div>
+        <div className="absolute inset-0 flex items-start justify-end">
+          <div className="lightning-glow-delayed w-full h-full flex items-start justify-end opacity-0" style={{ animationDelay: '7.5s' }}>
+            <div className="w-1/3 h-1/3 rounded-full bg-blue-100/20 blur-3xl"></div>
+          </div>
+        </div>
       </div>
+      
+      {/* تأثير اهتزاز الشاشة عند حدوث الرعد - إظهار بعد وقت قصير من البرق */}
+      <div className="thunder-shake fixed inset-0 z-0 pointer-events-none opacity-0"></div>
+      <div className="thunder-shake-delayed fixed inset-0 z-0 pointer-events-none opacity-0" style={{ animationDelay: '7.8s' }}></div>
 
       {/* Header Bar - تصميم احترافي بجودة عالية مع تأثيرات مذهلة */}
       <header className="relative z-10 py-3 sticky top-0 backdrop-blur-sm">
@@ -454,7 +484,7 @@ export default function LobbyPage() {
 
                     {/* بوكر العرب - تصميم محسّن مع تأثيرات حركية */}
                     <div 
-                      className={`relative flex flex-col h-[180px] w-full rounded-xl overflow-hidden shadow-2xl mb-4 mt-2 transform transition-all duration-500 cursor-pointer group`}
+                      className={`relative flex flex-col h-[180px] w-full rounded-xl overflow-hidden shadow-2xl mb-4 mt-2 transform transition-all duration-500 cursor-pointer group game-card-glow hover:scale-105`}
                       style={{
                         boxShadow: activeGameCategory === 'arab_poker' ? 
                           '0 0 15px 5px rgba(212, 175, 55, 0.5), 0 0 30px 10px rgba(212, 175, 55, 0.2)' : 
@@ -473,6 +503,18 @@ export default function LobbyPage() {
                       {/* إضافة تأثيرات إضاءة متحركة */}
                       <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-[#D4AF37]/5 blur-3xl group-hover:translate-x-5 group-hover:translate-y-5 transition-all duration-700 animate-pulse-slow"></div>
                       <div className="absolute -bottom-32 -left-32 w-64 h-64 rounded-full bg-[#D4AF37]/10 blur-3xl group-hover:translate-x-10 group-hover:translate-y-5 transition-all duration-700"></div>
+                      
+                      {/* إضافة تأثيرات خاصة لبوكر العرب: خطوط متحركة ولمعان */}
+                      <div className="absolute inset-0 overflow-hidden opacity-10 mix-blend-screen">
+                        <div className="absolute inset-0 top-1/4 left-0 bg-gradient-to-r from-transparent via-[#D4AF37]/30 to-transparent h-[2px] w-full animate-float-slow"></div>
+                        <div className="absolute inset-0 top-1/2 left-0 bg-gradient-to-r from-transparent via-[#D4AF37]/20 to-transparent h-[1px] w-full animate-float-slow-reverse"></div>
+                        <div className="absolute inset-0 top-3/4 left-0 bg-gradient-to-r from-transparent via-[#D4AF37]/30 to-transparent h-[2px] w-full animate-float-slow"></div>
+                      </div>
+                      
+                      {/* إضافة نقاط لمعان متحركة */}
+                      <div className="absolute top-1/4 left-1/4 w-1 h-1 rounded-full bg-[#D4AF37] opacity-70 animate-pulse-slow"></div>
+                      <div className="absolute top-3/4 right-1/3 w-1 h-1 rounded-full bg-[#D4AF37] opacity-70 animate-pulse-slow" style={{ animationDelay: '1s' }}></div>
+                      <div className="absolute top-1/2 left-2/3 w-1 h-1 rounded-full bg-[#D4AF37] opacity-70 animate-pulse-slow" style={{ animationDelay: '2s' }}></div>
                       
                       {/* إطار ذهبي متوهج */}
                       <div className={`absolute inset-0 rounded-xl border-2 ${activeGameCategory === 'arab_poker' ? 'border-[#D4AF37]' : 'border-[#D4AF37]/50'} opacity-60 group-hover:opacity-100 transition-all duration-500 z-[1]`}></div>

@@ -96,6 +96,18 @@ export default {
           "50%": { transform: "translateY(-20px) rotate(5deg)" },
           "100%": { transform: "translateY(0px) rotate(0deg)" },
         },
+        "float-slow": {
+          "0%": { transform: "translateX(0) translateY(0)" },
+          "33%": { transform: "translateX(20px) translateY(-10px)" },
+          "66%": { transform: "translateX(-20px) translateY(10px)" },
+          "100%": { transform: "translateX(0) translateY(0)" },
+        },
+        "float-slow-reverse": {
+          "0%": { transform: "translateX(0) translateY(0)" },
+          "33%": { transform: "translateX(-20px) translateY(-5px)" },
+          "66%": { transform: "translateX(20px) translateY(10px)" },
+          "100%": { transform: "translateX(0) translateY(0)" },
+        },
         "santa-fly": {
           "0%": { transform: "translateX(-20vw) translateY(0)" },
           "25%": { transform: "translateX(0vw) translateY(-10vh)" },
@@ -111,6 +123,82 @@ export default {
           "0%, 100%": { boxShadow: "0 0 5px 2px rgba(255, 215, 0, 0.7)" },
           "50%": { boxShadow: "0 0 20px 5px rgba(255, 215, 0, 0.9)" },
         },
+        "lightning-flash": {
+          "0%, 100%": { 
+            backgroundColor: "rgba(255, 255, 255, 0)",
+            opacity: "0"
+          },
+          "0.5%, 1.5%": { 
+            backgroundColor: "rgba(255, 255, 255, 0.9)",
+            opacity: "0.9"
+          },
+          "2%": { 
+            backgroundColor: "rgba(255, 255, 255, 0.1)",
+            opacity: "0.3"
+          },
+          "3%, 4.5%": { 
+            backgroundColor: "rgba(255, 255, 255, 0.9)",
+            opacity: "0.9"
+          },
+          "5%": { 
+            backgroundColor: "rgba(255, 255, 255, 0)",
+            opacity: "0"
+          }
+        },
+        "lightning-streak-anim": {
+          "0%, 100%": { 
+            opacity: "0"
+          },
+          "0.5%, 1.5%": { 
+            opacity: "1"
+          },
+          "2%": { 
+            opacity: "0.3"
+          },
+          "3%, 4.5%": { 
+            opacity: "1"
+          },
+          "5%": { 
+            opacity: "0"
+          }
+        },
+        "lightning-glow-anim": {
+          "0%, 100%": { 
+            opacity: "0"
+          },
+          "0.5%, 4.5%": { 
+            opacity: "0.8"
+          },
+          "5%": { 
+            opacity: "0"
+          }
+        },
+        "thunder-shake-anim": {
+          "0%, 100%": { 
+            transform: "translateX(0)",
+            opacity: "0"
+          },
+          "0.5%, 2.5%": { 
+            transform: "translateX(-2px)",
+            opacity: "1"
+          },
+          "1%, 3%, 4.5%": { 
+            transform: "translateX(2px)",
+            opacity: "1"
+          },
+          "1.5%, 3.5%": { 
+            transform: "translateX(-1px)",
+            opacity: "1"
+          },
+          "2%, 4%": { 
+            transform: "translateX(1px)",
+            opacity: "1"
+          },
+          "5%": { 
+            transform: "translateX(0)",
+            opacity: "0"
+          }
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -119,9 +207,21 @@ export default {
         "bounce-x": "bounce-x 1s ease-in-out infinite",
         "spin-slow": "spin-slow 8s linear infinite",
         "float": "float 5s ease-in-out infinite",
+        "float-slow": "float-slow 20s ease-in-out infinite",
+        "float-slow-reverse": "float-slow-reverse 15s ease-in-out infinite",
         "santa-fly": "santa-fly 20s linear infinite",
         "snow": "snow 10s linear infinite",
         "glitter": "glitter 2s ease-in-out infinite",
+        "lightning-effect": "lightning-flash 30s ease-in-out infinite",
+        "lightning-effect-delayed": "lightning-flash 30s ease-in-out infinite",
+        "lightning-effect-distant": "lightning-flash 30s ease-in-out infinite",
+        "lightning-streak": "lightning-streak-anim 30s ease-in-out infinite",
+        "lightning-streak-delayed": "lightning-streak-anim 30s ease-in-out infinite",
+        "lightning-streak-distant": "lightning-streak-anim 30s ease-in-out infinite",
+        "lightning-glow": "lightning-glow-anim 30s ease-in-out infinite",
+        "lightning-glow-delayed": "lightning-glow-anim 30s ease-in-out infinite",
+        "thunder-shake": "thunder-shake-anim 30s ease-in-out infinite",
+        "thunder-shake-delayed": "thunder-shake-anim 30s ease-in-out infinite",
       },
     },
   },

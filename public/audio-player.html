@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Audio Player</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #fff;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #2a2a2a;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+        h1 {
+            color: #D4AF37;
+            text-align: center;
+        }
+        .button {
+            background: linear-gradient(to right, #D4AF37, #FFC107);
+            color: black;
+            border: none;
+            padding: 10px 20px;
+            margin: 10px 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .volume-control {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 15px 0;
+        }
+        .volume-control input {
+            width: 200px;
+            margin: 0 10px;
+        }
+        .status {
+            text-align: center;
+            margin: 10px 0;
+            color: #D4AF37;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>مشغل التأثيرات الصوتية</h1>
+        
+        <div class="controls">
+            <button class="button" id="thunder-close">صوت رعد قريب</button>
+            <button class="button" id="thunder-medium">صوت رعد متوسط</button>
+            <button class="button" id="thunder-distant">صوت رعد بعيد</button>
+            <button class="button" id="toggle-sound">تفعيل/تعطيل الأصوات</button>
+        </div>
+        
+        <div class="volume-control">
+            <span>مستوى الصوت:</span>
+            <input type="range" id="volume-slider" min="0" max="100" value="30">
+            <span id="volume-value">30%</span>
+        </div>
+        
+        <div class="status" id="status">الأصوات معطلة</div>
+        
+        <audio id="thunder-audio" src="/sounds/thunder.mp3" preload="auto"></audio>
+    </div>
+
+    <script src="/sounds/thunder.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const thunderAudio = document.getElementById('thunder-audio');
+            const volumeSlider = document.getElementById('volume-slider');
+            const volumeValue = document.getElementById('volume-value');
+            const statusEl = document.getElementById('status');
+            const toggleSoundBtn = document.getElementById('toggle-sound');
+            
+            // إعداد الأزرار
+            document.getElementById('thunder-close').addEventListener('click', function() {
+                window.thunderSoundPlayer.playThunder('close');
+                updateStatus('تم تشغيل صوت الرعد القريب');
+            });
+            
+            document.getElementById('thunder-medium').addEventListener('click', function() {
+                window.thunderSoundPlayer.playThunder('medium');
+                updateStatus('تم تشغيل صوت الرعد المتوسط');
+            });
+            
+            document.getElementById('thunder-distant').addEventListener('click', function() {
+                window.thunderSoundPlayer.playThunder('distant');
+                updateStatus('تم تشغيل صوت الرعد البعيد');
+            });
+            
+            toggleSoundBtn.addEventListener('click', function() {
+                const isEnabled = window.thunderSoundPlayer.toggleSounds(!window.thunderSoundPlayer.isEnabled);
+                updateStatus(isEnabled ? 'الأصوات مفعلة' : 'الأصوات معطلة');
+            });
+            
+            // إعداد مستوى الصوت
+            volumeSlider.addEventListener('input', function() {
+                const volumeLevel = this.value / 100;
+                window.thunderSoundPlayer.setVolume(volumeLevel);
+                volumeValue.textContent = this.value + '%';
+                updateStatus(`تم ضبط مستوى الصوت على ${this.value}%`);
+            });
+            
+            function updateStatus(message) {
+                statusEl.textContent = message;
+                // إظهار تأثير لحظي عند تحديث الحالة
+                statusEl.style.transform = 'scale(1.1)';
+                setTimeout(() => {
+                    statusEl.style.transform = 'scale(1)';
+                }, 200);
+            }
+            
+            // تحديث الحالة الأولية
+            updateStatus(window.thunderSoundPlayer.isEnabled ? 'الأصوات مفعلة' : 'الأصوات معطلة');
+        });
+    </script>
+</body>
+</html>

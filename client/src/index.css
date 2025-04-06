@@ -1,200 +1,220 @@
-/* Import Arabic fonts */
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Roboto:wght@400;500;700&family=Tajawal:wght@400;500;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Add custom styles below */
+ 
 @layer base {
-  html {
-    font-family: 'Cairo', 'Tajawal', sans-serif;
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.5rem;
+    --chart-1: 221.2 83.2% 53.3%;
+    --chart-2: 142.1 76.2% 36.3%;
+    --chart-3: 221.2 83.2% 53.3%;
+    --chart-4: 221.2 83.2% 53.3%;
+    --chart-5: 221.2 83.2% 53.3%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 222.2 84% 4.9%;
+    --sidebar-primary: 221.2 83.2% 53.3%;
+    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-accent: 210 40% 96.1%;
+    --sidebar-accent-foreground: 222.2 47.4% 11.2%;
+    --sidebar-border: 214.3 31.8% 91.4%;
+    --sidebar-ring: 221.2 83.2% 53.3%;
   }
-  
-  /* Arabic RTL support */
-  [dir="rtl"] {
-    font-family: 'Cairo', 'Tajawal', sans-serif;
+ 
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
+    --chart-1: 217.2 91.2% 59.8%;
+    --chart-2: 142.1 76.2% 36.3%;
+    --chart-3: 217.2 91.2% 59.8%;
+    --chart-4: 217.2 91.2% 59.8%;
+    --chart-5: 217.2 91.2% 59.8%;
+    --sidebar-background: 222.2 84% 4.9%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 222.2 47.4% 11.2%;
+    --sidebar-accent: 217.2 32.6% 17.5%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217.2 32.6% 17.5%;
+    --sidebar-ring: 224.3 76.3% 48%;
   }
 }
-
-/* صاروخ كراش - أنماط */
-.rocket-line {
-  animation: rocketStartEffect 0.5s ease-out;
-}
-
-.rocket-path {
-  stroke-dasharray: 1000;
-  stroke-dashoffset: 1000;
-  animation: drawRocketPath 4s linear forwards;
-  filter: drop-shadow(0 0 8px rgba(255, 165, 0, 0.6));
-}
-
-.grid-lines {
-  background-image: linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-  background-size: 20px 20px;
-}
-
-.crash-animation {
-  animation: crashEffect 0.8s ease-out;
-}
-
-.high-multiplier {
-  text-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor;
-  animation: pulsateText 0.8s infinite alternate;
-}
-
-.multiplier-glow {
-  text-shadow: 0 0 5px currentColor;
-}
-
-.rocket-animation {
-  animation: rocket-fly 0.5s infinite alternate;
-}
-
-.flame-animation {
-  animation: flame-flicker 0.2s infinite alternate;
-  background: linear-gradient(to bottom, #FFC700, #FF5722);
-  border-bottom-left-radius: 50%;
-  border-bottom-right-radius: 50%;
-}
-
-.countdown-timer {
-  animation: pulse 1s infinite alternate;
-  font-weight: bold;
-  text-shadow: 0 0 10px currentColor;
-}
-
-@keyframes rocket-fly {
-  from { transform: translate(-50%, 50%) rotate(45deg); }
-  to { transform: translate(-50%, 52%) rotate(45deg) scale(1.05); }
-}
-
-@keyframes flame-flicker {
-  from { height: 6px; opacity: 0.8; }
-  to { height: 10px; opacity: 1; }
-}
-
-@keyframes pulse {
-  from { opacity: 0.8; transform: scale(1); }
-  to { opacity: 1; transform: scale(1.05); }
-}
-
-@keyframes rocketStartEffect {
-  0% {
-    opacity: 0;
-    transform: scale(0.8);
+ 
+@layer base {
+  * {
+    @apply border-border;
   }
-  100% {
-    opacity: 1;
-    transform: scale(1);
+  body {
+    @apply bg-background text-foreground;
   }
 }
 
-@keyframes drawRocketPath {
-  to {
-    stroke-dashoffset: 0;
-  }
+/* إضافة تأثيرات البرق والرعد */
+.lightning-effect {
+  @apply animate-lightning-effect;
+  animation-duration: 30s;
 }
 
-@keyframes crashEffect {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  20% {
-    transform: scale(1.5);
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
+.lightning-effect-delayed {
+  @apply animate-lightning-effect-delayed;
+  animation-duration: 30s;
 }
 
-@keyframes explosion-animation {
-  0% {
-    transform: translate(-50%, 50%) scale(0.3);
-    opacity: 1;
-    box-shadow: 0 0 20px 10px rgba(255, 68, 0, 0.7);
-  }
-  50% {
-    transform: translate(-50%, 50%) scale(1.8);
-    opacity: 0.8;
-    box-shadow: 0 0 50px 30px rgba(255, 68, 0, 0.5);
-  }
-  100% {
-    transform: translate(-50%, 50%) scale(2.5);
-    opacity: 0;
-    box-shadow: 0 0 80px 50px rgba(255, 68, 0, 0);
-  }
+.lightning-effect-distant {
+  @apply animate-lightning-effect-distant;
+  animation-duration: 30s;
 }
 
-@keyframes pulsateText {
-  0% {
-    opacity: 0.8;
-  }
-  100% {
-    opacity: 1;
-  }
+.lightning-streak {
+  @apply animate-lightning-streak;
+  animation-duration: 30s;
 }
 
-/* Classes for Arabic/English number display */
-.font-arabic-numbers {
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum";
-  direction: ltr; /* Ensure numbers are always displayed left-to-right */
-  unicode-bidi: embed;
-  /* Ensure only numbers are affected */
-  display: inline-block;
+.lightning-streak-delayed {
+  @apply animate-lightning-streak-delayed;
+  animation-duration: 30s;
 }
 
-/* Global animations */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+.lightning-streak-distant {
+  @apply animate-lightning-streak-distant;
+  animation-duration: 30s;
 }
 
-@keyframes slideInRight {
-  from {
-    transform: translateX(100%);
-  }
-  to {
-    transform: translateX(0);
-  }
+.lightning-glow {
+  @apply animate-lightning-glow;
+  animation-duration: 30s;
 }
 
-@keyframes slideInLeft {
-  from {
-    transform: translateX(-100%);
-  }
-  to {
-    transform: translateX(0);
-  }
+.lightning-glow-delayed {
+  @apply animate-lightning-glow-delayed;
+  animation-duration: 30s;
 }
 
-/* Transition animations */
-.fade-transition-enter {
-  opacity: 0;
-  transform: scale(0.98);
+.thunder-shake {
+  @apply animate-thunder-shake;
+  animation-duration: 30s;
 }
 
-.fade-transition-enter-active {
-  opacity: 1;
-  transform: scale(1);
-  transition: opacity 300ms, transform 300ms;
+.thunder-shake-delayed {
+  @apply animate-thunder-shake-delayed;
+  animation-duration: 30s;
 }
 
-.fade-transition-exit {
-  opacity: 1;
-  transform: scale(1);
+/* خلفية الذهب للنصوص */
+.gold-text {
+  background: linear-gradient(to right, #D4AF37, #FFC107);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
-.fade-transition-exit-active {
-  opacity: 0;
-  transform: scale(0.98);
-  transition: opacity 300ms, transform 300ms;
+/* تأثير الظل الذهبي */
+.drop-shadow-gold {
+  filter: drop-shadow(0 0 2px rgba(212, 175, 55, 0.5));
+}
+
+/* قسم تحسينات إضافية لتأثيرات البطاقات */
+.game-card-glow {
+  box-shadow: 0 0 15px 2px rgba(212, 175, 55, 0.3);
+  transition: all 0.3s ease-in-out;
+}
+
+.game-card-glow:hover {
+  box-shadow: 0 0 25px 5px rgba(212, 175, 55, 0.5);
+}
+
+/* تأثيرات صوتية متقدمة للإشعارات */
+@keyframes sound-wave {
+  0%, 100% { transform: scale(1); opacity: 0.3; }
+  50% { transform: scale(1.5); opacity: 0.7; }
+}
+
+.sound-indicator {
+  position: relative;
+}
+
+.sound-indicator::before {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.2);
+  animation: sound-wave 2s infinite;
+}
+
+/* تحسينات للنص الذي يظهر خلال البث */
+@keyframes text-appear {
+  0% { opacity: 0; transform: translateY(10px); }
+  10%, 90% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-10px); }
+}
+
+.streaming-text {
+  animation: text-appear 5s ease-in-out forwards;
+}
+
+/* تأثير الخط المتقطع للحدود */
+@keyframes border-dash {
+  to { stroke-dashoffset: 0; }
+}
+
+.dashed-border {
+  stroke-dasharray: 5;
+  stroke-dashoffset: 100;
+  animation: border-dash 10s linear infinite;
+}
+
+/* تعديلات خاصة لصفحة اللعبة */
+.game-overlay {
+  background: radial-gradient(circle, rgba(0,0,0,0) 0%, rgba(0,0,0,0.7) 100%);
+}
+
+.winner-effect {
+  position: relative;
+}
+
+.winner-effect::after {
+  content: "";
+  position: absolute;
+  inset: -10px;
+  border-radius: inherit;
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.5) 0%, rgba(212, 175, 55, 0) 70%);
+  z-index: -1;
+  animation: pulse-slow 2s infinite;
 }
