@@ -30,6 +30,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // API endpoints
   
+  // مسار اختبار حالة الخادم - يستخدم للتحقق من أن الخادم يعمل
+  app.get("/health", (req, res) => {
+    res.status(200).json({ status: "up", timestamp: new Date().toISOString() });
+  });
+  
   // طرق المستخدم الأساسية
   app.get("/api/user", (req, res) => {
     if (!req.isAuthenticated()) {
@@ -978,7 +983,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     // إعادة توجيه إلى صفحة المصادقة للصفحات الأخرى
-    res.redirect('/auth');
+    // تجنب حلقة التوجيه المستمرة إذا كان المسار هو /auth
+    if (req.path === '/auth') {
+      // إذا كان الطلب بالفعل على صفحة المصادقة، نترك خادم الواجهة الأمامية يتعامل معه
+      // سنقوم بتمرير الطلب للواجهة الأمامية عن طريق إرسال استجابة فارغة
+      // هذا سيسمح لـ React/Vite بعرض صفحة تسجيل الدخول بشكل صحيح
+      res.status(200).end();
+    } else {
+      res.redirect('/auth');
+    }
   });
 
   // معالجة الأخطاء العامة
