@@ -12,9 +12,11 @@ import { cn, formatChips } from "@/lib/utils";
 
 interface TableCardProps {
   table: GameTable;
+  gameType?: string;
+  onJoin?: () => void;
 }
 
-export function TableCard({ table }: TableCardProps) {
+export function TableCard({ table, gameType, onJoin }: TableCardProps) {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const [hoverSeat, setHoverSeat] = useState<number | null>(null);
@@ -153,7 +155,11 @@ export function TableCard({ table }: TableCardProps) {
   };
 
   const handleSeatJoin = () => {
-    joinMutation.mutate();
+    if (onJoin) {
+      onJoin();
+    } else {
+      joinMutation.mutate();
+    }
   };
 
   const generateSeats = () => {
@@ -248,7 +254,7 @@ export function TableCard({ table }: TableCardProps) {
             : "bg-gradient-to-br from-[#D4AF37] to-[#AA8C2C] hover:from-[#E5C04B] hover:to-[#D4AF37] text-[#0A0A0A]"
         }`}
                 disabled={joinMutation.isPending} 
-                onClick={() => joinMutation.mutate()}>
+                onClick={() => onJoin ? onJoin() : joinMutation.mutate()}>
           {joinMutation.isPending ? (
             <Loader2 className="h-3 w-3 animate-spin mx-auto" />
           ) : (

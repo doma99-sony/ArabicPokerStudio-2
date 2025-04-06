@@ -23,6 +23,8 @@ import BadgesPage from "@/pages/badges-page";
 import SendChipsPage from "@/pages/send-chips-page";
 import OffersPage from "@/pages/offers-page";
 import ArabicRocketPage from "@/pages/arabic-rocket-page";
+import ArabPokerPage from "@/pages/arab-poker-page";
+import ArabPokerGamePage from "@/pages/arab-poker-game-page";
 import { ProtectedRoute } from "./lib/protected-route";
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
@@ -59,6 +61,8 @@ function Router() {
       <ProtectedRoute path="/poker-tables" component={PokerTablesPage} />
       <ProtectedRoute path="/poker/levels" component={LevelSelectPage} />
       <ProtectedRoute path="/poker/:level" component={GamePage} />
+      <ProtectedRoute path="/arab-poker" component={ArabPokerPage} />
+      <ProtectedRoute path="/arab-poker/:tableId" component={ArabPokerGamePage} />
       <ProtectedRoute path="/naruto" component={NarutoPage} />
       <ProtectedRoute path="/rankings" component={RankingsPage} />
       <ProtectedRoute path="/domino" component={DominoPage} />
