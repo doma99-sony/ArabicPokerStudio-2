@@ -13,6 +13,7 @@ import { NotificationsButton, GameInstructionsButton } from "@/components/ui/not
 import { LogOut, User, ChevronRight, Loader2, ChevronLeft, ChevronUp, Bell, ShoppingBag, ShoppingCart, Download, Smartphone, ExternalLink, Coins, Trophy, Crown } from "lucide-react";
 import { formatChips } from "@/lib/utils";
 import { HeavySnowEffect, GoldDustEffect } from "@/components/effects/snow-effect";
+import { DragonEffect, FireEmbers } from "@/components/effects/dragon-effect";
 
 export default function LobbyPage() {
   const [location, navigate] = useLocation();
@@ -106,7 +107,7 @@ export default function LobbyPage() {
       <HeavySnowEffect />
       <GoldDustEffect />
       
-      {/* خلفية الفيديو محسنة - بتأثيرات ضبابية وإضاءة وبرق ورعد */}
+      {/* خلفية الفيديو محسنة - بتأثيرات ضبابية وإضاءة */}
       <div className="fixed inset-0 z-0 overflow-hidden">
         <video
           ref={videoRef}
@@ -125,11 +126,6 @@ export default function LobbyPage() {
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-black/80 to-transparent h-32 pointer-events-none"></div>
         <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 to-transparent h-32 pointer-events-none"></div>
         
-        {/* إضافة تأثيرات البرق والرعد */}
-        <div className="lightning-effect absolute inset-0 bg-white/0 opacity-0 mix-blend-overlay pointer-events-none"></div>
-        <div className="lightning-effect-delayed absolute inset-0 bg-white/0 opacity-0 mix-blend-overlay pointer-events-none" style={{ animationDelay: '7.5s' }}></div>
-        <div className="lightning-effect-distant absolute inset-0 bg-blue-100/0 opacity-0 mix-blend-overlay pointer-events-none" style={{ animationDelay: '15.2s' }}></div>
-        
         {/* إضافة سحب متحركة */}
         <div className="absolute inset-0 bg-[url('/images/fog-overlay.png')] bg-cover opacity-10 mix-blend-overlay animate-float-slow pointer-events-none"></div>
         <div className="absolute inset-0 bg-[url('/images/fog-overlay2.png')] bg-cover opacity-5 mix-blend-overlay animate-float-slow-reverse pointer-events-none" style={{ animationDelay: '5s' }}></div>
@@ -137,28 +133,11 @@ export default function LobbyPage() {
         {/* إضافة تلميعات ضوئية متحركة */}
         <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-[#D4AF37]/10 blur-3xl animate-pulse-slow opacity-60 mix-blend-screen"></div>
         <div className="absolute bottom-1/4 right-1/4 w-64 h-64 rounded-full bg-[#D4AF37]/10 blur-3xl animate-pulse-slow opacity-50 mix-blend-screen" style={{ animationDelay: "2s" }}></div>
-        
-        {/* إضافة وميض البرق في أماكن مختلفة */}
-        <div className="absolute top-0 left-1/4 w-1 h-screen bg-gradient-to-b from-blue-100/0 via-blue-100/20 to-blue-100/0 lightning-streak opacity-0"></div>
-        <div className="absolute top-0 right-1/3 w-0.5 h-screen bg-gradient-to-b from-blue-100/0 via-blue-100/30 to-blue-100/0 lightning-streak-delayed opacity-0" style={{ animationDelay: '7.5s' }}></div>
-        <div className="absolute top-10 left-1/2 w-0.5 h-96 bg-gradient-to-b from-blue-100/0 via-blue-100/30 to-blue-100/0 lightning-streak-distant opacity-0" style={{ animationDelay: '15.2s' }}></div>
-        
-        {/* نقاط ضوء متحركة تظهر عند حدوث البرق */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="lightning-glow w-full h-full flex items-center justify-center opacity-0">
-            <div className="w-1/2 h-1/2 rounded-full bg-blue-100/20 blur-3xl"></div>
-          </div>
-        </div>
-        <div className="absolute inset-0 flex items-start justify-end">
-          <div className="lightning-glow-delayed w-full h-full flex items-start justify-end opacity-0" style={{ animationDelay: '7.5s' }}>
-            <div className="w-1/3 h-1/3 rounded-full bg-blue-100/20 blur-3xl"></div>
-          </div>
-        </div>
       </div>
       
-      {/* تأثير اهتزاز الشاشة عند حدوث الرعد - إظهار بعد وقت قصير من البرق */}
-      <div className="thunder-shake fixed inset-0 z-0 pointer-events-none opacity-0"></div>
-      <div className="thunder-shake-delayed fixed inset-0 z-0 pointer-events-none opacity-0" style={{ animationDelay: '7.8s' }}></div>
+      {/* إضافة تأثير التنين */}
+      <DragonEffect speed={40} fireRate={8000} initialDelay={4000} />
+      <FireEmbers />
 
       {/* Header Bar - تصميم احترافي بجودة عالية مع تأثيرات مذهلة */}
       <header className="relative z-10 py-3 sticky top-0 backdrop-blur-sm">
