@@ -13,7 +13,7 @@ import { RemoveVirtualPlayersButton } from "@/components/remove-virtual-players-
 import { NotificationsButton, GameInstructionsButton } from "@/components/ui/notifications-system";
 import { LogOut, User, ChevronRight, Loader2, ChevronLeft, ChevronUp, Bell, ShoppingBag, ShoppingCart, Download, Smartphone, ExternalLink, Coins, Trophy, Crown } from "lucide-react";
 import { formatChips } from "@/lib/utils";
-import { HeavySnowEffect, GoldDustEffect } from "@/components/effects/snow-effect";
+import { HeavyPokerCardsEffect, SuitSymbolsEffect } from "@/components/effects/poker-cards-effect";
 
 export default function LobbyPage() {
   const [location, navigate] = useLocation();
@@ -114,9 +114,9 @@ export default function LobbyPage() {
     <div className="h-screen overflow-hidden bg-cover bg-center flex flex-col"
          style={{ backgroundImage: "url('/images/egyptian-background.jpg')" }}>
       
-      {/* إضافة تأثير تساقط الثلج والغبار الذهبي */}
-      <HeavySnowEffect />
-      <GoldDustEffect />
+      {/* إضافة تأثير تساقط بطاقات البوكر */}
+      <HeavyPokerCardsEffect />
+      <SuitSymbolsEffect />
       
       {/* خلفية الفيديو محسنة - بتأثيرات ضبابية وإضاءة */}
       <div className="fixed inset-0 z-0 overflow-hidden">
