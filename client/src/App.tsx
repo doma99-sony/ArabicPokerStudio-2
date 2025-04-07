@@ -26,7 +26,7 @@ import ArabicRocketPage from "@/pages/arabic-rocket-page";
 import ArabPokerPage from "@/pages/arab-poker-page";
 import ArabPokerGamePage from "@/pages/arab-poker-game-page";
 import EgyptQueenPage from "@/pages/egypt-queen-page";
-import EgyptRocketPage from "@/games/egypt-rocket/egypt-rocket-page";
+import EgyptRocketPage from "@/pages/egypt-rocket-page";
 import { ProtectedRoute } from "./lib/protected-route";
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
