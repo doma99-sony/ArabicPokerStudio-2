@@ -87,6 +87,10 @@ const EgyptRocketPage = () => {
     setCurrentMultiplier(1.00);
     setHasCashedOut(false);
     
+    // إعادة تعيين حالة المراهنة في بداية كل جولة
+    // هذا يضمن أن المستخدم يجب أن يشارك في كل جولة بشكل صريح
+    setIsBetting(false);
+    
     // بدء اللعبة بعد فترة انتظار
     const waitingTime = 5000; // 5 ثوانٍ للانتظار
     
@@ -134,6 +138,18 @@ const EgyptRocketPage = () => {
             rocketRef.current.triggerExplosion();
           }
           
+          // إظهار تنبيه للاعب إذا كان مشاركاً في الجولة (ولم يخرج) بأنه سيحتاج للمشاركة من جديد في الجولة القادمة
+          if (isBetting && !hasCashedOut) {
+            // المستخدم لم يجمع رهانه وخسر - نعلمه بضرورة وضع رهان جديد في الجولة القادمة
+            setTimeout(() => {
+              toast({
+                title: "انتهت الجولة",
+                description: "يجب عليك وضع رهان جديد للمشاركة في الجولة القادمة",
+                variant: "default"
+              });
+            }, 1000);
+          }
+          
           // بدء جولة جديدة بعد فترة
           gameTimerRef.current = setTimeout(simulateGame, 5000);
         } else {
@@ -173,7 +189,8 @@ const EgyptRocketPage = () => {
     
     const aiBets: GamePlayer[] = [];
     
-    // إضافة اللاعب الحقيقي إذا كان يراهن
+    // في بداية كل جولة جديدة، يتم إعادة تعيين قائمة اللاعبين المشاركين
+    // إضافة اللاعب الحقيقي فقط إذا كان يراهن في هذه الجولة تحديداً
     if (isBetting) {
       aiBets.push({
         username: user?.username || 'ضيف',
@@ -325,7 +342,18 @@ const EgyptRocketPage = () => {
     const profit = Math.floor(betAmount * currentMultiplier) - betAmount;
     const totalWin = betAmount + profit;
     
+    // تعيين حالة جمع الرهان والمشاركة
     setHasCashedOut(true);
+    
+    // تنبيه المستخدم بأنه يجب إعادة المراهنة في الجولة القادمة
+    // هذا التنبيه يظهر بعد جمع الرهان بنجاح
+    setTimeout(() => {
+      toast({
+        title: "تذكير",
+        description: "ستحتاج إلى وضع رهان جديد للمشاركة في الجولة القادمة",
+        variant: "default"
+      });
+    }, 1500); // تأخير قصير لتجنب ظهور التنبيهات في نفس الوقت
     
     // تحديث حالة اللاعب في قائمة الرهانات الحية
     setLiveBets(prev => {
