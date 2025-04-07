@@ -183,11 +183,16 @@ export function useRealtimeUpdates(): UseRealtimeUpdatesReturn {
     // إنشاء اتصال WebSocket جديد
     try {
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const host = window.location.hostname;
-      const port = 3001; // منفذ خادم FastAPI المحدث
+      const host = window.location.host; // استخدام host بدلاً من hostname للحصول على المضيف والمنفذ معاً
       
-      console.log(`محاولة الاتصال بـ WebSocket على العنوان: ${protocol}//${host}:${port}/ws/${user.id}`);
-      const wsUrl = `${protocol}//${host}:${port}/ws/${user.id}`;
+      // في بيئة التطوير المحلية، نستخدم المنفذ 3001 صراحةً
+      // في بيئة Replit، نستخدم نفس المضيف دون تحديد منفذ إضافي
+      const isLocalhost = host.includes('localhost') || host.includes('127.0.0.1');
+      const wsUrl = isLocalhost 
+        ? `${protocol}//${host.split(':')[0]}:3001/ws/${user.id}`
+        : `${protocol}//${host}/ws/${user.id}`;
+      
+      console.log(`محاولة الاتصال بـ WebSocket على العنوان: ${wsUrl}`);
       const ws = new WebSocket(wsUrl);
       
       ws.onopen = () => {
