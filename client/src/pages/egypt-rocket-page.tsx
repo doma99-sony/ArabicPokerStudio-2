@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
+import { useLocation } from 'wouter';
 import BetHistory from './egypt-rocket/components/bet-history';
 import LiveBets from './egypt-rocket/components/live-bets';
 import GameControls from './egypt-rocket/components/game-controls';
@@ -9,7 +10,7 @@ import './egypt-rocket/assets/egypt-rocket.css';
 import { motion } from 'framer-motion';
 
 // استيراد سمات مصرية وتأثيرات بصرية
-import { Pyramid as PyramidIcon, ScrollText as ScrollIcon, Compass as AnkhIcon } from 'lucide-react';
+import { Pyramid as PyramidIcon, ScrollText as ScrollIcon, Compass as AnkhIcon, LogOut as LogOutIcon, Home as HomeIcon } from 'lucide-react';
 
 // نوع اللاعب في اللعبة
 interface GamePlayer {
@@ -23,6 +24,7 @@ interface GamePlayer {
 const EgyptRocketPage = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [_, navigate] = useLocation();
   const rocketRef = useRef<{ triggerExplosion: () => void }>(null);
   
   // حالة اللعبة
@@ -350,6 +352,21 @@ const EgyptRocketPage = () => {
             </h1>
           </div>
           <div className="flex items-center space-x-3 rtl:space-x-reverse">
+            <button 
+              onClick={() => {
+                if (isBetting && gameStatus === 'flying' && !hasCashedOut) {
+                  if (window.confirm('لديك رهان نشط! هل أنت متأكد من أنك تريد الخروج وخسارة الرهان؟')) {
+                    navigate('/');
+                  }
+                } else {
+                  navigate('/');
+                }
+              }} 
+              className="bg-[#D4AF37] hover:bg-[#B48C2A] text-black font-medium py-2 px-4 rounded-lg flex items-center transition-all duration-300 shadow-lg"
+            >
+              <HomeIcon className="h-5 w-5 mr-2" />
+              الصفحة الرئيسية
+            </button>
             <div className="bg-black/30 p-2 rounded-lg border border-[#D4AF37]/20">
               <AnkhIcon className="h-5 w-5 text-[#D4AF37]" />
             </div>
