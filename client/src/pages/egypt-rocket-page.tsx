@@ -341,13 +341,13 @@ const EgyptRocketPage = () => {
   }, []);
   
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#06071A] to-[#141E30] pt-12 pb-2 px-2">
+    <div className="min-h-screen bg-gradient-to-b from-[#06071A] to-[#141E30] pt-10 pb-2 px-2">
       <div className="max-w-7xl mx-auto">
         {/* رأس الصفحة وأيقونات مصرية */}
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex justify-between items-center mb-3">
           <div className="flex items-center">
-            <PyramidIcon className="h-6 w-6 text-[#D4AF37] mr-2" />
-            <h1 className="text-xl font-bold text-white">
+            <PyramidIcon className="h-5 w-5 text-[#D4AF37] mr-2" />
+            <h1 className="text-lg font-bold text-white">
               صاروخ <span className="text-[#D4AF37]">مصر</span>
             </h1>
           </div>
@@ -362,16 +362,16 @@ const EgyptRocketPage = () => {
                   navigate('/');
                 }
               }} 
-              className="bg-[#FFD700] hover:bg-[#F0C000] text-black font-bold py-2 px-4 rounded-lg flex items-center transition-all duration-300 shadow-xl border-2 border-[#B8860B] text-sm animate-pulse"
+              className="bg-[#FFD700] hover:bg-[#F0C000] text-black font-bold py-1.5 px-3 rounded-lg flex items-center transition-all duration-300 shadow-xl border-2 border-[#B8860B] text-xs animate-pulse"
             >
-              <HomeIcon className="h-4 w-4 mr-2" strokeWidth={2.5} />
+              <HomeIcon className="h-3.5 w-3.5 mr-1.5" strokeWidth={2.5} />
               العودة للصفحة الرئيسية
             </button>
             <div className="bg-black/30 p-1 rounded-lg border border-[#D4AF37]/20">
-              <AnkhIcon className="h-4 w-4 text-[#D4AF37]" />
+              <AnkhIcon className="h-3.5 w-3.5 text-[#D4AF37]" />
             </div>
             <div className="bg-black/30 p-1 rounded-lg border border-[#D4AF37]/20">
-              <ScrollIcon className="h-4 w-4 text-[#D4AF37]" />
+              <ScrollIcon className="h-3.5 w-3.5 text-[#D4AF37]" />
             </div>
           </div>
         </div>
@@ -386,7 +386,7 @@ const EgyptRocketPage = () => {
             
             {/* منطقة عرض اللعبة */}
             <div className="bg-black/20 rounded-xl overflow-hidden border border-[#D4AF37]/10">
-              <div className="relative h-[40vh]">
+              <div className="relative h-[38vh]">
                 <RocketGame 
                   ref={rocketRef}
                   gameStatus={gameStatus} 
@@ -426,8 +426,8 @@ const EgyptRocketPage = () => {
           <div className="space-y-4">
             {/* الرهانات الحية */}
             <div className="bg-black/20 rounded-xl p-3 border border-[#D4AF37]/10">
-              <h3 className="text-[#D4AF37] font-bold mb-1 text-center text-sm">الرهانات الحية</h3>
-              <div className="max-h-[30vh] overflow-y-auto">
+              <h3 className="text-[#D4AF37] font-bold mb-2 text-center text-base">الرهانات الحية</h3>
+              <div className="max-h-[32vh] overflow-y-auto">
                 <LiveBets bets={liveBets} />
               </div>
             </div>

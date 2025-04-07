@@ -16,7 +16,6 @@ const LiveBets = ({ bets }: LiveBetsProps) => {
   
   return (
     <div className="w-full">
-      <h3 className="text-[#D4AF37] font-bold mb-3 text-center">الرهانات الحية</h3>
       
       {bets.length === 0 ? (
         <div className="text-center text-gray-400 py-4">لا توجد رهانات حالية</div>

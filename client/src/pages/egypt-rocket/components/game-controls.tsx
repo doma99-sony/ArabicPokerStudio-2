@@ -59,8 +59,8 @@ const GameControls = ({
   };
   
   return (
-    <div className="p-4 bg-black/30 backdrop-blur-sm rounded-lg border border-[#D4AF37]/20 transition-all duration-300">
-      <div className="flex flex-col md:flex-row gap-4">
+    <div className="p-3 bg-black/30 backdrop-blur-sm rounded-lg border border-[#D4AF37]/20 transition-all duration-300">
+      <div className="flex flex-col md:flex-row gap-3">
         {/* جانب معلومات الرصيد */}
         <div className="flex-1">
           <div className="text-sm text-gray-300 mb-1">رصيدك</div>
@@ -197,7 +197,7 @@ const GameControls = ({
           {!isBetting ? (
             <Button 
               onClick={onPlaceBet} 
-              className="mt-auto flex-grow bg-[#D4AF37] hover:bg-[#B08D2A] text-black font-bold py-3"
+              className="mt-auto flex-grow bg-[#D4AF37] hover:bg-[#B08D2A] text-black font-bold py-2.5"
               disabled={
                 gameStatus === 'flying' || 
                 betAmount <= 0 || 
@@ -210,14 +210,14 @@ const GameControls = ({
             gameStatus === 'waiting' ? (
               <Button 
                 onClick={onCancelBet} 
-                className="mt-auto flex-grow bg-red-600 hover:bg-red-700 text-white py-3"
+                className="mt-auto flex-grow bg-red-600 hover:bg-red-700 text-white py-2.5"
               >
                 إلغاء الرهان
               </Button>
             ) : (
               <Button 
                 onClick={onCashout} 
-                className="mt-auto flex-grow bg-green-600 hover:bg-green-700 text-white font-bold py-3"
+                className="mt-auto flex-grow bg-green-600 hover:bg-green-700 text-white font-bold py-2.5"
                 disabled={hasCashedOut || gameStatus !== 'flying'}
               >
                 جمع {formatChips(Math.floor(betAmount * currentMultiplier))}

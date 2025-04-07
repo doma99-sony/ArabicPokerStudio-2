@@ -9,18 +9,18 @@ interface BetHistoryProps {
 const BetHistory = ({ history, horizontal = false }: BetHistoryProps) => {
   return (
     <div className="w-full">
-      <h3 className="text-[#D4AF37] font-bold mb-2 text-center text-sm">تاريخ الجولات</h3>
+      <h3 className="text-[#D4AF37] font-bold mb-1 text-center text-sm">تاريخ الجولات</h3>
       
       {history.length === 0 ? (
         <div className="text-center text-gray-400 py-2 text-xs">لا يوجد تاريخ سابق</div>
       ) : (
         // استخدام العرض الأفقي أو الرأسي بناءً على الخاصية
-        <div className={`${horizontal ? 'flex overflow-x-auto py-1 space-x-1 rtl:space-x-reverse' : 'space-y-2'}`}>
+        <div className={`${horizontal ? 'flex overflow-x-auto py-1 space-x-1 rtl:space-x-reverse' : 'space-y-2'} scrollbar-thin scrollbar-thumb-[#D4AF37]/30 scrollbar-track-black/10`}>
           {history.map((item, index) => (
             <div 
               key={index} 
               className={`
-                flex ${horizontal ? 'flex-col min-w-[45px] w-[45px]' : 'justify-between'} 
+                flex ${horizontal ? 'flex-col min-w-[55px] w-[55px]' : 'justify-between'} 
                 items-center py-1 px-0.5 rounded-lg bg-black/30 border border-[#D4AF37]/20
               `}
             >
@@ -42,7 +42,7 @@ const BetHistory = ({ history, horizontal = false }: BetHistoryProps) => {
               
               <div className={horizontal ? 'text-center' : ''}>
                 <div 
-                  className={`font-mono font-bold ${horizontal ? 'text-xs' : 'text-lg'} ${
+                  className={`font-mono font-bold ${horizontal ? 'text-sm' : 'text-lg'} ${
                     item.multiplier < 1.5 ? 'text-red-500' : 
                     item.multiplier < 3 ? 'text-yellow-500' : 
                     'text-green-500'
