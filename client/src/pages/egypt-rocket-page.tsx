@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
-import BetHistory from './components/bet-history';
-import LiveBets from './components/live-bets';
-import GameControls from './components/game-controls';
-import RocketGame from './components/rocket-game';
-import './assets/egypt-rocket.css';
+import BetHistory from './egypt-rocket/components/bet-history';
+import LiveBets from './egypt-rocket/components/live-bets';
+import GameControls from './egypt-rocket/components/game-controls';
+import RocketGame from './egypt-rocket/components/rocket-game';
+import './egypt-rocket/assets/egypt-rocket.css';
 import { motion } from 'framer-motion';
 
 // استيراد سمات مصرية وتأثيرات بصرية

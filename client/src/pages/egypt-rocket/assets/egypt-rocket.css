@@ -1,0 +1,86 @@
+/* تأثيرات لصاروخ مصر */
+
+/* تأثير وميض النجوم */
+@keyframes twinkle {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 0.8; }
+}
+
+/* تأثير نبضات سريعة للصاروخ */
+@keyframes pulse-fast {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.2); opacity: 1; }
+}
+
+/* تأثير حركة التدرج */
+@keyframes gradient-move {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* تأثير مؤثر للمضاعف */
+@keyframes multiplier-glow {
+  0%, 100% { text-shadow: 0 0 5px rgba(212, 175, 55, 0.5); }
+  50% { text-shadow: 0 0 15px rgba(212, 175, 55, 0.8); }
+}
+
+/* مثلث لتمثيل الهرم */
+.triangle-pyramid {
+  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+}
+
+/* تأثير ظل ذهبي */
+.drop-shadow-gold {
+  filter: drop-shadow(0 0 2px rgba(212, 175, 55, 0.5));
+}
+
+/* تأثير ضوء للصاروخ */
+.rocket-glow {
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.5), 0 0 30px rgba(255, 215, 0, 0.3);
+}
+
+/* تأثير خلفية متحركة */
+.animated-bg {
+  background-size: 200% 200%;
+  animation: gradient-move 5s ease infinite;
+}
+
+/* تأثير الخط الذهبي المتوهج */
+.gold-text-glow {
+  color: #D4AF37;
+  text-shadow: 0 0 5px rgba(212, 175, 55, 0.5);
+  animation: multiplier-glow 2s ease-in-out infinite;
+}
+
+/* تأثير ارتفاع الصاروخ */
+@keyframes rocket-rise {
+  from { transform: translateY(0); }
+  to { transform: translateY(-80vh); }
+}
+
+/* تأثير انفجار الصاروخ */
+@keyframes explosion {
+  0% { transform: scale(0); opacity: 0; }
+  50% { transform: scale(2); opacity: 1; }
+  100% { transform: scale(3); opacity: 0; }
+}
+
+/* تأثير دخان الصاروخ */
+@keyframes smoke {
+  0% { transform: translate(0, 0) scale(1); opacity: 0.8; }
+  100% { transform: translate(var(--smoke-x, 20px), var(--smoke-y, 50px)) scale(2); opacity: 0; }
+}
+
+/* تأثير الاهتزاز للانفجار */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+/* تأثير ظهور تدريجي */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
