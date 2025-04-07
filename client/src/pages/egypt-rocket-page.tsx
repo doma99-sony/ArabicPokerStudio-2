@@ -160,15 +160,34 @@ const EgyptRocketPage = () => {
     }, waitingTime);
   };
   
-  // توليد نقطة انفجار عشوائية باستخدام توزيع احتمالي واقعي
+  // توليد نقطة انفجار عشوائية باستخدام توزيع احتمالي أكثر صعوبة (مماثل لألعاب كراش الاحترافية)
   const generateCrashPoint = (): number => {
-    // استخدام توزيع يميل نحو القيم المنخفضة
+    // توزيع عشوائي أسي لمحاكاة توزيع ألعاب الكراش الحقيقية
+    // معادلة لتوليد مضاعفات منخفضة بشكل أكثر تكراراً
+    // وفق الصيغة: 0.99 / (1 - R)، حيث R هو رقم عشوائي بين 0 و 1
     const r = Math.random();
-    // معادلة تضمن أن معظم القيم تكون بين 1 و 2 مع احتمالية قليلة للقيم الأعلى
-    let crashPoint = 0.5 + (1 / (r * 0.15 + 0.1));
     
-    // تحديد الحد الأقصى للمضاعف (نادراً ما يتجاوز 10)
-    return Math.min(crashPoint, 20);
+    // 1% من الوقت ستكون نقطة الانفجار أقل من 1.01x (انفجار فوري تقريباً)
+    if (r < 0.01) {
+      return 1.0 + (r * 0.1); // بين 1.0 و 1.01
+    }
+    
+    // 80% من الوقت سيكون الانفجار بين 1.1x و 2.0x
+    if (r < 0.8) {
+      return 1.1 + (r * 0.9); // معظم النتائج ستكون بين 1.1 و 2.0
+    }
+    
+    // 15% من الوقت سيكون بين 2.0x و 5.0x
+    if (r < 0.95) {
+      return 2.0 + (r * 3.0);
+    }
+    
+    // 5% فقط من الوقت ستكون النتيجة فوق 5.0x
+    // استخدام معادلة متوازنة تقلل من احتمالية القيم العالية جداً
+    const highMultiplier = 5.0 + (Math.pow(r, 3) * 15.0);
+    
+    // تحديد الحد الأقصى للمضاعف (نادراً جداً ما يتجاوز 15x)
+    return Math.min(highMultiplier, 15.0);
   };
   
   // حساب المضاعف بناءً على الوقت المنقضي
@@ -244,12 +263,36 @@ const EgyptRocketPage = () => {
           }
         }
         
-        // منطق اللاعب الوهمي - احتمالية أن يجمع اللاعب الوهمي رهانه قبل الانفجار
-        const willCashout = Math.random() > 0.4; // 60% احتمالية الجمع قبل الانفجار
+        // منطق اللاعب الوهمي المحسن - الأكثر واقعية في الألعاب الاحترافية
+        // معظم اللاعبين الوهميين سينسحبون مبكراً (مثل الألعاب الحقيقية)
+        const willCashout = Math.random() > 0.25; // 75% احتمالية الجمع قبل الانفجار
         
         if (willCashout) {
-          // اختيار مضاعف الجمع بشكل عشوائي بين 1.1 والمضاعف النهائي
-          const aiCashoutMultiplier = parseFloat((1.1 + Math.random() * (crashMultiplier - 1.1)).toFixed(2));
+          // توزيع أكثر واقعية للمضاعفات - معظم اللاعبين يجمعون مبكراً
+          // 70% من اللاعبين يجمعون بين 1.1x و 1.8x
+          // 25% من اللاعبين يجمعون بين 1.8x و 3.0x
+          // 5% فقط يجمعون فوق 3.0x
+          
+          let aiCashoutMultiplier = 1.1;
+          const cashoutBehavior = Math.random();
+          
+          if (cashoutBehavior < 0.7) {
+            // معظم اللاعبين محافظين جداً
+            aiCashoutMultiplier = 1.1 + (Math.random() * 0.7);
+          } else if (cashoutBehavior < 0.95) {
+            // بعض اللاعبين يخاطرون قليلاً
+            aiCashoutMultiplier = 1.8 + (Math.random() * 1.2);
+          } else {
+            // القليل جداً من اللاعبين يخاطرون كثيراً
+            aiCashoutMultiplier = 3.0 + (Math.random() * (crashMultiplier - 3.0));
+          }
+          
+          // التأكد من أن مضاعف اللاعب الوهمي لا يتجاوز مضاعف الانفجار
+          aiCashoutMultiplier = Math.min(aiCashoutMultiplier, crashMultiplier - 0.02);
+          
+          // تصحيح المضاعف ليكون رقماً مناسباً مع رقمين عشريين فقط
+          aiCashoutMultiplier = parseFloat(aiCashoutMultiplier.toFixed(2));
+          
           const profit = Math.floor(bet.amount * aiCashoutMultiplier) - bet.amount;
           
           return {
@@ -460,13 +503,18 @@ const EgyptRocketPage = () => {
   useEffect(() => {
     simulateGame();
     
-    // إضافة بعض البيانات التاريخية للعرض
+    // إضافة بيانات تاريخية واقعية تعكس توزيع المضاعفات في ألعاب كراش الحقيقية
     setGameHistory([
-      { multiplier: 1.24, timestamp: new Date(Date.now() - 60000) },
-      { multiplier: 3.57, timestamp: new Date(Date.now() - 120000) },
-      { multiplier: 1.89, timestamp: new Date(Date.now() - 180000) },
-      { multiplier: 4.62, timestamp: new Date(Date.now() - 240000) },
-      { multiplier: 1.35, timestamp: new Date(Date.now() - 300000) },
+      { multiplier: 1.12, timestamp: new Date(Date.now() - 60000) },
+      { multiplier: 1.05, timestamp: new Date(Date.now() - 120000) }, // انفجار مبكر جداً
+      { multiplier: 1.74, timestamp: new Date(Date.now() - 180000) },
+      { multiplier: 2.14, timestamp: new Date(Date.now() - 240000) },
+      { multiplier: 1.23, timestamp: new Date(Date.now() - 300000) },
+      { multiplier: 1.48, timestamp: new Date(Date.now() - 360000) },
+      { multiplier: 3.77, timestamp: new Date(Date.now() - 420000) }, // مضاعف عالي نادر
+      { multiplier: 1.31, timestamp: new Date(Date.now() - 480000) },
+      { multiplier: 1.92, timestamp: new Date(Date.now() - 540000) },
+      { multiplier: 1.07, timestamp: new Date(Date.now() - 600000) }, // انفجار مبكر آخر
     ]);
   }, []);
   
