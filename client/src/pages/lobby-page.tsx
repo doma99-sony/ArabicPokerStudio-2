@@ -461,17 +461,7 @@ export default function LobbyPage() {
                   title="ألعاب الكراش" 
                   icon="🚀"
                   games={[
-                    {
-                      id: "arabic-rocket",
-                      title: "الصاروخ العربي",
-                      image: "/images/rocket-crash-bg.jpg",
-                      playerCount: 982,
-                      tableCount: 0,
-                      minBet: 10,
-                      maxBet: 100000,
-                      isHot: true,
-                      onClick: () => navigate("/arabic-rocket")
-                    },
+
 
                   ]}
                 />
