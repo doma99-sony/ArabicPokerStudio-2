@@ -1,96 +1,102 @@
 /**
- * أنواع البيانات للعبة صياد السمك
+ * تعريف الأنواع المستخدمة في لعبة صياد السمك
  */
 
 // أنواع الرموز في اللعبة
 export enum SymbolType {
-  WILD = 'WILD', // الصياد - الرمز الجوكر
-  FISH_1 = 'FISH_1', // سمكة 1
-  FISH_2 = 'FISH_2', // سمكة 2
-  FISH_3 = 'FISH_3', // سمكة 3
-  STARFISH = 'STARFISH', // نجم البحر
-  SHELL = 'SHELL', // صدفة
-  ANCHOR = 'ANCHOR', // مرساة
-  CRAB = 'CRAB', // سلطعون
-  BAIT_BOX = 'BAIT_BOX', // صندوق الطعم (سكاتر)
-  FISH_MONEY = 'FISH_MONEY', // سمكة بقيمة مالية
+  WILD = 'WILD',               // الصياد (Wild)
+  FISH_1 = 'FISH_1',           // سمكة 1
+  FISH_2 = 'FISH_2',           // سمكة 2
+  FISH_3 = 'FISH_3',           // سمكة 3
+  STARFISH = 'STARFISH',       // نجم البحر
+  SHELL = 'SHELL',             // صدفة
+  ANCHOR = 'ANCHOR',           // مرساة
+  CRAB = 'CRAB',               // سلطعون
+  BAIT_BOX = 'BAIT_BOX',       // صندوق الطعم (Scatter)
+  FISH_MONEY = 'FISH_MONEY'    // سمكة نقدية
 }
 
-// حالات اللعبة
-export enum GameState {
-  IDLE = 'IDLE', // انتظار
-  SPINNING = 'SPINNING', // دوران
-  WIN_ANIMATION = 'WIN_ANIMATION', // عرض الفوز
-  FREE_SPINS = 'FREE_SPINS', // لفات مجانية
-  COLLECTING = 'COLLECTING', // جمع القيم
+// واجهة خط الدفع
+export interface Payline {
+  id: number;                  // رقم خط الدفع
+  positions: number[];         // مواضع الرموز في كل عمود (الصفوف)
+  color: string;               // لون خط الدفع
 }
 
 // أنواع الفوز
 export enum WinType {
-  LINE = 'LINE', // فوز على خط
-  SCATTER = 'SCATTER', // فوز بالسكاتر
-  FISH_COLLECT = 'FISH_COLLECT', // جمع قيمة الأسماك
-  BONUS = 'BONUS', // مكافأة
+  LINE = 'LINE',               // فوز على خط دفع
+  SCATTER = 'SCATTER',         // فوز بالتشتت (Scatter)
+  FISH_MONEY = 'FISH_MONEY'    // فوز بجمع الأسماك النقدية
 }
 
-// واجهة الفوز
+// واجهة حالة الفوز
 export interface Win {
-  type: WinType;
-  amount: number;
-  payline?: number; // رقم خط الدفع في حالة الفوز على خط
-  positions: [number, number][]; // مواضع الرموز الفائزة [صف، عمود]
-  symbolType: SymbolType; // نوع الرمز الفائز
-  multiplier?: number; // مضاعف الفوز إن وجد
+  type: WinType;               // نوع الفوز
+  amount: number;              // مبلغ الفوز
+  positions?: [number, number][]; // مواضع الرموز الفائزة [صف، عمود]
+  payline?: number;            // رقم خط الدفع (إذا كان الفوز على خط)
+  symbolType?: SymbolType;     // نوع الرمز الفائز
 }
 
-// نتيجة الدوران
-export interface SpinResult {
-  reels: SymbolType[][]; // مصفوفة البكرات
-  wins: Win[]; // مصفوفة الفوز
-  totalWin: number; // إجمالي الفوز
-  triggeredFreeSpins: number; // عدد اللفات المجانية المتحققة
-  fishValues?: { [position: string]: number }; // قيم الأسماك النقدية
+// حالات اللعبة
+export enum GameState {
+  IDLE = 'IDLE',                 // وضع الانتظار
+  SPINNING = 'SPINNING',         // وضع الدوران
+  WIN_ANIMATION = 'WIN_ANIMATION', // عرض الفوز
+  FREE_SPINS = 'FREE_SPINS',      // وضع اللفات المجانية
+  COLLECTING = 'COLLECTING'       // وضع جمع الأسماك النقدية
 }
 
-// حالة اللفات المجانية
+// واجهة حالة اللفات المجانية
 export interface FreeSpinsState {
-  active: boolean; // هل اللفات المجانية نشطة
-  remaining: number; // عدد اللفات المجانية المتبقية
-  multiplier: number; // مضاعف الفوز
-  fishermanCount: number; // عدد رموز الصياد المجمعة
-  collectedFishValues: number; // قيم الأسماك المجمعة
+  active: boolean;              // هل اللفات المجانية نشطة
+  spinsRemaining: number;       // عدد اللفات المتبقية
+  totalSpins: number;           // إجمالي عدد اللفات
+  multiplier: number;           // مضاعف الفوز
+  collectedWild: number;        // عدد الصيادين المجموعين
+  totalWin: number;             // إجمالي الفوز في اللفات المجانية
 }
 
-// ضبط الصوت
-export interface SoundControl {
-  isMuted: boolean;
-  volume: number;
-  playBackgroundMusic: () => void;
-  stopBackgroundMusic: () => void;
-  playSound: (soundName: string) => void;
-  muteAll: () => void;
-  unmuteAll: () => void;
-  setVolume: (volume: number) => void;
-}
-
-// إعدادات الرسوم المتحركة
-export interface AnimationSettings {
-  speed: number; // سرعة الرسوم المتحركة (1.0 = طبيعي)
-  quality: 'low' | 'medium' | 'high'; // جودة الرسوم المتحركة
-}
-
-// حالة اللعبة الكاملة
+// واجهة حالة لعبة صياد السمك
 export interface FishingGameState {
-  balance: number; // رصيد اللاعب
-  betAmount: number; // قيمة الرهان
-  reels: SymbolType[][]; // حالة البكرات الحالية
-  gameState: GameState; // حالة اللعبة الحالية
-  lastWin: number; // قيمة الفوز الأخير
-  wins: Win[]; // قائمة الفوز الحالية
-  winPositions: [number, number][]; // مواضع الفوز للتمييز
-  freeSpins: FreeSpinsState; // حالة اللفات المجانية
-  autoPlayActive: boolean; // هل اللعب التلقائي نشط
-  totalBet: number; // إجمالي الرهان
-  paylineCount: number; // عدد خطوط الدفع النشطة
+  balance: number;              // رصيد اللاعب
+  betAmount: number;            // قيمة الرهان
+  totalBet: number;             // إجمالي الرهان (الرهان × خطوط الدفع)
+  reels: SymbolType[][];        // مصفوفة البكرات والرموز
+  gameState: GameState;         // حالة اللعبة الحالية
+  lastWin: number;              // آخر فوز
+  activePaylines: number;       // عدد خطوط الدفع النشطة
+  paylineWins: Win[];           // حالات الفوز على خطوط الدفع
+  scatterWins: Win[];           // حالات الفوز بالتشتت
+  fishMoneyWins: Win[];         // حالات الفوز بالأسماك النقدية
   fishValues: { [position: string]: number }; // قيم الأسماك النقدية
+  freeSpins: FreeSpinsState;    // حالة اللفات المجانية
+  autoPlayActive: boolean;      // هل اللعب التلقائي نشط
+  canSpin: boolean;             // هل يمكن الدوران الآن
+}
+
+// واجهة نتيجة الدوران
+export interface SpinResult {
+  reels: SymbolType[][];        // مصفوفة البكرات بعد الدوران
+  wins: Win[];                  // حالات الفوز
+  totalWin: number;             // إجمالي الفوز
+  triggeredFreeSpins: number;   // عدد اللفات المجانية المُفعلة (0 إذا لم يتم التفعيل)
+  fishValues: { [position: string]: number }; // قيم الأسماك النقدية
+}
+
+// واجهة التحكم بالأصوات
+export interface SoundControl {
+  muted: boolean;               // هل الصوت مكتوم
+  volume: number;               // مستوى الصوت (0-1)
+  playSound: (soundName: string) => void; // تشغيل صوت معين
+  toggleMute: () => void;       // تبديل كتم الصوت
+  setVolume: (volume: number) => void; // تعيين مستوى الصوت
+}
+
+// واجهة إعدادات الرسوم المتحركة
+export interface AnimationSettings {
+  speed: number;                // سرعة الرسوم المتحركة
+  effects: boolean;             // هل المؤثرات مفعلة
+  quality: 'low' | 'medium' | 'high'; // جودة الرسوم المتحركة
 }

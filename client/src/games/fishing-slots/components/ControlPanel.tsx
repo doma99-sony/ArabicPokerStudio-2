@@ -1,166 +1,194 @@
 /**
- * لوحة التحكم للعبة صياد السمك
- * تحتوي على زر الدوران وإعدادات الرهان وأزرار التحكم الأخرى
+ * مكون لوحة التحكم في لعبة صياد السمك
  */
 
-import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Slider } from '@/components/ui/slider';
-import { motion } from 'framer-motion';
+import React from 'react';
+import { Button } from "@/components/ui/button";
 import { 
-  SPIN_BUTTON_IMAGE, 
-  AUTOPLAY_BUTTON_IMAGE, 
-  MAX_BET_BUTTON_IMAGE 
-} from '../assets/images';
+  Cog, 
+  VolumeX, 
+  Volume2, 
+  RotateCw, 
+  DollarSign, 
+  ChevronUp, 
+  ChevronDown,
+  FastForward,
+  Pause
+} from 'lucide-react';
+import { GameState } from '../types';
 
 interface ControlPanelProps {
-  balance: number;
-  betAmount: number;
-  onChangeBet: (amount: number) => void;
-  onSpin: () => void;
-  onAutoPlay: () => void;
-  onMaxBet: () => void;
-  isSpinning: boolean;
-  isAutoPlaying: boolean;
-  canSpin: boolean;
-  minBet: number;
-  maxBet: number;
+  balance: number; // رصيد اللاعب
+  betAmount: number; // قيمة الرهان الحالي
+  totalBet: number; // إجمالي الرهان (الرهان × خطوط الدفع)
+  lastWin: number; // آخر فوز
+  gameState: GameState; // حالة اللعبة
+  autoPlayActive: boolean; // حالة اللعب التلقائي
+  changeBet: (amount: number) => void; // تغيير قيمة الرهان
+  setMaxBet: () => void; // تعيين الرهان الأقصى
+  spin: () => void; // بدء الدوران
+  toggleAutoPlay: () => void; // تبديل وضع اللعب التلقائي
+  onOpenSettings?: () => void; // فتح الإعدادات
+  onOpenPaytable?: () => void; // فتح جدول المدفوعات
+  muted?: boolean; // حالة كتم الصوت
+  toggleMute?: () => void; // تبديل كتم الصوت
 }
 
 const ControlPanel: React.FC<ControlPanelProps> = ({
   balance,
   betAmount,
-  onChangeBet,
-  onSpin,
-  onAutoPlay,
-  onMaxBet,
-  isSpinning,
-  isAutoPlaying,
-  canSpin,
-  minBet,
-  maxBet
+  totalBet,
+  lastWin,
+  gameState,
+  autoPlayActive,
+  changeBet,
+  setMaxBet,
+  spin,
+  toggleAutoPlay,
+  onOpenSettings,
+  onOpenPaytable,
+  muted = false,
+  toggleMute
 }) => {
-  // سلسلة قيم الرهان المتاحة
-  const betValues = [10, 20, 50, 100, 200, 500, 1000, 2000, 5000];
+  // قائمة قيم الرهان المتاحة
+  const betValues = [10, 20, 50, 100, 200, 500, 1000];
   
-  // مؤشر الرهان الحالي في المصفوفة
-  const [betIndex, setBetIndex] = useState(0);
+  // الحصول على قيمة الرهان التالية والسابقة
+  const currentBetIndex = betValues.indexOf(betAmount);
+  const canIncreaseBet = currentBetIndex < betValues.length - 1 && gameState === GameState.IDLE;
+  const canDecreaseBet = currentBetIndex > 0 && gameState === GameState.IDLE;
   
-  // تحديث مؤشر الرهان عند تغيير قيمة الرهان
-  useEffect(() => {
-    const index = betValues.findIndex(value => value === betAmount);
-    if (index !== -1) {
-      setBetIndex(index);
-    }
-  }, [betAmount]);
-
-  // زيادة الرهان
+  // زيادة قيمة الرهان
   const increaseBet = () => {
-    if (betIndex < betValues.length - 1) {
-      const newIndex = betIndex + 1;
-      setBetIndex(newIndex);
-      onChangeBet(betValues[newIndex]);
+    if (canIncreaseBet) {
+      changeBet(betValues[currentBetIndex + 1]);
     }
   };
-
-  // إنقاص الرهان
+  
+  // تقليل قيمة الرهان
   const decreaseBet = () => {
-    if (betIndex > 0) {
-      const newIndex = betIndex - 1;
-      setBetIndex(newIndex);
-      onChangeBet(betValues[newIndex]);
+    if (canDecreaseBet) {
+      changeBet(betValues[currentBetIndex - 1]);
     }
   };
-
-  // تحديث الرهان من شريط التمرير
-  const handleSliderChange = (value: number[]) => {
-    const newIndex = Math.min(Math.max(Math.round(value[0] / (100 / (betValues.length - 1))), 0), betValues.length - 1);
-    setBetIndex(newIndex);
-    onChangeBet(betValues[newIndex]);
+  
+  // التحقق من إمكانية الدوران
+  const canSpin = gameState === GameState.IDLE && balance >= totalBet;
+  
+  // نص زر الدوران
+  const getSpinButtonText = () => {
+    switch (gameState) {
+      case GameState.SPINNING:
+        return 'دوران...';
+      case GameState.WIN_ANIMATION:
+        return 'فوز!';
+      default:
+        return 'دوران';
+    }
   };
-
+  
   return (
     <div className="control-panel">
-      {/* معلومات الرهان والرصيد */}
-      <div className="bet-info">
-        <div className="balance-display">
-          <span className="label">الرصيد:</span>
-          <span className="value">{balance.toLocaleString()}</span>
-        </div>
-        
-        <div className="bet-controls">
-          <button 
-            className="bet-button decrease" 
-            onClick={decreaseBet} 
-            disabled={isSpinning || betIndex === 0}
-          >
-            -
-          </button>
-          
-          <div className="bet-amount">
-            <span className="label">الرهان:</span>
-            <span className="value">{betAmount.toLocaleString()}</span>
+      <div className="control-panel-background"></div>
+      <div className="control-panel-content">
+        <div className="player-info">
+          <div className="info-box balance">
+            <div className="info-label">الرصيد</div>
+            <div className="info-value">{balance}</div>
           </div>
           
-          <button 
-            className="bet-button increase" 
-            onClick={increaseBet} 
-            disabled={isSpinning || betIndex === betValues.length - 1 || betValues[betIndex + 1] > balance}
-          >
-            +
-          </button>
+          <div className="info-box bet">
+            <div className="info-label">الرهان</div>
+            <div className="info-value">{betAmount}</div>
+            <div className="bet-controls">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={decreaseBet}
+                disabled={!canDecreaseBet}
+                className="bet-button decrease"
+              >
+                <ChevronDown size={20} />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={increaseBet}
+                disabled={!canIncreaseBet}
+                className="bet-button increase"
+              >
+                <ChevronUp size={20} />
+              </Button>
+            </div>
+          </div>
+          
+          <div className="info-box total-bet">
+            <div className="info-label">إجمالي الرهان</div>
+            <div className="info-value">{totalBet}</div>
+          </div>
+          
+          <div className="info-box win">
+            <div className="info-label">الفوز</div>
+            <div className="info-value">{lastWin}</div>
+          </div>
         </div>
-      </div>
-      
-      {/* شريط تمرير الرهان */}
-      <div className="bet-slider">
-        <Slider
-          value={[betIndex * (100 / (betValues.length - 1))]}
-          min={0}
-          max={100}
-          step={100 / (betValues.length - 1)}
-          onValueChange={handleSliderChange}
-          disabled={isSpinning}
-          className="slider"
-        />
-      </div>
-      
-      {/* أزرار التحكم */}
-      <div className="action-buttons">
-        {/* زر أقصى رهان */}
-        <motion.button
-          className="max-bet-button"
-          onClick={onMaxBet}
-          disabled={isSpinning || balance < maxBet}
-          whileTap={{ scale: 0.95 }}
-        >
-          <img src={MAX_BET_BUTTON_IMAGE} alt="أقصى رهان" />
-          <span>أقصى رهان</span>
-        </motion.button>
         
-        {/* زر الدوران */}
-        <motion.button
-          className={`spin-button ${isSpinning ? 'spinning' : ''}`}
-          onClick={onSpin}
-          disabled={!canSpin || isSpinning || balance < betAmount}
-          whileTap={{ scale: 0.95 }}
-          animate={isSpinning ? { rotate: 360 } : {}}
-          transition={isSpinning ? { duration: 1, repeat: Infinity, ease: "linear" } : {}}
-        >
-          <img src={SPIN_BUTTON_IMAGE} alt="دوران" />
-          <span>{isSpinning ? 'جاري الدوران...' : 'دوران'}</span>
-        </motion.button>
-        
-        {/* زر اللعب التلقائي */}
-        <motion.button
-          className={`autoplay-button ${isAutoPlaying ? 'active' : ''}`}
-          onClick={onAutoPlay}
-          disabled={isSpinning || balance < betAmount}
-          whileTap={{ scale: 0.95 }}
-        >
-          <img src={AUTOPLAY_BUTTON_IMAGE} alt="لعب تلقائي" />
-          <span>{isAutoPlaying ? 'إيقاف' : 'لعب تلقائي'}</span>
-        </motion.button>
+        <div className="control-buttons">
+          <Button
+            variant="outline"
+            onClick={onOpenSettings}
+            className="control-button settings"
+          >
+            <Cog size={24} />
+          </Button>
+          
+          <Button
+            variant="outline"
+            onClick={toggleMute}
+            className="control-button sound"
+          >
+            {muted ? <VolumeX size={24} /> : <Volume2 size={24} />}
+          </Button>
+          
+          <Button
+            variant="outline"
+            onClick={onOpenPaytable}
+            className="control-button paytable"
+          >
+            <DollarSign size={24} />
+          </Button>
+          
+          <Button
+            variant="outline"
+            onClick={setMaxBet}
+            disabled={gameState !== GameState.IDLE}
+            className="control-button max-bet"
+          >
+            أقصى رهان
+          </Button>
+          
+          <Button
+            variant={autoPlayActive ? "destructive" : "outline"}
+            onClick={toggleAutoPlay}
+            disabled={gameState !== GameState.IDLE}
+            className="control-button auto-play"
+          >
+            {autoPlayActive ? <Pause size={24} /> : <FastForward size={24} />}
+          </Button>
+          
+          <Button
+            variant="default"
+            onClick={spin}
+            disabled={!canSpin}
+            className={`control-button spin ${gameState === GameState.WIN_ANIMATION ? 'winning' : ''}`}
+          >
+            {gameState === GameState.SPINNING ? (
+              <RotateCw size={24} className="spin-icon rotating" />
+            ) : (
+              getSpinButtonText()
+            )}
+          </Button>
+        </div>
       </div>
     </div>
   );

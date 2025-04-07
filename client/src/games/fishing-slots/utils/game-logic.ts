@@ -1,377 +1,247 @@
 /**
- * وحدة منطق اللعبة - تنفيذ آليات اللعب والفوز في لعبة صياد السمك
+ * منطق لعبة صياد السمك
+ * تنفيذ آليات اللعبة الأساسية
  */
 
+import { PAYLINES, getPaylinePositions } from './paylines';
+import { getSymbolPayouts } from './symbols';
 import { 
-  Symbol, 
   SymbolType, 
+  SpinResult, 
   Win, 
   WinType, 
-  SpinResult, 
-  FreeSpinsState, 
-  GameStatus, 
+  GameState,
+  FreeSpinsState,
   FishingGameState 
 } from '../types';
 
-import { PAYLINES } from './paylines';
-import { 
-  generateRandomGrid, 
-  SYMBOL_PAYOUTS, 
-  getFishMoneyValue 
-} from './symbols';
+// ثوابت اللعبة
+export const REELS_COUNT = 5; // عدد البكرات
+export const ROWS_COUNT = 3; // عدد الصفوف في كل بكرة
+export const DEFAULT_PAYLINES_COUNT = 10; // عدد خطوط الدفع الافتراضي
+export const DEFAULT_BET_AMOUNT = 50; // قيمة الرهان الافتراضية
 
 /**
- * التحقق من الفوز بناءً على عدد معين من الرموز من نوع معين
- * @param symbolType نوع الرمز للتحقق منه
- * @param count عدد الرموز المتطابقة
- * @param bet قيمة الرهان
- * @returns القيمة المكافئة للفوز (مضاعف الرهان)
+ * إنشاء مصفوفة بكرات فارغة
  */
-const getSymbolPayout = (symbolType: SymbolType, count: number, bet: number): number => {
-  if (count < 3) return 0; // يتطلب 3 رموز على الأقل
-
-  const payoutsForSymbol = SYMBOL_PAYOUTS[symbolType];
-  if (!payoutsForSymbol) return 0;
-
-  const multiplier = payoutsForSymbol[count];
-  if (!multiplier) return 0;
-
-  return multiplier * bet;
-};
-
-/**
- * تنفيذ عملية الدوران وحساب النتائج
- * @param bet قيمة الرهان الحالي
- * @param isFreeSpin ما إذا كان هذا دوران مجاني أم لا
- * @param fishermanMultiplier مضاعف الصياد الحالي (للدورات المجانية)
- * @param existingFishmanPositions مواضع الصياد الحالية (للدورات المجانية)
- * @returns نتيجة الدوران
- */
-export const spin = (
-  bet: number, 
-  isFreeSpin: boolean = false,
-  fishermanMultiplier: number = 1,
-  existingFishmanPositions: [number, number][] = []
-): SpinResult => {
-  // توليد شبكة الرموز بشكل عشوائي
-  const grid = generateRandomGrid(isFreeSpin);
+export const createEmptyReels = (): SymbolType[][] => {
+  const reels: SymbolType[][] = [];
   
-  // البحث عن خطوط الفوز
-  const lineWins = checkLineWins(grid, bet);
-  
-  // البحث عن رموز التشتت (صندوق الطعم)
-  const scatterWins = checkScatterWins(grid, bet);
-  
-  // جمع جميع أنواع الفوز
-  const allWins = [...lineWins, ...scatterWins];
-  
-  // حساب إجمالي الفوز
-  const totalWin = allWins.reduce((sum, win) => sum + win.amount, 0);
-  
-  // التحقق مما إذا تم تفعيل اللفات المجانية
-  const scatterWin = scatterWins.find(win => win.symbolType === SymbolType.BAIT_BOX);
-  const hasFreeSpin = !!scatterWin;
-  const freeSpinsAwarded = hasFreeSpin ? (
-    scatterWin.count === 3 ? 10 : 
-    scatterWin.count === 4 ? 15 : 
-    scatterWin.count === 5 ? 20 : 0
-  ) : 0;
-  
-  let fishCollection = null;
-  let updatedFishermanMultiplier = fishermanMultiplier;
-  let collectedFishermans = 0;
-  let collectedFishSymbols: { position: [number, number], value: number }[] = [];
-  
-  // إذا كان دوران مجاني، تحقق من جمع قيم الأسماك بواسطة الصياد
-  if (isFreeSpin) {
-    // البحث عن مواضع الصياد الجديدة
-    const newFishermanPositions = findSymbolPositions(grid, SymbolType.FISHERMAN);
-    
-    // دمج مواضع الصياد الحالية مع الجديدة
-    const allFishermanPositions = [...existingFishmanPositions, ...newFishermanPositions];
-    
-    // حساب عدد الصيادين الجدد المجمعين
-    collectedFishermans = newFishermanPositions.length;
-    
-    // تحديث مضاعف الصياد بناءً على العدد الإجمالي للصيادين
-    updatedFishermanMultiplier = updateFishermanMultiplier(allFishermanPositions.length);
-    
-    // جمع قيم الأسماك ذات القيمة النقدية بواسطة الصياد
-    if (allFishermanPositions.length > 0) {
-      fishCollection = collectFishMoneyValues(grid, allFishermanPositions, bet, updatedFishermanMultiplier);
-      
-      // إذا تم جمع أي أسماك، أضف قيمتها إلى إجمالي الفوز
-      if (fishCollection) {
-        collectedFishSymbols = fishCollection.collectedFish;
-      }
-    }
+  for (let col = 0; col < REELS_COUNT; col++) {
+    reels[col] = Array(ROWS_COUNT).fill(SymbolType.FISH_1);
   }
   
-  // تجميع نتيجة الدوران
-  const result: SpinResult = {
-    symbols: grid,
-    wins: allWins,
-    totalWin: totalWin + (fishCollection ? fishCollection.totalValue : 0),
-    hasFreeSpin,
-    freeSpinsAwarded,
-    triggeredFreeSpins: hasFreeSpin,
-    fishermanMultiplier: updatedFishermanMultiplier,
-    fishmanPositions: isFreeSpin ? [...existingFishmanPositions, ...findSymbolPositions(grid, SymbolType.FISHERMAN)] : [],
-    collectedFishermans,
-    collectedFishSymbols
-  };
-
-  return result;
+  return reels;
 };
 
 /**
- * التحقق من الفوز وفقًا لخطوط الدفع
+ * فحص حالات الفوز على خطوط الدفع
+ * @param reels مصفوفة البكرات الحالية
+ * @param betAmount قيمة الرهان
+ * @param multiplier مضاعف الفوز (يستخدم في اللفات المجانية)
+ * @param activePaylines عدد خطوط الدفع النشطة (الافتراضي: 10)
+ * @returns نتيجة الفوز الإجمالية
  */
-export const checkLineWins = (grid: Symbol[][], bet: number): Win[] => {
+export const checkWins = (
+  reels: SymbolType[][], 
+  betAmount: number, 
+  multiplier: number = 1,
+  activePaylines: number = DEFAULT_PAYLINES_COUNT
+): { wins: Win[], totalWin: number } => {
   const wins: Win[] = [];
-
-  // التحقق من كل خط دفع
-  PAYLINES.forEach((payline, lineIndex) => {
-    // الحصول على رموز هذا الخط
-    const lineSymbols: Symbol[] = [];
+  let totalWin = 0;
+  
+  // فحص خطوط الدفع النشطة
+  for (let i = 0; i < activePaylines && i < PAYLINES.length; i++) {
+    const paylineId = PAYLINES[i].id;
+    const positions = getPaylinePositions(paylineId);
     
-    for (let col = 0; col < 5; col++) {
-      const row = payline.positions[col];
-      if (grid[col] && grid[col][row]) {
-        lineSymbols.push(grid[col][row]);
-      }
-    }
-
-    if (lineSymbols.length !== 5) return; // يجب أن يكون هناك 5 رموز لخط كامل
-
-    // تخطي الخط إذا كان الرمز الأول هو FISH_MONEY (هذه الرموز لها منطق معالجة خاص)
-    if (lineSymbols[0].type === SymbolType.FISH_MONEY) return;
-
-    // البحث عن أطول تطابق من الرموز المتماثلة بدءًا من العمود الأول
-    let symbolType = lineSymbols[0].type;
-    let count = 1;
-    const positions: [number, number][] = [[payline.positions[0], 0]];
-
-    for (let col = 1; col < 5; col++) {
-      const currentSymbol = lineSymbols[col];
+    // الحصول على رموز خط الدفع
+    const symbols: SymbolType[] = positions.map(([row, col]) => reels[col][row]);
+    
+    // الرمز الأول في الخط
+    const firstSymbol = symbols[0];
+    
+    // عدد الرموز المتطابقة من اليسار إلى اليمين
+    let matchCount = 1;
+    
+    // حساب عدد الرموز المتطابقة
+    for (let j = 1; j < symbols.length; j++) {
+      const currentSymbol = symbols[j];
       
-      // الصياد (FISHERMAN) يعمل كرمز Wild ويمكنه مطابقة أي رمز آخر
-      if (currentSymbol.type === symbolType || currentSymbol.type === SymbolType.FISHERMAN || 
-         (symbolType === SymbolType.FISHERMAN && currentSymbol.type !== SymbolType.BAIT_BOX && currentSymbol.type !== SymbolType.FISH_MONEY)) {
-        count++;
-        positions.push([payline.positions[col], col]);
+      // إذا كان الرمز الحالي يطابق الرمز الأول أو كان Wild (صياد)
+      if (currentSymbol === firstSymbol || currentSymbol === SymbolType.WILD || 
+          (firstSymbol === SymbolType.WILD && currentSymbol !== SymbolType.BAIT_BOX)) {
+        matchCount++;
       } else {
         break;
       }
     }
-
-    // التحقق من عدد الرموز المتطابقة
-    if (count >= 3) {
-      // إذا كان الرمز الأول هو FISHERMAN، ونجحنا في مطابقة رموز أخرى، نستخدم النوع الثاني كنوع الرمز الفائز
-      if (symbolType === SymbolType.FISHERMAN && count > 1) {
-        for (let i = 1; i < lineSymbols.length && i < count; i++) {
-          if (lineSymbols[i].type !== SymbolType.FISHERMAN && 
-              lineSymbols[i].type !== SymbolType.BAIT_BOX && 
-              lineSymbols[i].type !== SymbolType.FISH_MONEY) {
-            symbolType = lineSymbols[i].type;
-            break;
-          }
-        }
-      }
-
-      // تخطي الفوز إذا كان الرمز هو BAIT_BOX (يتم التعامل معه في فحص رموز التشتت)
-      if (symbolType === SymbolType.BAIT_BOX) return;
-
-      // حساب قيمة الفوز
-      const amount = getSymbolPayout(symbolType, count, bet);
+    
+    // الحصول على قيمة الفوز بناءً على عدد الرموز المتطابقة
+    if (matchCount >= 3) {
+      const symbolType = firstSymbol === SymbolType.WILD ? symbols.find(s => s !== SymbolType.WILD) || SymbolType.WILD : firstSymbol;
+      const payouts = getSymbolPayouts(symbolType);
       
-      if (amount > 0) {
+      // حساب قيمة الفوز
+      if (payouts[matchCount]) {
+        const baseWin = payouts[matchCount] * betAmount;
+        const winAmount = baseWin * multiplier;
+        
+        // إضافة الفوز إلى قائمة حالات الفوز
         wins.push({
           type: WinType.LINE,
-          symbolType,
-          count,
-          positions,
-          multiplier: SYMBOL_PAYOUTS[symbolType][count],
-          amount,
-          lineIndex
+          amount: winAmount,
+          payline: paylineId,
+          positions: positions.slice(0, matchCount),
+          symbolType
         });
+        
+        // إضافة قيمة الفوز إلى الإجمالي
+        totalWin += winAmount;
       }
     }
-  });
-
-  return wins;
-};
-
-/**
- * التحقق من فوز رموز التشتت (صندوق الطعم)
- */
-export const checkScatterWins = (grid: Symbol[][], bet: number): Win[] => {
-  const wins: Win[] = [];
+  }
   
-  // البحث عن رموز BAIT_BOX (رموز التشتت)
-  const scatterPositions = findSymbolPositions(grid, SymbolType.BAIT_BOX);
+  // فحص حالات الفوز بالتشتت (Scatter - صندوق الطعم)
+  const scatterPositions: [number, number][] = [];
+  
+  // البحث عن مواضع رموز التشتت في جميع البكرات
+  for (let col = 0; col < REELS_COUNT; col++) {
+    for (let row = 0; row < ROWS_COUNT; row++) {
+      if (reels[col][row] === SymbolType.BAIT_BOX) {
+        scatterPositions.push([row, col]);
+      }
+    }
+  }
+  
+  // حساب قيمة الفوز للتشتت (Scatter)
   const scatterCount = scatterPositions.length;
   
-  // يجب أن يكون هناك 3 رموز تشتت على الأقل للفوز
   if (scatterCount >= 3) {
-    const amount = getSymbolPayout(SymbolType.BAIT_BOX, scatterCount, bet);
+    const scatterPayouts: Record<number, number> = {
+      3: 5, // 3 رموز تشتت = 5x قيمة الرهان
+      4: 20, // 4 رموز تشتت = 20x قيمة الرهان
+      5: 50 // 5 رموز تشتت = 50x قيمة الرهان
+    };
     
-    if (amount > 0) {
-      wins.push({
-        type: WinType.SCATTER,
-        symbolType: SymbolType.BAIT_BOX,
-        count: scatterCount,
-        positions: scatterPositions,
-        multiplier: SYMBOL_PAYOUTS[SymbolType.BAIT_BOX][scatterCount],
-        amount
-      });
-    }
+    const baseWin = scatterPayouts[scatterCount] * betAmount;
+    const winAmount = baseWin * multiplier;
+    
+    wins.push({
+      type: WinType.SCATTER,
+      amount: winAmount,
+      positions: scatterPositions,
+      symbolType: SymbolType.BAIT_BOX
+    });
+    
+    totalWin += winAmount;
   }
   
-  return wins;
+  return { wins, totalWin };
 };
 
 /**
- * جمع قيم رموز السمك ذات القيمة النقدية بواسطة رموز الصياد
+ * توليد قيم للأسماك النقدية
+ * @param reels مصفوفة البكرات
+ * @param betAmount قيمة الرهان
+ * @returns قيم الأسماك النقدية
  */
-export const collectFishMoneyValues = (
-  grid: Symbol[][], 
-  fishermanPositions: [number, number][],
-  bet: number,
-  multiplier: number = 1
-): { totalValue: number, collectedFish: { position: [number, number], value: number }[] } => {
-  let totalValue = 0;
-  const collectedFish: { position: [number, number], value: number }[] = [];
+export const generateFishValues = (
+  reels: SymbolType[][], 
+  betAmount: number
+): { [position: string]: number } => {
+  const fishValues: { [position: string]: number } = {};
   
-  // البحث عن جميع رموز FISH_MONEY في الشبكة
-  const fishMoneyPositions = findSymbolPositions(grid, SymbolType.FISH_MONEY);
-  
-  // لكل رمز سمكة ذات قيمة نقدية
-  fishMoneyPositions.forEach(fishPos => {
-    const fishSymbol = grid[fishPos[1]][fishPos[0]];
-    
-    if (fishSymbol && fishSymbol.type === SymbolType.FISH_MONEY && fishSymbol.value !== undefined) {
-      // الحصول على قيمة السمكة وتطبيق المضاعف
-      const fishValue = fishSymbol.value * bet * multiplier;
-      
-      // إضافة قيمة السمكة إلى القيمة الإجمالية
-      totalValue += fishValue;
-      
-      // إضافة معلومات السمكة إلى قائمة الأسماك المجمعة
-      collectedFish.push({
-        position: fishPos,
-        value: fishValue
-      });
-    }
-  });
-  
-  // إنشاء كائن الفوز لجمع الأسماك
-  const win: Win = {
-    type: WinType.FISHERMAN,
-    symbolType: SymbolType.FISHERMAN,
-    count: fishermanPositions.length,
-    positions: fishermanPositions,
-    multiplier: multiplier,
-    amount: totalValue
-  };
-  
-  return {
-    totalValue,
-    collectedFish,
-    win
-  };
-};
-
-/**
- * حساب عدد الرموز من نوع معين في الشبكة
- */
-export const countSymbolsOfType = (grid: Symbol[][], symbolType: SymbolType): number => {
-  let count = 0;
-  
-  for (let col = 0; col < grid.length; col++) {
-    for (let row = 0; row < grid[col].length; row++) {
-      if (grid[col][row].type === symbolType) {
-        count++;
+  // البحث عن مواضع رموز الأسماك النقدية
+  for (let col = 0; col < REELS_COUNT; col++) {
+    for (let row = 0; row < ROWS_COUNT; row++) {
+      if (reels[col][row] === SymbolType.FISH_MONEY) {
+        // تحديد قيمة عشوائية للسمكة النقدية (1-10 أضعاف قيمة الرهان)
+        const value = Math.floor(Math.random() * 10 + 1) * betAmount;
+        fishValues[`${row},${col}`] = value;
       }
     }
   }
   
-  return count;
+  return fishValues;
 };
 
 /**
- * البحث عن مواقع رمز معين في الشبكة
+ * جمع قيم الأسماك النقدية إذا كان هناك صياد (Wild) موجود
+ * @param reels مصفوفة البكرات
+ * @param fishValues قيم الأسماك النقدية
+ * @returns نتيجة جمع قيم الأسماك
  */
-export const findSymbolPositions = (grid: Symbol[][], symbolType: SymbolType): [number, number][] => {
-  const positions: [number, number][] = [];
+export const collectFishValues = (
+  reels: SymbolType[][], 
+  fishValues: { [position: string]: number }
+): { totalValue: number; collectedFish: { position: [number, number]; value: number }[] } => {
+  const result = {
+    totalValue: 0,
+    collectedFish: [] as { position: [number, number]; value: number }[]
+  };
   
-  for (let col = 0; col < grid.length; col++) {
-    for (let row = 0; row < grid[col].length; row++) {
-      if (grid[col][row].type === symbolType) {
-        positions.push([row, col]);
+  // التحقق من وجود صياد (Wild) على البكرات
+  const hasWild = reels.some(reel => reel.some(symbol => symbol === SymbolType.WILD));
+  
+  // إذا كان هناك صياد، قم بجمع قيم الأسماك النقدية
+  if (hasWild && Object.keys(fishValues).length > 0) {
+    // جمع كل قيم الأسماك
+    for (const positionStr in fishValues) {
+      const [row, col] = positionStr.split(',').map(Number);
+      const value = fishValues[positionStr];
+      
+      result.totalValue += value;
+      result.collectedFish.push({
+        position: [row, col],
+        value
+      });
+    }
+  }
+  
+  return result;
+};
+
+/**
+ * التحقق من تفعيل اللفات المجانية
+ * @param reels مصفوفة البكرات
+ * @returns عدد اللفات المجانية (0 إذا لم يتم التفعيل)
+ */
+export const checkFreeSpinsTrigger = (reels: SymbolType[][]): number => {
+  // عدد رموز التشتت (صندوق الطعم) في البكرات
+  let scatterCount = 0;
+  
+  // حساب عدد رموز التشتت
+  for (let col = 0; col < REELS_COUNT; col++) {
+    for (let row = 0; row < ROWS_COUNT; row++) {
+      if (reels[col][row] === SymbolType.BAIT_BOX) {
+        scatterCount++;
       }
     }
   }
   
-  return positions;
+  // تحديد عدد اللفات المجانية بناءً على عدد رموز التشتت
+  if (scatterCount >= 3) {
+    return 10; // 10 لفات مجانية عند ظهور 3 أو أكثر من رموز التشتت
+  }
+  
+  return 0;
 };
 
 /**
- * تحديث مضاعف الصياد بناءً على عدد الصيادين الذين تم جمعهم
- * تزداد قيمة المضاعف عند جمع 4 أو 8 أو 12 صياد
+ * تحديث مضاعف اللفات المجانية بناءً على عدد الصيادين
+ * @param fishermanCount عدد الصيادين
+ * @returns المضاعف الجديد
  */
-export const updateFishermanMultiplier = (collectedFisherman: number): number => {
-  if (collectedFisherman >= 12) {
-    return 10;  // مضاعف 10x عند جمع 12 أو أكثر
-  } else if (collectedFisherman >= 8) {
-    return 3;   // مضاعف 3x عند جمع 8-11
-  } else if (collectedFisherman >= 4) {
-    return 2;   // مضاعف 2x عند جمع 4-7
+export const updateFreeSpinsMultiplier = (fishermanCount: number): number => {
+  if (fishermanCount >= 12) {
+    return 10; // مضاعف x10 عند جمع 12 صياد أو أكثر
+  } else if (fishermanCount >= 8) {
+    return 3; // مضاعف x3 عند جمع 8-11 صياد
+  } else if (fishermanCount >= 4) {
+    return 2; // مضاعف x2 عند جمع 4-7 صياد
   } else {
-    return 1;   // مضاعف 1x افتراضي
+    return 1; // مضاعف x1 إذا كان عدد الصيادين أقل من 4
   }
-};
-
-/**
- * تهيئة حالة اللفات المجانية
- */
-export const initFreeSpinsState = (freeSpinsCount: number): FreeSpinsState => {
-  return {
-    active: true,
-    remaining: freeSpinsCount,
-    collectedFisherman: 0,
-    fishermanMultiplier: 1,
-    totalWin: 0,
-    fishermanPositions: []
-  };
-};
-
-/**
- * تهيئة حالة اللعبة الأولية
- */
-export const initGameState = (initialBalance: number): FishingGameState => {
-  const defaultBet = 1.0;
-  
-  return {
-    balance: initialBalance,
-    bet: defaultBet,
-    status: GameStatus.IDLE,
-    symbols: generateRandomGrid(false),
-    lastWin: 0,
-    totalWin: 0,
-    isAutoPlay: false,
-    paylines: 20, // عدد خطوط الدفع الثابت
-    freeSpins: {
-      active: false,
-      remaining: 0,
-      collectedFisherman: 0,
-      fishermanMultiplier: 1,
-      totalWin: 0,
-      fishermanPositions: []
-    },
-    currentWins: [],
-    fishermanPositions: [],
-    collectedFishValues: [],
-    bonusMultiplier: 1
-  };
 };

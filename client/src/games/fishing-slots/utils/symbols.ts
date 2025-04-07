@@ -1,270 +1,157 @@
 /**
- * وحدة الرموز - تحتوي على إعدادات وتوزيع الرموز في لعبة صياد السمك
+ * تعريف رموز لعبة صياد السمك ومدفوعاتها
  */
 
-import { Symbol, SymbolType } from '../types';
-import { SYMBOL_IMAGES } from '../assets/images';
-
-/**
- * توزيع وتصميم البكرات الأساسية خلال اللعبة العادية
- * كل بكرة هي مصفوفة من الرموز المحتمل ظهورها
- */
-export const MAIN_REELS_DISTRIBUTION = [
-  // البكرة 1
-  [
-    SymbolType.FISH_1, SymbolType.FISH_1, SymbolType.FISH_1, SymbolType.FISH_1, SymbolType.FISH_1,
-    SymbolType.FISH_2, SymbolType.FISH_2, SymbolType.FISH_2,
-    SymbolType.FISH_3, SymbolType.FISH_3,
-    SymbolType.SHELL, SymbolType.SHELL, SymbolType.SHELL,
-    SymbolType.ANCHOR, SymbolType.ANCHOR, SymbolType.ANCHOR,
-    SymbolType.CRAB, SymbolType.CRAB, SymbolType.CRAB,
-    SymbolType.STARFISH, SymbolType.STARFISH,
-    SymbolType.FISHERMAN,
-    SymbolType.BAIT_BOX,
-    SymbolType.FISH_MONEY
-  ],
-  // البكرة 2
-  [
-    SymbolType.FISH_1, SymbolType.FISH_1, SymbolType.FISH_1, SymbolType.FISH_1, SymbolType.FISH_1,
-    SymbolType.FISH_2, SymbolType.FISH_2, SymbolType.FISH_2, SymbolType.FISH_2,
-    SymbolType.FISH_3, SymbolType.FISH_3,
-    SymbolType.SHELL, SymbolType.SHELL, SymbolType.SHELL,
-    SymbolType.ANCHOR, SymbolType.ANCHOR, SymbolType.ANCHOR,
-    SymbolType.CRAB, SymbolType.CRAB, SymbolType.CRAB,
-    SymbolType.STARFISH, SymbolType.STARFISH,
-    SymbolType.FISHERMAN,
-    SymbolType.BAIT_BOX,
-    SymbolType.FISH_MONEY, SymbolType.FISH_MONEY
-  ],
-  // البكرة 3
-  [
-    SymbolType.FISH_1, SymbolType.FISH_1, SymbolType.FISH_1, SymbolType.FISH_1,
-    SymbolType.FISH_2, SymbolType.FISH_2, SymbolType.FISH_2,
-    SymbolType.FISH_3, SymbolType.FISH_3, SymbolType.FISH_3,
-    SymbolType.SHELL, SymbolType.SHELL, SymbolType.SHELL,
-    SymbolType.ANCHOR, SymbolType.ANCHOR, SymbolType.ANCHOR,
-    SymbolType.CRAB, SymbolType.CRAB, SymbolType.CRAB,
-    SymbolType.STARFISH, SymbolType.STARFISH,
-    SymbolType.FISHERMAN, SymbolType.FISHERMAN,
-    SymbolType.BAIT_BOX,
-    SymbolType.FISH_MONEY, SymbolType.FISH_MONEY, SymbolType.FISH_MONEY
-  ],
-  // البكرة 4
-  [
-    SymbolType.FISH_1, SymbolType.FISH_1, SymbolType.FISH_1,
-    SymbolType.FISH_2, SymbolType.FISH_2, SymbolType.FISH_2, SymbolType.FISH_2,
-    SymbolType.FISH_3, SymbolType.FISH_3, SymbolType.FISH_3,
-    SymbolType.SHELL, SymbolType.SHELL, SymbolType.SHELL,
-    SymbolType.ANCHOR, SymbolType.ANCHOR, SymbolType.ANCHOR,
-    SymbolType.CRAB, SymbolType.CRAB, SymbolType.CRAB,
-    SymbolType.STARFISH, SymbolType.STARFISH,
-    SymbolType.FISHERMAN, SymbolType.FISHERMAN,
-    SymbolType.FISH_MONEY, SymbolType.FISH_MONEY, SymbolType.FISH_MONEY
-  ],
-  // البكرة 5
-  [
-    SymbolType.FISH_1, SymbolType.FISH_1, SymbolType.FISH_1,
-    SymbolType.FISH_2, SymbolType.FISH_2, SymbolType.FISH_2,
-    SymbolType.FISH_3, SymbolType.FISH_3, SymbolType.FISH_3, SymbolType.FISH_3,
-    SymbolType.SHELL, SymbolType.SHELL, SymbolType.SHELL,
-    SymbolType.ANCHOR, SymbolType.ANCHOR, SymbolType.ANCHOR,
-    SymbolType.CRAB, SymbolType.CRAB, SymbolType.CRAB,
-    SymbolType.STARFISH, SymbolType.STARFISH,
-    SymbolType.FISHERMAN, SymbolType.FISHERMAN, SymbolType.FISHERMAN,
-    SymbolType.FISH_MONEY, SymbolType.FISH_MONEY, SymbolType.FISH_MONEY
-  ]
-];
+import { SymbolType } from '../types';
 
 /**
- * توزيع وتصميم البكرات خلال اللفات المجانية - احتمالية أكبر للأسماك ذات القيمة النقدية والصياد
+ * قيم مدفوعات الرموز المختلفة
+ * المفتاح: نوع الرمز
+ * القيمة: قيم المدفوعات لعدد 3 و 4 و 5 من الرموز
  */
-export const FREE_SPINS_REELS_DISTRIBUTION = [
-  // البكرة 1
-  [
-    SymbolType.FISH_1, SymbolType.FISH_1, SymbolType.FISH_1,
-    SymbolType.FISH_2, SymbolType.FISH_2, SymbolType.FISH_2,
-    SymbolType.FISH_3, SymbolType.FISH_3,
-    SymbolType.SHELL, SymbolType.SHELL,
-    SymbolType.ANCHOR, SymbolType.ANCHOR,
-    SymbolType.CRAB, SymbolType.CRAB,
-    SymbolType.STARFISH, SymbolType.STARFISH,
-    SymbolType.FISHERMAN, SymbolType.FISHERMAN,
-    SymbolType.BAIT_BOX,
-    SymbolType.FISH_MONEY, SymbolType.FISH_MONEY, SymbolType.FISH_MONEY
-  ],
-  // البكرة 2
-  [
-    SymbolType.FISH_1, SymbolType.FISH_1, SymbolType.FISH_1,
-    SymbolType.FISH_2, SymbolType.FISH_2, SymbolType.FISH_2,
-    SymbolType.FISH_3, SymbolType.FISH_3,
-    SymbolType.SHELL, SymbolType.SHELL,
-    SymbolType.ANCHOR, SymbolType.ANCHOR,
-    SymbolType.CRAB, SymbolType.CRAB,
-    SymbolType.STARFISH, SymbolType.STARFISH,
-    SymbolType.FISHERMAN, SymbolType.FISHERMAN,
-    SymbolType.BAIT_BOX,
-    SymbolType.FISH_MONEY, SymbolType.FISH_MONEY, SymbolType.FISH_MONEY, SymbolType.FISH_MONEY
-  ],
-  // البكرة 3
-  [
-    SymbolType.FISH_1, SymbolType.FISH_1,
-    SymbolType.FISH_2, SymbolType.FISH_2,
-    SymbolType.FISH_3, SymbolType.FISH_3, SymbolType.FISH_3,
-    SymbolType.SHELL, SymbolType.SHELL,
-    SymbolType.ANCHOR, SymbolType.ANCHOR,
-    SymbolType.CRAB, SymbolType.CRAB,
-    SymbolType.STARFISH, SymbolType.STARFISH,
-    SymbolType.FISHERMAN, SymbolType.FISHERMAN, SymbolType.FISHERMAN,
-    SymbolType.BAIT_BOX,
-    SymbolType.FISH_MONEY, SymbolType.FISH_MONEY, SymbolType.FISH_MONEY, SymbolType.FISH_MONEY, SymbolType.FISH_MONEY
-  ],
-  // البكرة 4
-  [
-    SymbolType.FISH_1, SymbolType.FISH_1,
-    SymbolType.FISH_2, SymbolType.FISH_2,
-    SymbolType.FISH_3, SymbolType.FISH_3, SymbolType.FISH_3,
-    SymbolType.SHELL, SymbolType.SHELL,
-    SymbolType.ANCHOR, SymbolType.ANCHOR,
-    SymbolType.CRAB, SymbolType.CRAB,
-    SymbolType.STARFISH, SymbolType.STARFISH,
-    SymbolType.FISHERMAN, SymbolType.FISHERMAN, SymbolType.FISHERMAN, SymbolType.FISHERMAN,
-    SymbolType.FISH_MONEY, SymbolType.FISH_MONEY, SymbolType.FISH_MONEY, SymbolType.FISH_MONEY
-  ],
-  // البكرة 5
-  [
-    SymbolType.FISH_1,
-    SymbolType.FISH_2, SymbolType.FISH_2,
-    SymbolType.FISH_3, SymbolType.FISH_3, SymbolType.FISH_3,
-    SymbolType.SHELL, SymbolType.SHELL,
-    SymbolType.ANCHOR, SymbolType.ANCHOR,
-    SymbolType.CRAB, SymbolType.CRAB,
-    SymbolType.STARFISH, SymbolType.STARFISH,
-    SymbolType.FISHERMAN, SymbolType.FISHERMAN, SymbolType.FISHERMAN, SymbolType.FISHERMAN, SymbolType.FISHERMAN,
-    SymbolType.FISH_MONEY, SymbolType.FISH_MONEY, SymbolType.FISH_MONEY, SymbolType.FISH_MONEY
-  ]
-];
-
-/**
- * مدفوعات الرموز المختلفة
- * القيمة هي مضاعف الرهان الأساسي
- */
-export const SYMBOL_PAYOUTS = {
-  [SymbolType.FISH_3]: {
-    3: 5,   // 3 رموز = 5x الرهان
-    4: 15,  // 4 رموز = 15x الرهان
-    5: 50   // 5 رموز = 50x الرهان
+export const SYMBOL_PAYOUTS: Record<SymbolType, Record<number, number>> = {
+  // الصياد (Wild) - أعلى قيمة مدفوعات
+  [SymbolType.WILD]: {
+    3: 20,  // 3 رموز = 20x قيمة الرهان
+    4: 100, // 4 رموز = 100x قيمة الرهان
+    5: 500  // 5 رموز = 500x قيمة الرهان
   },
-  [SymbolType.FISH_2]: {
-    3: 4,
-    4: 10,
-    5: 40
-  },
+  
+  // سمكة 1 - قيمة متوسطة
   [SymbolType.FISH_1]: {
-    3: 3,
-    4: 8,
-    5: 30
+    3: 5,  // 3 رموز = 5x قيمة الرهان
+    4: 20, // 4 رموز = 20x قيمة الرهان
+    5: 100 // 5 رموز = 100x قيمة الرهان
   },
+  
+  // سمكة 2 - قيمة متوسطة
+  [SymbolType.FISH_2]: {
+    3: 4,  // 3 رموز = 4x قيمة الرهان
+    4: 15, // 4 رموز = 15x قيمة الرهان
+    5: 75  // 5 رموز = 75x قيمة الرهان
+  },
+  
+  // سمكة 3 - قيمة متوسطة
+  [SymbolType.FISH_3]: {
+    3: 3,   // 3 رموز = 3x قيمة الرهان
+    4: 10,  // 4 رموز = 10x قيمة الرهان
+    5: 50   // 5 رموز = 50x قيمة الرهان
+  },
+  
+  // نجم البحر - قيمة منخفضة
   [SymbolType.STARFISH]: {
-    3: 2.5,
-    4: 6,
-    5: 25
+    3: 2,  // 3 رموز = 2x قيمة الرهان
+    4: 6,  // 4 رموز = 6x قيمة الرهان
+    5: 30  // 5 رموز = 30x قيمة الرهان
   },
+  
+  // صدفة - قيمة منخفضة
   [SymbolType.SHELL]: {
-    3: 2,
-    4: 5,
-    5: 20
+    3: 1,  // 3 رموز = 1x قيمة الرهان
+    4: 5,  // 4 رموز = 5x قيمة الرهان
+    5: 25  // 5 رموز = 25x قيمة الرهان
   },
+  
+  // مرساة - قيمة منخفضة
   [SymbolType.ANCHOR]: {
-    3: 1.5,
-    4: 4,
-    5: 15
+    3: 1,  // 3 رموز = 1x قيمة الرهان
+    4: 4,  // 4 رموز = 4x قيمة الرهان
+    5: 20  // 5 رموز = 20x قيمة الرهان
   },
+  
+  // سلطعون - قيمة منخفضة
   [SymbolType.CRAB]: {
-    3: 1,
-    4: 3,
-    5: 10
+    3: 0.5,  // 3 رموز = 0.5x قيمة الرهان
+    4: 3,    // 4 رموز = 3x قيمة الرهان
+    5: 15    // 5 رموز = 15x قيمة الرهان
   },
-  [SymbolType.FISHERMAN]: {
-    3: 10,
-    4: 25,
-    5: 100
-  },
+  
+  // صندوق الطعم (Scatter) - يعطي لفات مجانية
   [SymbolType.BAIT_BOX]: {
-    3: 10,  // 3 رموز = 10x الرهان + 10 لفات مجانية
-    4: 20,  // 4 رموز = 20x الرهان + 15 لفة مجانية
-    5: 50   // 5 رموز = 50x الرهان + 20 لفة مجانية
+    3: 5,   // 3 رموز = 5x قيمة الرهان
+    4: 20,  // 4 رموز = 20x قيمة الرهان
+    5: 50   // 5 رموز = 50x قيمة الرهان
+  },
+  
+  // سمكة نقدية - لها قيمة متغيرة وتُجمع بواسطة الصياد
+  [SymbolType.FISH_MONEY]: {
+    3: 0,
+    4: 0,
+    5: 0
   }
-  // ملاحظة: FISH_MONEY ليس لديه قيمة ثابتة، إذ تعتمد قيمته على الرقم المعروض على الرمز نفسه
 };
 
 /**
- * نطاق القيم المحتملة لرمز السمكة ذات القيمة النقدية
+ * احتمالية ظهور كل رمز على بكرات اللعبة
+ * (1 = احتمالية عادية، أقل من 1 = احتمالية أقل، أكثر من 1 = احتمالية أكبر)
  */
-export const FISH_MONEY_VALUE_RANGE = {
-  MIN: 0.5,  // الحد الأدنى هو 0.5x الرهان
-  MAX: 25    // الحد الأقصى هو 25x الرهان
+export const SYMBOL_WEIGHTS: Record<SymbolType, number> = {
+  [SymbolType.WILD]: 0.5,        // احتمالية أقل للصياد (Wild)
+  [SymbolType.FISH_1]: 1.2,      // احتمالية أكبر قليلاً للسمكة 1
+  [SymbolType.FISH_2]: 1.2,      // احتمالية أكبر قليلاً للسمكة 2
+  [SymbolType.FISH_3]: 1.0,      // احتمالية عادية للسمكة 3
+  [SymbolType.STARFISH]: 1.5,    // احتمالية أكبر لنجم البحر
+  [SymbolType.SHELL]: 1.5,       // احتمالية أكبر للصدفة
+  [SymbolType.ANCHOR]: 1.5,      // احتمالية أكبر للمرساة
+  [SymbolType.CRAB]: 1.5,        // احتمالية أكبر للسلطعون
+  [SymbolType.BAIT_BOX]: 0.3,    // احتمالية منخفضة لصندوق الطعم
+  [SymbolType.FISH_MONEY]: 0.8   // احتمالية متوسطة للسمكة النقدية
 };
 
 /**
- * توليد رمز جديد عشوائي من البكرة المحددة
+ * احتمالية ظهور كل رمز على بكرات اللعبة أثناء اللفات المجانية
+ * (احتمالية أكبر للرموز ذات القيمة العالية والأسماك النقدية)
  */
-export const generateRandomSymbol = (reelIndex: number, isFreeSpin: boolean): Symbol => {
-  const reelSymbols = isFreeSpin 
-    ? FREE_SPINS_REELS_DISTRIBUTION[reelIndex]
-    : MAIN_REELS_DISTRIBUTION[reelIndex];
-  
-  const randomIndex = Math.floor(Math.random() * reelSymbols.length);
-  const symbolType = reelSymbols[randomIndex];
-  
-  const symbol: Symbol = { type: symbolType };
-  
-  // إذا كان رمز السمكة ذات القيمة النقدية، قم بتعيين قيمة عشوائية له
-  if (symbolType === SymbolType.FISH_MONEY) {
-    const min = FISH_MONEY_VALUE_RANGE.MIN;
-    const max = FISH_MONEY_VALUE_RANGE.MAX;
-    const randomValue = parseFloat((Math.random() * (max - min) + min).toFixed(1));
-    symbol.value = randomValue;
-  }
-  
-  return symbol;
+export const FREE_SPINS_SYMBOL_WEIGHTS: Record<SymbolType, number> = {
+  [SymbolType.WILD]: 0.8,        // احتمالية أكبر للصياد (Wild) في اللفات المجانية
+  [SymbolType.FISH_1]: 1.2,      // احتمالية أكبر قليلاً للسمكة 1
+  [SymbolType.FISH_2]: 1.2,      // احتمالية أكبر قليلاً للسمكة 2
+  [SymbolType.FISH_3]: 1.0,      // احتمالية عادية للسمكة 3
+  [SymbolType.STARFISH]: 1.0,    // احتمالية عادية لنجم البحر
+  [SymbolType.SHELL]: 1.0,       // احتمالية عادية للصدفة
+  [SymbolType.ANCHOR]: 1.0,      // احتمالية عادية للمرساة
+  [SymbolType.CRAB]: 1.0,        // احتمالية عادية للسلطعون
+  [SymbolType.BAIT_BOX]: 0.2,    // احتمالية منخفضة لصندوق الطعم
+  [SymbolType.FISH_MONEY]: 1.5   // احتمالية أكبر للسمكة النقدية في اللفات المجانية
 };
 
 /**
- * توليد مصفوفة رموز عشوائية للشبكة كاملة
+ * الحصول على مدفوعات رمز معين
+ * @param symbolType نوع الرمز
+ * @returns مدفوعات الرمز لعدد 3 و 4 و 5 من الرموز
  */
-export const generateRandomGrid = (isFreeSpin: boolean): Symbol[][] => {
-  const grid: Symbol[][] = [];
-  
-  // عدد الأعمدة (البكرات) = 5
-  for (let col = 0; col < 5; col++) {
-    const column: Symbol[] = [];
-    
-    // عدد الصفوف = 3
-    for (let row = 0; row < 3; row++) {
-      const symbol = generateRandomSymbol(col, isFreeSpin);
-      symbol.position = [row, col];
-      column.push(symbol);
-    }
-    
-    grid.push(column);
-  }
-  
-  return grid;
+export const getSymbolPayouts = (symbolType: SymbolType): Record<number, number> => {
+  return SYMBOL_PAYOUTS[symbolType] || { 3: 0, 4: 0, 5: 0 };
 };
 
 /**
- * الحصول على مسار صورة الرمز
+ * رموز ذات قيمة عالية (رموز الفوز الكبير)
+ * تستخدم لعرض تأثيرات خاصة عند الفوز بقيمة كبيرة
  */
-export const getSymbolImage = (symbolType: SymbolType): string => {
-  return SYMBOL_IMAGES[symbolType];
-};
+export const HIGH_VALUE_SYMBOLS = [
+  SymbolType.WILD,
+  SymbolType.FISH_1,
+  SymbolType.FISH_2,
+  SymbolType.FISH_3
+];
 
 /**
- * الحصول على قيمة رمز سمكة المال
+ * رموز ذات قيمة منخفضة
  */
-export const getFishMoneyValue = (symbol: Symbol): number => {
-  if (symbol.type === SymbolType.FISH_MONEY && symbol.value !== undefined) {
-    return symbol.value;
-  }
-  return 0;
+export const LOW_VALUE_SYMBOLS = [
+  SymbolType.STARFISH,
+  SymbolType.SHELL,
+  SymbolType.ANCHOR,
+  SymbolType.CRAB
+];
+
+/**
+ * توليد قيمة رمز السمكة النقدية
+ * @param betAmount قيمة الرهان
+ * @returns قيمة السمكة النقدية
+ */
+export const generateMoneyFishValue = (betAmount: number): number => {
+  // توليد قيمة عشوائية للسمكة النقدية (1-10 أضعاف قيمة الرهان)
+  const multiplier = Math.floor(Math.random() * 10) + 1;
+  return multiplier * betAmount;
 };
