@@ -1,155 +1,389 @@
 /**
- * Hook لإدارة حالة لعبة صياد السمك
+ * خطاف إدارة حالة لعبة صياد السمك
+ * يتحكم في منطق اللعبة ودورة الحياة بالكامل
  */
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { 
-  REELS_COUNT, 
-  ROWS_COUNT, 
-  createEmptyReels, 
-  checkWins, 
-  generateFishValues, 
-  collectFishValues 
+  REELS_COUNT, ROWS_COUNT, DEFAULT_PAYLINES_COUNT, DEFAULT_BET_AMOUNT,
+  createEmptyReels, checkWins, generateFishValues, collectFishValues,
+  checkFreeSpinsTrigger, updateFreeSpinsMultiplier
 } from '../utils/game-logic';
+import { HIGH_VALUE_SYMBOLS, LOW_VALUE_SYMBOLS } from '../utils/symbols';
+import { 
+  SymbolType, GameState, FishingGameState, FreeSpinsState,
+  Win, WinType, SpinResult
+} from '../types';
 
-import { SymbolType, GameState, WinType, FishingGameState, SpinResult, FreeSpinsState, Win } from '../types';
-
-/**
- * التهيئة الأولية لحالة اللفات المجانية
- */
-const initFreeSpinsState = (): FreeSpinsState => ({
+// قيم افتراضية لحالة اللفات المجانية
+const DEFAULT_FREE_SPINS_STATE: FreeSpinsState = {
   active: false,
-  remaining: 0,
+  spinsRemaining: 0,
+  totalSpins: 0,
   multiplier: 1,
-  fishermanCount: 0,
-  collectedFishValues: 0
-});
-
-/**
- * التهيئة الأولية لحالة اللعبة
- */
-const initGameState = (): FishingGameState => ({
-  balance: 5000, // رصيد افتراضي للاختبار
-  betAmount: 50, // قيمة الرهان الافتراضية
-  reels: [
-    [SymbolType.FISH_1, SymbolType.SHELL, SymbolType.ANCHOR],
-    [SymbolType.FISH_2, SymbolType.CRAB, SymbolType.STARFISH],
-    [SymbolType.FISH_3, SymbolType.FISH_2, SymbolType.FISH_1],
-    [SymbolType.SHELL, SymbolType.ANCHOR, SymbolType.WILD],
-    [SymbolType.STARFISH, SymbolType.FISH_1, SymbolType.CRAB]
-  ],
-  gameState: GameState.IDLE,
-  lastWin: 0,
-  wins: [],
-  winPositions: [],
-  freeSpins: initFreeSpinsState(),
-  autoPlayActive: false,
-  totalBet: 50, // إجمالي الرهان (الرهان × خطوط الدفع)
-  paylineCount: 10, // عدد خطوط الدفع النشطة
-  fishValues: {} // قيم الأسماك النقدية
-});
-
-/**
- * محاكاة نتيجة دوران البكرات
- * في التطبيق الحقيقي، يجب استدعاء الخادم للحصول على النتيجة
- */
-const simulateSpinResult = (
-  betAmount: number, 
-  inFreeSpins: boolean = false, 
-  multiplier: number = 1
-): SpinResult => {
-  // إنشاء وتعبئة البكرات بشكل عشوائي
-  const reels: SymbolType[][] = createEmptyReels();
-  
-  // ملء البكرات بالرموز بشكل عشوائي
-  for (let col = 0; col < REELS_COUNT; col++) {
-    for (let row = 0; row < ROWS_COUNT; row++) {
-      // احتمالية أكبر للرموز ذات القيمة المنخفضة
-      const randValue = Math.random();
-      let symbol: SymbolType;
-      
-      if (randValue < 0.01) {
-        symbol = SymbolType.WILD; // احتمالية منخفضة للصياد (Wild)
-      } else if (randValue < 0.05) {
-        symbol = SymbolType.BAIT_BOX; // احتمالية منخفضة لصندوق الطعم (Scatter)
-      } else if (randValue < 0.10) {
-        // احتمالية السمكة النقدية أكبر في اللفات المجانية
-        symbol = inFreeSpins && Math.random() < 0.4 ? SymbolType.FISH_MONEY : SymbolType.FISH_1;
-      } else if (randValue < 0.20) {
-        symbol = SymbolType.FISH_2;
-      } else if (randValue < 0.30) {
-        symbol = SymbolType.FISH_3;
-      } else if (randValue < 0.45) {
-        symbol = SymbolType.STARFISH;
-      } else if (randValue < 0.60) {
-        symbol = SymbolType.SHELL;
-      } else if (randValue < 0.75) {
-        symbol = SymbolType.ANCHOR;
-      } else {
-        symbol = SymbolType.CRAB;
-      }
-      
-      reels[col][row] = symbol;
-    }
-  }
-  
-  // التحقق من حالات الفوز على خطوط الدفع
-  const winResult = checkWins(reels, betAmount, multiplier);
-  
-  // إنشاء قيم للأسماك النقدية (إذا كانت موجودة)
-  const fishValues = generateFishValues(reels, betAmount);
-  
-  // حساب إجمالي الفوز
-  const totalWin = winResult.totalWin;
-  
-  // تحديد ما إذا كانت قد تم تفعيل اللفات المجانية (عند ظهور 3 أو أكثر من صناديق الطعم)
-  const scatterCount = winResult.wins.filter(win => win.type === WinType.SCATTER).length;
-  const triggeredFreeSpins = scatterCount >= 3 ? 10 : 0;
-  
-  return {
-    reels,
-    wins: winResult.wins,
-    totalWin,
-    triggeredFreeSpins,
-    fishValues
-  };
+  collectedWild: 0,
+  totalWin: 0
 };
 
 /**
- * Hook إدارة حالة اللعبة
+ * إنشاء مصفوفة من بكرات عشوائية للعبة
+ * @param inFreeSpin هل نحن في وضع اللفات المجانية
+ * @returns مصفوفة من الرموز العشوائية
  */
-export const useGameState = () => {
-  const [gameState, setGameState] = useState<FishingGameState>(initGameState);
+const generateRandomReels = (inFreeSpin: boolean = false): SymbolType[][] => {
+  // توزيع الرموز بشكل عشوائي مع مراعاة احتمالية ظهور كل رمز
+  const reels: SymbolType[][] = [];
   
-  // تغيير قيمة الرهان
-  const changeBet = useCallback((amount: number) => {
+  // تمثيل الرموز المختلفة
+  const allSymbols = [
+    SymbolType.FISH_1, SymbolType.SHELL, SymbolType.ANCHOR,
+    SymbolType.FISH_2, SymbolType.CRAB, SymbolType.STARFISH,
+    SymbolType.FISH_3, SymbolType.FISH_2, SymbolType.FISH_1,
+    SymbolType.SHELL, SymbolType.ANCHOR, SymbolType.WILD,
+    SymbolType.STARFISH, SymbolType.FISH_1, SymbolType.CRAB
+  ];
+  
+  // إنشاء بكرات عشوائية
+  for (let col = 0; col < REELS_COUNT; col++) {
+    reels[col] = [];
+    for (let row = 0; row < ROWS_COUNT; row++) {
+      // اختيار رمز عشوائي
+      const randomIndex = Math.floor(Math.random() * allSymbols.length);
+      reels[col][row] = allSymbols[randomIndex];
+      
+      // إضافة احتمالية ظهور رموز خاصة
+      if (Math.random() < 0.05 && !inFreeSpin) {
+        // احتمالية 5% لظهور صندوق الطعم خارج اللفات المجانية
+        reels[col][row] = SymbolType.BAIT_BOX;
+      } else if (Math.random() < 0.05) {
+        // احتمالية 5% لظهور سمكة نقدية
+        reels[col][row] = SymbolType.FISH_MONEY;
+      } else if (inFreeSpin && Math.random() < 0.08) {
+        // احتمالية 8% لظهور صياد في اللفات المجانية
+        reels[col][row] = SymbolType.WILD;
+      } else if (Math.random() < 0.03) {
+        // احتمالية 3% لظهور صياد في اللعب العادي
+        reels[col][row] = SymbolType.WILD;
+      }
+    }
+  }
+  
+  return reels;
+};
+
+/**
+ * خطاف إدارة حالة لعبة صياد السمك
+ * @param initialBalance الرصيد الابتدائي للاعب
+ * @returns حالة اللعبة ودوال التحكم
+ */
+export const useGameState = (initialBalance: number = 10000) => {
+  // حالة اللعبة الرئيسية
+  const [gameState, setGameState] = useState<FishingGameState>({
+    balance: initialBalance,
+    betAmount: DEFAULT_BET_AMOUNT,
+    totalBet: DEFAULT_BET_AMOUNT * DEFAULT_PAYLINES_COUNT,
+    reels: createEmptyReels(),
+    gameState: GameState.IDLE,
+    lastWin: 0,
+    activePaylines: DEFAULT_PAYLINES_COUNT,
+    paylineWins: [],
+    scatterWins: [],
+    fishMoneyWins: [],
+    fishValues: {},
+    freeSpins: { ...DEFAULT_FREE_SPINS_STATE },
+    autoPlayActive: false,
+    canSpin: true
+  });
+  
+  // معالجة نتيجة الدوران
+  const handleSpinResult = useCallback((result: SpinResult) => {
     setGameState(prev => ({
       ...prev,
-      betAmount: amount,
-      totalBet: amount * prev.paylineCount
+      reels: result.reels,
+      lastWin: result.totalWin,
+      fishValues: result.fishValues || {}
     }));
+    
+    // تأخير للحفاظ على تأثير الدوران
+    setTimeout(() => {
+      // إظهار الفوز إذا كان هناك فوز
+      if (result.totalWin > 0) {
+        // تصنيف حالات الفوز
+        const paylineWins = result.wins.filter(win => win.type === WinType.LINE);
+        const scatterWins = result.wins.filter(win => win.type === WinType.SCATTER);
+        const fishMoneyWins = result.wins.filter(win => win.type === WinType.FISH_MONEY);
+        
+        setGameState(prev => ({
+          ...prev,
+          gameState: GameState.WIN_ANIMATION,
+          paylineWins,
+          scatterWins,
+          fishMoneyWins,
+          balance: prev.balance + result.totalWin
+        }));
+        
+        // تأخير قبل عرض اللفات المجانية إذا تم تفعيلها
+        setTimeout(() => {
+          if (result.triggeredFreeSpins > 0) {
+            startFreeSpins(result.triggeredFreeSpins);
+          }
+        }, 2000);
+      } else {
+        // لا فوز، العودة إلى وضع الانتظار
+        setGameState(prev => ({
+          ...prev,
+          gameState: GameState.IDLE,
+          canSpin: true
+        }));
+      }
+    }, 1000);
   }, []);
   
-  // تعيين الرهان الأقصى
-  const setMaxBet = useCallback(() => {
+  // معالجة نتيجة الدوران في وضع اللفات المجانية
+  const handleFreeSpinResult = useCallback((result: SpinResult) => {
+    // حساب عدد رموز الصياد (Wild) في النتيجة
+    const wildCount = result.reels.flat().filter(symbol => symbol === SymbolType.WILD).length;
+    
     setGameState(prev => {
-      const maxBet = 1000; // أقصى قيمة للرهان
+      // تحديث حالة اللفات المجانية
+      const collectedWild = prev.freeSpins.collectedWild + wildCount;
+      
+      // تحديث قيمة المضاعف بناءً على عدد الصيادين المجموعين
+      const multiplier = updateFreeSpinsMultiplier(collectedWild);
+      
+      // تحديث باقي اللفات المجانية
+      const spinsRemaining = prev.freeSpins.spinsRemaining - 1;
+      
       return {
         ...prev,
-        betAmount: maxBet,
-        totalBet: maxBet * prev.paylineCount
+        reels: result.reels,
+        lastWin: result.totalWin,
+        fishValues: result.fishValues || {},
+        freeSpins: {
+          ...prev.freeSpins,
+          collectedWild,
+          multiplier,
+          spinsRemaining,
+          totalWin: prev.freeSpins.totalWin + result.totalWin
+        }
       };
+    });
+    
+    // تأخير للحفاظ على تأثير الدوران
+    setTimeout(() => {
+      // عرض الفوز وتحديث الرصيد
+      if (result.totalWin > 0) {
+        // تصنيف حالات الفوز
+        const paylineWins = result.wins.filter(win => win.type === WinType.LINE);
+        const scatterWins = result.wins.filter(win => win.type === WinType.SCATTER);
+        const fishMoneyWins = result.wins.filter(win => win.type === WinType.FISH_MONEY);
+        
+        setGameState(prev => ({
+          ...prev,
+          gameState: GameState.WIN_ANIMATION,
+          paylineWins,
+          scatterWins,
+          fishMoneyWins,
+          balance: prev.balance + result.totalWin
+        }));
+        
+        // تحقق من تفعيل المزيد من اللفات المجانية
+        if (result.triggeredFreeSpins > 0) {
+          setTimeout(() => {
+            setGameState(prev => ({
+              ...prev,
+              freeSpins: {
+                ...prev.freeSpins,
+                spinsRemaining: prev.freeSpins.spinsRemaining + result.triggeredFreeSpins,
+                totalSpins: prev.freeSpins.totalSpins + result.triggeredFreeSpins
+              }
+            }));
+            
+            // الدوران التالي بعد عرض الفوز
+            setTimeout(() => continueFreeSpins(), 2000);
+          }, 2000);
+        } else {
+          // الدوران التالي بعد عرض الفوز
+          setTimeout(() => continueFreeSpins(), 2000);
+        }
+      } else {
+        // لا فوز، الانتقال مباشرة إلى الدوران التالي أو إنهاء اللفات المجانية
+        continueFreeSpins();
+      }
+    }, 1000);
+  }, []);
+  
+  // بدء دوران جديد
+  const spin = useCallback(() => {
+    // التحقق من إمكانية الدوران
+    if (!gameState.canSpin || gameState.gameState !== GameState.IDLE) {
+      return;
+    }
+    
+    // خصم قيمة الرهان من الرصيد
+    if (gameState.balance < gameState.totalBet) {
+      // لا يوجد رصيد كافٍ
+      return;
+    }
+    
+    setGameState(prev => ({
+      ...prev,
+      gameState: GameState.SPINNING,
+      balance: prev.balance - prev.totalBet,
+      canSpin: false
+    }));
+    
+    // محاكاة الدوران وإنشاء بكرات عشوائية
+    setTimeout(() => {
+      const reels = generateRandomReels();
+      const { wins, totalWin } = checkWins(reels, gameState.betAmount);
+      const triggeredFreeSpins = checkFreeSpinsTrigger(reels);
+      const fishValues = generateFishValues(reels, gameState.betAmount);
+      
+      // جمع قيم الأسماك النقدية إذا كان هناك صياد
+      const fishMoneyResults = collectFishValues(reels, fishValues);
+      
+      // إضافة فوز الأسماك النقدية إذا وجد
+      const totalFishWin = fishMoneyResults.totalValue;
+      
+      if (totalFishWin > 0) {
+        wins.push({
+          type: WinType.FISH_MONEY,
+          amount: totalFishWin,
+          positions: fishMoneyResults.collectedFish.map(fish => fish.position)
+        });
+      }
+      
+      // إعداد نتيجة الدوران
+      const spinResult: SpinResult = {
+        reels,
+        wins,
+        totalWin: totalWin + totalFishWin,
+        triggeredFreeSpins,
+        fishValues
+      };
+      
+      handleSpinResult(spinResult);
+    }, 1500);
+  }, [gameState, handleSpinResult]);
+  
+  // بدء وضع اللفات المجانية
+  const startFreeSpins = useCallback((spinsCount: number) => {
+    setGameState(prev => ({
+      ...prev,
+      gameState: GameState.FREE_SPINS,
+      freeSpins: {
+        active: true,
+        spinsRemaining: spinsCount,
+        totalSpins: spinsCount,
+        multiplier: 1,
+        collectedWild: 0,
+        totalWin: 0
+      }
+    }));
+    
+    // بدء أول لفة مجانية بعد التأخير
+    setTimeout(() => {
+      freeSpin();
+    }, 2000);
+  }, []);
+  
+  // مواصلة اللفات المجانية
+  const continueFreeSpins = useCallback(() => {
+    setGameState(prev => {
+      // التحقق من بقاء لفات مجانية
+      if (prev.freeSpins.spinsRemaining > 0) {
+        // المزيد من اللفات المجانية
+        setTimeout(() => {
+          freeSpin();
+        }, 1000);
+        
+        return {
+          ...prev,
+          gameState: GameState.FREE_SPINS
+        };
+      } else {
+        // انتهت اللفات المجانية
+        return {
+          ...prev,
+          gameState: GameState.IDLE,
+          canSpin: true,
+          freeSpins: { ...DEFAULT_FREE_SPINS_STATE }
+        };
+      }
     });
   }, []);
   
-  // تغيير عدد خطوط الدفع النشطة
-  const changePaylines = useCallback((count: number) => {
+  // تنفيذ لفة مجانية واحدة
+  const freeSpin = useCallback(() => {
     setGameState(prev => ({
       ...prev,
-      paylineCount: count,
-      totalBet: prev.betAmount * count
+      gameState: GameState.SPINNING
     }));
-  }, []);
+    
+    // محاكاة الدوران وإنشاء بكرات عشوائية في وضع اللفات المجانية
+    setTimeout(() => {
+      const reels = generateRandomReels(true);
+      const { wins, totalWin } = checkWins(
+        reels, 
+        gameState.betAmount, 
+        gameState.freeSpins.multiplier, 
+        gameState.activePaylines
+      );
+      const triggeredFreeSpins = checkFreeSpinsTrigger(reels);
+      const fishValues = generateFishValues(reels, gameState.betAmount);
+      
+      // جمع قيم الأسماك النقدية إذا كان هناك صياد
+      const fishMoneyResults = collectFishValues(reels, fishValues);
+      
+      // إضافة فوز الأسماك النقدية إذا وجد
+      const totalFishWin = fishMoneyResults.totalValue;
+      
+      if (totalFishWin > 0) {
+        wins.push({
+          type: WinType.FISH_MONEY,
+          amount: totalFishWin * gameState.freeSpins.multiplier,
+          positions: fishMoneyResults.collectedFish.map(fish => fish.position)
+        });
+      }
+      
+      // إعداد نتيجة الدوران
+      const spinResult: SpinResult = {
+        reels,
+        wins,
+        totalWin: totalWin + (totalFishWin * gameState.freeSpins.multiplier),
+        triggeredFreeSpins,
+        fishValues
+      };
+      
+      handleFreeSpinResult(spinResult);
+    }, 1500);
+  }, [gameState, handleFreeSpinResult]);
+  
+  // تغيير قيمة الرهان
+  const changeBet = useCallback((amount: number) => {
+    if (gameState.gameState !== GameState.IDLE) return;
+    
+    setGameState(prev => ({
+      ...prev,
+      betAmount: amount,
+      totalBet: amount * prev.activePaylines
+    }));
+  }, [gameState.gameState]);
+  
+  // تعيين الرهان الأقصى
+  const setMaxBet = useCallback(() => {
+    if (gameState.gameState !== GameState.IDLE) return;
+    
+    // تعيين قيمة الرهان الأقصى (مثال: 500)
+    const maxBet = 500;
+    
+    setGameState(prev => ({
+      ...prev,
+      betAmount: maxBet,
+      totalBet: maxBet * prev.activePaylines
+    }));
+  }, [gameState.gameState]);
   
   // تبديل وضع اللعب التلقائي
   const toggleAutoPlay = useCallback(() => {
@@ -159,175 +393,42 @@ export const useGameState = () => {
     }));
   }, []);
   
-  // معالجة نتيجة اللفة الحرة
-  const handleFreeSpinResult = useCallback((result: SpinResult) => {
-    setGameState(prev => {
-      // جمع قيم الأسماك النقدية إذا كان هناك صياد (WILD) موجود
-      const fishCollectResult = collectFishValues(result.reels, result.fishValues || {});
-      
-      // تحديث عدد الصيادين وتطبيق المضاعف المناسب
-      let { fishermanCount, multiplier } = prev.freeSpins;
-      let newFishermanCount = fishermanCount;
-      
-      // إضافة عدد الصيادين الجدد
-      const wildsCount = result.reels.flat().filter(symbol => symbol === SymbolType.WILD).length;
-      newFishermanCount += wildsCount;
-      
-      // تحديث المضاعف بناءً على عدد الصيادين
-      let newMultiplier = multiplier;
-      if (newFishermanCount >= 12) {
-        newMultiplier = 10;
-      } else if (newFishermanCount >= 8) {
-        newMultiplier = 3;
-      } else if (newFishermanCount >= 4) {
-        newMultiplier = 2;
-      }
-      
-      // إضافة قيمة الفوز من الأسماك النقدية
-      const collectedFishValues = prev.freeSpins.collectedFishValues + (fishCollectResult.totalValue * newMultiplier);
-      
-      // تحديث حالة اللفات المجانية
-      const remaining = prev.freeSpins.remaining - 1;
-      const active = remaining > 0;
-      
-      return {
-        ...prev,
-        reels: result.reels,
-        lastWin: result.totalWin + fishCollectResult.totalValue * newMultiplier,
-        wins: result.wins,
-        winPositions: result.wins.flatMap(win => win.positions),
-        fishValues: result.fishValues || {},
-        gameState: active ? GameState.WIN_ANIMATION : GameState.IDLE,
-        freeSpins: {
-          active,
-          remaining,
-          multiplier: newMultiplier,
-          fishermanCount: newFishermanCount,
-          collectedFishValues
-        }
-      };
-    });
-  }, []);
-  
-  // قم بالدوران
-  const spin = useCallback(() => {
-    setGameState(prev => {
-      // لا يمكن الدوران إذا لم تكن اللعبة في حالة انتظار أو إذا كان الرصيد غير كافٍ
-      if (prev.gameState !== GameState.IDLE || prev.balance < prev.totalBet) {
-        return prev;
-      }
-      
-      // خصم قيمة الرهان من الرصيد في اللعبة العادية (ليس في اللفات المجانية)
-      const newBalance = prev.freeSpins.active ? prev.balance : prev.balance - prev.totalBet;
-      
-      return {
-        ...prev,
-        balance: newBalance,
-        gameState: GameState.SPINNING
-      };
-    });
+  // تغيير عدد خطوط الدفع النشطة
+  const changeActivePaylines = useCallback((count: number) => {
+    if (gameState.gameState !== GameState.IDLE) return;
     
-    // محاكاة تأخير دوران البكرات (1.5 ثانية)
-    setTimeout(() => {
-      setGameState(prev => {
-        // الحصول على نتيجة الدوران
-        const inFreeSpins = prev.freeSpins.active;
-        const multiplier = prev.freeSpins.multiplier;
-        const result = simulateSpinResult(prev.betAmount, inFreeSpins, multiplier);
-        
-        // إذا كانت اللفات المجانية نشطة، معالجة نتيجة اللفة الحرة
-        if (inFreeSpins) {
-          handleFreeSpinResult(result);
-          return prev; // تم التعامل مع التحديث في handleFreeSpinResult
-        }
-        
-        // حساب الفوز الإجمالي
-        let totalWin = 0;
-        result.wins.forEach(win => {
-          totalWin += win.amount;
-        });
-        
-        // إذا تم تفعيل اللفات المجانية
-        if (result.triggeredFreeSpins > 0) {
-          return {
-            ...prev,
-            reels: result.reels,
-            lastWin: totalWin,
-            wins: result.wins,
-            winPositions: result.wins.flatMap(win => win.positions),
-            fishValues: result.fishValues || {},
-            balance: prev.balance + totalWin,
-            gameState: GameState.WIN_ANIMATION,
-            freeSpins: {
-              ...initFreeSpinsState(),
-              active: true,
-              remaining: result.triggeredFreeSpins
-            }
-          };
-        }
-        
-        // نتيجة اللعبة العادية
-        return {
-          ...prev,
-          reels: result.reels,
-          lastWin: totalWin,
-          wins: result.wins,
-          winPositions: result.wins.flatMap(win => win.positions),
-          fishValues: result.fishValues || {},
-          balance: prev.balance + totalWin,
-          gameState: totalWin > 0 ? GameState.WIN_ANIMATION : GameState.IDLE
-        };
-      });
-    }, 1500);
-  }, [handleFreeSpinResult]);
-  
-  // انتقال من حالة عرض الفوز إلى حالة الانتظار
-  const completeWinAnimation = useCallback(() => {
     setGameState(prev => ({
       ...prev,
-      gameState: GameState.IDLE
+      activePaylines: count,
+      totalBet: prev.betAmount * count
     }));
-  }, []);
+  }, [gameState.gameState]);
   
-  // إعادة ضبط اللعبة
-  const resetGame = useCallback(() => {
-    setGameState(initGameState);
-  }, []);
-  
-  // تحديث الرصيد (للاستخدام الخارجي، مثل عند شحن الرصيد)
-  const updateBalance = useCallback((amount: number) => {
-    setGameState(prev => ({
-      ...prev,
-      balance: amount
-    }));
-  }, []);
-  
-  // اللعب التلقائي
+  // تأثير للعب التلقائي
   useEffect(() => {
-    let autoPlayTimer: NodeJS.Timeout | null = null;
+    let autoPlayInterval: NodeJS.Timeout | null = null;
     
-    if (gameState.autoPlayActive && gameState.gameState === GameState.IDLE && gameState.balance >= gameState.totalBet) {
-      autoPlayTimer = setTimeout(() => {
+    if (gameState.autoPlayActive && gameState.gameState === GameState.IDLE && gameState.canSpin) {
+      autoPlayInterval = setInterval(() => {
         spin();
-      }, 1000);
+      }, 3000);
     }
     
     return () => {
-      if (autoPlayTimer) {
-        clearTimeout(autoPlayTimer);
+      if (autoPlayInterval) {
+        clearInterval(autoPlayInterval);
       }
     };
-  }, [gameState.autoPlayActive, gameState.gameState, gameState.balance, gameState.totalBet, spin]);
+  }, [gameState.autoPlayActive, gameState.gameState, gameState.canSpin, spin]);
   
   return {
-    ...gameState,
+    gameState,
     spin,
     changeBet,
     setMaxBet,
-    changePaylines,
     toggleAutoPlay,
-    completeWinAnimation,
-    resetGame,
-    updateBalance
+    changeActivePaylines
   };
 };
+
+export default useGameState;

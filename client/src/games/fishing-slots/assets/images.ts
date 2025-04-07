@@ -1,93 +1,119 @@
 /**
- * تعريف مسارات الصور المستخدمة في لعبة صياد السمك
+ * ملف الصور والموارد المستخدمة في لعبة صياد السمك
  */
 
 import { SymbolType } from '../types';
 
-// الصور الأساسية للعبة
-export const LOGO_IMAGE = '/assets/fishing-slots/logo.png';
-export const BACKGROUND_IMAGE = '/assets/fishing-slots/underwater-background.jpg';
-export const BUBBLE_IMAGE = '/assets/fishing-slots/bubble.png';
-
-// ألوان خطوط الدفع (لكل خط لون مختلف)
-export const PAYLINE_COLORS = [
-  '#FF0000', // أحمر
-  '#00FF00', // أخضر
-  '#0000FF', // أزرق
-  '#FFFF00', // أصفر
-  '#FF00FF', // وردي
-  '#00FFFF', // سماوي
-  '#FFA500', // برتقالي
-  '#800080', // بنفسجي
-  '#008000', // أخضر داكن
-  '#FF4500', // أحمر برتقالي
-  '#4B0082', // نيلي
-  '#FF1493', // وردي عميق
-  '#FFD700', // ذهبي
-  '#40E0D0', // تركواز
-  '#CD853F', // بني فاتح
-  '#8A2BE2', // أزرق بنفسجي
-  '#32CD32', // أخضر ليموني
-  '#FF6347', // طماطم
-  '#6A5ACD', // أزرق أرجواني
-  '#7FFF00'  // أخضر شارت
-];
-
-// صور رموز اللعبة
-export const SYMBOL_IMAGES: Record<SymbolType, string> = {
-  [SymbolType.WILD]: '/assets/fishing-slots/symbols/fisherman.png', // الصياد (Wild)
-  [SymbolType.FISH_1]: '/assets/fishing-slots/symbols/fish1.png', // سمكة 1
-  [SymbolType.FISH_2]: '/assets/fishing-slots/symbols/fish2.png', // سمكة 2
-  [SymbolType.FISH_3]: '/assets/fishing-slots/symbols/fish3.png', // سمكة 3
-  [SymbolType.STARFISH]: '/assets/fishing-slots/symbols/starfish.png', // نجم البحر
-  [SymbolType.SHELL]: '/assets/fishing-slots/symbols/shell.png', // صدفة
-  [SymbolType.ANCHOR]: '/assets/fishing-slots/symbols/anchor.png', // مرساة
-  [SymbolType.CRAB]: '/assets/fishing-slots/symbols/crab.png', // سلطعون
-  [SymbolType.BAIT_BOX]: '/assets/fishing-slots/symbols/bait-box.png', // صندوق الطعم (Scatter)
-  [SymbolType.FISH_MONEY]: '/assets/fishing-slots/symbols/money-fish.png' // سمكة نقدية
+/**
+ * روابط الأصوات للعبة
+ */
+export const SOUNDS = {
+  // أصوات اللعبة الرئيسية
+  BACKGROUND_MUSIC: '/sounds/fishing-slots/background-music.mp3',
+  REEL_SPIN: '/sounds/fishing-slots/reel-spin.mp3',
+  REEL_STOP: '/sounds/fishing-slots/reel-stop.mp3',
+  WIN_SMALL: '/sounds/fishing-slots/win-small.mp3',
+  WIN_MEDIUM: '/sounds/fishing-slots/win-medium.mp3',
+  WIN_BIG: '/sounds/fishing-slots/win-big.mp3',
+  CLICK: '/sounds/fishing-slots/click.mp3',
+  
+  // أصوات خاصة باللفات المجانية
+  FREE_SPINS_TRIGGER: '/sounds/fishing-slots/free-spins-trigger.mp3',
+  FREE_SPINS_COUNT: '/sounds/fishing-slots/free-spins-count.mp3',
+  FISHERMAN_COLLECT: '/sounds/fishing-slots/fisherman-collect.mp3',
+  MULTIPLIER_UP: '/sounds/fishing-slots/multiplier-up.mp3',
+  
+  // أصوات التنبيهات والأزرار
+  ALERT: '/sounds/fishing-slots/alert.mp3',
+  ERROR: '/sounds/fishing-slots/error.mp3',
+  BUTTON_HOVER: '/sounds/fishing-slots/button-hover.mp3',
+  BUTTON_CLICK: '/sounds/fishing-slots/button-click.mp3',
 };
 
-// مسارات عناصر واجهة اللعبة
-export const REEL_FRAME_IMAGE = '/assets/fishing-slots/reel-frame.png';
-export const PAYLINES_FRAME_IMAGE = '/assets/fishing-slots/paylines-frame.png';
-export const CONTROL_PANEL_BACKGROUND = '/assets/fishing-slots/control-panel-bg.png';
+/**
+ * ألوان خطوط الدفع
+ */
+export const PAYLINE_COLORS = [
+  "#FF5252", "#FFEB3B", "#4CAF50", "#2196F3", "#9C27B0",
+  "#FF9800", "#795548", "#607D8B", "#F44336", "#3F51B5",
+  "#009688", "#FFC107", "#E91E63", "#00BCD4", "#8BC34A",
+  "#673AB7", "#CDDC39", "#FF4081", "#03A9F4", "#FFAB40"
+];
 
-// أزرار التحكم
-export const SPIN_BUTTON = '/assets/fishing-slots/buttons/spin-button.png';
-export const AUTO_PLAY_BUTTON = '/assets/fishing-slots/buttons/auto-play-button.png';
-export const MAX_BET_BUTTON = '/assets/fishing-slots/buttons/max-bet-button.png';
-export const BET_UP_BUTTON = '/assets/fishing-slots/buttons/bet-up-button.png';
-export const BET_DOWN_BUTTON = '/assets/fishing-slots/buttons/bet-down-button.png';
-export const SETTINGS_BUTTON = '/assets/fishing-slots/buttons/settings-button.png';
-export const PAYTABLE_BUTTON = '/assets/fishing-slots/buttons/paytable-button.png';
-export const SOUND_ON_BUTTON = '/assets/fishing-slots/buttons/sound-on-button.png';
-export const SOUND_OFF_BUTTON = '/assets/fishing-slots/buttons/sound-off-button.png';
+/**
+ * صور رموز اللعبة
+ */
+export const SYMBOL_IMAGES: Record<SymbolType, string> = {
+  [SymbolType.WILD]: '/images/fishing-slots/symbols/fisherman.png',
+  [SymbolType.FISH_1]: '/images/fishing-slots/symbols/fish-1.png',
+  [SymbolType.FISH_2]: '/images/fishing-slots/symbols/fish-2.png',
+  [SymbolType.FISH_3]: '/images/fishing-slots/symbols/fish-3.png',
+  [SymbolType.STARFISH]: '/images/fishing-slots/symbols/starfish.png',
+  [SymbolType.SHELL]: '/images/fishing-slots/symbols/shell.png',
+  [SymbolType.ANCHOR]: '/images/fishing-slots/symbols/anchor.png',
+  [SymbolType.CRAB]: '/images/fishing-slots/symbols/crab.png',
+  [SymbolType.BAIT_BOX]: '/images/fishing-slots/symbols/bait-box.png',
+  [SymbolType.FISH_MONEY]: '/images/fishing-slots/symbols/fish-money.png',
+};
 
-// مسارات عناصر اللفات المجانية
-export const FREE_SPINS_BACKGROUND = '/assets/fishing-slots/free-spins-bg.png';
-export const FREE_SPINS_INTRO = '/assets/fishing-slots/free-spins-intro.png';
-export const FREE_SPINS_OUTRO = '/assets/fishing-slots/free-spins-outro.png';
+/**
+ * صور خلفيات اللعبة
+ */
+export const BACKGROUND_IMAGES = {
+  MAIN: '/images/fishing-slots/backgrounds/main-background.jpg',
+  FREE_SPINS: '/images/fishing-slots/backgrounds/free-spins-background.jpg',
+  PAYTABLE: '/images/fishing-slots/backgrounds/paytable-background.jpg',
+};
 
-// عناصر الفوز والمؤثرات
-export const WIN_FRAME = '/assets/fishing-slots/win-frame.png';
-export const BIG_WIN_ANIMATION = '/assets/fishing-slots/big-win.png';
-export const MEGA_WIN_ANIMATION = '/assets/fishing-slots/mega-win.png';
-export const SUPER_WIN_ANIMATION = '/assets/fishing-slots/super-win.png';
-export const WATER_SPLASH = '/assets/fishing-slots/water-splash.png';
-export const COIN_ANIMATION = '/assets/fishing-slots/coin.png';
+/**
+ * صور عناصر واجهة اللعبة
+ */
+export const UI_IMAGES = {
+  LOGO: '/images/fishing-slots/ui/logo.png',
+  FRAME: '/images/fishing-slots/ui/frame.png',
+  BUTTON_SPIN: '/images/fishing-slots/ui/button-spin.png',
+  BUTTON_AUTO: '/images/fishing-slots/ui/button-auto.png',
+  BUTTON_MAX_BET: '/images/fishing-slots/ui/button-max-bet.png',
+  BUTTON_INFO: '/images/fishing-slots/ui/button-info.png',
+  BUTTON_SOUND_ON: '/images/fishing-slots/ui/button-sound-on.png',
+  BUTTON_SOUND_OFF: '/images/fishing-slots/ui/button-sound-off.png',
+  BUTTON_MENU: '/images/fishing-slots/ui/button-menu.png',
+  BUTTON_PLUS: '/images/fishing-slots/ui/button-plus.png',
+  BUTTON_MINUS: '/images/fishing-slots/ui/button-minus.png',
+  COIN: '/images/fishing-slots/ui/coin.png',
+  WIN_FRAME: '/images/fishing-slots/ui/win-frame.png',
+  FREE_SPINS_OVERLAY: '/images/fishing-slots/ui/free-spins-overlay.png',
+  MULTIPLIER_FRAME: '/images/fishing-slots/ui/multiplier-frame.png',
+};
 
-// مسارات الأصوات
-export const SOUNDS = {
-  SPIN: '/assets/fishing-slots/sounds/spin.mp3',
-  REEL_STOP: '/assets/fishing-slots/sounds/reel-stop.mp3',
-  WIN: '/assets/fishing-slots/sounds/win.mp3',
-  BIG_WIN: '/assets/fishing-slots/sounds/big-win.mp3',
-  COLLECT_MONEY: '/assets/fishing-slots/sounds/collect-money.mp3',
-  WILD_APPEAR: '/assets/fishing-slots/sounds/wild-appear.mp3',
-  FREE_SPINS_TRIGGER: '/assets/fishing-slots/sounds/free-spins-trigger.mp3',
-  FREE_SPINS_END: '/assets/fishing-slots/sounds/free-spins-end.mp3',
-  BUTTON_CLICK: '/assets/fishing-slots/sounds/button-click.mp3',
-  BUBBLE_POP: '/assets/fishing-slots/sounds/bubble-pop.mp3',
-  BACKGROUND_MUSIC: '/assets/fishing-slots/sounds/background-music.mp3',
-  FREE_SPINS_MUSIC: '/assets/fishing-slots/sounds/free-spins-music.mp3'
+/**
+ * صور الرسوم المتحركة
+ */
+export const ANIMATION_IMAGES = {
+  SPLASH: '/images/fishing-slots/animations/splash.png',
+  WAVE: '/images/fishing-slots/animations/wave.png',
+  BUBBLE: '/images/fishing-slots/animations/bubble.png',
+  COIN_SHINE: '/images/fishing-slots/animations/coin-shine.png',
+  WIN_LIGHT: '/images/fishing-slots/animations/win-light.png',
+  FREE_SPINS_INTRO: '/images/fishing-slots/animations/free-spins-intro.png',
+  FISHERMAN_CATCHING: '/images/fishing-slots/animations/fisherman-catching.gif',
+};
+
+/**
+ * مسارات ملفات الرموز المتحركة (Sprite Sheets)
+ */
+export const SPRITE_SHEETS = {
+  SYMBOLS: '/images/fishing-slots/sprite-sheets/symbols-sheet.png',
+  WILD_ANIMATION: '/images/fishing-slots/sprite-sheets/wild-animation.png',
+  SCATTER_ANIMATION: '/images/fishing-slots/sprite-sheets/scatter-animation.png',
+  WIN_EFFECTS: '/images/fishing-slots/sprite-sheets/win-effects.png',
+};
+
+/**
+ * روابط أيقونات العملة وقيم المراهنة
+ */
+export const CURRENCY_ICONS = {
+  COIN: '/images/fishing-slots/currency/coin.png',
+  CHIP: '/images/fishing-slots/currency/chip.png',
+  DOLLAR: '/images/fishing-slots/currency/dollar.png',
 };
