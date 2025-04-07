@@ -341,7 +341,7 @@ const EgyptRocketPage = () => {
   }, []);
   
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#06071A] to-[#141E30] pt-20 pb-10 px-4">
+    <div className="min-h-screen bg-gradient-to-b from-[#06071A] to-[#141E30] pt-12 pb-2 px-2">
       <div className="max-w-7xl mx-auto">
         {/* رأس الصفحة وأيقونات مصرية */}
         <div className="flex justify-between items-center mb-4">
@@ -380,13 +380,13 @@ const EgyptRocketPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div className="lg:col-span-2 space-y-4">
             {/* تاريخ الجولات بشكل أفقي */}
-            <div className="bg-black/20 rounded-xl p-4 border border-[#D4AF37]/10">
+            <div className="bg-black/20 rounded-xl p-2 border border-[#D4AF37]/10">
               <BetHistory history={gameHistory} horizontal={true} />
             </div>
             
             {/* منطقة عرض اللعبة */}
             <div className="bg-black/20 rounded-xl overflow-hidden border border-[#D4AF37]/10">
-              <div className="relative h-[45vh]">
+              <div className="relative h-[40vh]">
                 <RocketGame 
                   ref={rocketRef}
                   gameStatus={gameStatus} 
@@ -427,7 +427,7 @@ const EgyptRocketPage = () => {
             {/* الرهانات الحية */}
             <div className="bg-black/20 rounded-xl p-3 border border-[#D4AF37]/10">
               <h3 className="text-[#D4AF37] font-bold mb-1 text-center text-sm">الرهانات الحية</h3>
-              <div className="max-h-[35vh] overflow-y-auto">
+              <div className="max-h-[30vh] overflow-y-auto">
                 <LiveBets bets={liveBets} />
               </div>
             </div>

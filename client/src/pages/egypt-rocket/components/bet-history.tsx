@@ -15,25 +15,24 @@ const BetHistory = ({ history, horizontal = false }: BetHistoryProps) => {
         <div className="text-center text-gray-400 py-2 text-xs">لا يوجد تاريخ سابق</div>
       ) : (
         // استخدام العرض الأفقي أو الرأسي بناءً على الخاصية
-        <div className={`${horizontal ? 'flex overflow-x-auto py-1 -mx-2 px-2 gap-1' : 'space-y-2'}`}>
+        <div className={`${horizontal ? 'flex overflow-x-auto py-1 space-x-1 rtl:space-x-reverse' : 'space-y-2'}`}>
           {history.map((item, index) => (
             <div 
               key={index} 
               className={`
-                flex ${horizontal ? 'flex-col min-w-[60px] w-16' : 'justify-between'} 
-                items-center p-1 rounded-lg bg-black/30 border border-[#D4AF37]/20
-                ${horizontal ? 'mx-1' : ''}
+                flex ${horizontal ? 'flex-col min-w-[45px] w-[45px]' : 'justify-between'} 
+                items-center py-1 px-0.5 rounded-lg bg-black/30 border border-[#D4AF37]/20
               `}
             >
               {horizontal && (
                 <div 
-                  className={`w-6 h-6 mb-1 rounded-full flex items-center justify-center ${
+                  className={`w-5 h-5 mb-1 rounded-full flex items-center justify-center ${
                     item.multiplier < 1.5 ? 'bg-red-500/20 text-red-500' : 
                     item.multiplier < 3 ? 'bg-yellow-500/20 text-yellow-500' : 
                     'bg-green-500/20 text-green-500'
                   }`}
                 >
-                  <span className="text-xs">
+                  <span className="text-[10px]">
                     {item.multiplier < 1.5 ? '💥' : 
                      item.multiplier < 3 ? '🙂' : 
                      item.multiplier < 5 ? '🤑' : '🔥'}
@@ -43,7 +42,7 @@ const BetHistory = ({ history, horizontal = false }: BetHistoryProps) => {
               
               <div className={horizontal ? 'text-center' : ''}>
                 <div 
-                  className={`font-mono font-bold ${horizontal ? 'text-sm' : 'text-lg'} ${
+                  className={`font-mono font-bold ${horizontal ? 'text-xs' : 'text-lg'} ${
                     item.multiplier < 1.5 ? 'text-red-500' : 
                     item.multiplier < 3 ? 'text-yellow-500' : 
                     'text-green-500'
