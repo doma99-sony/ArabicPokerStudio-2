@@ -386,7 +386,7 @@ const EgyptRocketPage = () => {
             
             {/* منطقة عرض اللعبة */}
             <div className="bg-black/20 rounded-xl overflow-hidden border border-[#D4AF37]/10">
-              <div className="relative h-[60vh]">
+              <div className="relative h-[50vh]">
                 <RocketGame 
                   ref={rocketRef}
                   gameStatus={gameStatus} 
@@ -425,70 +425,59 @@ const EgyptRocketPage = () => {
           
           <div className="space-y-6">
             {/* الرهانات الحية */}
-            <div className="bg-black/20 rounded-xl p-4 border border-[#D4AF37]/10">
-              <LiveBets bets={liveBets} />
+            <div className="bg-black/20 rounded-xl p-3 border border-[#D4AF37]/10">
+              <h3 className="text-[#D4AF37] font-bold mb-1 text-center text-sm">الرهانات الحية</h3>
+              <div className="max-h-[35vh] overflow-y-auto">
+                <LiveBets bets={liveBets} />
+              </div>
             </div>
             
-            {/* إحصائيات */}
-            <div className="bg-black/20 rounded-xl p-4 border border-[#D4AF37]/10">
-              <h3 className="text-[#D4AF37] font-bold mb-3 text-center">إحصائيات الجولات</h3>
-              {gameHistory.length > 0 && (
-                <div className="p-3 rounded-lg bg-black/30 border border-[#D4AF37]/20">
-                  <div className="flex justify-between">
-                    <div className="text-center">
-                      <div className="text-lg font-bold text-green-500">
-                        {gameHistory.reduce((max, curr) => Math.max(max, curr.multiplier), 0).toFixed(2)}x
-                      </div>
-                      <div className="text-xs text-gray-400">أعلى مضاعف</div>
+            {/* إحصائيات مختصرة */}
+            <div className="bg-black/20 rounded-xl p-3 border border-[#D4AF37]/10">
+              <h3 className="text-[#D4AF37] font-bold mb-1 text-center text-sm">إحصائيات</h3>
+              {gameHistory.length > 0 ? (
+                <div className="flex justify-between items-center text-center">
+                  <div>
+                    <div className="text-sm font-bold text-green-500">
+                      {gameHistory.reduce((max, curr) => Math.max(max, curr.multiplier), 0).toFixed(2)}x
                     </div>
-                    <div className="text-center">
-                      <div className="text-lg font-bold text-[#D4AF37]">
-                        {(gameHistory.reduce((sum, curr) => sum + curr.multiplier, 0) / gameHistory.length).toFixed(2)}x
-                      </div>
-                      <div className="text-xs text-gray-400">المتوسط</div>
+                    <div className="text-xs text-gray-400">أعلى</div>
+                  </div>
+                  <div className="border-l border-r px-2 border-[#D4AF37]/20">
+                    <div className="text-sm font-bold text-[#D4AF37]">
+                      {(gameHistory.reduce((sum, curr) => sum + curr.multiplier, 0) / gameHistory.length).toFixed(2)}x
                     </div>
-                    <div className="text-center">
-                      <div className="text-lg font-bold text-red-500">
-                        {gameHistory.reduce((min, curr) => Math.min(min, curr.multiplier), Infinity).toFixed(2)}x
-                      </div>
-                      <div className="text-xs text-gray-400">أدنى مضاعف</div>
+                    <div className="text-xs text-gray-400">المتوسط</div>
+                  </div>
+                  <div>
+                    <div className="text-sm font-bold text-red-500">
+                      {gameHistory.reduce((min, curr) => Math.min(min, curr.multiplier), Infinity).toFixed(2)}x
                     </div>
+                    <div className="text-xs text-gray-400">أدنى</div>
                   </div>
                 </div>
+              ) : (
+                <div className="text-xs text-center text-gray-400">لا توجد بيانات كافية</div>
               )}
             </div>
             
-            {/* نصائح للاعبين */}
+            {/* نصائح للاعبين - تم تبسيط المحتوى */}
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 1 }}
-              className="bg-[#D4AF37]/5 rounded-xl p-4 border border-[#D4AF37]/20"
+              className="bg-[#D4AF37]/5 rounded-xl p-3 border border-[#D4AF37]/20"
             >
-              <h3 className="text-[#D4AF37] font-bold mb-2 text-center">نصائح ذهبية</h3>
-              <ul className="text-sm text-gray-300 space-y-2">
-                <li className="flex items-start">
-                  <span className="text-[#D4AF37] mr-1">•</span> اجمع رهانك قبل انفجار الصاروخ للفوز
-                </li>
-                <li className="flex items-start">
-                  <span className="text-[#D4AF37] mr-1">•</span> كلما تأخرت في الجمع، زادت أرباحك ولكن زادت المخاطرة
-                </li>
-                <li className="flex items-start">
-                  <span className="text-[#D4AF37] mr-1">•</span> استخدم الجمع التلقائي للحصول على نتائج متسقة
-                </li>
-              </ul>
+              <h3 className="text-[#D4AF37] font-bold mb-1 text-center text-sm">نصائح ذهبية</h3>
+              <div className="text-xs text-gray-300 flex justify-between">
+                <span>• اجمع قبل الانفجار</span>
+                <span>• أعلى مضاعف = أعلى ربح</span>
+              </div>
             </motion.div>
           </div>
         </div>
         
-        {/* تذييل الصفحة مع زخارف مصرية */}
-        <div className="mt-10 border-t border-[#D4AF37]/20 pt-4 flex justify-center">
-          <div className="flex items-center">
-            <div className="h-[1px] w-10 bg-[#D4AF37]/50"></div>
-            <PyramidIcon className="h-5 w-5 text-[#D4AF37] mx-2" />
-            <div className="h-[1px] w-10 bg-[#D4AF37]/50"></div>
-          </div>
-        </div>
+        {/* لا حاجة لتذييل الصفحة لتقليل الارتفاع */}
       </div>
     </div>
   );
