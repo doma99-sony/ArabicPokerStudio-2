@@ -2,16 +2,16 @@
 # -*- coding: utf-8 -*-
 
 """
-صاروخ مصر - سكريبت التشغيل
-=========================
-هذا الملف يستخدم لتشغيل خادم صاروخ مصر
+Python Run Script
+================
+This file can be used to run Python scripts if needed.
+Currently not in active use.
 """
 
-import os
-from . import start_egypt_rocket_server
+# The following code is commented out as it's not currently needed
+# but provides a structure for future Python services if required.
 
-if __name__ == '__main__':
-    # احصل على رقم المنفذ من متغيرات البيئة أو استخدم 3001 كقيمة افتراضية
-    port = int(os.environ.get('ROCKET_PORT', 3001))
-    print(f"بدء تشغيل خادم صاروخ مصر على المنفذ {port}...")
-    start_egypt_rocket_server(port=port, debug=True)
+# import os
+# 
+# if __name__ == '__main__':
+#     print("Python support is available but not currently in use.")
