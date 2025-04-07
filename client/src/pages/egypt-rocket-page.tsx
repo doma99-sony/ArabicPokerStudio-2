@@ -160,11 +160,17 @@ const EgyptRocketPage = () => {
     }, waitingTime);
   };
   
-  // توليد نقطة انفجار عشوائية - محاكاة لعبة "البحث عن الآثار المصرية"
+  // توليد نقطة انفجار عشوائية - محاكاة لعبة "البحث عن الآثار المصرية" مع لعنة الفراعنة!
   const generateCrashPoint = (): number => {
     // نظام توزيع المضاعفات يشبه اكتشاف كنوز فرعونية - أحياناً تجد كنزاً ثميناً!
     const r = Math.random();
     const specialEvent = Math.random(); // احتمالية حدث خاص
+    const pharaohsCurse = Math.random(); // لعنة الفراعنة - انفجار فوري!
+    
+    // 3% من الوقت - لعنة الفراعنة! انفجار فوري عند 1.0x
+    if (pharaohsCurse < 0.03) {
+      return 1.0;  // لعنة الفراعنة - انفجار فوري!
+    }
     
     // 5% من الوقت سيكون هناك انفجار مبكر (حظ سيء!)
     if (r < 0.05) {
@@ -507,22 +513,22 @@ const EgyptRocketPage = () => {
   useEffect(() => {
     simulateGame();
     
-    // إضافة بيانات تاريخية تتضمن بعض "اكتشافات الآثار النادرة" - مضاعفات مرتفعة جداً!
+    // إضافة بيانات تاريخية تتضمن بعض "اكتشافات الآثار النادرة" ولعنة الفراعنة (انفجارات فورية)
     setGameHistory([
       { multiplier: 1.52, timestamp: new Date(Date.now() - 60000) },
       { multiplier: 2.14, timestamp: new Date(Date.now() - 120000) },
-      { multiplier: 1.05, timestamp: new Date(Date.now() - 180000) }, // انفجار مبكر
+      { multiplier: 1.00, timestamp: new Date(Date.now() - 180000) }, // لعنة الفراعنة! انفجار فوري
       { multiplier: 3.27, timestamp: new Date(Date.now() - 240000) },
       { multiplier: 24.87, timestamp: new Date(Date.now() - 300000) }, // اكتشاف كنز صغير! 🏺
       { multiplier: 1.78, timestamp: new Date(Date.now() - 360000) },
-      { multiplier: 1.31, timestamp: new Date(Date.now() - 420000) },
+      { multiplier: 1.00, timestamp: new Date(Date.now() - 420000) }, // لعنة الفراعنة! انفجار فوري
       { multiplier: 2.54, timestamp: new Date(Date.now() - 480000) },
       { multiplier: 1.92, timestamp: new Date(Date.now() - 540000) },
       { multiplier: 64.35, timestamp: new Date(Date.now() - 600000) }, // اكتشاف كنز متوسط! 💎
       { multiplier: 1.67, timestamp: new Date(Date.now() - 660000) },
       { multiplier: 1.22, timestamp: new Date(Date.now() - 720000) },
       { multiplier: 4.89, timestamp: new Date(Date.now() - 780000) },
-      { multiplier: 1.07, timestamp: new Date(Date.now() - 840000) }, // انفجار مبكر
+      { multiplier: 1.00, timestamp: new Date(Date.now() - 840000) }, // لعنة الفراعنة! انفجار فوري
       { multiplier: 182.46, timestamp: new Date(Date.now() - 900000) }, // اكتشاف كنز فرعوني نادر جداً! 👑
     ]);
   }, []);

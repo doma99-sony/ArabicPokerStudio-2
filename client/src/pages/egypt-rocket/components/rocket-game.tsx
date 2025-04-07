@@ -269,8 +269,17 @@ const RocketGame = forwardRef(({ gameStatus, multiplier }: RocketGameProps, ref)
           transition={{ duration: 0.3 }}
           className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/70 backdrop-blur-sm px-10 py-6 rounded-xl border border-red-500/50"
         >
-          <div className="text-red-500 text-3xl font-bold text-center mb-2">💥 انفجر! 💥</div>
-          <div className="text-white text-lg font-bold text-center">{multiplier.toFixed(2)}x</div>
+          {multiplier === 1.0 ? (
+            <>
+              <div className="text-red-500 text-3xl font-bold text-center mb-2">⚡ لعنة الفراعنة! ⚡</div>
+              <div className="text-white text-lg font-bold text-center">انفجار فوري {multiplier.toFixed(2)}x</div>
+            </>
+          ) : (
+            <>
+              <div className="text-red-500 text-3xl font-bold text-center mb-2">💥 انفجر! 💥</div>
+              <div className="text-white text-lg font-bold text-center">{multiplier.toFixed(2)}x</div>
+            </>
+          )}
         </motion.div>
       )}
     </div>
