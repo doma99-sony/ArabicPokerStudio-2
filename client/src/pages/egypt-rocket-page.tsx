@@ -379,6 +379,11 @@ const EgyptRocketPage = () => {
         {/* الجزء الرئيسي من اللعبة */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
+            {/* تاريخ الجولات بشكل أفقي */}
+            <div className="bg-black/20 rounded-xl p-4 border border-[#D4AF37]/10">
+              <BetHistory history={gameHistory} horizontal={true} />
+            </div>
+            
             {/* منطقة عرض اللعبة */}
             <div className="bg-black/20 rounded-xl overflow-hidden border border-[#D4AF37]/10">
               <div className="relative h-[60vh]">
@@ -424,9 +429,33 @@ const EgyptRocketPage = () => {
               <LiveBets bets={liveBets} />
             </div>
             
-            {/* تاريخ الرهانات */}
+            {/* إحصائيات */}
             <div className="bg-black/20 rounded-xl p-4 border border-[#D4AF37]/10">
-              <BetHistory history={gameHistory} />
+              <h3 className="text-[#D4AF37] font-bold mb-3 text-center">إحصائيات الجولات</h3>
+              {gameHistory.length > 0 && (
+                <div className="p-3 rounded-lg bg-black/30 border border-[#D4AF37]/20">
+                  <div className="flex justify-between">
+                    <div className="text-center">
+                      <div className="text-lg font-bold text-green-500">
+                        {gameHistory.reduce((max, curr) => Math.max(max, curr.multiplier), 0).toFixed(2)}x
+                      </div>
+                      <div className="text-xs text-gray-400">أعلى مضاعف</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-lg font-bold text-[#D4AF37]">
+                        {(gameHistory.reduce((sum, curr) => sum + curr.multiplier, 0) / gameHistory.length).toFixed(2)}x
+                      </div>
+                      <div className="text-xs text-gray-400">المتوسط</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-lg font-bold text-red-500">
+                        {gameHistory.reduce((min, curr) => Math.min(min, curr.multiplier), Infinity).toFixed(2)}x
+                      </div>
+                      <div className="text-xs text-gray-400">أدنى مضاعف</div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
             
             {/* نصائح للاعبين */}
