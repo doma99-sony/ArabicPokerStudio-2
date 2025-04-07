@@ -30,13 +30,13 @@ logger = logging.getLogger("python_runner")
 def start_realtime_server():
     """بدء تشغيل خادم التحديثات الفورية بشكل مباشر"""
     try:
-        logger.info("بدء تشغيل خادم التحديثات الفورية على المنفذ 3005...")
+        logger.info("بدء تشغيل خادم التحديثات الفورية على المنفذ 3001...")
         
         # تكوين وتشغيل Uvicorn مباشرة
         uvicorn.run(
             fast_api_app,
             host="0.0.0.0",
-            port=3005,
+            port=3001,
             log_level="info"
         )
         
@@ -49,10 +49,9 @@ def start_realtime_server():
 if __name__ == '__main__':
     """تشغيل نقطة الدخول الرئيسية"""
     logger.info("بدء تشغيل خدمات Python...")
+    logger.info("يرجى استخدام start_realtime_server.py بدلاً من run.py")
     
-    # محاولة بدء تشغيل الخادم بشكل مباشر
-    success = start_realtime_server()
-    
-    if not success:
-        logger.error("فشل في بدء الخدمات")
-        sys.exit(1)
+    # توجيه المستخدم لاستخدام الملف الرئيسي
+    command = os.path.join(os.getcwd(), "start_realtime_server.py")
+    print(f"يرجى تشغيل الخادم باستخدام: python {command}")
+    sys.exit(0)

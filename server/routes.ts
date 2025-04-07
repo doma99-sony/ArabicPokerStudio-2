@@ -140,20 +140,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // التحقق من رصيد المرسل
-      const sender = await storage.getUser(senderId);
+      let sender;
+      try {
+        // محاولة الحصول على المستخدم من قاعدة البيانات أولاً
+        sender = await userService.getUserById(senderId);
+      } catch (dbError) {
+        console.error(`خطأ في الحصول على المرسل من قاعدة البيانات:`, dbError);
+      }
+      
+      // إذا لم يتم العثور عليه في قاعدة البيانات، نستخدم المخزن المؤقت كنسخة احتياطية
       if (!sender) {
-        return res.status(404).json({ error: "المرسل غير موجود" });
+        sender = await storage.getUser(senderId);
+        if (!sender) {
+          return res.status(404).json({ error: "المرسل غير موجود" });
+        }
       }
       
       if (sender.chips < amountNum) {
         return res.status(400).json({ error: "رصيد غير كافٍ" });
       }
       
-      // تحديث رصيد المرسل
-      const updatedSender = await storage.updateUserChips(senderId, sender.chips - amountNum);
+      // تحديث رصيد المرسل في قاعدة البيانات وفي الذاكرة المؤقتة
+      let dbSenderUpdated = false;
+      try {
+        await userService.updateUserChips(
+          senderId, 
+          sender.chips - amountNum, 
+          "send_chips",
+          `إرسال رقائق إلى المستخدم ${recipient.username}`
+        );
+        dbSenderUpdated = true;
+      } catch (dbError) {
+        console.error(`خطأ في تحديث رصيد المرسل في قاعدة البيانات:`, dbError);
+      }
       
-      // تحديث رصيد المستلم
-      const updatedRecipient = await storage.updateUserChips(recipientIdNum, recipient.chips + amountNum);
+      // تحديث الذاكرة المؤقتة على أي حال للقطات السريعة من الواجهة
+      const updatedSender = await storage.updateUserChips(
+        senderId, 
+        sender.chips - amountNum, 
+        "send_chips",
+        `إرسال رقائق إلى المستخدم ${recipient.username}`
+      );
+      
+      // تحديث رصيد المستلم في قاعدة البيانات وفي الذاكرة المؤقتة
+      let dbRecipientUpdated = false;
+      try {
+        await userService.updateUserChips(
+          recipientIdNum, 
+          recipient.chips + amountNum, 
+          "receive_chips",
+          `استلام رقائق من المستخدم ${sender.username}`
+        );
+        dbRecipientUpdated = true;
+      } catch (dbError) {
+        console.error(`خطأ في تحديث رصيد المستلم في قاعدة البيانات:`, dbError);
+      }
+      
+      // تحديث الذاكرة المؤقتة على أي حال للقطات السريعة من الواجهة
+      const updatedRecipient = await storage.updateUserChips(
+        recipientIdNum, 
+        recipient.chips + amountNum,
+        "receive_chips",
+        `استلام رقائق من المستخدم ${sender.username}`
+      );
       
       // إرسال إشعار (يمكن تنفيذه لاحقاً)
       // TODO: إضافة نظام الإشعارات
@@ -722,7 +771,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // التأكد من أن المبلغ قيمة رقمية صحيحة
       const chipsAmount = typeof amount === 'number' && !isNaN(amount) ? amount : 1000000;
       
-      const updatedUser = await storage.updateUserChips(req.user.id, chipsAmount);
+      // تحديث الرصيد في قاعدة البيانات أولاً
+      let dbUpdateSuccess = false;
+      try {
+        await userService.updateUserChips(
+          req.user.id, 
+          chipsAmount, 
+          "reset_chips", 
+          "إعادة تعيين الرصيد بواسطة المستخدم"
+        );
+        dbUpdateSuccess = true;
+        console.log(`تم تحديث رصيد المستخدم ${req.user.id} في قاعدة البيانات إلى ${chipsAmount}`);
+      } catch (dbError) {
+        console.error("خطأ في تحديث الرصيد في قاعدة البيانات:", dbError);
+      }
+      
+      // تحديث الرصيد في الذاكرة المؤقتة أيضاً
+      const updatedUser = await storage.updateUserChips(
+        req.user.id, 
+        chipsAmount, 
+        "reset_chips", 
+        "إعادة تعيين الرصيد بواسطة المستخدم"
+      );
       
       if (!updatedUser) {
         return res.status(500).json({ success: false, message: "فشل تحديث الرصيد" });

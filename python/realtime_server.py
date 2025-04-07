@@ -296,7 +296,7 @@ async def websocket_endpoint(websocket: WebSocket, user_id: int):
 
 
 # وظيفة لبدء الخادم
-def start_realtime_server(host="0.0.0.0", port=3005, log_level="info"):
+def start_realtime_server(host="0.0.0.0", port=3001, log_level="info"):
     """بدء تشغيل خادم التحديثات الفورية"""
     try:
         uvicorn.run(
@@ -310,18 +310,16 @@ def start_realtime_server(host="0.0.0.0", port=3005, log_level="info"):
         logger.error(f"فشل في بدء خادم التحديثات الفورية: {str(e)}")
 
 
-# بدء تشغيل الخادم في خيط منفصل عند استيراد الوحدة
+# بدء تشغيل الخادم في خيط منفصل عند استيراد الوحدة بشكل واضح
 def start_server_in_thread():
-    """بدء تشغيل الخادم في خيط منفصل"""
-    server_thread = threading.Thread(
-        target=start_realtime_server,
-        kwargs={"port": 3005},
-        daemon=True  # اجعل الخيط تابعًا للعملية الرئيسية
-    )
-    server_thread.start()
-    return server_thread
+    """بدء تشغيل الخادم في خيط منفصل عندما يطلب ذلك بشكل صريح"""
+    logger.info("تم طلب بدء الخادم في خيط منفصل (هذه الطريقة لم تعد مستخدمة)")
+    # قمنا بإيقاف تشغيل هذه الوظيفة لتجنب تعدد الخيوط
+    # والاعتماد على start_realtime_server.py الرئيسي بدلاً من ذلك
+    return None
 
 
 # إذا تم تشغيل الملف مباشرة
 if __name__ == "__main__":
-    start_realtime_server()
+    # تنبيه أن هذا الملف يجب استدعاؤه من start_realtime_server.py
+    logger.info("يجب تشغيل الخادم من start_realtime_server.py وليس مباشرة")

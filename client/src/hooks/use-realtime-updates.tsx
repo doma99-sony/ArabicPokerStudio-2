@@ -184,7 +184,7 @@ export function useRealtimeUpdates(): UseRealtimeUpdatesReturn {
     try {
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       const host = window.location.hostname;
-      const port = 3005; // منفذ خادم FastAPI المحدث
+      const port = 3001; // منفذ خادم FastAPI المحدث
       
       console.log(`محاولة الاتصال بـ WebSocket على العنوان: ${protocol}//${host}:${port}/ws/${user.id}`);
       const wsUrl = `${protocol}//${host}:${port}/ws/${user.id}`;

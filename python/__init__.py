@@ -37,19 +37,19 @@ except ImportError as e:
     logger.error("يرجى تثبيت الحزم المطلوبة قبل تشغيل الخادم")
     sys.exit(1)
 
-# بدء تشغيل خادم التحديثات الفورية
+# التحقق من وجود ملف realtime_server
 try:
-    # استيراد وحدة realtime_server
+    # استيراد وحدة realtime_server للتحقق من وجودها
     realtime_server = import_module("python.realtime_server")
     
     # التحقق من تطابق المسار
     logger.info(f"مسار الوحدة المستوردة: {realtime_server.__file__}")
     
-    # بدء تشغيل الخادم في خيط منفصل
-    realtime_thread = realtime_server.start_server_in_thread()
+    # تنبيه: لم يعد يتم تشغيل الخادم تلقائياً عند استيراد الوحدة
+    # بدلاً من ذلك، يجب استخدام start_realtime_server.py
+    logger.info("ملاحظة: لبدء تشغيل خادم التحديثات الفورية، استخدم: python start_realtime_server.py")
     
-    logger.info(f"تم بدء تشغيل خادم التحديثات الفورية على المنفذ 3001 (خيط: {realtime_thread.name})")
 except Exception as e:
-    logger.error(f"فشل في بدء تشغيل خادم التحديثات الفورية: {str(e)}")
+    logger.error(f"فشل في استيراد وحدة realtime_server: {str(e)}")
     logger.error(f"تفاصيل الخطأ: {traceback.format_exc()}")
     logger.error("ملاحظة: يجب التأكد من تثبيت جميع الحزم المطلوبة وصلاحية ملف realtime_server.py")

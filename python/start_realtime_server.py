@@ -71,11 +71,11 @@ def main():
             return 1
         
         # تشغيل الخادم
-        logger.info("بدء تشغيل خادم FastAPI على المنفذ 3005...")
+        logger.info("بدء تشغيل خادم FastAPI على المنفذ 3001...")
         uvicorn.run(
             app,
             host="0.0.0.0",
-            port=3005, 
+            port=3001, 
             log_level="info"
         )
         
