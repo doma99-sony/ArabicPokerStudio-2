@@ -74,7 +74,9 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
     // تخزين علامة الجلسة
     localStorage.setItem('sessionToken', sessionToken);
     
-    const wsUrl = `${wsProtocol}//${window.location.host}/ws?sid=${sessionToken}&uid=${userId}&ts=${Date.now()}`;
+    // استخدام خادم الـ Node.js WebSocket المتكامل
+    // نستخدم مسار /ws في خادم Node.js (يتم تضمين معرف المستخدم في رسالة التوثيق)
+    const wsUrl = `${wsProtocol}//${window.location.host}/ws`;
     
     console.log("إنشاء اتصال WebSocket عمومي جديد:", wsUrl);
     

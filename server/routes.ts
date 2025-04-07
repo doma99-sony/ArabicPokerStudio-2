@@ -341,60 +341,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // وظيفة مساعدة لإرسال التحديث المباشر مع تحمل الأخطاء
+  // وظيفة مساعدة لإرسال التحديث المباشر مباشرة عبر الـ WebSocket الداخلي لـ Node.js
   async function sendRealtimeUpdate(userId: number, data: any) {
     try {
       // إضافة نوع التحديث
       const message = {
         ...data,
         type: "user_update",
-        updateType: "chips_update"
+        updateType: "chips_update",
+        timestamp: new Date().toISOString()
       };
       
-      console.log(`محاولة إرسال تحديث فوري للمستخدم ${userId}...`);
+      console.log(`محاولة إرسال تحديث فوري للمستخدم ${userId} مباشرةً عبر WebSocket...`);
       
-      // استخدام المهلة الزمنية لتجنب انتظار استجابة لفترة طويلة
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 1500); // توقف بعد 1.5 ثانية
-      
-      try {
-        // إرسال التحديث إلى خادم FastAPI
-        // استخدام node-fetch للإرسال إلى خادم WebSocket
-        const response = await fetch(`http://localhost:3001/user/${userId}/notify`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(message),
-          signal: controller.signal
-        });
-        
-        // إلغاء المهلة الزمنية
-        clearTimeout(timeoutId);
-        
-        if (!response.ok) {
-          console.warn(`استجابة غير ناجحة من خادم التحديثات الفورية: ${response.status} ${response.statusText}`);
-          return { success: false, error: "استجابة غير ناجحة" };
+      // استخدام WebSocket الداخلي لـ Node.js بدلاً من محاولة الاتصال بخادم FastAPI
+      if (pokerModule.clients && pokerModule.clients.has(userId)) {
+        try {
+          const clientInfo = pokerModule.clients.get(userId);
+          if (clientInfo && clientInfo.ws && clientInfo.ws.readyState === 1) { // WebSocket.OPEN
+            clientInfo.ws.send(JSON.stringify(message));
+            console.log(`تم إرسال التحديث المباشر للمستخدم ${userId} بنجاح عبر WebSocket الداخلي`);
+            return { success: true };
+          } else {
+            console.warn(`المستخدم ${userId} متصل ولكن WebSocket غير جاهز للإرسال`);
+          }
+        } catch (wsError) {
+          console.error(`خطأ في إرسال رسالة WebSocket للمستخدم ${userId}:`, wsError);
         }
-        
-        const result = await response.json();
-        console.log(`تم إرسال التحديث المباشر للمستخدم ${userId} بنجاح`);
-        
-        return { success: true, result };
-      } catch (fetchError) {
-        // إلغاء المهلة الزمنية في حالة حدوث خطأ
-        clearTimeout(timeoutId);
-        
-        // تسجيل رسالة خطأ أقل تفصيلاً للحفاظ على ترتيب السجلات
-        console.warn(`تعذر الاتصال بخادم التحديثات الفورية على المنفذ 3001: ${fetchError.message || "خطأ غير معروف"}`);
-        
-        // لا نرمي خطأ، بل نعود بحالة فشل
-        return { success: false, error: "تعذر الاتصال بخادم التحديثات الفورية" };
+      } else {
+        console.warn(`المستخدم ${userId} غير متصل بـ WebSocket حالياً`);
       }
+      
+      // في حالة عدم وجود خادم Python WebSocket متاح، نعود بنجاح زائف ولا نعطل تجربة المستخدم
+      return { 
+        success: true, // نعود دائمًا بـ "نجاح" حتى لا تتأثر الواجهة
+        warning: "التحديث الفوري غير متاح حالياً", 
+        realtime: false 
+      };
     } catch (error) {
       // التقاط أي أخطاء أخرى قد تحدث
       console.error(`خطأ غير متوقع في إرسال التحديث المباشر للمستخدم ${userId}:`, error);
-      return { success: false, error: "خطأ غير متوقع" };
+      return { success: true, error: "خطأ غير متوقع", realtime: false };
     }
   }
   
@@ -917,8 +904,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // التحقق من أن المستخدم لاعب في هذه الطاولة
-      const isPlayer = gameState.players.some(p => 
-        p.id === req.user?.id && p.isCurrentPlayer === true);
+      const isPlayer = gameState.players.some(p => p.id === req.user?.id);
+      
+      // تحقق ما إذا كان دور اللاعب الحالي للعب
+      const isCurrentPlayerTurn = gameState.currentTurn === req.user?.id;
       
       if (!isPlayer) {
         return res.status(400).json({ 

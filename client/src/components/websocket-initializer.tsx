@@ -21,6 +21,7 @@ export function WebSocketInitializer() {
       // لدينا معلومات المستخدم، قم بالاتصال باستخدام معرف المستخدم الحالي
       if (!ws.isConnected) {
         console.log(`بدء اتصال WebSocket للمستخدم ${user.id}`);
+        // استخدام WebSocket الداخلي في Node.js بدلاً من Python WebSocket
         ws.connect(user.id);
       }
     } else if (storedUserId) {

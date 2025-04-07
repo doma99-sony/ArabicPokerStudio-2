@@ -82,13 +82,13 @@
         
         <div class="status" id="status">الأصوات معطلة</div>
         
-        <audio id="thunder-audio" src="/sounds/thunder.mp3" preload="auto"></audio>
+        <!-- تم إزالة مرجع الصوت الخارجي واستخدام Web Audio API بدلاً من ذلك -->
     </div>
 
     <script src="/sounds/thunder.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const thunderAudio = document.getElementById('thunder-audio');
+            // تم إزالة الإشارة إلى عنصر الصوت الخارجي
             const volumeSlider = document.getElementById('volume-slider');
             const volumeValue = document.getElementById('volume-value');
             const statusEl = document.getElementById('status');

@@ -185,12 +185,9 @@ export function useRealtimeUpdates(): UseRealtimeUpdatesReturn {
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       const host = window.location.host; // استخدام host بدلاً من hostname للحصول على المضيف والمنفذ معاً
       
-      // في بيئة التطوير المحلية، نستخدم المنفذ 3001 صراحةً
-      // في بيئة Replit، نستخدم نفس المضيف دون تحديد منفذ إضافي
-      const isLocalhost = host.includes('localhost') || host.includes('127.0.0.1');
-      const wsUrl = isLocalhost 
-        ? `${protocol}//${host.split(':')[0]}:3001/ws/${user.id}`
-        : `${protocol}//${host}/ws/${user.id}`;
+      // استخدام خادم الـ Node.js WebSocket المتكامل - عدم التبديل إلى المنفذ 3001
+      // نستخدم مسار /ws في خادم Node.js (يتم تضمين معرف المستخدم في رسالة التوثيق)
+      const wsUrl = `${protocol}//${host}/ws`;
       
       console.log(`محاولة الاتصال بـ WebSocket على العنوان: ${wsUrl}`);
       const ws = new WebSocket(wsUrl);
@@ -200,6 +197,16 @@ export function useRealtimeUpdates(): UseRealtimeUpdatesReturn {
         setStatus('connected');
         setError(null);
         reconnectCountRef.current = 0;
+        
+        // إرسال رسالة توثيق فور فتح الاتصال
+        if (user && user.id) {
+          ws.send(JSON.stringify({ 
+            type: 'auth', 
+            userId: user.id,
+            timestamp: Date.now() 
+          }));
+          console.log(`تم إرسال رسالة التوثيق للمستخدم ${user.id}`);
+        }
         
         // إرسال رسالة ping دورية للحفاظ على الاتصال
         const pingInterval = setInterval(() => {

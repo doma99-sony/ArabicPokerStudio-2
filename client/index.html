@@ -11,7 +11,7 @@
     
     <!-- تحميل مسبق للموارد -->
     <link rel="preload" href="/sounds/thunder.js" as="script">
-    <link rel="preload" href="/sounds/thunder.mp3" as="audio">
+    <!-- تم تعطيل preload لملف thunder.mp3 بسبب مشاكل تحميل الملف -->
     <link rel="preload" href="/images/fog-overlay.svg" as="image">
     <link rel="preload" href="/images/fog-overlay2.svg" as="image">
     <link rel="preload" href="/images/fighting-pattern.svg" as="image">
@@ -50,12 +50,8 @@
     
     <!-- تحميل مسبق لسكريبت تأثيرات الصوت -->
     <script>
-      // تحميل مسبق للصوت
-      const audioPreloader = new Audio();
-      audioPreloader.preload = 'auto';
-      audioPreloader.src = '/sounds/thunder.mp3';
-      
-      // تسجيل بدء تحميل التطبيق - يمكن استخدامه لقياس الأداء
+      // تم تعطيل تحميل صوت الرعد مسبقًا بسبب مشاكل في الملف
+      // بدلاً من ذلك، سنكتفي بتسجيل بدء تحميل التطبيق
       window.appStartTime = new Date().getTime();
     </script>
     
