@@ -6,7 +6,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
-import { LOGO_IMAGE, BACKGROUND_IMAGE } from '@/games/fishing-slots/assets/images';
+import { UI_IMAGES, BACKGROUND_IMAGES } from '@/games/fishing-slots/assets/images';
 import '@/games/fishing-slots/assets/fishing-slots.css';
 
 // استيراد المكونات
@@ -54,7 +54,7 @@ const FishingSlotsPage = () => {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-blue-900 to-blue-700">
         <img 
-          src={LOGO_IMAGE} 
+          src={UI_IMAGES.LOGO} 
           alt="شعار صياد السمك" 
           className="mb-8 w-64 h-auto"
         />
@@ -74,7 +74,7 @@ const FishingSlotsPage = () => {
             <div className="flex flex-col space-y-2 mt-4 w-full">
               <BackButton
                 label="العودة للصفحة الرئيسية"
-                href="/"
+                to="/"
                 className="bg-blue-600 hover:bg-blue-700 text-white w-full"
               />
               <Button 
@@ -95,7 +95,7 @@ const FishingSlotsPage = () => {
     <div className="fishing-slots-game">
       {/* خلفية اللعبة */}
       <img 
-        src={BACKGROUND_IMAGE} 
+        src={BACKGROUND_IMAGES.MAIN} 
         alt="خلفية البحر" 
         className="fishing-game-background"
       />
@@ -104,12 +104,12 @@ const FishingSlotsPage = () => {
       <div className="fishing-header">
         <BackButton 
           label="العودة للصفحة الرئيسية" 
-          href="/"
+          to="/"
           className="bg-[#01447a] border-[#0277bd] text-white hover:bg-[#025a9e]"
         />
         
         <img 
-          src={LOGO_IMAGE} 
+          src={UI_IMAGES.LOGO} 
           alt="شعار صياد السمك" 
           className="game-logo"
         />
