@@ -9,31 +9,31 @@ interface BetHistoryProps {
 const BetHistory = ({ history, horizontal = false }: BetHistoryProps) => {
   return (
     <div className="w-full">
-      <h3 className="text-[#D4AF37] font-bold mb-3 text-center">تاريخ الجولات</h3>
+      <h3 className="text-[#D4AF37] font-bold mb-2 text-center text-sm">تاريخ الجولات</h3>
       
       {history.length === 0 ? (
-        <div className="text-center text-gray-400 py-4">لا يوجد تاريخ سابق</div>
+        <div className="text-center text-gray-400 py-2 text-xs">لا يوجد تاريخ سابق</div>
       ) : (
         // استخدام العرض الأفقي أو الرأسي بناءً على الخاصية
-        <div className={`${horizontal ? 'flex overflow-x-auto py-2 -mx-2 px-2 gap-2' : 'space-y-2'}`}>
+        <div className={`${horizontal ? 'flex overflow-x-auto py-1 -mx-2 px-2 gap-1' : 'space-y-2'}`}>
           {history.map((item, index) => (
             <div 
               key={index} 
               className={`
-                flex ${horizontal ? 'flex-col min-w-[80px] w-20' : 'justify-between'} 
-                items-center p-2 rounded-lg bg-black/30 border border-[#D4AF37]/20
+                flex ${horizontal ? 'flex-col min-w-[60px] w-16' : 'justify-between'} 
+                items-center p-1 rounded-lg bg-black/30 border border-[#D4AF37]/20
                 ${horizontal ? 'mx-1' : ''}
               `}
             >
               {horizontal && (
                 <div 
-                  className={`w-8 h-8 mb-1 rounded-full flex items-center justify-center ${
+                  className={`w-6 h-6 mb-1 rounded-full flex items-center justify-center ${
                     item.multiplier < 1.5 ? 'bg-red-500/20 text-red-500' : 
                     item.multiplier < 3 ? 'bg-yellow-500/20 text-yellow-500' : 
                     'bg-green-500/20 text-green-500'
                   }`}
                 >
-                  <span>
+                  <span className="text-xs">
                     {item.multiplier < 1.5 ? '💥' : 
                      item.multiplier < 3 ? '🙂' : 
                      item.multiplier < 5 ? '🤑' : '🔥'}
@@ -43,7 +43,7 @@ const BetHistory = ({ history, horizontal = false }: BetHistoryProps) => {
               
               <div className={horizontal ? 'text-center' : ''}>
                 <div 
-                  className={`font-mono font-bold ${horizontal ? 'text-xl' : 'text-lg'} ${
+                  className={`font-mono font-bold ${horizontal ? 'text-sm' : 'text-lg'} ${
                     item.multiplier < 1.5 ? 'text-red-500' : 
                     item.multiplier < 3 ? 'text-yellow-500' : 
                     'text-green-500'
@@ -51,7 +51,7 @@ const BetHistory = ({ history, horizontal = false }: BetHistoryProps) => {
                 >
                   {item.multiplier.toFixed(2)}x
                 </div>
-                <div className="text-xs text-gray-400 whitespace-nowrap">
+                <div className="text-[10px] text-gray-400 whitespace-nowrap">
                   {formatDistanceToNow(item.timestamp, { 
                     addSuffix: true,
                     locale: ar // استخدام اللغة العربية لتنسيق الوقت
