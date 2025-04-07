@@ -11,7 +11,7 @@ import '@/games/fishing-slots/assets/fishing-slots.css';
 
 // استيراد المكونات
 import { Button } from '@/components/ui/button';
-import { LoadingSpinner } from '@/components/ui/loading';
+import { Loading } from '@/components/ui/loading';
 import { ErrorDisplay } from '@/components/ui/error-display';
 import { BackButton } from '@/components/navigation/back-button';
 
@@ -58,7 +58,7 @@ const FishingSlotsPage = () => {
           alt="شعار صياد السمك" 
           className="mb-8 w-64 h-auto"
         />
-        <LoadingSpinner size="large" color="primary" />
+        <Loading variant="centered" text="جاري تحميل اللعبة..." />
         <p className="mt-4 text-white text-xl font-bold">جاري تحميل لعبة صياد السمك...</p>
       </div>
     );

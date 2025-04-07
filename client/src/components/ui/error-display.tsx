@@ -18,7 +18,7 @@ export interface ErrorDisplayProps {
   className?: string;
 }
 
-export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
+const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
   title = 'حدث خطأ',
   message,
   action,
@@ -85,7 +85,7 @@ export interface RetryErrorProps extends ErrorDisplayProps {
   retryText?: string;
 }
 
-export const RetryError: React.FC<RetryErrorProps> = ({
+const RetryError: React.FC<RetryErrorProps> = ({
   onRetry,
   retryText = 'إعادة المحاولة',
   ...props
@@ -100,4 +100,5 @@ export const RetryError: React.FC<RetryErrorProps> = ({
   return <ErrorDisplay {...props} action={props.action || retryButton} />;
 };
 
+export { ErrorDisplay, RetryError };
 export default ErrorDisplay;

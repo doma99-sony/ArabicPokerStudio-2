@@ -14,7 +14,7 @@ export interface LoadingProps {
   size?: 'sm' | 'md' | 'lg';
 }
 
-export const Loading: React.FC<LoadingProps> = ({
+const Loading: React.FC<LoadingProps> = ({
   text,
   className,
   variant = 'default',
@@ -66,4 +66,5 @@ export const Loading: React.FC<LoadingProps> = ({
   }
 };
 
+export { Loading };
 export default Loading;
