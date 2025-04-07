@@ -1,352 +1,166 @@
-/* ==============================
- * CSS لعبة صياد السمك
- * ==============================
+/**
+ * أنماط لعبة صياد السمك (Big Bass Bonanza)
+ * تشمل تنسيقات واجهة المستخدم وأنيميشن البكرات والشبكة
  */
 
-/* تنسيق عام للعبة */
-.fishing-game-container {
-  width: 100%;
-  min-height: 100vh;
+/* الأنماط العامة للعبة */
+.fishing-slots-game {
   position: relative;
-  overflow: hidden;
-  background: linear-gradient(to bottom, #004080, #001F40);
-  color: white;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 1rem;
-  font-family: 'Tajawal', 'Arial', sans-serif;
-}
-
-/* خلفية اللعبة والتأثيرات */
-.fishing-game-background {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 0;
-  overflow: hidden;
-}
-
-.water-animation {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(to bottom, rgba(0, 64, 128, 0.4), rgba(0, 32, 64, 0.8));
-  opacity: 0.7;
-  animation: water-move 20s infinite linear;
-}
-
-.bubbles-animation {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: radial-gradient(circle at center, rgba(255, 255, 255, 0.1) 2px, transparent 3px);
-  background-size: 60px 60px;
-  opacity: 0.3;
-  animation: bubbles-rise 15s infinite linear;
-}
-
-.water-grid {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-  background-size: 30px 30px;
-  opacity: 0.2;
-}
-
-/* شاشة التحميل */
-.loading-screen {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
   width: 100%;
   height: 100vh;
-  z-index: 100;
-  background: linear-gradient(to bottom, #004080, #001F40);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Cairo', 'Tajawal', sans-serif;
+  color: white;
+  user-select: none;
 }
 
-.loading-animation {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  border: 5px solid rgba(255, 255, 255, 0.1);
-  border-top: 5px solid #FFD700;
-  animation: spin 2s linear infinite;
-  margin-bottom: 1rem;
-}
-
-/* رأس اللعبة */
-.game-header {
+/* خلفية اللعبة */
+.fishing-game-background {
+  position: absolute;
   width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -1;
+}
+
+/* رأس اللعبة مع الشعار والرصيد */
+.fishing-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.5rem 1rem;
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 8px;
-  margin-bottom: 1rem;
+  padding: 1rem;
   z-index: 10;
 }
 
-.game-title {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #FFD700;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-}
-
-.exit-button {
-  background-color: rgba(220, 53, 69, 0.7);
-  color: white;
-  border: none;
-  padding: 0.4rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.exit-button:hover {
-  background-color: rgba(220, 53, 69, 0.9);
-}
-
-/* معلومات اللاعب */
-.player-info {
-  display: flex;
-  justify-content: space-around;
-  width: 100%;
-  margin-bottom: 1rem;
-  z-index: 10;
-}
-
-.balance-card, .bet-card, .win-card {
-  background: rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(255, 215, 0, 0.3);
-  border-radius: 8px;
-  padding: 0.5rem 1rem;
-  text-align: center;
-  min-width: 100px;
-  flex: 1;
-  margin: 0 0.5rem;
-}
-
-.balance-label, .bet-label, .win-label {
-  font-size: 0.8rem;
-  color: #ccc;
-  margin-bottom: 0.2rem;
-}
-
-.balance-amount, .bet-amount, .win-amount {
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: #FFD700;
-}
-
-/* منطقة البكرات */
-.reels-area {
-  width: 100%;
-  max-width: 600px;
-  position: relative;
+/* شعار اللعبة */
+.game-logo {
+  height: 80px;
   margin: 0 auto;
-  z-index: 10;
 }
 
+/* عرض الرصيد */
+.balance-display {
+  background: linear-gradient(135deg, #01447a 0%, #0277bd 100%);
+  padding: 0.75rem 1.5rem;
+  border-radius: 2rem;
+  border: 2px solid #f5af19;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.balance-value {
+  font-size: 1.25rem;
+  font-weight: bold;
+  text-align: center;
+  color: #ffffff;
+}
+
+.balance-label {
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+/* حاوية اللعبة الرئيسية */
+.game-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  z-index: 5;
+}
+
+/* شبكة البكرات */
 .reels-container {
-  background: rgba(0, 0, 0, 0.5);
-  border: 2px solid rgba(255, 215, 0, 0.5);
-  border-radius: 12px;
-  padding: 0.5rem;
   position: relative;
+  width: 100%;
+  max-width: 900px;
+  aspect-ratio: 5 / 3;
+  background: rgba(1, 24, 38, 0.8);
+  border-radius: 10px;
+  border: 3px solid #0277bd;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
   overflow: hidden;
+  margin: 0 auto 2rem;
 }
 
+/* صف البكرات */
 .reels-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   grid-template-rows: repeat(3, 1fr);
-  gap: 4px;
-  position: relative;
+  width: 100%;
+  height: 100%;
+  gap: 1px;
 }
 
-.symbol {
-  aspect-ratio: 1/1;
-  background: rgba(0, 16, 32, 0.8);
-  border-radius: 8px;
-  overflow: hidden;
+/* خلية رمز */
+.symbol-cell {
+  position: relative;
+  width: 100%;
+  height: 100%;
   display: flex;
-  align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
-  position: relative;
+  align-items: center;
+  background: rgba(0, 35, 58, 0.5);
+  transition: all 0.2s ease;
+  overflow: hidden;
 }
 
-.symbol img {
-  max-width: 90%;
-  max-height: 90%;
+/* رمز اللعبة */
+.game-symbol {
+  width: 90%;
+  height: 90%;
   object-fit: contain;
+  transition: transform 0.3s ease;
 }
 
-.symbol.wild {
-  background: rgba(255, 215, 0, 0.2);
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-}
-
-.symbol.scatter {
-  background: rgba(100, 149, 237, 0.2);
-  box-shadow: 0 0 10px rgba(100, 149, 237, 0.5);
-}
-
-.symbol.fish-money {
+/* رمز سمكة ذات قيمة نقدية */
+.money-fish-symbol {
   position: relative;
 }
 
-.symbol.fish-money::after {
-  content: attr(data-value);
+.money-value {
   position: absolute;
   bottom: 5px;
   right: 5px;
-  background: rgba(255, 215, 0, 0.8);
-  color: black;
+  background: #f5af19;
+  color: #012c44;
   font-weight: bold;
-  font-size: 0.7rem;
-  padding: 2px 5px;
-  border-radius: 10px;
-  z-index: 2;
+  font-size: 0.9rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 1rem;
+  border: 2px solid white;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
 }
 
-.spinning-animation {
-  animation: spin 0.5s linear infinite;
-}
-
-/* عرض اللفات المجانية */
-.free-spins-container {
-  background: rgba(255, 215, 0, 0.1);
-  border: 2px solid rgba(255, 215, 0, 0.5);
-  border-radius: 8px;
-  padding: 0.5rem;
-  margin-top: 1rem;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.free-spins-title {
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: #FFD700;
-  margin-bottom: 0.5rem;
-}
-
-.free-spins-multiplier {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #FF6347;
-  margin: 0.5rem 0;
-}
-
-.free-spins-count {
-  font-size: 1.2rem;
-  color: white;
-}
-
-.free-spins-win {
-  margin-top: 0.5rem;
-  font-size: 1.1rem;
-  color: #FFD700;
-}
-
-/* أزرار التحكم */
-.game-controls {
+/* طبقة طرق الدفع */
+.payline-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
-  max-width: 600px;
-  background: rgba(0, 0, 0, 0.5);
-  border-radius: 12px;
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  margin-top: 1rem;
+  height: 100%;
+  pointer-events: none;
   z-index: 10;
 }
 
-.bet-controls, .paylines-controls {
-  display: flex;
-  align-items: center;
-  margin-bottom: 0.8rem;
+.payline-path {
+  fill: none;
+  stroke-width: 5px;
+  stroke-dasharray: 10;
+  animation: dash 1s linear infinite;
 }
 
-.control-label {
-  width: 100px;
-  font-size: 0.9rem;
-  color: #ccc;
+@keyframes dash {
+  to {
+    stroke-dashoffset: -20;
+  }
 }
 
-.bet-amount-controls, .paylines-count-controls {
-  display: flex;
-  align-items: center;
-}
-
-.main-controls {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.8rem;
-}
-
-.max-bet-button {
-  width: 100%;
-  background-color: rgba(255, 215, 0, 0.3);
-  color: white;
-  border: 1px solid rgba(255, 215, 0, 0.5);
-  padding: 0.5rem;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.max-bet-button:hover {
-  background-color: rgba(255, 215, 0, 0.5);
-}
-
-.play-controls {
-  display: flex;
-  width: 100%;
-  gap: 0.5rem;
-}
-
-.spin-button {
-  flex: 2;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  padding: 0.8rem;
-  border-radius: 4px;
-  font-size: 1.1rem;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.spin-button:hover {
-  background-color: #45a049;
-}
-
-.spin-button:disabled {
-  background-color: #cccccc;
-  cursor: not-allowed;
-}
-
-/* عرض حالة الفوز */
+/* عرض خلاصة الفوز */
 .win-display {
   position: absolute;
   top: 0;
@@ -355,188 +169,353 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
-  z-index: 50;
-  animation: fadeIn 0.5s ease;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  z-index: 20;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
 }
 
-.win-effect {
+.win-display.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.win-amount {
+  font-size: 3rem;
+  font-weight: bold;
+  color: #f5af19;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+  animation: scale-bounce 0.5s ease infinite alternate;
+}
+
+.win-symbol {
+  width: 100px;
+  height: 100px;
+  margin: 1rem;
+}
+
+.win-text {
+  font-size: 1.5rem;
+  text-transform: uppercase;
+}
+
+@keyframes scale-bounce {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.1);
+  }
+}
+
+/* شريط تحكم اللعبة */
+.controls-container {
+  width: 100%;
+  padding: 1rem;
+  background: rgba(1, 24, 38, 0.8);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+}
+
+/* مجموعة أزرار التحكم */
+.control-group {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+/* زر اللفة */
+.spin-button {
+  background: linear-gradient(135deg, #f5af19 0%, #f7b733 100%);
+  color: #012c44;
+  font-weight: bold;
+  font-size: 1.2rem;
+  padding: 1rem 2rem;
+  border-radius: 50px;
+  border: none;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 150px;
+}
+
+.spin-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(245, 175, 25, 0.7);
+}
+
+.spin-button:active {
+  transform: scale(0.95);
+}
+
+.spin-button:disabled {
+  background: #666;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* تحكم الرهان */
+.bet-control {
+  display: flex;
+  align-items: center;
+  background: rgba(1, 44, 68, 0.9);
+  border-radius: 50px;
+  padding: 0.5rem;
+  border: 2px solid #0277bd;
+}
+
+.bet-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #0277bd;
+  color: white;
+  border: none;
+  font-size: 1.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.bet-button:hover {
+  background: #0288d1;
+}
+
+.bet-value {
+  padding: 0 1rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+  min-width: 80px;
+  text-align: center;
+}
+
+/* سجل خطوط الدفع */
+.paylines-list {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 10px;
+  background: rgba(1, 24, 38, 0.8);
+  border-radius: 10px;
+  border: 2px solid #0277bd;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 15;
+}
+
+.payline-number {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.payline-number:hover {
+  transform: scale(1.1);
+}
+
+/* نافذة اللفات المجانية */
+.free-spins-display {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: -1;
-}
-
-.small-win-effect {
-  background: radial-gradient(circle, rgba(76, 175, 80, 0.5) 0%, rgba(0, 0, 0, 0) 70%);
-  animation: pulse 2s infinite;
-}
-
-.medium-win-effect {
-  background: radial-gradient(circle, rgba(255, 193, 7, 0.5) 0%, rgba(0, 0, 0, 0) 70%);
-  animation: pulse 1.5s infinite;
-}
-
-.large-win-effect {
-  background: radial-gradient(circle, rgba(33, 150, 243, 0.5) 0%, rgba(0, 0, 0, 0) 70%);
-  animation: pulse 1.2s infinite;
-}
-
-.mega-win-effect {
-  background: radial-gradient(circle, rgba(255, 87, 34, 0.5) 0%, rgba(0, 0, 0, 0) 70%);
-  animation: pulse 1s infinite;
-}
-
-.win-content {
-  background: rgba(0, 0, 0, 0.7);
-  border: 2px solid #FFD700;
-  border-radius: 12px;
-  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 30;
   text-align: center;
-  animation: scale 0.5s ease;
 }
 
-.win-text {
-  font-size: 1.8rem;
+.free-spins-title {
+  font-size: 3rem;
   font-weight: bold;
-  color: #FFD700;
-  margin-bottom: 0.5rem;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  color: #f5af19;
+  margin-bottom: 1rem;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
 }
 
-.win-multiplier {
-  font-size: 2.5rem;
+.free-spins-count {
+  font-size: 5rem;
   font-weight: bold;
-  color: #FF6347;
-  margin-bottom: 0.5rem;
-}
-
-.win-amount {
-  font-size: 1.5rem;
   color: white;
+  margin: 1rem 0;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
 }
 
-/* الخطوط */
-.payline {
+.free-spins-subtitle {
+  font-size: 1.5rem;
+  color: #0288d1;
+  margin-bottom: 2rem;
+}
+
+.free-spins-footer {
   position: absolute;
+  bottom: 2rem;
+  left: 0;
   width: 100%;
-  height: 2px;
-  background-color: #FFD700;
-  z-index: 20;
-  box-shadow: 0 0 5px #FFD700;
-  animation: lineFlash 1s infinite;
+  display: flex;
+  justify-content: center;
 }
 
-/* الرسوم المتحركة */
+.free-spins-button {
+  background: linear-gradient(135deg, #f5af19 0%, #f7b733 100%);
+  color: #012c44;
+  font-weight: bold;
+  font-size: 1.2rem;
+  padding: 1rem 2rem;
+  border-radius: 50px;
+  border: none;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.free-spins-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(245, 175, 25, 0.7);
+}
+
+/* مؤشر عدد اللفات المجانية المتبقية */
+.free-spins-indicator {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(2, 119, 189, 0.9);
+  padding: 0.5rem 1.5rem;
+  border-radius: 50px;
+  border: 2px solid #f5af19;
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.remaining-spins {
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.fisherman-multiplier {
+  background: #f5af19;
+  color: #012c44;
+  font-weight: bold;
+  padding: 0.25rem 0.75rem;
+  border-radius: 50px;
+}
+
+/* تحريك اللفة */
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(calc(-100% * 3));
+  }
 }
 
-@keyframes pulse {
-  0% { opacity: 0.6; }
-  50% { opacity: 1; }
-  100% { opacity: 0.6; }
+.spinning {
+  animation: spin 0.5s linear infinite;
 }
 
-@keyframes fadeIn {
-  0% { opacity: 0; }
-  100% { opacity: 1; }
+/* أنيميشن الجمع بواسطة الصياد */
+@keyframes collect-flash {
+  0% {
+    filter: brightness(1);
+    transform: scale(1);
+  }
+  50% {
+    filter: brightness(1.5);
+    transform: scale(1.1);
+  }
+  100% {
+    filter: brightness(1);
+    transform: scale(1);
+  }
 }
 
-@keyframes scale {
-  0% { transform: scale(0.8); }
-  70% { transform: scale(1.1); }
-  100% { transform: scale(1); }
+.collecting {
+  animation: collect-flash 0.5s ease infinite;
 }
 
-@keyframes lineFlash {
-  0% { opacity: 0.3; }
-  50% { opacity: 1; }
-  100% { opacity: 0.3; }
+/* أنيميشن تأثير الفوز */
+@keyframes win-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(245, 175, 25, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(245, 175, 25, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(245, 175, 25, 0);
+  }
 }
 
-@keyframes water-move {
-  0% { transform: translate(0, 0) rotate(0deg); }
-  50% { transform: translate(5px, 5px) rotate(1deg); }
-  100% { transform: translate(0, 0) rotate(0deg); }
+.winning-symbol {
+  animation: win-pulse 1s ease infinite;
 }
 
-@keyframes bubbles-rise {
-  0% { background-position: 0 0; }
-  100% { background-position: 20px -80px; }
+/* تنسيق للفات المجانية */
+.free-spin-active .reels-container {
+  border-color: #f5af19;
+  box-shadow: 0 0 20px rgba(245, 175, 25, 0.5);
 }
 
-/* وسائط متعددة للتوافق */
+/* تنسيق للهواتف المحمولة */
 @media (max-width: 768px) {
-  .game-controls {
-    padding: 0.5rem;
+  .game-logo {
+    height: 50px;
   }
   
-  .player-info {
-    flex-direction: row;
-    flex-wrap: wrap;
-  }
-  
-  .balance-card, .bet-card, .win-card {
-    min-width: calc(33.333% - 1rem);
-    margin: 0 0.5rem 0.5rem 0;
-  }
-  
-  .main-controls {
+  .controls-container {
     flex-direction: column;
-  }
-  
-  .bet-amount-controls, .paylines-count-controls {
-    flex: 1;
-  }
-  
-  .win-content {
-    padding: 1rem;
-  }
-  
-  .win-text {
-    font-size: 1.5rem;
-  }
-  
-  .win-multiplier {
-    font-size: 2rem;
+    gap: 1rem;
   }
   
   .win-amount {
-    font-size: 1.2rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .game-header {
-    flex-direction: column;
-    gap: 0.5rem;
+    font-size: 2rem;
   }
   
-  .player-info {
-    flex-direction: column;
+  .free-spins-title {
+    font-size: 2rem;
   }
   
-  .balance-card, .bet-card, .win-card {
-    width: 100%;
-    margin: 0 0 0.5rem 0;
+  .free-spins-count {
+    font-size: 3rem;
   }
   
-  .control-label {
-    width: 70px;
-    font-size: 0.8rem;
+  .spin-button {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    min-width: 120px;
   }
   
-  .play-controls {
-    flex-direction: column;
-  }
-  
-  .spin-button, button {
-    width: 100%;
-    margin-bottom: 0.5rem;
+  .paylines-list {
+    position: static;
+    transform: none;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 1rem;
   }
 }

@@ -1,146 +1,156 @@
 /**
- * صفحة لعبة صياد السمك
- * تعرض واجهة اللعبة وتتحكم في تحميلها
+ * صفحة لعبة صياد السمك (Big Bass Bonanza)
+ * تعرض اللعبة الرئيسية مع الواجهة المتكاملة
  */
 
-import React, { useEffect, useState } from 'react';
-import { useLocation } from 'wouter';
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/use-auth';
+import { useToast } from '@/hooks/use-toast';
+import { LOGO_IMAGE, BACKGROUND_IMAGE } from '@/games/fishing-slots/assets/images';
+import '@/games/fishing-slots/assets/fishing-slots.css';
+
+// استيراد المكونات
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Volume2, VolumeX } from 'lucide-react';
-import '../../games/fishing-slots/assets/fishing-slots.css';
+import { LoadingSpinner } from '@/components/ui/loading';
+import { ErrorDisplay } from '@/components/ui/error-display';
+import { BackButton } from '@/components/navigation/back-button';
 
-// استيراد الصور والأصول
-import images from '../../games/fishing-slots/assets/images';
-
-// استيراد مكونات اللعبة
-// سيتم استبدال هذا لاحقًا بالمكونات الحقيقية عند إنشائها
-const FishingGamePlaceholder = () => (
-  <div className="fishing-game-container">
-    <div className="fishing-game-background">
-      <div className="water-animation"></div>
-      <div className="bubbles-animation"></div>
-      <div className="water-grid"></div>
-    </div>
-    
-    <div className="game-header">
-      <h1 className="game-title">صياد السمك 🎣</h1>
-      <button className="exit-button" onClick={() => window.history.back()}>خروج</button>
-    </div>
-    
-    <div className="player-info">
-      <div className="balance-card">
-        <div className="balance-label">رصيدك</div>
-        <div className="balance-amount">5,000</div>
-      </div>
-      <div className="bet-card">
-        <div className="bet-label">الرهان</div>
-        <div className="bet-amount">100</div>
-      </div>
-      <div className="win-card">
-        <div className="win-label">الفوز</div>
-        <div className="win-amount">0</div>
-      </div>
-    </div>
-    
-    <div className="reels-area">
-      <div className="reels-container">
-        <div className="reels-grid">
-          {Array(3).fill(0).map((_, row) => (
-            Array(5).fill(0).map((_, col) => (
-              <div key={`${row}-${col}`} className="symbol">
-                <img 
-                  src={Object.values(images.symbols)[Math.floor(Math.random() * Object.values(images.symbols).length)]} 
-                  alt="Symbol" 
-                />
-              </div>
-            ))
-          ))}
-        </div>
-      </div>
-    </div>
-    
-    <div className="game-controls">
-      <div className="bet-controls">
-        <div className="control-label">الرهان:</div>
-        <div className="bet-amount-controls">
-          <Button variant="outline" size="sm">-</Button>
-          <span className="mx-2">100</span>
-          <Button variant="outline" size="sm">+</Button>
-        </div>
-      </div>
-      
-      <div className="main-controls">
-        <button className="max-bet-button">أقصى رهان</button>
-        <div className="play-controls">
-          <button className="spin-button">لف! 🎣</button>
-        </div>
-      </div>
-    </div>
-    
-    <div className="mt-4 text-center text-white/60 text-xs">
-      <p>قريباً! ستتمكن من جمع الأسماك ذات القيمة أثناء دورات اللفات المجانية</p>
-    </div>
-  </div>
-);
-
-export default function FishingSlotsPage() {
+const FishingSlotsPage = () => {
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
-  const [isMuted, setIsMuted] = useState(false);
-  const [, navigate] = useLocation();
+  const [error, setError] = useState<string | null>(null);
 
-  // تحميل اللعبة ومواردها
   useEffect(() => {
-    // تحميل مسبق للصور
-    images.preload();
-    
-    // محاكاة وقت التحميل
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1500);
-    
-    return () => clearTimeout(timer);
-  }, []);
+    // تحميل أصول اللعبة ومعلومات اللاعب
+    const loadGameAssets = async () => {
+      try {
+        setIsLoading(true);
+        
+        // محاكاة وقت التحميل للأصول الرسومية والصوتية
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // التحقق من رصيد اللاعب
+        if (!user || user.chips < 100) {
+          toast({
+            title: "رصيد غير كافي",
+            description: "يجب أن يكون لديك على الأقل 100 رقاقة للعب.",
+            variant: "destructive"
+          });
+          setError("الرصيد غير كافٍ للعب. يجب أن يكون لديك على الأقل 100 رقاقة.");
+        }
+      } catch (err) {
+        console.error("خطأ في تحميل اللعبة:", err);
+        setError("حدث خطأ أثناء تحميل اللعبة. يرجى المحاولة مرة أخرى.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  // التبديل بين كتم الصوت وتشغيله
-  const toggleMute = () => {
-    setIsMuted(!isMuted);
-  };
-
-  // العودة إلى الصفحة السابقة
-  const handleBack = () => {
-    navigate('/');
-  };
+    loadGameAssets();
+  }, [user, toast]);
 
   if (isLoading) {
     return (
-      <div className="loading-screen">
-        <div className="loading-animation"></div>
-        <h2 className="text-gold text-xl font-bold mb-2">جاري تحميل اللعبة...</h2>
-        <p className="text-white/70 text-sm">استعد لصيد كنوز البحر!</p>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-blue-900 to-blue-700">
+        <img 
+          src={LOGO_IMAGE} 
+          alt="شعار صياد السمك" 
+          className="mb-8 w-64 h-auto"
+        />
+        <LoadingSpinner size="large" color="primary" />
+        <p className="mt-4 text-white text-xl font-bold">جاري تحميل لعبة صياد السمك...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-blue-900 to-blue-700 flex flex-col items-center justify-center p-4">
+        <ErrorDisplay
+          title="غير قادر على بدء اللعبة"
+          message={error}
+          action={
+            <div className="flex flex-col space-y-2 mt-4 w-full">
+              <BackButton
+                label="العودة للصفحة الرئيسية"
+                href="/"
+                className="bg-blue-600 hover:bg-blue-700 text-white w-full"
+              />
+              <Button 
+                onClick={() => window.location.reload()} 
+                variant="outline"
+                className="w-full"
+              >
+                إعادة المحاولة
+              </Button>
+            </div>
+          }
+        />
       </div>
     );
   }
 
   return (
-    <div className="relative min-h-screen">
-      {/* زر العودة */}
-      <button 
-        className="fixed top-4 left-4 z-50 bg-black/60 p-2 rounded-full border border-[#D4AF37] text-[#D4AF37] hover:bg-black/80 transition-all"
-        onClick={handleBack}
-      >
-        <ArrowLeft size={24} />
-      </button>
+    <div className="fishing-slots-game">
+      {/* خلفية اللعبة */}
+      <img 
+        src={BACKGROUND_IMAGE} 
+        alt="خلفية البحر" 
+        className="fishing-game-background"
+      />
       
-      {/* زر كتم/تشغيل الصوت */}
-      <button 
-        className="fixed top-4 right-4 z-50 bg-black/60 p-2 rounded-full border border-[#D4AF37] text-[#D4AF37] hover:bg-black/80 transition-all"
-        onClick={toggleMute}
-      >
-        {isMuted ? <VolumeX size={24} /> : <Volume2 size={24} />}
-      </button>
+      {/* رأس اللعبة */}
+      <div className="fishing-header">
+        <BackButton 
+          label="العودة للصفحة الرئيسية" 
+          href="/"
+          className="bg-[#01447a] border-[#0277bd] text-white hover:bg-[#025a9e]"
+        />
+        
+        <img 
+          src={LOGO_IMAGE} 
+          alt="شعار صياد السمك" 
+          className="game-logo"
+        />
+        
+        <div className="balance-display">
+          <div className="balance-value">{user?.chips.toLocaleString()}</div>
+        </div>
+      </div>
       
-      {/* مكون اللعبة */}
-      <FishingGamePlaceholder />
+      {/* حاوية اللعبة الرئيسية */}
+      <div className="flex justify-center items-center flex-grow">
+        <div className="p-8 bg-[#012c44] rounded-xl border-4 border-[#0277bd] shadow-2xl text-center">
+          <h2 className="text-3xl font-bold text-yellow-400 mb-6">صياد السمك</h2>
+          <p className="text-white text-xl mb-8">لعبة السلوت الأكثر إثارة بتصميم Big Bass Bonanza!</p>
+          
+          <div className="flex flex-col items-center p-4 bg-[#011a29] rounded-lg mb-8">
+            <div className="text-white mb-2">ميزات اللعبة:</div>
+            <ul className="text-white text-right mb-4">
+              <li className="mb-2">• رموز سمك ذات قيم نقدية متغيرة</li>
+              <li className="mb-2">• رمز الصياد يجمع قيم الأسماك</li>
+              <li className="mb-2">• لفات مجانية مع 3 صناديق طعم</li>
+              <li>• مضاعفات x2, x3, و x10 بجمع الصيادين</li>
+            </ul>
+          </div>
+          
+          <Button
+            className="bg-[#f5af19] hover:bg-[#f7be36] text-[#012c44] font-bold text-lg py-6 px-12 rounded-full shadow-lg transition-all hover:scale-105 active:scale-95"
+          >
+            ابدأ اللعب الآن!
+          </Button>
+        </div>
+      </div>
+      
+      {/* التذييل مع الإعدادات */}
+      <div className="controls-container">
+        <div className="text-white opacity-70 text-sm">
+          تطوير بواسطة Replit © 2025 | جميع الحقوق محفوظة
+        </div>
+      </div>
     </div>
   );
-}
+};
+
+export default FishingSlotsPage;
