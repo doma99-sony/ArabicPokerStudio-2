@@ -362,10 +362,10 @@ const EgyptRocketPage = () => {
                   navigate('/');
                 }
               }} 
-              className="bg-[#D4AF37] hover:bg-[#B48C2A] text-black font-medium py-2 px-4 rounded-lg flex items-center transition-all duration-300 shadow-lg"
+              className="bg-[#FFD700] hover:bg-[#F0C000] text-black font-bold py-3 px-6 rounded-lg flex items-center transition-all duration-300 shadow-xl border-2 border-[#B8860B] text-lg animate-pulse"
             >
-              <HomeIcon className="h-5 w-5 mr-2" />
-              الصفحة الرئيسية
+              <HomeIcon className="h-6 w-6 mr-2" strokeWidth={2.5} />
+              العودة للصفحة الرئيسية
             </button>
             <div className="bg-black/30 p-2 rounded-lg border border-[#D4AF37]/20">
               <AnkhIcon className="h-5 w-5 text-[#D4AF37]" />
