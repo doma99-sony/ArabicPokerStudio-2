@@ -49,7 +49,7 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
-  updateUserChips(userId: number, newChips: number): Promise<User | undefined>;
+  updateUserChips(userId: number, newChips: number, type?: string, description?: string): Promise<User | undefined>;
   updateUsername(userId: number, username: string): Promise<User | undefined>;
   uploadAvatar(userId: number, avatar: any): Promise<string>;
   uploadCoverPhoto(userId: number, coverPhoto: any): Promise<string>;
@@ -473,12 +473,25 @@ export class MemStorage implements IStorage {
     return userCode;
   }
   
-  async updateUserChips(userId: number, newChips: number): Promise<User | undefined> {
+  async updateUserChips(userId: number, newChips: number, type?: string, description?: string): Promise<User | undefined> {
     const user = await this.getUser(userId);
     if (!user) return undefined;
     
+    // حساب التغيير في الرصيد
+    const chipsChange = newChips - user.chips;
+    
+    // تحديث رصيد المستخدم
     user.chips = newChips;
     this.users.set(userId, user);
+    
+    // يمكن إضافة منطق لحفظ سجل المعاملات هنا إذا لزم الأمر مستقبلاً
+    if (type && chipsChange !== 0) {
+      console.log(`سجل معاملة: المستخدم ${userId} - ${type} - التغيير: ${chipsChange} - الوصف: ${description || 'غير متوفر'}`);
+      
+      // هنا يمكن تخزين سجل المعاملة في هيكل بيانات أو قاعدة بيانات
+      // إذا تم تنفيذ هذه الوظيفة في المستقبل
+    }
+    
     return user;
   }
   

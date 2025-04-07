@@ -170,6 +170,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // تحديث رصيد اللاعب بعد اللعب في صاروخ مصر
+  app.post("/api/games/egypt-rocket/update-chips", ensureAuthenticated, async (req, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ error: "مستخدم غير مصرح به" });
+      }
+      
+      const { betAmount, winAmount, multiplier, gameResult } = req.body;
+      const userId = req.user.id;
+      
+      // التحقق من المعلومات
+      if (typeof betAmount !== 'number' || isNaN(betAmount)) {
+        return res.status(400).json({ error: "مبلغ الرهان غير صالح" });
+      }
+      
+      if (typeof winAmount !== 'number' || isNaN(winAmount)) {
+        return res.status(400).json({ error: "مبلغ الفوز غير صالح" });
+      }
+      
+      // الحصول على المستخدم
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ error: "المستخدم غير موجود" });
+      }
+      
+      // حساب الربح أو الخسارة
+      const profitLoss = winAmount - betAmount;
+      const newChips = user.chips + profitLoss;
+      
+      // تحديث رصيد المستخدم
+      const updatedUser = await storage.updateUserChips(
+        userId, 
+        newChips, 
+        profitLoss >= 0 ? "egypt_rocket_win" : "egypt_rocket_loss",
+        `${profitLoss >= 0 ? "ربح" : "خسارة"} في لعبة صاروخ مصر بمضاعف ${multiplier}x`
+      );
+      
+      // إضافة سجل للاعب (تاريخ اللعب)
+      // يمكن تطبيقه في المستقبل
+      
+      res.json({ 
+        success: true, 
+        message: profitLoss >= 0 ? "تم تحديث الرصيد بنجاح بعد الربح" : "تم تحديث الرصيد بعد الخسارة",
+        user: {
+          id: user.id,
+          username: user.username,
+          chips: newChips,
+        },
+        gameDetails: {
+          betAmount,
+          winAmount,
+          profitLoss,
+          multiplier,
+          gameResult
+        }
+      });
+    } catch (error) {
+      console.error("خطأ في تحديث رصيد اللاعب بعد لعبة صاروخ مصر:", error);
+      res.status(500).json({ error: "حدث خطأ أثناء تحديث الرصيد" });
+    }
+  });
+  
   // Get user profile with stats and game history
   app.get("/api/profile", ensureAuthenticated, async (req, res) => {
     try {

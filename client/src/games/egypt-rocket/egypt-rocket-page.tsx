@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
-import { useAuth } from '@/hooks/use-auth';
+import { useState, useEffect, useRef, useContext } from 'react';
+import { useAuth, AuthContext } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
 import BetHistory from './components/bet-history';
 import LiveBets from './components/live-bets';
@@ -22,6 +22,7 @@ interface GamePlayer {
 
 const EgyptRocketPage = () => {
   const { user } = useAuth();
+  const authContext = useContext(AuthContext);
   const { toast } = useToast();
   const rocketRef = useRef<{ triggerExplosion: () => void }>(null);
   
@@ -37,6 +38,18 @@ const EgyptRocketPage = () => {
   const [autoCashoutMultiplier, setAutoCashoutMultiplier] = useState<number>(2.0);
   const [isBetting, setIsBetting] = useState<boolean>(false);
   const [hasCashedOut, setHasCashedOut] = useState<boolean>(false);
+  
+  // وظيفة مساعدة لتحديث رصيد المستخدم في الحالة المحلية وفي سياق المصادقة
+  const updateUserChipsData = (newChips: number) => {
+    setUserChips(newChips);
+    // تحديث كاش المستخدم في سياق المصادقة للحفاظ على التزامن
+    if (user && authContext) {
+      authContext.setUser({
+        ...user,
+        chips: newChips
+      });
+    }
+  };
   
   // مراجع للمؤقتات
   const gameTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -119,6 +132,41 @@ const EgyptRocketPage = () => {
     }, waitingTime);
   };
   
+  // تسجيل الخسارة في قاعدة البيانات عند انفجار الصاروخ
+  const updateLossInDatabase = async (betAmount: number) => {
+    if (!user) return;
+    
+    try {
+      // إرسال طلب لتحديث رصيد المستخدم بعد الخسارة
+      const response = await fetch('/api/games/egypt-rocket/update-chips', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          betAmount: betAmount,
+          winAmount: 0, // المبلغ المربوح هو صفر في حالة الخسارة
+          multiplier: 0,
+          gameResult: 'rocket_crashed'
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        console.error('خطأ في تسجيل الخسارة:', data.error);
+      } else {
+        // رصيد المستخدم تم تحديثه بالفعل عند وضع الرهان
+        console.log('تم تسجيل الخسارة بنجاح');
+        
+        // تحديث حالة اللعب
+        setIsBetting(false);
+      }
+    } catch (error) {
+      console.error('خطأ في الاتصال بخادم API:', error);
+    }
+  };
+  
   // توليد نقطة انفجار عشوائية باستخدام توزيع احتمالي واقعي
   const generateCrashPoint = (): number => {
     // استخدام توزيع يميل نحو القيم المنخفضة
@@ -183,6 +231,20 @@ const EgyptRocketPage = () => {
         // إذا كان اللاعب قد جمع رهانه بالفعل، لا تغير حالته
         if (bet.isCashedOut) return bet;
         
+        // إذا كان هذا هو اللاعب الحقيقي وهو يلعب حاليًا، سجل الخسارة
+        if (bet.username === user?.username && isBetting && !hasCashedOut) {
+          // تسجيل خسارة اللاعب الحقيقي في قاعدة البيانات
+          updateLossInDatabase(bet.amount);
+          
+          // المستخدم خسر رهانه (تم تحديثه بالفعل في الواجهة عند وضع الرهان)
+          return {
+            ...bet,
+            multiplier: 0,
+            profit: -bet.amount,
+            isCashedOut: false
+          };
+        }
+        
         // إذا كان هذا هو اللاعب الحقيقي، يبقى كما هو (نحن نتحكم في حالته بشكل منفصل)
         if (bet.username === user?.username) {
           if (hasCashedOut) {
@@ -230,7 +292,7 @@ const EgyptRocketPage = () => {
   };
   
   // وضع رهان
-  const placeBet = () => {
+  const placeBet = async () => {
     if (!user) {
       toast({
         title: "تنبيه",
@@ -249,9 +311,10 @@ const EgyptRocketPage = () => {
       return;
     }
     
+    // تحديث الواجهة المحلية فورًا لتجربة مستخدم أفضل
     setIsBetting(true);
     setHasCashedOut(false);
-    setUserChips(prev => prev - betAmount);
+    updateUserChipsData(userChips - betAmount);
     
     // تحديث قائمة الرهانات الحية
     setLiveBets(prev => {
@@ -271,6 +334,31 @@ const EgyptRocketPage = () => {
       ];
     });
     
+    // سجل الرهان في قاعدة البيانات (المراهنة = خسارة محتملة)
+    try {
+      const response = await fetch('/api/games/egypt-rocket/update-chips', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          betAmount: betAmount,
+          winAmount: 0, // في البداية، المبلغ المربوح هو صفر
+          multiplier: 0,
+          gameResult: 'bet_placed'
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        console.error('خطأ في تسجيل الرهان:', data.error);
+        // إذا فشلت العملية، يمكن التراجع عن التغييرات المحلية (اختياري)
+      }
+    } catch (error) {
+      console.error('خطأ في الاتصال بخادم API:', error);
+    }
+    
     toast({
       title: "تم وضع الرهان",
       description: `تم وضع رهان بقيمة ${betAmount} رقاقة`,
@@ -278,14 +366,44 @@ const EgyptRocketPage = () => {
   };
   
   // إلغاء الرهان (فقط في وضع الانتظار)
-  const cancelBet = () => {
-    if (gameStatus !== 'waiting') return;
+  const cancelBet = async () => {
+    if (gameStatus !== 'waiting' || !user) return;
     
+    // تحديث الواجهة المحلية فورًا
     setIsBetting(false);
-    setUserChips(prev => prev + betAmount);
+    updateUserChipsData(userChips + betAmount);
     
     // إزالة رهان اللاعب من القائمة
-    setLiveBets(prev => prev.filter(bet => bet.username !== user?.username));
+    setLiveBets(prev => prev.filter(bet => bet.username !== user.username));
+    
+    // إعادة الرهان للمستخدم في قاعدة البيانات
+    try {
+      const response = await fetch('/api/games/egypt-rocket/update-chips', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          betAmount: 0,
+          winAmount: betAmount, // إعادة المبلغ كاملاً
+          multiplier: 1,
+          gameResult: 'bet_cancelled'
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        console.error('خطأ في إلغاء الرهان:', data.error);
+      } else {
+        // تحديث الرصيد من الخادم بدلاً من القيمة المحلية
+        if (data.user && data.user.chips) {
+          updateUserChipsData(data.user.chips);
+        }
+      }
+    } catch (error) {
+      console.error('خطأ في الاتصال بخادم API:', error);
+    }
     
     toast({
       title: "تم إلغاء الرهان",
@@ -294,19 +412,20 @@ const EgyptRocketPage = () => {
   };
   
   // جمع الرهان قبل الانفجار
-  const cashout = () => {
-    if (gameStatus !== 'flying' || !isBetting || hasCashedOut) return;
+  const cashout = async () => {
+    if (gameStatus !== 'flying' || !isBetting || hasCashedOut || !user) return;
     
     const profit = Math.floor(betAmount * currentMultiplier) - betAmount;
     const totalWin = betAmount + profit;
     
+    // تحديث الواجهة المحلية فورًا
     setHasCashedOut(true);
-    setUserChips(prev => prev + totalWin);
+    updateUserChipsData(userChips + totalWin);
     
     // تحديث حالة اللاعب في قائمة الرهانات الحية
     setLiveBets(prev => {
       return prev.map(bet => {
-        if (bet.username === user?.username) {
+        if (bet.username === user.username) {
           return {
             ...bet,
             multiplier: currentMultiplier,
@@ -318,11 +437,47 @@ const EgyptRocketPage = () => {
       });
     });
     
+    // تسجيل الربح في قاعدة البيانات
+    try {
+      const response = await fetch('/api/games/egypt-rocket/update-chips', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          betAmount: betAmount,
+          winAmount: totalWin,
+          multiplier: currentMultiplier,
+          gameResult: 'cashout_success'
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        console.error('خطأ في تسجيل الربح:', data.error);
+      } else {
+        // تحديث الرصيد من الخادم بدلاً من القيمة المحلية
+        if (data.user && data.user.chips) {
+          updateUserChipsData(data.user.chips);
+        }
+      }
+    } catch (error) {
+      console.error('خطأ في الاتصال بخادم API:', error);
+    }
+    
     toast({
       title: "تم الجمع بنجاح!",
       description: `ربحت ${profit} رقاقة عند ${currentMultiplier.toFixed(2)}x`,
     });
   };
+  
+  // تحديث رصيد المستخدم عند تغير بيانات المستخدم
+  useEffect(() => {
+    if (user && user.chips) {
+      setUserChips(user.chips);
+    }
+  }, [user]);
   
   // ابدأ اللعبة عند تحميل الصفحة
   useEffect(() => {
