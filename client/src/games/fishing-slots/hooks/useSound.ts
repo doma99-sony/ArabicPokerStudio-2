@@ -1,118 +1,209 @@
-// استخدام الصوت في لعبة صياد السمك
-import { useState, useEffect, useCallback, useRef } from 'react';
+/**
+ * مكون إدارة الأصوات في لعبة صياد السمك
+ */
+
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { SoundControl } from '../types';
 
-// مسارات ملفات الصوت
-const SOUND_PATHS = {
-  spin: '/audio/fishing-slots/spin.mp3',
-  win: '/audio/fishing-slots/win.mp3',
-  bigWin: '/audio/fishing-slots/big-win.mp3',
-  megaWin: '/audio/fishing-slots/mega-win.mp3',
-  scatter: '/audio/fishing-slots/scatter.mp3',
-  wild: '/audio/fishing-slots/wild.mp3',
-  fishCollect: '/audio/fishing-slots/fish-collect.mp3',
-  freeSpin: '/audio/fishing-slots/free-spin.mp3',
-  freeSpinEnd: '/audio/fishing-slots/free-spin-end.mp3',
-  reel: '/audio/fishing-slots/reel.mp3',
-  click: '/audio/fishing-slots/click.mp3',
-  music: '/audio/fishing-slots/background-music.mp3',
-};
-
 /**
- * Hook لإدارة الصوت في لعبة صياد السمك
+ * Hook لإدارة الأصوات في اللعبة
+ * يسمح بتشغيل وإيقاف أصوات مختلفة مرتبطة بأحداث اللعبة
  */
-export function useSound(initialEnabled = true): SoundControl {
-  const [enabled, setEnabled] = useState(initialEnabled);
-  const audioElements = useRef<Record<string, HTMLAudioElement>>({});
+export const useSound = (): SoundControl => {
+  const [muted, setMuted] = useState<boolean>(false);
+  const [volume, setVolume] = useState<number>(0.7); // مستوى الصوت الافتراضي 70%
   
-  // تهيئة عناصر الصوت
+  // مراجع لعناصر الصوت
+  const spinSound = useRef<HTMLAudioElement | null>(null);
+  const winSound = useRef<HTMLAudioElement | null>(null);
+  const bigWinSound = useRef<HTMLAudioElement | null>(null);
+  const freeSpinsSound = useRef<HTMLAudioElement | null>(null);
+  const buttonClickSound = useRef<HTMLAudioElement | null>(null);
+  const fishermanSound = useRef<HTMLAudioElement | null>(null);
+  const fishCollectSound = useRef<HTMLAudioElement | null>(null);
+  const backgroundMusic = useRef<HTMLAudioElement | null>(null);
+
+  // تهيئة عناصر الصوت عند التحميل
   useEffect(() => {
-    // إنشاء عناصر الصوت لكل مسار
-    Object.entries(SOUND_PATHS).forEach(([key, path]) => {
-      const audio = new Audio(path);
-      
-      // ضبط خصائص الصوت
-      if (key === 'music') {
-        audio.loop = true;
-        audio.volume = 0.3;
-      } else {
-        audio.volume = 0.5;
+    // إنشاء عناصر الصوت المختلفة وتكوينها
+    spinSound.current = new Audio('/sounds/spin.mp3');
+    winSound.current = new Audio('/sounds/win.mp3');
+    bigWinSound.current = new Audio('/sounds/big-win.mp3');
+    freeSpinsSound.current = new Audio('/sounds/free-spins.mp3');
+    buttonClickSound.current = new Audio('/sounds/button-click.mp3');
+    fishermanSound.current = new Audio('/sounds/fisherman.mp3');
+    fishCollectSound.current = new Audio('/sounds/fish-collect.mp3');
+    backgroundMusic.current = new Audio('/sounds/underwater-background.mp3');
+    
+    // إعداد موسيقى الخلفية للتشغيل المتكرر
+    if (backgroundMusic.current) {
+      backgroundMusic.current.loop = true;
+    }
+    
+    // تعيين مستوى الصوت لجميع العناصر
+    const allSounds = [
+      spinSound.current,
+      winSound.current,
+      bigWinSound.current,
+      freeSpinsSound.current,
+      buttonClickSound.current,
+      fishermanSound.current,
+      fishCollectSound.current,
+      backgroundMusic.current
+    ];
+    
+    allSounds.forEach(sound => {
+      if (sound) {
+        sound.volume = volume;
       }
-      
-      audioElements.current[key] = audio;
     });
     
-    // تنظيف عند إزالة المكون
+    // تنظيف عند تفكيك المكون
     return () => {
-      Object.values(audioElements.current).forEach(audio => {
-        audio.pause();
-        audio.src = '';
+      allSounds.forEach(sound => {
+        if (sound) {
+          sound.pause();
+          sound.currentTime = 0;
+        }
       });
-      audioElements.current = {};
     };
   }, []);
   
-  // تشغيل صوت
-  const play = useCallback((sound: string) => {
-    if (!enabled || !audioElements.current[sound]) return;
+  // تحديث مستوى الصوت لجميع العناصر عند تغيير مستوى الصوت
+  useEffect(() => {
+    const allSounds = [
+      spinSound.current,
+      winSound.current,
+      bigWinSound.current,
+      freeSpinsSound.current,
+      buttonClickSound.current,
+      fishermanSound.current,
+      fishCollectSound.current,
+      backgroundMusic.current
+    ];
     
-    try {
-      const audio = audioElements.current[sound];
-      
-      // إعادة ضبط الصوت إلى البداية إذا كان يعمل بالفعل
-      audio.currentTime = 0;
-      
-      // تشغيل الصوت
-      audio.play().catch(err => {
-        console.warn(`Error playing sound ${sound}:`, err);
-      });
-    } catch (error) {
-      console.error(`Error playing ${sound}:`, error);
-    }
-  }, [enabled]);
-  
-  // إيقاف صوت
-  const stop = useCallback((sound: string) => {
-    if (!audioElements.current[sound]) return;
-    
-    try {
-      const audio = audioElements.current[sound];
-      audio.pause();
-      audio.currentTime = 0;
-    } catch (error) {
-      console.error(`Error stopping ${sound}:`, error);
-    }
-  }, []);
-  
-  // ضبط حالة تمكين الصوت
-  const setIsEnabled = useCallback((isEnabled: boolean) => {
-    setEnabled(isEnabled);
-    
-    // إيقاف/تشغيل الموسيقى بناءً على الحالة
-    if (isEnabled) {
-      if (audioElements.current.music) {
-        audioElements.current.music.play().catch(err => {
-          console.warn('Error playing background music:', err);
-        });
+    allSounds.forEach(sound => {
+      if (sound) {
+        sound.volume = muted ? 0 : volume;
       }
-    } else {
-      // إيقاف جميع الأصوات
-      Object.values(audioElements.current).forEach(audio => {
-        audio.pause();
-        audio.currentTime = 0;
-      });
+    });
+  }, [volume, muted]);
+  
+  /**
+   * تشغيل موسيقى الخلفية
+   */
+  const playBackgroundMusic = useCallback(() => {
+    if (backgroundMusic.current && !muted) {
+      backgroundMusic.current.play().catch(e => console.error("Error playing background music:", e));
+    }
+  }, [muted]);
+  
+  /**
+   * إيقاف موسيقى الخلفية
+   */
+  const stopBackgroundMusic = useCallback(() => {
+    if (backgroundMusic.current) {
+      backgroundMusic.current.pause();
+      backgroundMusic.current.currentTime = 0;
     }
   }, []);
   
-  // الحصول على حالة تمكين الصوت
-  const isEnabled = useCallback(() => {
-    return enabled;
-  }, [enabled]);
+  /**
+   * تشغيل صوت الدوران
+   */
+  const playSpinSound = useCallback(() => {
+    if (spinSound.current && !muted) {
+      spinSound.current.currentTime = 0;
+      spinSound.current.play().catch(e => console.error("Error playing spin sound:", e));
+    }
+  }, [muted]);
   
+  /**
+   * تشغيل صوت الفوز
+   * @param big ما إذا كان فوزًا كبيرًا
+   */
+  const playWinSound = useCallback((big = false) => {
+    if (!muted) {
+      const soundToPlay = big ? bigWinSound.current : winSound.current;
+      if (soundToPlay) {
+        soundToPlay.currentTime = 0;
+        soundToPlay.play().catch(e => console.error("Error playing win sound:", e));
+      }
+    }
+  }, [muted]);
+  
+  /**
+   * تشغيل صوت اللفات المجانية
+   */
+  const playFreeSpinsSound = useCallback(() => {
+    if (freeSpinsSound.current && !muted) {
+      freeSpinsSound.current.currentTime = 0;
+      freeSpinsSound.current.play().catch(e => console.error("Error playing free spins sound:", e));
+    }
+  }, [muted]);
+  
+  /**
+   * تشغيل صوت الضغط على الزر
+   */
+  const playButtonClickSound = useCallback(() => {
+    if (buttonClickSound.current && !muted) {
+      buttonClickSound.current.currentTime = 0;
+      buttonClickSound.current.play().catch(e => console.error("Error playing button click sound:", e));
+    }
+  }, [muted]);
+  
+  /**
+   * تشغيل صوت الصياد
+   */
+  const playFishermanSound = useCallback(() => {
+    if (fishermanSound.current && !muted) {
+      fishermanSound.current.currentTime = 0;
+      fishermanSound.current.play().catch(e => console.error("Error playing fisherman sound:", e));
+    }
+  }, [muted]);
+  
+  /**
+   * تشغيل صوت جمع السمك
+   */
+  const playFishCollectSound = useCallback(() => {
+    if (fishCollectSound.current && !muted) {
+      fishCollectSound.current.currentTime = 0;
+      fishCollectSound.current.play().catch(e => console.error("Error playing fish collect sound:", e));
+    }
+  }, [muted]);
+  
+  /**
+   * كتم/إلغاء كتم جميع الأصوات
+   */
+  const toggleMute = useCallback(() => {
+    setMuted(prev => !prev);
+  }, []);
+  
+  /**
+   * تعيين مستوى الصوت
+   * @param newVolume مستوى الصوت الجديد (0.0-1.0)
+   */
+  const handleSetVolume = useCallback((newVolume: number) => {
+    // تقييد مستوى الصوت بين 0 و 1
+    const clampedVolume = Math.max(0, Math.min(1, newVolume));
+    setVolume(clampedVolume);
+  }, []);
+  
+  // كائن التحكم بالصوت الذي سيتم إرجاعه
   return {
-    play,
-    stop,
-    setEnabled: setIsEnabled,
-    isEnabled
+    muted,
+    volume,
+    toggleMute,
+    setVolume: handleSetVolume,
+    playSpinSound,
+    playWinSound,
+    playFreeSpinsSound,
+    playButtonClickSound,
+    playFishermanSound,
+    playFishCollectSound,
+    playBackgroundMusic,
+    stopBackgroundMusic
   };
-}
+};
+
+export default useSound;

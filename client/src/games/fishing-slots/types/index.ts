@@ -1,30 +1,21 @@
 /**
- * وحدة الأنواع - تعريفات الواجهات والأنواع اللازمة للعبة صياد السمك
+ * أنواع البيانات الأساسية للعبة صياد السمك
  */
 
 /**
- * نوع الرمز - تعداد لجميع أنواع الرموز المستخدمة في اللعبة
+ * أنواع الرموز في اللعبة
  */
 export enum SymbolType {
-  FISHERMAN = 'fisherman', // الصياد (Wild)
-  BAIT_BOX = 'bait_box',   // صندوق الطعم (Scatter)
-  FISH_3 = 'fish_3',       // سمكة كبيرة
-  FISH_2 = 'fish_2',       // سمكة متوسطة
-  FISH_1 = 'fish_1',       // سمكة صغيرة
-  STARFISH = 'starfish',   // نجمة البحر
-  SHELL = 'shell',         // محارة
-  ANCHOR = 'anchor',       // مرساة
-  CRAB = 'crab',           // سلطعون
+  WILD = 'wild', // الصياد (وايلد)
+  FISH_1 = 'fish_1', // سمكة زرقاء
+  FISH_2 = 'fish_2', // سمكة برتقالية
+  FISH_3 = 'fish_3', // سمكة حمراء
+  SHELL = 'shell', // صدفة
+  ANCHOR = 'anchor', // مرساة
+  CRAB = 'crab', // سلطعون
+  STARFISH = 'starfish', // نجم البحر
+  BAIT_BOX = 'bait_box', // صندوق الطعم (سكاتر)
   FISH_MONEY = 'fish_money' // سمكة ذات قيمة نقدية
-}
-
-/**
- * واجهة الرمز - تمثيل الرمز وخصائصه
- */
-export interface Symbol {
-  type: SymbolType; // نوع الرمز
-  value?: number;   // قيمة نقدية (للأسماك ذات القيمة النقدية)
-  position?: [number, number]; // الموضع [صف، عمود]
 }
 
 /**
@@ -37,198 +28,124 @@ export interface Payline {
 }
 
 /**
- * نوع الفوز - تعداد لمختلف أنواع الفوز الممكنة
+ * واجهة رمز اللعبة
  */
-export enum WinType {
-  LINE = 'line',           // خط تطابق
-  SCATTER = 'scatter',     // تشتت (صندوق الطعم)
-  FISHERMAN = 'fisherman'  // جمع قيم الأسماك بواسطة الصياد
+export interface Symbol {
+  id: number; // معرف فريد للرمز
+  type: SymbolType; // نوع الرمز
+  image: string; // مسار صورة الرمز
+  payout: {
+    3: number; // قيمة الدفع لـ 3 رموز متطابقة
+    4: number; // قيمة الدفع لـ 4 رموز متطابقة
+    5: number; // قيمة الدفع لـ 5 رموز متطابقة
+  };
+  isWild?: boolean; // هل هذا رمز وايلد (يمكن أن يحل محل أي رمز آخر)
+  isScatter?: boolean; // هل هذا رمز سكاتر (يمكن أن يظهر في أي مكان وليس فقط على خط دفع)
+  moneyValue?: number; // القيمة النقدية للسمكة (للأسماك ذات القيمة النقدية)
 }
 
 /**
- * واجهة الفوز - تمثيل للفوز وبياناته
+ * واجهة نتيجة الفوز
  */
 export interface Win {
-  type: WinType; // نوع الفوز
+  paylineId: number; // معرف خط الدفع الفائز
   symbolType: SymbolType; // نوع الرمز الفائز
   count: number; // عدد الرموز المتطابقة
-  positions: [number, number][]; // مواضع الرموز الفائزة [صف، عمود][]
-  multiplier: number; // مضاعف الفوز
-  amount: number; // المبلغ الفائز
-  lineIndex?: number; // مؤشر خط الدفع (للفوز بالخط فقط)
+  amount: number; // قيمة الفوز
+  positions: [number, number][]; // المواضع الفائزة (الصف، العمود)
 }
 
 /**
- * واجهة نتيجة الدوران - تمثيل لمخرجات عملية الدوران
+ * أنواع الفوز المختلفة
  */
-export interface SpinResult {
-  symbols: Symbol[][]; // شبكة الرموز
-  wins: Win[]; // قائمة الفوز
-  totalWin: number; // إجمالي الفوز
-  hasFreeSpin: boolean; // هل تم تفعيل اللفات المجانية؟
-  freeSpinsAwarded: number; // عدد اللفات المجانية الممنوحة
-  triggeredFreeSpins?: boolean; // هل تم تحفيز اللفات المجانية في هذا الدوران؟
-  fishermanMultiplier?: number; // مضاعف الصياد الحالي
-  fishmanPositions?: [number, number][]; // مواضع الصياد
-  collectedFishermans?: number; // عدد الصيادين المجمعين
-  collectedFishSymbols?: { position: [number, number], value: number }[]; // الأسماك ذات القيمة النقدية المجمعة
-  visibleSymbols?: Symbol[][]; // الرموز المرئية (قد تختلف عن الشبكة الكاملة)
+export enum WinType {
+  NORMAL = 'normal', // فوز عادي
+  BIG_WIN = 'big_win', // فوز كبير (25x-50x الرهان)
+  MEGA_WIN = 'mega_win', // فوز ضخم (50x-100x الرهان)
+  SUPER_WIN = 'super_win' // فوز هائل (>100x الرهان)
 }
 
 /**
- * واجهة حالة اللفات المجانية - تمثيل لحالة جلسة اللفات المجانية
+ * واجهة حالة اللفات المجانية
  */
 export interface FreeSpinsState {
   active: boolean; // هل اللفات المجانية نشطة؟
-  remaining: number; // عدد اللفات المجانية المتبقية
-  collectedFisherman: number; // عدد الصيادين المجمعين خلال اللفات المجانية
-  fishermanMultiplier: number; // مضاعف الصياد الحالي
-  totalWin: number; // إجمالي الفوز من اللفات المجانية
-  fishermanPositions: [number, number][]; // مواضع الصياد المجمعة
+  spinsRemaining: number; // عدد اللفات المجانية المتبقية
+  collectedFishermen: number; // عدد الصيادين الذين تم جمعهم
+  multiplier: number; // مضاعف الفوز الحالي
+  fishCollection: { // جمع السمك أثناء اللفات المجانية
+    positions: [number, number][]; // مواضع السمك التي تم جمعها (الصف، العمود)
+    values: number[]; // قيم السمك التي تم جمعها
+    total: number; // إجمالي قيمة السمك المجموعة
+  };
 }
 
 /**
- * حالة اللعبة - تعداد للحالات المختلفة التي يمكن أن تكون عليها اللعبة
+ * حالات اللعبة المختلفة
  */
-export enum GameStatus {
-  IDLE = 'idle',         // في انتظار بدء اللعب
+export enum GameState {
+  IDLE = 'idle', // اللعبة في حالة انتظار (قبل الدوران)
   SPINNING = 'spinning', // البكرات تدور
-  WINNING = 'winning',   // عرض الفوز
-  COLLECTING = 'collecting', // الصياد يجمع الأسماك
-  FREE_SPINS = 'free_spins' // في وضع اللفات المجانية
+  SHOWING_WIN = 'showing_win', // عرض الفوز
+  FREE_SPINS = 'free_spins', // في وضع اللفات المجانية
+  COLLECTING = 'collecting', // جمع الأسماك ذات القيمة النقدية
+  ERROR = 'error' // حدث خطأ
 }
 
 /**
- * واجهة حالة اللعبة - تمثيل للحالة الشاملة للعبة
+ * واجهة حالة لعبة صياد السمك
  */
 export interface FishingGameState {
   balance: number; // رصيد اللاعب
-  bet: number; // قيمة الرهان الحالي
-  status: GameStatus; // حالة اللعبة الحالية
-  symbols: Symbol[][]; // شبكة الرموز الحالية
-  lastWin: number; // قيمة الفوز الأخير
-  totalWin: number; // إجمالي الفوز التراكمي
-  isAutoPlay: boolean; // هل اللعب التلقائي مفعل؟
-  paylines: number; // عدد خطوط الدفع النشطة
+  betAmount: number; // مبلغ الرهان
+  totalWin: number; // إجمالي الفوز في الجولة الحالية
+  reels: SymbolType[][][]; // البكرات الحالية (3 صفوف، 5 أعمدة)
+  prevReels: SymbolType[][][]; // البكرات السابقة
+  wins: Win[]; // قائمة بالفوز في الجولة الحالية
+  winType: WinType | null; // نوع الفوز في الجولة الحالية
+  status: GameState; // حالة اللعبة الحالية
+  isAutoPlay: boolean; // هل اللعبة في وضع اللعب التلقائي
+  autoPlayCount: number; // عدد الدورات المتبقية في اللعب التلقائي
   freeSpins: FreeSpinsState; // حالة اللفات المجانية
-  currentWins: Win[]; // الفوز الحالي
-  fishermanPositions: [number, number][]; // مواضع الصياد
-  collectedFishValues: any[]; // قيم الأسماك المجمعة
-  bonusMultiplier: number; // مضاعف المكافأة
 }
 
 /**
- * واجهة التحكم في الصوت - إدارة أصوات اللعبة
+ * واجهة نتيجة الدوران
  */
-export interface SoundControl {
-  isMuted: boolean; // هل الصوت مكتوم؟
-  volume: number; // مستوى الصوت (0-1)
-  playSound: (sound: string) => void; // تشغيل صوت معين
-  toggleMute: () => void; // تبديل حالة كتم الصوت
-  setVolume: (value: number) => void; // تعيين مستوى الصوت
+export interface SpinResult {
+  reels: SymbolType[][][]; // البكرات بعد الدوران
+  symbols: SymbolType[][]; // مصفوفة الرموز المسطحة (3×5)
+  wins: Win[]; // قائمة الفوز
+  totalWin: number; // إجمالي الفوز
+  winType: WinType | null; // نوع الفوز
+  freeSpinsTriggered: boolean; // هل تم تفعيل اللفات المجانية
+  freeSpinsCount: number; // عدد اللفات المجانية
 }
 
 /**
- * واجهة إعدادات الرسوم المتحركة - تخصيص الرسوم المتحركة
+ * إعدادات الرسوم المتحركة
  */
 export interface AnimationSettings {
-  speed: number; // سرعة الرسوم المتحركة
+  speed: number; // سرعة الرسوم المتحركة (0.5-2.0)
   quality: 'low' | 'medium' | 'high'; // جودة الرسوم المتحركة
-  setSpeed: (speed: number) => void; // تعيين سرعة الرسوم المتحركة
-  setQuality: (quality: 'low' | 'medium' | 'high') => void; // تعيين جودة الرسوم المتحركة
+  setSpeed: (speed: number) => void; // دالة لتعيين السرعة
+  setQuality: (quality: 'low' | 'medium' | 'high') => void; // دالة لتعيين الجودة
 }
 
 /**
- * واجهة خصائص عرض خط الدفع - استخدام في مكونات العرض
+ * واجهة التحكم بالصوت
  */
-export interface PaylineOverlayProps {
-  visible: boolean; // هل خط الدفع مرئي؟
-  wins?: Win[]; // الفوز المرتبط بخط الدفع
-  gridSize: { width: number; height: number }; // حجم الشبكة
-  paylines: Payline[]; // خطوط الدفع المتاحة
-}
-
-/**
- * واجهة خصائص عرض الفوز - استخدام في مكونات العرض
- */
-export interface WinDisplayProps {
-  win: number; // قيمة الفوز
-  isVisible: boolean; // هل النافذة مرئية؟
-  onClose: () => void; // دالة الإغلاق
-}
-
-/**
- * واجهة خصائص اللفات المجانية - استخدام في مكونات العرض
- */
-export interface FreeSpinProps {
-  freeSpins: FreeSpinsState; // حالة اللفات المجانية
-  onStartFreeSpins: () => void; // بدء اللفات المجانية
-  onFreeSpinEnd: () => void; // انتهاء اللفات المجانية
-}
-
-/**
- * واجهة خصائص حاوية البكرات - استخدام في مكونات العرض
- */
-export interface ReelsContainerProps {
-  symbols: Symbol[][]; // شبكة الرموز
-  isSpinning: boolean; // هل البكرات تدور؟
-  wins: Win[]; // الفوز الحالي
-  onSpinComplete: () => void; // اكتمال الدوران
-}
-
-/**
- * واجهة خصائص شريط التحكم - استخدام في مكونات العرض
- */
-export interface ControlBarProps {
-  balance: number; // الرصيد
-  bet: number; // الرهان
-  onBetChange: (bet: number) => void; // تغيير الرهان
-  onSpin: () => void; // بدء الدوران
-  onAutoPlay: () => void; // تبديل اللعب التلقائي
-  isSpinning: boolean; // هل البكرات تدور؟
-  isAutoPlay: boolean; // هل اللعب التلقائي مفعل؟
-  maxBet: number; // أقصى رهان
-  minBet: number; // أدنى رهان
-}
-
-/**
- * واجهة الاستجابة من الخادم - الشكل العام لاستجابات الخادم
- */
-export interface ServerResponse {
-  success: boolean; // هل الطلب ناجح؟
-  data?: any; // البيانات المرجعة
-  error?: string; // رسالة الخطأ
-}
-
-/**
- * واجهة طلب الدوران - بيانات طلب دوران جديد
- */
-export interface SpinRequest {
-  bet: number; // قيمة الرهان
-  isFreeSpin: boolean; // هل هي لفة مجانية؟
-}
-
-/**
- * واجهة طلب تحديث الرصيد - بيانات طلب تحديث رصيد اللاعب
- */
-export interface UpdateBalanceRequest {
-  amount: number; // المبلغ المراد إضافته/خصمه
-  type: 'win' | 'bet'; // نوع التحديث
-}
-
-/**
- * واجهة استجابة الرصيد - بيانات استجابة الرصيد
- */
-export interface BalanceResponse {
-  balance: number; // الرصيد الجديد
-}
-
-/**
- * واجهة استجابة تحميل اللعبة - بيانات تهيئة اللعبة
- */
-export interface GameLoadResponse {
-  balance: number; // رصيد اللاعب
-  minBet: number; // أدنى رهان
-  maxBet: number; // أقصى رهان
-  defaultBet: number; // الرهان الافتراضي
+export interface SoundControl {
+  muted: boolean; // هل الصوت مكتوم
+  volume: number; // مستوى الصوت (0.0-1.0)
+  toggleMute: () => void; // تبديل كتم الصوت
+  setVolume: (volume: number) => void; // تعيين مستوى الصوت
+  playSpinSound: () => void; // تشغيل صوت الدوران
+  playWinSound: (big?: boolean) => void; // تشغيل صوت الفوز
+  playFreeSpinsSound: () => void; // تشغيل صوت اللفات المجانية
+  playButtonClickSound: () => void; // تشغيل صوت النقر على الزر
+  playFishermanSound: () => void; // تشغيل صوت الصياد
+  playFishCollectSound: () => void; // تشغيل صوت جمع السمك
+  playBackgroundMusic: () => void; // تشغيل موسيقى الخلفية
+  stopBackgroundMusic: () => void; // إيقاف موسيقى الخلفية
 }
