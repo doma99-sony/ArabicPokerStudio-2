@@ -5,6 +5,7 @@ import { setupAuth, hashPassword } from "./auth";
 import { setupPokerGame, pokerModule } from "./poker";
 import { z } from "zod";
 import fileUpload from "express-fileupload";
+import { UserService } from "./services/user-service";
 
 // ميدلوير للتحقق من المصادقة
 function ensureAuthenticated(req: Request, res: Response, next: NextFunction) {
@@ -170,6 +171,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // إنشاء مثيل لخدمة المستخدم
+  const userService = new UserService();
+
   // تحديث رصيد اللاعب بعد اللعب في صاروخ مصر
   app.post("/api/games/egypt-rocket/update-chips", ensureAuthenticated, async (req, res) => {
     try {
@@ -189,17 +193,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "مبلغ الفوز غير صالح" });
       }
       
-      // الحصول على المستخدم
-      const user = await storage.getUser(userId);
-      if (!user) {
+      // الحصول على المستخدم الحالي من قاعدة البيانات أولاً
+      let dbUser;
+      try {
+        dbUser = await userService.getUserById(userId);
+        if (!dbUser) {
+          console.log(`المستخدم ${userId} غير موجود في قاعدة البيانات، الانتقال لاستخدام المستخدم من المخزن المؤقت`);
+        } else {
+          console.log(`تم العثور على المستخدم ${userId} في قاعدة البيانات، الرصيد الحالي: ${dbUser.chips}`);
+        }
+      } catch (dbError) {
+        console.error(`خطأ في الحصول على المستخدم من قاعدة البيانات:`, dbError);
+      }
+      
+      // الحصول على المستخدم من المخزن المؤقت كنسخة احتياطية
+      const memUser = await storage.getUser(userId);
+      if (!memUser && !dbUser) {
         return res.status(404).json({ error: "المستخدم غير موجود" });
       }
       
+      // استخدام البيانات من قاعدة البيانات أولاً ثم الانتقال إلى بيانات المخزن المؤقت
+      const user = dbUser || memUser;
+      
       // حساب الربح أو الخسارة
       const profitLoss = winAmount - betAmount;
-      const newChips = user.chips + profitLoss;
       
-      // تحديث رصيد المستخدم
+      // تأكد من وجود المستخدم والرقائق الخاصة به
+      if (!user) {
+        return res.status(404).json({ error: "المستخدم غير موجود أو لا يمكن الوصول إليه" });
+      }
+      
+      const currentChips = user.chips || 0; // إذا كانت الرقائق غير محددة، استخدم 0
+      const newChips = currentChips + profitLoss;
+      
+      console.log(`تحديث رصيد المستخدم ${userId} - القديم: ${currentChips}, الجديد: ${newChips}, التغيير: ${profitLoss}`);
+      
+      // تحديث رصيد المستخدم في المخزن المؤقت أولاً
       const updatedUser = await storage.updateUserChips(
         userId, 
         newChips, 
@@ -207,10 +236,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         `${profitLoss >= 0 ? "ربح" : "خسارة"} في لعبة صاروخ مصر بمضاعف ${multiplier}x`
       );
       
+      // محاولة تحديث الرصيد في قاعدة البيانات أيضاً (لن تتوقف العملية إذا فشلت)
+      let dbUpdateSuccess = false;
+      try {
+        if (dbUser) {
+          await userService.updateUserChips(
+            userId,
+            newChips,
+            profitLoss >= 0 ? "egypt_rocket_win" : "egypt_rocket_loss",
+            `${profitLoss >= 0 ? "ربح" : "خسارة"} في لعبة صاروخ مصر بمضاعف ${multiplier}x`
+          );
+          console.log(`تم تحديث رصيد المستخدم ${userId} في قاعدة البيانات بنجاح`);
+          dbUpdateSuccess = true;
+        } else {
+          console.log(`تخطي تحديث قاعدة البيانات لأن المستخدم ${userId} غير موجود فيها`);
+        }
+      } catch (dbError) {
+        console.error(`خطأ في تحديث رصيد المستخدم في قاعدة البيانات:`, dbError);
+      }
+      
       // إنشاء كائن التحديث
-      const updateData = {
+      const updateData: any = {
         success: true, 
         message: profitLoss >= 0 ? "تم تحديث الرصيد بنجاح بعد الربح" : "تم تحديث الرصيد بعد الخسارة",
+        database_updated: dbUpdateSuccess,
         user: {
           id: user.id,
           username: user.username,
@@ -226,14 +275,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         timestamp: new Date().toISOString()
       };
       
-      // إرسال التحديث إلى خادم التحديثات الفورية
-      try {
-        // استخدام وظيفة مساعدة لإرسال التحديث إلى خادم WebSocket
-        await sendRealtimeUpdate(userId, updateData);
-      } catch (wsError) {
-        console.error("خطأ في إرسال التحديث المباشر:", wsError);
-        // نستمر رغم خطأ WebSocket لأنه غير حرج
-      }
+      // محاولة إرسال التحديث إلى خادم التحديثات الفورية (اختياري)
+      // استخدام وظيفة مساعدة لإرسال التحديث إلى خادم WebSocket
+      const wsResult = await sendRealtimeUpdate(userId, updateData);
+      
+      // إضافة نتيجة محاولة WebSocket إلى استجابة API
+      updateData.realtime_update = wsResult.success
+        ? { success: true, message: "تم إرسال التحديث المباشر بنجاح" }
+        : { success: false, message: "لم يتم إرسال التحديث المباشر (غير مهم)" };
       
       // الرد على العميل
       res.json(updateData);
@@ -243,7 +292,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // وظيفة مساعدة لإرسال التحديث المباشر
+  // وظيفة مساعدة لإرسال التحديث المباشر مع تحمل الأخطاء
   async function sendRealtimeUpdate(userId: number, data: any) {
     try {
       // إضافة نوع التحديث
@@ -253,27 +302,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
         updateType: "chips_update"
       };
       
-      // إرسال التحديث إلى خادم FastAPI
-      // استخدام node-fetch للإرسال إلى خادم WebSocket
-      const response = await fetch(`http://localhost:3001/user/${userId}/notify`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(message),
-      });
+      console.log(`محاولة إرسال تحديث فوري للمستخدم ${userId}...`);
       
-      if (!response.ok) {
-        throw new Error(`فشل إرسال التحديث المباشر: ${response.status} ${response.statusText}`);
+      // استخدام المهلة الزمنية لتجنب انتظار استجابة لفترة طويلة
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 1500); // توقف بعد 1.5 ثانية
+      
+      try {
+        // إرسال التحديث إلى خادم FastAPI
+        // استخدام node-fetch للإرسال إلى خادم WebSocket
+        const response = await fetch(`http://localhost:3001/user/${userId}/notify`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(message),
+          signal: controller.signal
+        });
+        
+        // إلغاء المهلة الزمنية
+        clearTimeout(timeoutId);
+        
+        if (!response.ok) {
+          console.warn(`استجابة غير ناجحة من خادم التحديثات الفورية: ${response.status} ${response.statusText}`);
+          return { success: false, error: "استجابة غير ناجحة" };
+        }
+        
+        const result = await response.json();
+        console.log(`تم إرسال التحديث المباشر للمستخدم ${userId} بنجاح`);
+        
+        return { success: true, result };
+      } catch (fetchError) {
+        // إلغاء المهلة الزمنية في حالة حدوث خطأ
+        clearTimeout(timeoutId);
+        
+        // تسجيل رسالة خطأ أقل تفصيلاً للحفاظ على ترتيب السجلات
+        console.warn(`تعذر الاتصال بخادم التحديثات الفورية على المنفذ 3001: ${fetchError.message || "خطأ غير معروف"}`);
+        
+        // لا نرمي خطأ، بل نعود بحالة فشل
+        return { success: false, error: "تعذر الاتصال بخادم التحديثات الفورية" };
       }
-      
-      const result = await response.json();
-      console.log(`تم إرسال التحديث المباشر للمستخدم ${userId}:`, result);
-      
-      return result;
     } catch (error) {
-      console.error(`خطأ في إرسال التحديث المباشر للمستخدم ${userId}:`, error);
-      throw error;
+      // التقاط أي أخطاء أخرى قد تحدث
+      console.error(`خطأ غير متوقع في إرسال التحديث المباشر للمستخدم ${userId}:`, error);
+      return { success: false, error: "خطأ غير متوقع" };
     }
   }
   

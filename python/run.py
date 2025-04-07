@@ -12,7 +12,13 @@ import sys
 import time
 import threading
 import logging
-from importlib import import_module
+import subprocess
+import signal
+import uvicorn
+import traceback
+
+# استيراد محتويات الوحدة مباشرة إذا كانت متاحة
+from python.realtime_server import app as fast_api_app
 
 # إعداد التسجيل
 logging.basicConfig(
@@ -22,39 +28,31 @@ logging.basicConfig(
 logger = logging.getLogger("python_runner")
 
 def start_realtime_server():
-    """بدء تشغيل خادم التحديثات الفورية"""
+    """بدء تشغيل خادم التحديثات الفورية بشكل مباشر"""
     try:
-        # استيراد وحدة realtime_server
-        realtime_server = import_module("python.realtime_server")
+        logger.info("بدء تشغيل خادم التحديثات الفورية على المنفذ 3005...")
         
-        # بدء تشغيل الخادم
-        server_thread = realtime_server.start_server_in_thread()
+        # تكوين وتشغيل Uvicorn مباشرة
+        uvicorn.run(
+            fast_api_app,
+            host="0.0.0.0",
+            port=3005,
+            log_level="info"
+        )
         
-        logger.info("تم بدء تشغيل خادم التحديثات الفورية على المنفذ 3001")
-        
-        # إرجاع مرجع الخيط للاستخدام في المستقبل
-        return server_thread
+        return True
     except Exception as e:
-        logger.error(f"فشل في بدء تشغيل خادم التحديثات الفورية: {str(e)}")
-        return None
+        error_traceback = traceback.format_exc()
+        logger.error(f"فشل في بدء تشغيل خادم التحديثات الفورية: {str(e)}\n{error_traceback}")
+        return False
 
 if __name__ == '__main__':
     """تشغيل نقطة الدخول الرئيسية"""
     logger.info("بدء تشغيل خدمات Python...")
     
-    # بدء تشغيل خادم التحديثات الفورية
-    server_thread = start_realtime_server()
+    # محاولة بدء تشغيل الخادم بشكل مباشر
+    success = start_realtime_server()
     
-    if server_thread:
-        logger.info("تم بدء جميع الخدمات بنجاح")
-        
-        # الانتظار حتى يتم إيقاف العملية
-        try:
-            while True:
-                time.sleep(1)
-        except KeyboardInterrupt:
-            logger.info("تم إيقاف الخدمات من قبل المستخدم")
-            sys.exit(0)
-    else:
+    if not success:
         logger.error("فشل في بدء الخدمات")
         sys.exit(1)

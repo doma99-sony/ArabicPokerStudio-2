@@ -10,6 +10,7 @@ import {
   badgeCategories,
   userBadges
 } from "@shared/schema";
+import { userService } from './services/user-service';
 import createMemoryStore from "memorystore";
 import session from "express-session";
 import fs from "fs";
@@ -475,43 +476,28 @@ export class MemStorage implements IStorage {
   
   async updateUserChips(userId: number, newChips: number, type?: string, description?: string): Promise<User | undefined> {
     try {
+      // الحصول على بيانات المستخدم الحالية من الذاكرة
       const user = await this.getUser(userId);
       if (!user) return undefined;
       
       // حساب التغيير في الرصيد
       const chipsChange = newChips - user.chips;
       
-      // استخدام userService لتحديث رصيد المستخدم في قاعدة البيانات
-      // وتخزين سجل المعاملة
-      const { userService } = require('./services/user-service');
+      // تحديث الرصيد في الذاكرة
+      user.chips = newChips;
+      this.users.set(userId, user);
       
-      try {
-        // استدعاء وظيفة تحديث الرصيد من خدمة المستخدم
-        const updatedUser = await userService.updateUserChips(userId, newChips, type || 'unknown_transaction', description);
-        
-        // تحديث النسخة المحلية في الذاكرة كذلك
-        if (updatedUser) {
-          user.chips = updatedUser.chips;
-          this.users.set(userId, user);
-          console.log(`تم تحديث رصيد المستخدم ${userId} في قاعدة البيانات وفي الذاكرة، الرصيد الجديد: ${newChips}`);
-        }
-        
-        return updatedUser;
-      } catch (dbError) {
-        console.error(`خطأ في تحديث رصيد المستخدم ${userId} في قاعدة البيانات:`, dbError);
-        
-        // إذا فشلت عملية التحديث في قاعدة البيانات، نقوم بتحديث الذاكرة فقط كإجراء احتياطي
-        console.log(`تحديث رصيد المستخدم ${userId} في الذاكرة فقط بسبب خطأ في قاعدة البيانات، الرصيد الجديد: ${newChips}`);
-        user.chips = newChips;
-        this.users.set(userId, user);
-        
-        // سجل المعاملة في سجل التطبيق على الأقل
-        if (type && chipsChange !== 0) {
-          console.log(`سجل معاملة في الذاكرة: المستخدم ${userId} - ${type} - التغيير: ${chipsChange} - الوصف: ${description || 'غير متوفر'}`);
-        }
-        
-        return user;
+      console.log(`تم تحديث رصيد المستخدم ${userId} في الذاكرة، الرصيد الجديد: ${newChips}`);
+      
+      // سجل المعاملة في سجل التطبيق
+      if (type && chipsChange !== 0) {
+        console.log(`سجل معاملة: المستخدم ${userId} - ${type} - التغيير: ${chipsChange} - الوصف: ${description || 'غير متوفر'}`);
       }
+      
+      // تحديث رصيد المستخدم في قاعدة البيانات يتم إجراؤه في routes.ts
+      // عن طريق استدعاء userService.updateUserChips مباشرة
+      
+      return user;
     } catch (error) {
       console.error(`خطأ غير متوقع في تحديث رصيد المستخدم ${userId}:`, error);
       return undefined;
