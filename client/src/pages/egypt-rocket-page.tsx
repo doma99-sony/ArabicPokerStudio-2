@@ -8,6 +8,7 @@ import GameControls from './egypt-rocket/components/game-controls';
 import RocketGame from './egypt-rocket/components/rocket-game';
 import './egypt-rocket/assets/egypt-rocket.css';
 import { motion } from 'framer-motion';
+import { useRealtimeUpdatesContext } from '@/hooks/use-realtime-updates';
 
 // استيراد سمات مصرية وتأثيرات بصرية
 import { Pyramid as PyramidIcon, ScrollText as ScrollIcon, Compass as AnkhIcon, LogOut as LogOutIcon, Home as HomeIcon } from 'lucide-react';
@@ -26,6 +27,7 @@ const EgyptRocketPage = () => {
   const { toast } = useToast();
   const [_, navigate] = useLocation();
   const rocketRef = useRef<{ triggerExplosion: () => void }>(null);
+  const realtimeUpdates = useRealtimeUpdatesContext();
   
   // حالة اللعبة
   const [gameStatus, setGameStatus] = useState<'waiting' | 'flying' | 'crashed'>('waiting');
@@ -43,6 +45,27 @@ const EgyptRocketPage = () => {
   // مراجع للمؤقتات
   const gameTimerRef = useRef<NodeJS.Timeout | null>(null);
   const multiplierIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // إضافة مستمع للتحديثات الفورية لتحديث رصيد اللاعب
+  useEffect(() => {
+    // دالة معالجة تحديث الرصيد
+    const handleChipsUpdate = (message: any) => {
+      if (message.user && message.user.chips !== undefined) {
+        console.log('تم استلام تحديث للرصيد من خادم التحديثات الفورية:', message);
+        
+        // تحديث حالة الرصيد المحلي
+        setUserChips(message.user.chips);
+      }
+    };
+    
+    // تسجيل مستمع للتحديثات الفورية
+    realtimeUpdates.addMessageListener('user_update', handleChipsUpdate);
+    
+    // تنظيف المستمع عند إزالة المكون
+    return () => {
+      realtimeUpdates.removeMessageListener('user_update', handleChipsUpdate);
+    };
+  }, [realtimeUpdates]);
   
   // محاكاة اتصال الويب سوكت (يجب استبدالها بالاتصال الحقيقي لاحقاً)
   useEffect(() => {
@@ -296,14 +319,13 @@ const EgyptRocketPage = () => {
   };
   
   // جمع الرهان قبل الانفجار
-  const cashout = () => {
+  const cashout = async () => {
     if (gameStatus !== 'flying' || !isBetting || hasCashedOut) return;
     
     const profit = Math.floor(betAmount * currentMultiplier) - betAmount;
     const totalWin = betAmount + profit;
     
     setHasCashedOut(true);
-    setUserChips(prev => prev + totalWin);
     
     // تحديث حالة اللاعب في قائمة الرهانات الحية
     setLiveBets(prev => {
@@ -324,6 +346,86 @@ const EgyptRocketPage = () => {
       title: "تم الجمع بنجاح!",
       description: `ربحت ${profit} رقاقة عند ${currentMultiplier.toFixed(2)}x`,
     });
+    
+    // تحديث الرصيد على الخادم - ملاحظة: لا نقوم بتعديل الرصيد المحلي هنا
+    // سيتم تحديث الرصيد تلقائياً عند استلام إشعار من خادم التحديثات الفورية
+    try {
+      console.log('جاري إرسال طلب تحديث الرصيد إلى الخادم...');
+      const response = await fetch('/api/games/egypt-rocket/update-chips', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          betAmount: betAmount,
+          winAmount: totalWin,
+          multiplier: currentMultiplier,
+          gameResult: 'win'
+        }),
+      });
+      
+      if (!response.ok) {
+        console.error('فشل في تحديث الرصيد على الخادم:', await response.text());
+        toast({
+          title: "تنبيه",
+          description: "حدث خطأ في تحديث الرصيد على الخادم. سيتم المحاولة مرة أخرى",
+          variant: "destructive"
+        });
+        
+        // في حالة الفشل، نقوم بتحديث الرصيد محلياً كإجراء احتياطي
+        setUserChips(prev => prev + totalWin);
+      } else {
+        // قراءة البيانات من الاستجابة
+        const result = await response.json();
+        console.log('تم تحديث الرصيد على الخادم بنجاح:', result);
+        
+        // في حالة عدم استلام تحديث من WebSocket، نحدث الرصيد المحلي من الاستجابة مباشرة
+        if (result.user && result.user.chips !== undefined) {
+          setUserChips(result.user.chips);
+        } else {
+          // إجراء احتياطي إذا لم تكن البيانات كاملة في الاستجابة
+          setUserChips(prev => prev + totalWin);
+          
+          // محاولة إرسال تحديث عبر WebSocket إذا كان متصلاً
+          if (realtimeUpdates.status === 'connected') {
+            realtimeUpdates.send({
+              type: 'local_update',
+              data: {
+                user_id: user?.id,
+                chips: userChips + totalWin,
+                action: 'cashout',
+                multiplier: currentMultiplier,
+                amount: totalWin
+              }
+            });
+          }
+        }
+      }
+    } catch (error) {
+      console.error('خطأ أثناء إرسال طلب تحديث الرصيد:', error);
+      toast({
+        title: "تنبيه",
+        description: "حدث خطأ في الاتصال بالخادم. تم تحديث الرصيد محلياً فقط",
+        variant: "destructive"
+      });
+      
+      // في حالة وجود خطأ في الاتصال، نحدث الرصيد محلياً
+      setUserChips(prev => prev + totalWin);
+      
+      // محاولة إرسال تحديث عبر WebSocket إذا كان متصلاً
+      if (realtimeUpdates.status === 'connected') {
+        realtimeUpdates.send({
+          type: 'local_update',
+          data: {
+            user_id: user?.id,
+            chips: userChips + totalWin,
+            action: 'cashout',
+            multiplier: currentMultiplier,
+            amount: totalWin
+          }
+        });
+      }
+    }
   };
   
   // ابدأ اللعبة عند تحميل الصفحة
@@ -339,6 +441,44 @@ const EgyptRocketPage = () => {
       { multiplier: 1.35, timestamp: new Date(Date.now() - 300000) },
     ]);
   }, []);
+  
+  // الاستماع لتحديثات WebSocket
+  useEffect(() => {
+    if (realtimeUpdates.status === 'connected' && user?.id) {
+      // إضافة مستمع لتحديثات الرصيد
+      const handleBalanceUpdate = (message: any) => {
+        if (message.type === 'balance_update' && message.data && message.data.userId === user.id) {
+          console.log('تم استلام تحديث رصيد عبر WebSocket:', message.data);
+          setUserChips(message.data.balance);
+          toast({
+            title: "تم تحديث الرصيد",
+            description: `تم تحديث رصيدك إلى ${message.data.balance} رقاقة`,
+            variant: "default"
+          });
+        }
+      };
+      
+      // إضافة مستمع للتحديثات المحلية المؤكدة
+      const handleLocalUpdate = (message: any) => {
+        if (message.type === 'local_update_confirmed' && message.data && message.data.user_id === user.id) {
+          console.log('تم تأكيد التحديث المحلي عبر WebSocket:', message.data);
+          if (message.data.chips !== undefined) {
+            setUserChips(message.data.chips);
+          }
+        }
+      };
+
+      // تسجيل المستمعين
+      realtimeUpdates.addMessageListener('balance_update', handleBalanceUpdate);
+      realtimeUpdates.addMessageListener('local_update_confirmed', handleLocalUpdate);
+      
+      // إزالة المستمعين عند تفكيك المكون
+      return () => {
+        realtimeUpdates.removeMessageListener('balance_update', handleBalanceUpdate);
+        realtimeUpdates.removeMessageListener('local_update_confirmed', handleLocalUpdate);
+      };
+    }
+  }, [realtimeUpdates.status, user?.id, realtimeUpdates]);
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#06071A] to-[#141E30] pt-10 pb-2 px-2">

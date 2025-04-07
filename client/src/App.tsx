@@ -48,6 +48,9 @@ import { useSessionManager } from "@/hooks/use-session-manager";
 import { WebSocketInitializer } from "@/components/websocket-initializer";
 import { ConnectionIndicator } from "@/components/ui/connection-indicator";
 
+// استيراد مزود التحديثات الفورية
+import { RealtimeUpdatesProvider } from "@/hooks/use-realtime-updates";
+
 
 function Router() {
   return (
@@ -182,22 +185,25 @@ function App() {
         {/* إضافة مكون WebSocketInitializer لضمان استمرارية الاتصال في جميع الصفحات */}
         <WebSocketInitializer />
         
-        {/* إذا كانت شاشة البداية مفعلة، اعرضها وإلا اعرض التطبيق الرئيسي */}
-        {showSplash ? (
-          <SplashScreen onComplete={() => {
-            // تعيين علامة في sessionStorage أنه قد رأى شاشة البداية
-            sessionStorage.setItem('hasSeenSplash', 'true');
-            setShowSplash(false);
-          }} />
-        ) : (
-          <>
-            <Router />
-            <WelcomeMessageNotification />
-            <LandscapeNotice />
-            <ConnectionIndicator />
-            <Toaster />
-          </>
-        )}
+        {/* إضافة مزود التحديثات الفورية */}
+        <RealtimeUpdatesProvider>
+          {/* إذا كانت شاشة البداية مفعلة، اعرضها وإلا اعرض التطبيق الرئيسي */}
+          {showSplash ? (
+            <SplashScreen onComplete={() => {
+              // تعيين علامة في sessionStorage أنه قد رأى شاشة البداية
+              sessionStorage.setItem('hasSeenSplash', 'true');
+              setShowSplash(false);
+            }} />
+          ) : (
+            <>
+              <Router />
+              <WelcomeMessageNotification />
+              <LandscapeNotice />
+              <ConnectionIndicator />
+              <Toaster />
+            </>
+          )}
+        </RealtimeUpdatesProvider>
       </NotificationsProvider>
     </ErrorProvider>
   );

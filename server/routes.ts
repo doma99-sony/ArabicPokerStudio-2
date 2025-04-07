@@ -207,10 +207,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         `${profitLoss >= 0 ? "ربح" : "خسارة"} في لعبة صاروخ مصر بمضاعف ${multiplier}x`
       );
       
-      // إضافة سجل للاعب (تاريخ اللعب)
-      // يمكن تطبيقه في المستقبل
-      
-      res.json({ 
+      // إنشاء كائن التحديث
+      const updateData = {
         success: true, 
         message: profitLoss >= 0 ? "تم تحديث الرصيد بنجاح بعد الربح" : "تم تحديث الرصيد بعد الخسارة",
         user: {
@@ -224,13 +222,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
           profitLoss,
           multiplier,
           gameResult
-        }
-      });
+        },
+        timestamp: new Date().toISOString()
+      };
+      
+      // إرسال التحديث إلى خادم التحديثات الفورية
+      try {
+        // استخدام وظيفة مساعدة لإرسال التحديث إلى خادم WebSocket
+        await sendRealtimeUpdate(userId, updateData);
+      } catch (wsError) {
+        console.error("خطأ في إرسال التحديث المباشر:", wsError);
+        // نستمر رغم خطأ WebSocket لأنه غير حرج
+      }
+      
+      // الرد على العميل
+      res.json(updateData);
     } catch (error) {
       console.error("خطأ في تحديث رصيد اللاعب بعد لعبة صاروخ مصر:", error);
       res.status(500).json({ error: "حدث خطأ أثناء تحديث الرصيد" });
     }
   });
+  
+  // وظيفة مساعدة لإرسال التحديث المباشر
+  async function sendRealtimeUpdate(userId: number, data: any) {
+    try {
+      // إضافة نوع التحديث
+      const message = {
+        ...data,
+        type: "user_update",
+        updateType: "chips_update"
+      };
+      
+      // إرسال التحديث إلى خادم FastAPI
+      // استخدام node-fetch للإرسال إلى خادم WebSocket
+      const response = await fetch(`http://localhost:3001/user/${userId}/notify`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(message),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`فشل إرسال التحديث المباشر: ${response.status} ${response.statusText}`);
+      }
+      
+      const result = await response.json();
+      console.log(`تم إرسال التحديث المباشر للمستخدم ${userId}:`, result);
+      
+      return result;
+    } catch (error) {
+      console.error(`خطأ في إرسال التحديث المباشر للمستخدم ${userId}:`, error);
+      throw error;
+    }
+  }
   
   // Get user profile with stats and game history
   app.get("/api/profile", ensureAuthenticated, async (req, res) => {
