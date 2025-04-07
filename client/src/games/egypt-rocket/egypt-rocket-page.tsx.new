@@ -1,215 +1,0 @@
-import { useState, useEffect } from "react";
-import { useLocation } from "wouter";
-import { useAuth } from "@/hooks/use-auth";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { 
-  ArrowLeft, 
-  DollarSign, 
-  Home, 
-  Crown,
-  ShoppingCart,
-  ShoppingBag,
-  Trophy
-} from "lucide-react";
-
-// استيراد المكونات والهوك
-import EgyptRocket from "./components/rocket";
-import PlayersList from "./components/players-list";
-import GameHistoryComponent from "./components/game-history";
-import BettingControls from "./components/betting-controls";
-import { useEgyptRocketSocket } from "./hooks/use-egypt-rocket-socket";
-
-// صفحة لعبة صاروخ مصر
-const EgyptRocketPage = () => {
-  const { user } = useAuth();
-  const [, navigate] = useLocation();
-  const [isBetPlaced, setIsBetPlaced] = useState<boolean>(false);
-  const [isCashedOut, setIsCashedOut] = useState<boolean>(false);
-
-  // استخدام هوك الاتصال بالخادم
-  const { 
-    gameState, 
-    placeBet, 
-    cashout, 
-    isConnected,
-    error
-  } = useEgyptRocketSocket();
-
-  // تتبع حالة الرهان والسحب بناءً على حالة اللعبة
-  useEffect(() => {
-    // إذا تغيرت حالة اللعبة إلى "waiting"، فإعادة تعيين حالة الرهان والسحب
-    if (gameState.status === 'waiting') {
-      setIsBetPlaced(false);
-      setIsCashedOut(false);
-    }
-  }, [gameState.status]);
-
-  // التعامل مع وضع رهان
-  const handlePlaceBet = (amount: number, autoCashout: number | null) => {
-    if (gameState.status !== 'waiting' || gameState.countdown === 0) {
-      return;
-    }
-    
-    if (!user) {
-      console.log("يجب تسجيل الدخول أولاً");
-      return;
-    }
-    
-    if (amount <= 0) {
-      console.log("مبلغ الرهان يجب أن يكون أكبر من 0");
-      return;
-    }
-    
-    if (user.chips < amount) {
-      console.log("لا يوجد رصيد كافٍ");
-      return;
-    }
-    
-    // إرسال الرهان إلى الخادم
-    placeBet(amount, autoCashout);
-    setIsBetPlaced(true);
-    
-    console.log(`تم وضع رهان بقيمة ${amount}`);
-  };
-
-  // التعامل مع السحب
-  const handleCashout = () => {
-    if (gameState.status !== 'flying' || !isBetPlaced || isCashedOut) {
-      return;
-    }
-    
-    // إرسال طلب سحب إلى الخادم
-    cashout();
-    setIsCashedOut(true);
-    
-    console.log(`تم طلب السحب`);
-  };
-
-  return (
-    <div className="bg-gradient-to-b from-sky-900 to-slate-900 min-h-screen pb-16 relative overflow-hidden rtl">
-      {/* رسالة الخطأ */}
-      {error && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/70">
-          <div className="bg-slate-800 p-6 rounded-lg shadow-lg max-w-md">
-            <h3 className="text-xl text-red-400 mb-4">حدث خطأ!</h3>
-            <p className="text-white mb-6">{error}</p>
-            <Button 
-              className="w-full bg-red-500 hover:bg-red-600"
-              onClick={() => window.location.reload()}
-            >
-              تحديث الصفحة
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {/* شريط التنقل العلوي */}
-      <div className="bg-slate-800 p-3 flex justify-between items-center shadow-md">
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="text-white" 
-          onClick={() => navigate("/")}
-        >
-          <ArrowLeft className="h-6 w-6" />
-        </Button>
-        <h1 className="text-xl font-bold text-white">صاروخ مصر 🚀</h1>
-        <div className="flex items-center gap-2">
-          <div className="bg-emerald-600 text-white py-1 px-3 rounded-full text-sm flex items-center">
-            <DollarSign className="h-4 w-4 mr-1" />
-            <span>{user?.chips || 5000}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* مؤشر الاتصال */}
-      <div className={`
-        absolute top-14 left-4 w-3 h-3 rounded-full transition-colors duration-300
-        ${isConnected ? 'bg-green-500' : 'bg-red-500'}
-      `}></div>
-
-      {/* منطقة اللعب الرئيسية */}
-      <div className="relative h-[50vh] bg-gradient-to-b from-transparent to-slate-900/50 overflow-hidden mt-4">
-        {/* خلفية النجوم */}
-        <div className="absolute inset-0 bg-[radial-gradient(white,_rgba(255,255,255,.2)_2px,_transparent_40px)] bg-[length:50px_50px] z-0"></div>
-        
-        {/* الصاروخ المصري */}
-        <EgyptRocket 
-          gameStatus={gameState.status} 
-          currentMultiplier={gameState.currentMultiplier} 
-        />
-        
-        {/* المضاعف الحالي */}
-        <div className="absolute top-10 right-1/2 transform translate-x-1/2 text-center z-10">
-          {gameState.currentMultiplier ? (
-            <div className="text-4xl font-bold text-yellow-400 drop-shadow-[0_0_10px_rgba(234,179,8,0.7)]">
-              {`${gameState.currentMultiplier.toFixed(2)}x`}
-            </div>
-          ) : gameState.status === 'waiting' ? (
-            <div className="text-4xl font-bold text-white">
-              {gameState.countdown > 0 ? `${gameState.countdown}` : "انطلاق!"}
-            </div>
-          ) : (
-            <div className="text-4xl font-bold text-red-500">
-              انفجر!
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* لوحة التحكم في الرهان */}
-      <div className="bg-slate-800 rounded-t-xl -mt-6 relative z-10 px-4 py-6 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.3)]">
-        {/* عناصر التحكم بالمراهنة */}
-        <BettingControls 
-          onPlaceBet={handlePlaceBet}
-          onCashout={handleCashout}
-          gameStatus={gameState.status}
-          isBetPlaced={isBetPlaced}
-          isCashedOut={isCashedOut}
-          countdown={gameState.countdown}
-          userChips={user?.chips || 0}
-        />
-        
-        {/* جدول اللاعبين وسجل الألعاب */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-          {/* قائمة اللاعبين */}
-          <PlayersList players={gameState.players} />
-          
-          {/* سجل الألعاب السابقة */}
-          <GameHistoryComponent history={gameState.gameHistory} />
-        </div>
-      </div>
-
-      {/* شريط التنقل السفلي */}
-      <div className="fixed bottom-0 left-0 right-0 bg-slate-800 py-2 px-4 flex justify-around items-center z-20 border-t border-slate-700">
-        <button className="flex flex-col items-center text-white py-1" onClick={() => navigate("/")}>
-          <Home className="h-6 w-6" />
-          <span className="text-xs mt-1">الرئيسية</span>
-        </button>
-        
-        <button className="flex flex-col items-center text-white py-1">
-          <Trophy className="h-6 w-6" />
-          <span className="text-xs mt-1">التصنيف</span>
-        </button>
-        
-        <button className="flex flex-col items-center text-white py-1">
-          <ShoppingCart className="h-6 w-6" />
-          <span className="text-xs mt-1">المتجر</span>
-        </button>
-        
-        <button className="flex flex-col items-center text-white py-1">
-          <ShoppingBag className="h-6 w-6" />
-          <span className="text-xs mt-1">الهدايا</span>
-        </button>
-        
-        <button className="flex flex-col items-center text-emerald-400 py-1">
-          <Crown className="h-6 w-6" />
-          <span className="text-xs mt-1">VIP</span>
-        </button>
-      </div>
-    </div>
-  );
-};
-
-export default EgyptRocketPage;
