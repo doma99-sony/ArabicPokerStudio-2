@@ -1,142 +1,159 @@
-// مكون خط الدفع للعبة صياد السمك
-import React, { useEffect, useRef } from 'react';
-import { Payline } from '../types';
+import React from 'react';
+import { Payline, Win } from '../types';
+import { PAYLINE_COLORS } from '../assets/images';
 
 interface PaylineOverlayProps {
   payline: Payline;
-  color: string;
+  visible: boolean;
+  gridSize: { cols: number, rows: number };
+  color?: string;
 }
 
 /**
- * مكون خط الدفع
- * يعرض خط الدفع الفائز على الشاشة
+ * مكون يعرض خط دفع مع الرسومات المتحركة
  */
-const PaylineOverlay: React.FC<PaylineOverlayProps> = ({ payline, color }) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+const PaylineOverlay: React.FC<PaylineOverlayProps> = ({
+  payline,
+  visible,
+  gridSize,
+  color
+}) => {
+  if (!visible) return null;
+
+  const { cols, rows } = gridSize;
+  const lineColor = color || PAYLINE_COLORS[payline.id % PAYLINE_COLORS.length];
   
-  // رسم خط الدفع على الشاشة
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+  // إنشاء نقاط المسار لرسم خط الدفع
+  const createPathPoints = () => {
+    const points: [number, number][] = [];
     
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    
-    // تعيين عرض وارتفاع الكانفاس
-    const reelsContainer = canvas.parentElement;
-    if (reelsContainer) {
-      canvas.width = reelsContainer.clientWidth;
-      canvas.height = reelsContainer.clientHeight;
+    // تحويل مواقع خط الدفع إلى إحداثيات
+    for (let i = 0; i < payline.positions.length; i++) {
+      const rowIndex = payline.positions[i];
+      
+      // مركز الخلية
+      const x = (i + 0.5) * (100 / cols);  // النسبة المئوية للعرض
+      const y = (rowIndex + 0.5) * (100 / rows);  // النسبة المئوية للارتفاع
+      
+      points.push([x, y]);
     }
     
-    // مسح الكانفاس
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    return points;
+  };
+  
+  // تحويل النقاط إلى مسار SVG
+  const pathPoints = createPathPoints();
+  let pathD = '';
+  
+  if (pathPoints.length > 0) {
+    pathD = `M${pathPoints[0][0]},${pathPoints[0][1]}`;
     
-    // رسم خط الدفع
-    ctx.beginPath();
-    
-    // حساب موقع كل رمز في خط الدفع
-    const positions = payline.positions.map(([reelIndex, rowIndex]) => {
-      // حساب الموقع الفعلي على الشاشة
-      const reelWidth = canvas.width / 5; // 5 بكرات
-      const rowHeight = canvas.height / 3; // 3 صفوف
-      
-      const x = reelWidth * reelIndex + reelWidth / 2;
-      const y = rowHeight * rowIndex + rowHeight / 2;
-      
-      return { x, y };
-    });
-    
-    // إذا لم يوجد مواقع، نخرج
-    if (positions.length === 0) return;
-    
-    // ضبط خصائص الخط
-    ctx.lineWidth = 4;
-    ctx.strokeStyle = color;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.shadowColor = color;
-    ctx.shadowBlur = 10;
-    
-    // رسم الخط
-    ctx.moveTo(positions[0].x, positions[0].y);
-    for (let i = 1; i < positions.length; i++) {
-      ctx.lineTo(positions[i].x, positions[i].y);
+    for (let i = 1; i < pathPoints.length; i++) {
+      pathD += ` L${pathPoints[i][0]},${pathPoints[i][1]}`;
     }
-    
-    ctx.stroke();
-    
-    // رسم نقاط على الخط
-    ctx.fillStyle = color;
-    positions.forEach(({ x, y }) => {
-      ctx.beginPath();
-      ctx.arc(x, y, 8, 0, Math.PI * 2);
-      ctx.fill();
-    });
-    
-    // إنشاء التأثير البصري المتحرك
-    let progress = 0;
-    const animatePayline = () => {
-      // مسح القماش
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      // رسم الخط الأساسي
-      ctx.beginPath();
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 4;
-      ctx.moveTo(positions[0].x, positions[0].y);
-      for (let i = 1; i < positions.length; i++) {
-        ctx.lineTo(positions[i].x, positions[i].y);
-      }
-      ctx.stroke();
-      
-      // إنشاء نبض على طول الخط
-      const pulseWidth = 50;
-      const pulsePosition = progress * (positions.length - 1);
-      const segmentIndex = Math.floor(pulsePosition);
-      const segmentProgress = pulsePosition - segmentIndex;
-      
-      if (segmentIndex < positions.length - 1) {
-        const startPos = positions[segmentIndex];
-        const endPos = positions[segmentIndex + 1];
+  }
+
+  return (
+    <div className="payline-overlay">
+      <svg width="100%" height="100%" style={{ pointerEvents: 'none' }}>
+        {/* خط الدفع الأساسي */}
+        <path
+          d={pathD}
+          stroke={lineColor}
+          strokeWidth="3"
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeDasharray="0"
+          style={{ 
+            animation: 'dashoffset 2s linear infinite',
+            filter: 'drop-shadow(0 0 3px rgba(255, 255, 255, 0.7))'
+          }}
+        />
         
-        const pulseX = startPos.x + (endPos.x - startPos.x) * segmentProgress;
-        const pulseY = startPos.y + (endPos.y - startPos.y) * segmentProgress;
+        {/* تأثير خط الدفع الإضافي */}
+        <path
+          d={pathD}
+          stroke="white"
+          strokeWidth="1"
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeDasharray="5,5"
+          style={{ 
+            animation: 'dashoffset 1.5s linear infinite reverse',
+            opacity: 0.7
+          }}
+        />
         
-        // رسم النبض
-        const gradient = ctx.createRadialGradient(
-          pulseX, pulseY, 0,
-          pulseX, pulseY, pulseWidth
-        );
-        gradient.addColorStop(0, `${color}cc`);
-        gradient.addColorStop(1, `${color}00`);
+        {/* نقاط الاتصال عند كل رمز */}
+        {pathPoints.map((point, index) => (
+          <circle
+            key={index}
+            cx={point[0] + '%'}
+            cy={point[1] + '%'}
+            r="6"
+            fill={lineColor}
+            stroke="white"
+            strokeWidth="1"
+            opacity="0.8"
+            style={{
+              animation: 'pulse 1s ease-in-out infinite alternate'
+            }}
+          />
+        ))}
         
-        ctx.fillStyle = gradient;
-        ctx.beginPath();
-        ctx.arc(pulseX, pulseY, pulseWidth, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      
-      // تقدم التأثير
-      progress += 0.01;
-      if (progress > 1) progress = 0;
-      
-      // استمرار التأثير
-      requestAnimationFrame(animatePayline);
-    };
-    
-    // بدء التأثير
-    const animation = requestAnimationFrame(animatePayline);
-    
-    return () => cancelAnimationFrame(animation);
-  }, [payline, color]);
+        {/* رقم خط الدفع */}
+        {pathPoints.length > 0 && (
+          <text
+            x={pathPoints[0][0] + '%'}
+            y={pathPoints[0][1] + '%'}
+            fill={lineColor}
+            stroke="white"
+            strokeWidth="0.5"
+            fontSize="14"
+            fontWeight="bold"
+            textAnchor="middle"
+            alignmentBaseline="middle"
+          >
+            {payline.id + 1}
+          </text>
+        )}
+      </svg>
+    </div>
+  );
+};
+
+/**
+ * مكون يعرض كل خطوط الدفع النشطة
+ */
+interface WinPaylinesProps {
+  wins: Win[];
+  gridSize: { cols: number, rows: number };
+  activePaylines: number;
+}
+
+export const WinPaylines: React.FC<WinPaylinesProps> = ({
+  wins,
+  gridSize,
+  activePaylines
+}) => {
+  if (!wins || wins.length === 0) return null;
   
   return (
-    <canvas 
-      ref={canvasRef} 
-      className="payline-overlay" 
-      data-payline-id={payline.id}
-    />
+    <>
+      {wins.map((win, index) => (
+        win.payline && (
+          <PaylineOverlay
+            key={`win-${index}-${win.payline.id}`}
+            payline={win.payline}
+            visible={true}
+            gridSize={gridSize}
+            color={PAYLINE_COLORS[win.payline.id % PAYLINE_COLORS.length]}
+          />
+        )
+      ))}
+    </>
   );
 };
 

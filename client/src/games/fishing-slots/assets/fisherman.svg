@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- صياد السمك - الرمز البديل في اللعبة -->
+  <defs>
+    <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#F8D094" />
+      <stop offset="100%" stop-color="#E8B46C" />
+    </linearGradient>
+    <radialGradient id="glowEffect" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+      <stop offset="0%" stop-color="#FFD700" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#FF8C00" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+  
+  <!-- تأثير التوهج للرمز البديل -->
+  <circle cx="100" cy="100" r="98" fill="url(#glowEffect)" />
+  
+  <!-- جسم الصياد -->
+  <circle cx="100" cy="80" r="20" fill="url(#bodyGrad)" stroke="#654321" stroke-width="2" />
+  
+  <!-- وجه الصياد -->
+  <ellipse cx="100" cy="77" rx="15" ry="15" fill="#F8D5C0" />
+  <circle cx="94" cy="74" r="2" fill="#332211" />
+  <circle cx="106" cy="74" r="2" fill="#332211" />
+  <path d="M97 82 Q100 84 103 82" stroke="#332211" stroke-width="1" fill="none" />
+  
+  <!-- قبعة الصياد -->
+  <path d="M80 64 Q100 45 120 64" fill="#4682B4" stroke="#2C5D8C" stroke-width="2" />
+  
+  <!-- جسم الصياد -->
+  <path d="M85 95 L85 135 Q100 150 115 135 L115 95" fill="#4682B4" stroke="#2C5D8C" stroke-width="2" />
+  
+  <!-- صنارة الصيد -->
+  <path d="M115 110 L145 85 L160 95" fill="none" stroke="#654321" stroke-width="3" />
+  <line x1="160" y1="95" x2="160" y2="135" stroke="#654321" stroke-width="2" />
+  <line x1="160" y1="135" x2="165" y2="145" stroke="#654321" stroke-width="1" />
+  
+  <!-- خط الصيد -->
+  <path d="M160 95 Q165 100 165 145 Q165 155 170 160" fill="none" stroke="#CCCCCC" stroke-width="1" />
+  
+  <!-- سنارة الصيد -->
+  <path d="M170 160 C172 162 174 163 173 165 C171 166 170 165 170 160" fill="none" stroke="#silver" stroke-width="1" />
+  
+  <!-- نص البديل -->
+  <text x="100" y="180" font-family="Arial" font-size="14" font-weight="bold" text-anchor="middle" fill="#FFD700">WILD</text>
+</svg>

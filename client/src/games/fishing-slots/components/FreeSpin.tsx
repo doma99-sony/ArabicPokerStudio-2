@@ -1,30 +1,27 @@
-// مكون اللفات المجانية للعبة صياد السمك
 import React from 'react';
+import { FreeSpinsState } from '../types';
 
 interface FreeSpinProps {
-  count: number;
-  multiplier: number;
+  freeSpins: FreeSpinsState;
 }
 
 /**
- * مكون اللفات المجانية
- * يعرض عدد اللفات المجانية المتبقية والمضاعف الحالي
+ * مكون عرض اللفات المجانية
  */
-const FreeSpin: React.FC<FreeSpinProps> = ({ count, multiplier }) => {
+const FreeSpin: React.FC<FreeSpinProps> = ({ freeSpins }) => {
+  if (!freeSpins.active) return null;
+
   return (
     <div className="free-spins-container">
+      <div className="free-spins-effect"></div>
       <div className="free-spins-label">لفات مجانية</div>
-      <div className="free-spins-count">{count}</div>
-      
-      {multiplier > 1 && (
+      <div className="free-spins-count">{freeSpins.count}</div>
+      {freeSpins.multiplier > 1 && (
         <div className="free-spins-multiplier">
-          <span className="multiplier-text">مضاعف</span>
-          <span className="multiplier-value">x{multiplier}</span>
+          <span>مضاعف</span>
+          <span className="multiplier-value">x{freeSpins.multiplier}</span>
         </div>
       )}
-      
-      {/* عنصر التأثير المرئي */}
-      <div className="free-spins-effect"></div>
     </div>
   );
 };

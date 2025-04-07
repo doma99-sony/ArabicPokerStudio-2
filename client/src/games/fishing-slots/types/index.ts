@@ -1,59 +1,70 @@
-// أنواع البيانات المستخدمة في لعبة صياد السمك
+/**
+ * أنواع البيانات للعبة صياد السمك
+ */
 
-// نوع الرمز
+// أنواع الرموز المتاحة في اللعبة
 export enum SymbolType {
-  FISHERMAN = 'fisherman', // الصياد (Wild)
-  BAIT_BOX = 'bait_box',   // صندوق الطعم (Scatter)
-  FISH_1 = 'fish_1',       // سمكة بقيمة منخفضة 
-  FISH_2 = 'fish_2',       // سمكة بقيمة متوسطة
-  FISH_3 = 'fish_3',       // سمكة بقيمة عالية
-  STARFISH = 'starfish',   // نجم البحر
-  SHELL = 'shell',         // صدفة
-  ANCHOR = 'anchor',       // مرساة
-  CRAB = 'crab',           // سلطعون
-  FISH_MONEY = 'fish_money' // سمكة ذات قيمة نقدية
+  FISHERMAN = 'FISHERMAN',  // صياد (رمز Joker)
+  BAIT_BOX = 'BAIT_BOX',   // صندوق الطعم (Scatter)
+  FISH_3 = 'FISH_3',       // سمكة ذهبية كبيرة
+  FISH_2 = 'FISH_2',       // سمكة فضية متوسطة
+  FISH_1 = 'FISH_1',       // سمكة ملونة صغيرة
+  STARFISH = 'STARFISH',   // نجم البحر
+  SHELL = 'SHELL',         // صدفة
+  ANCHOR = 'ANCHOR',       // مرساة
+  CRAB = 'CRAB',           // سلطعون
+  FISH_MONEY = 'FISH_MONEY' // الأسماك ذات القيمة النقدية
 }
 
-// الرمز في اللعبة
+// رمز في اللعبة
 export interface Symbol {
-  id: number;
+  id: string;
   type: SymbolType;
-  position: [number, number];
-  value?: number; // قيمة نقدية للسمكة (إذا كانت من نوع FISH_MONEY)
-  isWild?: boolean; // هل هو رمز Joker؟
-  isScatter?: boolean; // هل هو رمز Scatter؟
+  isWild: boolean;
+  isScatter: boolean;
+  value?: number;  // قيمة خاصة للأسماك النقدية
 }
 
-// البكرة
+// بكرة في اللعبة
 export interface Reel {
   id: number;
   symbols: Symbol[];
-  position: number;
-  spinning: boolean;
+  position: number;  // الموضع الحالي للبكرة
+  spinning: boolean; // حالة الدوران
 }
 
-// خط الدفع
+// خط دفع في اللعبة
 export interface Payline {
   id: number;
-  positions: number[]; // مواقع الرموز على البكرات (0-2 لكل عمود)
-  name?: string; // اسم خط الدفع، على سبيل المثال "أفقي علوي"
+  positions: number[];  // مواقع الرموز في كل عمود
 }
 
-// نوع الفوز
+// أنواع مكافآت الفوز
 export enum WinType {
-  SMALL = 'small',   // فوز صغير (أقل من 5x)
-  MEDIUM = 'medium', // فوز متوسط (5x - 20x)
-  LARGE = 'large',   // فوز كبير (20x - 50x)
-  MEGA = 'mega'      // فوز ضخم (أكثر من 50x)
+  SMALL = 'SMALL',     // صغير (1-4x)
+  MEDIUM = 'MEDIUM',   // متوسط (5-19x)
+  LARGE = 'LARGE',     // كبير (20-49x)
+  MEGA = 'MEGA'        // ضخم (50x+)
 }
 
-// معلومات الفوز
+// فوز في اللعبة
 export interface Win {
   type: WinType;
   amount: number;
   payoutMultiplier: number;
-  payline?: Payline;
-  symbols?: Symbol[];
+  payline?: Payline;  // خط الدفع المرتبط بالفوز إن وجد
+  symbols: Symbol[];  // الرموز التي شكلت الفوز
+}
+
+// نتيجة دوران البكرات
+export interface SpinResult {
+  totalWin: number;
+  wins: Win[];
+  reels: Reel[];
+  visibleSymbols: Symbol[][];
+  triggeredFreeSpins: number;
+  collectedFisherman: boolean;
+  collectedFishSymbols: { position: [number, number]; value: number }[];
 }
 
 // حالة اللفات المجانية
@@ -61,17 +72,17 @@ export interface FreeSpinsState {
   active: boolean;
   count: number;
   totalWin: number;
-  fishermen: number; // عدد الصيادين الذين تم جمعهم
+  fishermen: number;  // عدد الصيادين المجمعين
   multiplier: number; // مضاعف الفوز الحالي
 }
 
 // حالة اللعبة
 export enum GameStatus {
-  IDLE = 'idle',
-  SPINNING = 'spinning',
-  STOPPING = 'stopping',
-  SHOWING_WIN = 'showing_win',
-  FREE_SPINS = 'free_spins'
+  IDLE = 'IDLE',           // في وضع الانتظار
+  SPINNING = 'SPINNING',   // البكرات تدور
+  SHOWING_WIN = 'SHOWING_WIN', // عرض الفوز
+  FREE_SPINS = 'FREE_SPINS',   // في وضع اللفات المجانية
+  ERROR = 'ERROR'              // حدث خطأ
 }
 
 // إعدادات اللعبة
@@ -82,18 +93,7 @@ export interface GameSettings {
   showIntro: boolean;
 }
 
-// نتيجة اللفة
-export interface SpinResult {
-  totalWin: number;
-  wins: Win[];
-  reels: Reel[];
-  visibleSymbols: Symbol[][];
-  triggeredFreeSpins: number; // عدد اللفات المجانية التي تم تفعيلها (0 إذا لم يتم تفعيل لفات مجانية)
-  collectedFisherman: boolean; // هل تم جمع صياد جديد؟
-  collectedFishSymbols: { position: [number, number]; value: number }[]; // رموز الأسماك النقدية التي تم جمعها
-}
-
-// حالة لعبة صياد السمك
+// الحالة الكاملة للعبة
 export interface FishingGameState {
   balance: number;
   betAmount: number;
@@ -111,19 +111,24 @@ export interface FishingGameState {
   settings: GameSettings;
 }
 
-// واجهة التحكم في الصوت
+// إعدادات الصوت
 export interface SoundControl {
-  play: (sound: string) => void;
-  stop: (sound: string) => void;
-  setEnabled: (enabled: boolean) => void;
-  isEnabled: () => boolean;
+  playBackgroundMusic: () => void;
+  stopBackgroundMusic: () => void;
+  playSpinSound: () => void;
+  playWinSound: (winType: WinType) => void;
+  playFreeSpinsSound: () => void;
+  playButtonSound: () => void;
+  toggleSound: () => void;
+  toggleMusic: () => void;
+  isSoundEnabled: boolean;
+  isMusicEnabled: boolean;
 }
 
 // إعدادات الرسوم المتحركة
 export interface AnimationSettings {
-  duration: number;
-  reelSpinDuration: number;
-  reelStopInterval: number;
-  winDisplayDuration: number;
-  winEffectDuration: number;
+  spinDuration: number;
+  winAnimationDuration: number;
+  fastMode: boolean;
+  toggleFastMode: () => void;
 }

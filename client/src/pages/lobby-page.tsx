@@ -453,6 +453,17 @@ export default function LobbyPage() {
                       maxBet: 25000,
                       isHot: true,
                       onClick: () => navigate("/slots/arabian-legends")
+                    },
+                    {
+                      id: "fishing-slots",
+                      title: "صياد السمك",
+                      image: "/attached_assets/image_1743814147037.png",
+                      playerCount: 389,
+                      tableCount: 0,
+                      minBet: 1,
+                      maxBet: 50000,
+                      isNew: true,
+                      onClick: () => navigate("/fishing-slots")
                     }
                   ]}
                 />
