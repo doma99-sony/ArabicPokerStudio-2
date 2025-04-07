@@ -2,14 +2,15 @@
  * أنماط صفحة لعبة صياد السمك (Big Bass Bonanza)
  */
 
-/* النمط الأساسي للعبة */
+/* الصفحة الرئيسية */
 .fishing-slots-game {
+  position: relative;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  background-color: #012c44;
+  direction: rtl;
   overflow: hidden;
-  position: relative;
-  font-family: 'Arial', sans-serif;
 }
 
 /* خلفية اللعبة */
@@ -20,326 +21,436 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  z-index: -1;
+  z-index: 0;
+  opacity: 0.4;
 }
 
-/* رأس الصفحة مع الشعار والرصيد */
+/* رأس اللعبة */
 .fishing-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 1rem;
-  background-color: rgba(0, 40, 60, 0.7);
-  backdrop-filter: blur(8px);
-  border-bottom: 2px solid #0277bd;
+  background-color: rgba(1, 44, 68, 0.8);
+  border-bottom: 3px solid #0277bd;
+  position: relative;
   z-index: 10;
 }
 
-/* شعار اللعبة */
 .game-logo {
-  height: 4rem;
-  max-width: 12rem;
-  object-fit: contain;
+  height: 60px;
+  width: auto;
 }
 
-/* عرض الرصيد */
 .balance-display {
-  background-color: #01447a;
+  background: linear-gradient(to bottom, #01447a, #023858);
   border: 2px solid #0277bd;
-  border-radius: 1rem;
+  border-radius: 10px;
   padding: 0.5rem 1rem;
-  display: flex;
-  align-items: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-.balance-label {
-  color: #64b5f6;
-  margin-right: 0.5rem;
-  font-size: 0.875rem;
+  color: #fff;
+  font-weight: bold;
+  text-align: center;
+  box-shadow: 0 0 10px rgba(2, 119, 189, 0.5);
 }
 
 .balance-value {
-  color: #fff;
-  font-weight: bold;
-  font-size: 1.25rem;
+  font-size: 1.5rem;
+  color: #f5af19;
 }
 
-.balance-value::before {
-  content: '$';
-  margin-right: 0.25rem;
-  color: #ffb300;
-}
-
-/* شريط التحكم بالأسفل */
-.controls-container {
-  background-color: rgba(1, 42, 65, 0.9);
-  padding: 1rem;
-  border-top: 2px solid #0277bd;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 10;
-}
-
-/* لوحة مفاتيح الرهان */
-.bet-controls {
-  display: flex;
-  align-items: center;
-  background-color: rgba(0, 55, 82, 0.8);
-  border-radius: 0.5rem;
-  padding: 0.5rem;
-  margin: 0 1rem;
-}
-
-.bet-label {
-  color: #64b5f6;
-  margin-right: 0.5rem;
-  font-size: 0.875rem;
-}
-
-.bet-value {
-  color: #fff;
-  font-weight: bold;
-  padding: 0 0.5rem;
-  width: 5rem;
-  text-align: center;
-}
-
-.bet-button {
-  background-color: #01579b;
-  color: white;
-  border: none;
-  border-radius: 0.25rem;
-  width: 2rem;
-  height: 2rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.bet-button:hover {
-  background-color: #0277bd;
-}
-
-.bet-button:disabled {
-  background-color: #546e7a;
-  cursor: not-allowed;
-  opacity: 0.7;
-}
-
-/* زر الدوران */
-.spin-button {
-  background: linear-gradient(to bottom, #f5af19, #f12711);
-  color: white;
-  font-weight: bold;
-  font-size: 1.25rem;
-  border: none;
-  border-radius: 2rem;
-  padding: 0.75rem 2rem;
-  cursor: pointer;
-  transition: all 0.3s;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-}
-
-.spin-button:hover {
-  transform: scale(1.05);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
-}
-
-.spin-button:active {
-  transform: scale(0.95);
-}
-
-.spin-button:disabled {
-  background: #78909c;
-  cursor: not-allowed;
-}
-
-/* بكرة الرموز */
+/* حاوية البكرات */
 .reels-container {
+  flex-grow: 1;
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: rgba(0, 30, 50, 0.7);
-  border-radius: 1rem;
-  border: 3px solid #0277bd;
   padding: 1rem;
-  margin: 2rem auto;
-  max-width: 900px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
-  overflow: hidden;
   position: relative;
+  z-index: 5;
+}
+
+.reels-frame {
+  background: linear-gradient(to bottom, #023858, #012135);
+  border: 4px solid #0277bd;
+  border-radius: 10px;
+  padding: 1rem;
+  box-shadow: 0 0 20px rgba(2, 119, 189, 0.7);
+  max-width: 800px;
+  width: 100%;
+}
+
+.reels-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px;
+  background-color: #011a29;
+  border-radius: 5px;
+  padding: 10px;
 }
 
 .reel {
+  position: relative;
+  overflow: hidden;
+  border-radius: 5px;
+  background-color: #01121e;
+  height: 360px;
+}
+
+/* الرموز */
+.static-reel {
   display: flex;
   flex-direction: column;
-  margin: 0 0.25rem;
-  overflow: hidden;
+  height: 100%;
+}
+
+.symbol-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 5px;
+  box-sizing: border-box;
   position: relative;
 }
 
-.reel-column {
+.symbol-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.symbol-container.winning {
+  background-color: rgba(245, 175, 25, 0.3);
+  border-radius: 5px;
+}
+
+.fish-value {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  background-color: #f5af19;
+  color: #012c44;
+  font-weight: bold;
+  padding: 2px 5px;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+}
+
+/* بكرة الدوران */
+.spinning-reel {
   display: flex;
   flex-direction: column;
 }
 
-.symbol {
-  width: 6rem;
-  height: 6rem;
-  margin: 0.25rem;
-  border-radius: 0.5rem;
-  transition: transform 0.3s;
-  overflow: hidden;
+/* لوحة التحكم */
+.control-panel {
+  background: linear-gradient(to bottom, #01447a, #023858);
+  border-top: 3px solid #0277bd;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  position: relative;
+  z-index: 10;
 }
 
-.symbol img {
+.bet-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #fff;
+}
+
+.bet-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.bet-button {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: #0277bd;
+  color: white;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.bet-button:hover:not(:disabled) {
+  background-color: #025e9e;
+}
+
+.bet-button:disabled {
+  background-color: #bbbbbb;
+  cursor: not-allowed;
+}
+
+.bet-amount {
+  background-color: #012135;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  border: 1px solid #0277bd;
+}
+
+.label {
+  margin-right: 0.5rem;
+  color: #bbbbbb;
+  font-size: 0.9rem;
+}
+
+.value {
+  color: #f5af19;
+  font-weight: bold;
+}
+
+.bet-slider {
+  padding: 0 1rem;
+}
+
+.slider {
+  --slider-thumb-bg: #f5af19;
+  --slider-track-filled-bg: #0277bd;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.spin-button, .max-bet-button, .autoplay-button {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(to bottom, #f5af19, #e69500);
+  color: #012c44;
+  font-weight: bold;
+  border: 2px solid #f5c700;
+  border-radius: 50px;
+  padding: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.spin-button {
+  flex: 2;
+  padding: 1rem;
+}
+
+.spin-button img, .max-bet-button img, .autoplay-button img {
+  height: 40px;
+  width: 40px;
+  transition: transform 0.2s ease;
+}
+
+.spin-button:hover:not(:disabled), 
+.max-bet-button:hover:not(:disabled), 
+.autoplay-button:hover:not(:disabled) {
+  background: linear-gradient(to bottom, #f5c700, #e6a700);
+  transform: scale(1.05);
+}
+
+.spin-button:disabled, 
+.max-bet-button:disabled, 
+.autoplay-button:disabled {
+  background: linear-gradient(to bottom, #bbbbbb, #999999);
+  border-color: #bbbbbb;
+  cursor: not-allowed;
+}
+
+.spin-button.spinning img {
+  transform: rotate(360deg);
+  transition: transform 1s linear infinite;
+}
+
+.autoplay-button.active {
+  background: linear-gradient(to bottom, #e65c00, #b34700);
+  border-color: #ff6600;
+}
+
+/* فقاعات الخلفية */
+.bubbles-container {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  pointer-events: none;
+  z-index: 1;
 }
 
-.symbol.highlighted {
-  box-shadow: 0 0 12px 4px #ffc107;
-  transform: scale(1.1);
-  z-index: 2;
-}
-
-/* النتائج والجوائز */
-.win-display {
+.bubble {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background-color: rgba(1, 87, 155, 0.9);
-  border-radius: 1rem;
-  padding: 2rem;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.1));
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+}
+
+/* تذييل اللعبة */
+.controls-container {
+  padding: 0.5rem 1rem;
+  background-color: rgba(1, 33, 53, 0.9);
   color: white;
   text-align: center;
+  font-size: 0.8rem;
+  position: relative;
+  z-index: 10;
+}
+
+/* تأثيرات الفوز */
+.win-effect {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   z-index: 20;
-  border: 4px solid #ffc107;
-  box-shadow: 0 0 30px rgba(255, 193, 7, 0.6);
-  max-width: 80%;
+  background-color: rgba(1, 33, 53, 0.7);
+  flex-direction: column;
 }
 
 .win-amount {
   font-size: 3rem;
   font-weight: bold;
-  color: #ffc107;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  color: #f5af19;
+  text-shadow: 0 0 10px rgba(245, 175, 25, 0.8);
   margin-bottom: 1rem;
 }
 
-.win-message {
-  font-size: 1.25rem;
-  margin-bottom: 1.5rem;
+.win-type {
+  font-size: 2rem;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 3px;
 }
 
-/* رسومات خطوط الدفع */
-.payline-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 10;
-}
-
-.payline-path {
-  stroke-width: 5px;
-  fill: none;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.7));
-  animation: paylinePulse 1.5s infinite;
-}
-
-@keyframes paylinePulse {
-  0% { opacity: 0.2; stroke-width: 3px; }
-  50% { opacity: 1; stroke-width: 5px; }
-  100% { opacity: 0.2; stroke-width: 3px; }
-}
-
-/* وضع اللفات المجانية */
+/* حالة اللفات المجانية */
 .free-spins-container {
   position: absolute;
   top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  right: 0;
+  background-color: rgba(245, 175, 25, 0.9);
+  color: #012c44;
+  padding: 0.5rem 1rem;
+  border-radius: 0 0 0 10px;
+  font-weight: bold;
+  z-index: 15;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  background-color: rgba(0, 20, 40, 0.85);
-  z-index: 30;
 }
 
-.free-spins-intro {
-  color: #ffc107;
-  font-size: 3rem;
-  font-weight: bold;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
-  margin-bottom: 2rem;
-  text-align: center;
+.free-spins-title {
+  font-size: 0.8rem;
+  text-transform: uppercase;
 }
 
-.free-spins-counter {
-  background-color: #01447a;
-  border: 3px solid #0277bd;
-  border-radius: 1rem;
-  padding: 0.5rem 1.5rem;
-  color: white;
+.free-spins-count {
   font-size: 1.5rem;
-  font-weight: bold;
-  margin-bottom: 1rem;
 }
 
-.fisherman-multiplier {
-  background-color: #b71c1c;
-  border: 3px solid #f44336;
-  border-radius: 1rem;
-  padding: 0.5rem 1.5rem;
-  color: white;
-  font-size: 1.25rem;
-  font-weight: bold;
-  margin-bottom: 2rem;
+.free-spins-multiplier {
+  font-size: 1rem;
+  background-color: #012c44;
+  color: #f5af19;
+  padding: 0.2rem 0.5rem;
+  border-radius: 5px;
+  margin-top: 0.3rem;
 }
 
-.start-free-spins-button {
-  background: linear-gradient(to bottom, #ffd54f, #ff9800);
-  color: #01447a;
-  font-weight: bold;
-  font-size: 1.5rem;
-  border: none;
-  border-radius: 2rem;
-  padding: 1rem 3rem;
-  cursor: pointer;
-  transition: all 0.3s;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-}
-
-.start-free-spins-button:hover {
-  transform: scale(1.05);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
-}
-
-/* عناصر الطفو والزخرفة */
-.floating-bubble {
+/* الصياد يجمع الأسماك */
+.fisherman-collect {
   position: absolute;
-  border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.2);
+  z-index: 25;
+  width: 80px;
+  height: 80px;
   pointer-events: none;
-  animation: floatBubble linear infinite;
 }
 
-@keyframes floatBubble {
-  0% { transform: translateY(0); opacity: 0; }
-  10% { opacity: 0.7; }
-  90% { opacity: 0.7; }
-  100% { transform: translateY(-100vh); opacity: 0; }
+.collected-value {
+  position: absolute;
+  background-color: #f5af19;
+  color: #012c44;
+  font-weight: bold;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 1rem;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  animation: float-up 1s forwards;
+}
+
+@keyframes float-up {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+}
+
+/* تكييف للجوال */
+@media (max-width: 768px) {
+  .reels-frame {
+    padding: 0.5rem;
+  }
+  
+  .reels-grid {
+    gap: 3px;
+    padding: 5px;
+  }
+  
+  .reel {
+    height: 240px;
+  }
+  
+  .fishing-header {
+    padding: 0.5rem;
+  }
+  
+  .game-logo {
+    height: 40px;
+  }
+  
+  .balance-display {
+    padding: 0.3rem 0.7rem;
+  }
+  
+  .balance-value {
+    font-size: 1.2rem;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+  }
+  
+  .spin-button, .max-bet-button, .autoplay-button {
+    width: 100%;
+  }
+}
+
+/* تكييف للشاشات الصغيرة جداً */
+@media (max-width: 480px) {
+  .reel {
+    height: 180px;
+  }
+  
+  .bet-info {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
 }
