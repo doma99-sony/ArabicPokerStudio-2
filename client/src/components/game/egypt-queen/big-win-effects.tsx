@@ -1,17 +1,12 @@
 import { useRef, useState, useEffect } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { PerspectiveCamera, Text, useTexture, Float } from '@react-three/drei';
 import * as THREE from 'three';
 import { gsap } from 'gsap';
 
-interface CoinProps {
-  position: [number, number, number];
-  texture: THREE.Texture;
-  delay?: number;
-}
-
-// مكون القطعة النقدية المتساقطة
-function Coin({ position, texture, delay = 0 }: CoinProps) {
+// مكون القطعة النقدية المتساقطة داخل Canvas
+function Coin({ position, delay = 0 }: { position: [number, number, number]; delay?: number }) {
+  const texture = useTexture('/images/egypt-queen/coin-texture.png');
   const meshRef = useRef<THREE.Mesh>(null);
   const initialY = position[1];
   const [visible, setVisible] = useState(false);
@@ -71,16 +66,11 @@ function Coin({ position, texture, delay = 0 }: CoinProps) {
   );
 }
 
-interface BigWinTextProps {
-  amount: number;
-  isActive: boolean;
-}
-
-// نص الفوز الكبير مع تأثيرات
-function BigWinText({ amount, isActive }: BigWinTextProps) {
+// نص الفوز الكبير مع تأثيرات داخل Canvas
+function BigWinText({ amount, isActive }: { amount: number; isActive: boolean }) {
   const textRef = useRef<THREE.Group>(null);
   const [scale, setScale] = useState(0);
-  const amountRef = useRef<THREE.Group>(null);
+  const amountRef = useRef(0);
   const [amountValue, setAmountValue] = useState(0);
   
   // تحريك النص وتكبيره عند التفعيل
@@ -117,7 +107,7 @@ function BigWinText({ amount, isActive }: BigWinTextProps) {
         duration: 3,
         ease: "power2.out",
         onUpdate: () => {
-          setAmountValue(Math.floor(amountRef.current as unknown as number));
+          setAmountValue(Math.floor(amountRef.current));
         }
       });
     }
@@ -165,40 +155,39 @@ function BigWinText({ amount, isActive }: BigWinTextProps) {
   );
 }
 
-interface BigWinEffectsProps {
-  isActive: boolean;
-  winAmount: number;
-  onComplete?: () => void;
+// مكون الخلفية داخل Canvas
+function Background() {
+  const texture = useTexture('/images/egypt-queen/big-win-bg.jpg');
+  
+  return (
+    <mesh position={[0, 0, -10]}>
+      <planeGeometry args={[40, 30]} />
+      <meshBasicMaterial map={texture} transparent opacity={0.7} />
+    </mesh>
+  );
 }
 
-// المكون الرئيسي للعرض ثلاثي الأبعاد داخل Canvas
-function BigWinScene({ isActive, winAmount }: { isActive: boolean, winAmount: number }) {
+// مكون ثلاثي الأبعاد للفوز الكبير داخل Canvas
+function BigWinScene({ winAmount }: { winAmount: number }) {
   const [coins, setCoins] = useState<Array<{ id: number; position: [number, number, number]; delay: number }>>([]);
-  const coinTexture = useTexture('/images/egypt-queen/coin-texture.png');
-  const bgTexture = useTexture('/images/egypt-queen/big-win-bg.jpg');
-  const effectsRef = useRef<THREE.Group>(null);
   
   // إنشاء العملات المتساقطة
   useEffect(() => {
-    if (isActive) {
-      // عدد العملات يتناسب مع قيمة الفوز
-      const coinCount = Math.min(Math.floor(winAmount / 10000), 100);
-      
-      const newCoins = Array.from({ length: coinCount }, (_, i) => ({
-        id: i,
-        position: [
-          (Math.random() - 0.5) * 20, // موقع س عشوائي
-          (Math.random() - 0.5) * 5, // موقع ص عشوائي
-          (Math.random() - 0.5) * 5 // موقع ع عشوائي
-        ] as [number, number, number],
-        delay: Math.random() * 2000 // تأخير عشوائي
-      }));
-      
-      setCoins(newCoins);
-    } else {
-      setCoins([]);
-    }
-  }, [isActive, winAmount]);
+    // عدد العملات يتناسب مع قيمة الفوز
+    const coinCount = Math.min(Math.floor(winAmount / 10000), 100);
+    
+    const newCoins = Array.from({ length: coinCount }, (_, i) => ({
+      id: i,
+      position: [
+        (Math.random() - 0.5) * 20, // موقع س عشوائي
+        (Math.random() - 0.5) * 5, // موقع ص عشوائي
+        (Math.random() - 0.5) * 5 // موقع ع عشوائي
+      ] as [number, number, number],
+      delay: Math.random() * 2000 // تأخير عشوائي
+    }));
+    
+    setCoins(newCoins);
+  }, [winAmount]);
   
   return (
     <>
@@ -208,38 +197,37 @@ function BigWinScene({ isActive, winAmount }: { isActive: boolean, winAmount: nu
       <spotLight position={[0, 10, 0]} intensity={0.5} angle={0.6} penumbra={0.5} castShadow />
       
       {/* خلفية الفوز الكبير */}
-      <mesh position={[0, 0, -10]}>
-        <planeGeometry args={[40, 30]} />
-        <meshBasicMaterial map={bgTexture} transparent opacity={0.7} />
-      </mesh>
+      <Background />
       
-      {/* مجموعة التأثيرات */}
-      <group ref={effectsRef}>
-        {/* نص الفوز الكبير */}
-        <BigWinText amount={winAmount} isActive={isActive} />
-        
-        {/* العملات المتساقطة */}
-        {coins.map(coin => (
-          <Coin 
-            key={coin.id}
-            position={coin.position}
-            texture={coinTexture}
-            delay={coin.delay}
-          />
-        ))}
-        
-        {/* شرار مضيء حول النص */}
-        <Float floatIntensity={1} speed={2}>
-          <group position={[0, 2, -2]}>
-            <mesh>
-              <sphereGeometry args={[3, 32, 32]} />
-              <meshBasicMaterial color="#FFCC00" transparent opacity={0.1} />
-            </mesh>
-          </group>
-        </Float>
-      </group>
+      {/* نص الفوز الكبير */}
+      <BigWinText amount={winAmount} isActive={true} />
+      
+      {/* العملات المتساقطة */}
+      {coins.map(coin => (
+        <Coin 
+          key={coin.id} 
+          position={coin.position} 
+          delay={coin.delay} 
+        />
+      ))}
+      
+      {/* شرار مضيء حول النص */}
+      <Float floatIntensity={1} speed={2}>
+        <group position={[0, 2, -2]}>
+          <mesh>
+            <sphereGeometry args={[3, 32, 32]} />
+            <meshBasicMaterial color="#FFCC00" transparent opacity={0.1} />
+          </mesh>
+        </group>
+      </Float>
     </>
   );
+}
+
+interface BigWinEffectsProps {
+  isActive: boolean;
+  winAmount: number;
+  onComplete?: () => void;
 }
 
 export function BigWinEffects({ isActive, winAmount, onComplete }: BigWinEffectsProps) {
@@ -254,10 +242,14 @@ export function BigWinEffects({ isActive, winAmount, onComplete }: BigWinEffects
     }
   }, [isActive, winAmount, onComplete]);
   
+  if (!isActive) {
+    return null;
+  }
+  
   return (
-    <div className="absolute inset-0 z-50" style={{ display: isActive ? 'block' : 'none' }}>
+    <div className="absolute inset-0 z-50">
       <Canvas>
-        <BigWinScene isActive={isActive} winAmount={winAmount} />
+        <BigWinScene winAmount={winAmount} />
       </Canvas>
     </div>
   );
