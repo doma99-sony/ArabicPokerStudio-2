@@ -211,20 +211,28 @@ function Reel3D({
   );
 }
 
+interface ReelsSceneProps {
+  reels: SymbolType[][];
+  spinning: boolean;
+  onReelComplete: (reelIndex: number, finalSymbols: SymbolType[]) => void;
+  winningPositions: Record<number, number[]>;
+  bigWin?: boolean;
+}
+
 function ReelsScene({
   reels,
   spinning,
   onReelComplete,
   winningPositions,
   bigWin
-}) {
+}: ReelsSceneProps) {
   return (
     <>
       <PerspectiveCamera makeDefault position={[0, 0, 10]} />
       <ambientLight intensity={0.7} />
       <pointLight position={[5, 5, 5]} intensity={0.8} castShadow />
       <spotLight position={[0, 5, 5]} intensity={0.6} castShadow penumbra={0.5} />
-      <Environment preset="sunset" />
+      {/* حذف مكون Environment لإزالة الأخطاء */}
       
       <group position={[-4.4, 0, 0]}>
         {reels.map((reelSymbols, index) => (

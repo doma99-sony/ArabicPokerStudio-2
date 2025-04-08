@@ -600,7 +600,7 @@ function SymbolsSceneContent({ symbols }: SymbolsSceneProps) {
       <PerspectiveCamera makeDefault position={[0, 0, 5]} />
       <ambientLight intensity={0.5} />
       <pointLight position={[10, 10, 10]} intensity={1} castShadow />
-      <Environment preset="sunset" />
+      {/* حذف مكون Environment لإزالة الأخطاء */}
       
       {symbols.map((symbol, index) => (
         <EgyptSymbol3D
