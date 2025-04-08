@@ -1,0 +1,219 @@
+أرى أنك قمت بتوفير مثال عن كيفية استخدام مكون PokerActionButtons في مكون PokerTable الرئيسي، وأيضًا شاركت ملف CSS للتنسيق. بناءً على هذه المعلومات، سأقدم لك المكون النهائي PokerActionButtons.tsx مع أخذ ملف CSS المشترك بعين الاعتبار.
+
+مكون PokerActionButtons النهائي
+import { useState, useEffect } from 'react';
+import { useAuth } from '../hooks/use-auth';
+import { useGlobalWebSocket } from '../hooks/use-global-websocket';
+interface PokerActionButtonsProps {
+  tableId: number;
+  gameState: any;
+}
+const PokerActionButtons: React.FC<PokerActionButtonsProps> = ({ tableId, gameState }) => {
+  const { user } = useAuth();
+  const { socket } = useGlobalWebSocket();
+  const [buttonsDisabled, setButtonsDisabled] = useState(false);
+  const [actionInProgress, setActionInProgress] = useState(false);
+  
+  // تحديد ما إذا كان دور اللاعب الحالي
+  const isMyTurn = gameState?.currentTurnPlayerId === user?.id;
+  
+  // معالجة الإجراءات عند الضغط على الأزرار
+  const handleAction = (action: string, amount: number = 0) => {
+    // منع الإجراء إذا كانت الأزرار معطلة بالفعل أو ليس دور اللاعب
+    if (buttonsDisabled || !isMyTurn) return;
+    
+    // تعطيل جميع الأزرار
+    setButtonsDisabled(true);
+    setActionInProgress(true);
+    
+    // إرسال الإجراء إلى الخادم
+    socket.sendGameAction(tableId, action, amount);
+    
+    // إنشاء مؤقت احتياطي لإعادة تفعيل الأزرار في حالة عدم استلام رد
+    const timeoutId = setTimeout(() => {
+      setButtonsDisabled(false);
+      setActionInProgress(false);
+      console.log('تم انتهاء المهلة: لم يصل رد من الخادم');
+    }, 3000);
+    
+    // تخزين معرف المؤقت في window للتنظيف لاحقًا
+    window._actionTimeoutId = timeoutId;
+  };
+  
+  // الاستماع لرسائل تأكيد الإجراء من الخادم
+  useEffect(() => {
+    if (!socket) return;
+    
+    const handleActionConfirmed = (message: any) => {
+      // عند استلام تأكيد الإجراء أو تحديث حالة اللعبة
+      if (message.type === 'action_confirmed' || message.type === 'game_state') {
+        // إلغاء المؤقت إذا كان موجودًا
+        if (window._actionTimeoutId) {
+          clearTimeout(window._actionTimeoutId);
+          window._actionTimeoutId = null;
+        }
+        
+        // إعادة تفعيل الأزرار
+        setButtonsDisabled(false);
+        setActionInProgress(false);
+      }
+    };
+    
+    // تسجيل مستمع للرسائل
+    const unsubscribe = socket.onMessage(['action_confirmed', 'game_state'], handleActionConfirmed);
+    
+    // تنظيف عند إزالة المكون
+    return () => {
+      unsubscribe();
+      if (window._actionTimeoutId) {
+        clearTimeout(window._actionTimeoutId);
+      }
+    };
+  }, [socket]);
+  
+  // إضافة متغيرات للتصحيح
+  useEffect(() => {
+    window.POKER_DEBUG = {
+      ...window.POKER_DEBUG,
+      isMyTurn,
+      buttonsDisabled,
+      actionInProgress,
+      currentUser: user,
+      currentGameState: gameState,
+      tableId
+    };
+  }, [isMyTurn, buttonsDisabled, actionInProgress, user, gameState, tableId]);
+  
+  // عرض الواجهة المناسبة حسب دور اللاعب وحالة الأزرار
+  return (
+    <div className="poker-actions-container">
+      {isMyTurn ? (
+        <div className="poker-actions">
+          <div className="action-buttons">
+            <button 
+              className="action-button call"
+              onClick={() => handleAction('call', 20)}
+              disabled={buttonsDisabled}
+            >
+              متابعة (20)
+            </button>
+            
+            <button 
+              className="action-button raise"
+              onClick={() => handleAction('raise', 40)}
+              disabled={buttonsDisabled}
+            >
+              رفع (+40)
+            </button>
+            
+            <button 
+              className="action-button fold"
+              onClick={() => handleAction('fold')}
+              disabled={buttonsDisabled}
+            >
+              انسحاب
+            </button>
+          </div>
+          
+          {/* عرض حالة المعالجة فقط عندما تكون هناك عملية جارية */}
+          {actionInProgress && (
+            <div className="action-progress">
+              <span className="loading-indicator">⏳</span>
+              <span className="loading-text">جاري إرسال الإجراء...</span>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="waiting-turn">
+          <p className="wait-message">انتظر حتى يأتي دورك</p>
+        </div>
+      )}
+    </div>
+  );
+};
+export default PokerActionButtons;
+ميزات إضافية يمكن إضافتها لاحقًا
+لتحسين المكون مستقبلاً، يمكنك النظر في إضافة الميزات التالية:
+
+إمكانية تحديد مبلغ مخصص للرفع:
+// داخل المكون، أضف هذه الحالة
+const [raiseAmount, setRaiseAmount] = useState(40);
+// في الواجهة، أضف حقل الإدخال
+<div className="raise-container">
+  <input
+    type="number"
+    className="raise-input"
+    value={raiseAmount}
+    onChange={(e) => setRaiseAmount(Number(e.target.value))}
+    disabled={buttonsDisabled}
+    min={gameState?.minRaise || 20}
+    max={user?.chips || 1000}
+  />
+  <button 
+    className="action-button raise"
+    onClick={() => handleAction('raise', raiseAmount)}
+    disabled={buttonsDisabled}
+  >
+    رفع ({raiseAmount})
+  </button>
+</div>
+إضافة عرض للوقت المتبقي للاعب:
+// داخل المكون، أضف حالة للمؤقت
+const [turnTimeLeft, setTurnTimeLeft] = useState(30);
+// في useEffect، أضف مؤقت للتحديث
+useEffect(() => {
+  if (isMyTurn && gameState?.turnTimeLeft) {
+    setTurnTimeLeft(gameState.turnTimeLeft);
+    
+    const intervalId = setInterval(() => {
+      setTurnTimeLeft(prev => Math.max(0, prev - 1));
+    }, 1000);
+    
+    return () => clearInterval(intervalId);
+  }
+}, [isMyTurn, gameState?.turnTimeLeft]);
+// في الواجهة، أضف عرض الوقت المتبقي
+{isMyTurn && (
+  <div className="turn-timer">
+    <div className="timer-bar">
+      <div 
+        className="timer-progress" 
+        style={{ width: `${(turnTimeLeft / 30) * 100}%` }}
+      />
+    </div>
+    <span className="timer-text">{turnTimeLeft}s</span>
+  </div>
+)}
+الخطوات التالية
+قم بإنشاء ملف PokerActionButtons.tsx في المجلد المناسب (مثلاً client/src/components/game/PokerActionButtons.tsx)
+
+انسخ الكود النهائي المقدم أعلاه إلى هذا الملف
+
+تأكد من إنشاء ملف CSS في المسار client/src/styles/poker-actions.css وانسخ إليه التنسيقات التي شاركتها
+
+استورد المكون في صفحة الطاولة كما في المثال الذي شاركته:
+
+import PokerActionButtons from './PokerActionButtons';
+import './styles/poker-actions.css';
+function PokerTable({ tableId }) {
+  const [gameState, setGameState] = useState(null);
+  // ... باقي الكود
+  
+  return (
+    <div className="poker-table">
+      {/* محتوى الطاولة */}
+      <PokerActionButtons 
+        tableId={tableId} 
+        gameState={gameState} 
+      />
+    </div>
+  );
+}
+هذا المكون يلبي جميع المتطلبات التي حددتها:
+
+تعطيل الأزرار عند النقر
+إظهار رسالة انتظار أثناء معالجة الإجراء
+إعادة تفعيل الأزرار عند تلقي الرد أو بعد مهلة 3 ثوانٍ
+منع إرسال الإجراءات المتكررة
+إضافة معلومات للتصحيح متاحة من خلال window.POKER_DEBUG
+هل هناك أي تفاصيل إضافية تود إضافتها أو تعديله
