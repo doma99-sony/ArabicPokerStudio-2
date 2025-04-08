@@ -149,17 +149,13 @@ export const usePokerStore = create<PokerStore>((set, get) => ({
         }
       });
       
-      // محاولة الاتصال باستخدام عنوان ديناميكي على أساس بروتوكول الصفحة الحالية
-      const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const wsHost = window.location.host;
+      // استخدام آلية التحديد الديناميكي للعنوان المُضمنة في SocketManager
+      // ستقوم بتحديد البروتوكول (ws/wss) وعنوان المضيف والمنفذ بشكل صحيح
+      // بناءً على بيئة التشغيل (تطوير أو إنتاج)
+      console.log('محاولة الاتصال بخادم البوكر...');
       
-      // استخدام مسار "/ws" وهو المسار المعد للاتصال WebSocket في الخادم
-      const wsUrl = `${wsProtocol}//${wsHost}/ws`;
-      
-      console.log('محاولة الاتصال بخادم البوكر على العنوان:', wsUrl);
-      
-      // محاولة الاتصال مع وقت انتظار أطول
-      const connected = await socketManager.connect(wsUrl, userId, username);
+      // تمرير '' (سلسلة فارغة) لـ url يجعل SocketManager يولد العنوان تلقائيًا
+      const connected = await socketManager.connect('', userId, username);
       
       // تحديث الحالة
       set({

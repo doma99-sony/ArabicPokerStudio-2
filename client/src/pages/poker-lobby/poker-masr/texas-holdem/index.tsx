@@ -4,11 +4,15 @@ import { ChevronLeft, Loader2 } from 'lucide-react';
 import PokerTable from '../components/PokerTable';
 import PokerActions from '../components/PokerActions';
 import PokerPlayer from '../components/PokerPlayer';
-import { GamePhase, Card as GameCard } from '../logic/poker-engine';
+import { GamePhase, Card as GameCard, PlayerAction } from '../logic/poker-engine';
 import { usePokerStore } from '../store/poker-store';
 import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
+import { getMockGameState, simulatePlayerAction } from '../logic/mock-data';
+
+// استيراد أنماط CSS الخاصة ببوكر مصر
+import '../styles/poker-styles.css';
 
 // تعريف نوع بطاقة اللاعب (مختلف عن بطاقة اللعبة)
 interface PlayerCard {
@@ -26,9 +30,6 @@ const adaptPlayerCards = (cards: GameCard[]): PlayerCard[] => {
   }));
 };
 
-// استيراد أنماط CSS الخاصة ببوكر مصر
-import '../styles/poker-styles.css';
-
 /**
  * صفحة بوكر تكساس هولديم
  */
@@ -40,86 +41,97 @@ export default function TexasHoldemPoker() {
   const {
     gameState,
     localPlayerId,
-    socketManager,
-    isConnected,
-    isJoining,
     errorMessage,
     winners,
-    initializeSocket,
-    joinTable,
-    getLocalPlayer,
-    getActivePlayers,
     resetGame,
     setErrorMessage,
-    clearWinners
+    clearWinners,
+    performAction
   } = usePokerStore();
   
   // حالة تحكم الاتصال
   const [connecting, setConnecting] = useState(false);
   const [joiningTable, setJoiningTable] = useState(false);
   
-  // تهيئة اتصال WebSocket عند تحميل الصفحة
+  // تحميل بيانات تجريبية عند تحميل الصفحة
   useEffect(() => {
-    // إذا لم يكن هناك اتصال بالفعل، قم بالاتصال
-    if (!isConnected && !connecting && user) {
-      const connectToSocket = async () => {
-        try {
-          setConnecting(true);
-          const connected = await initializeSocket(user.id, user.username);
-          
-          if (connected) {
-            console.log('تم الاتصال بالخادم بنجاح');
-            // محاولة الانضمام للطاولة بعد الاتصال
-            setJoiningTable(true);
-            const joined = await joinTable(1, 5000); // معرف الطاولة وعدد الرقائق
-            
-            if (joined) {
-              console.log('تم الانضمام للطاولة بنجاح');
-              toast({
-                title: 'تم الانضمام للطاولة',
-                description: 'أنت الآن جزء من لعبة تكساس هولديم!'
-              });
-            } else {
-              console.error('فشل الانضمام للطاولة');
-              toast({
-                title: 'فشل الانضمام',
-                description: 'لم نتمكن من ضمك للطاولة، يرجى المحاولة مرة أخرى',
-                variant: 'destructive'
-              });
-            }
-            setJoiningTable(false);
-          } else {
-            console.error('فشل الاتصال بالخادم');
-            toast({
-              title: 'فشل الاتصال',
-              description: 'لم نتمكن من الاتصال بخادم اللعبة، يرجى المحاولة مرة أخرى',
-              variant: 'destructive'
-            });
-          }
-        } catch (error) {
-          console.error('خطأ أثناء الاتصال:', error);
-          toast({
-            title: 'خطأ',
-            description: 'حدث خطأ غير متوقع أثناء الاتصال',
-            variant: 'destructive'
-          });
-        }
-        setConnecting(false);
-      };
-      
-      connectToSocket();
-    }
+    setConnecting(true);
+    console.log('تحميل بيانات تجريبية للعبة البوكر...');
+    
+    // الحصول على بيانات تجريبية مع معلومات المستخدم
+    const mockData = getMockGameState(user?.id, user?.username);
+    
+    // تعيين حالة اللعبة التجريبية
+    usePokerStore.setState({
+      gameState: mockData,
+      localPlayerId: user?.id || 1,
+      isConnected: true
+    });
+    
+    // تأخير لعرض شاشة التحميل
+    setTimeout(() => {
+      setConnecting(false);
+      toast({
+        title: 'تم تحميل بيانات تجريبية',
+        description: 'أنت الآن تلعب بوكر تكساس هولديم في الوضع التجريبي!'
+      });
+    }, 1000);
     
     // تنظيف عند مغادرة الصفحة
     return () => {
-      if (isConnected && socketManager) {
-        resetGame();
-      }
+      resetGame();
     };
-  }, [user, isConnected, connecting]);
+  }, [user?.id, user?.username, resetGame]);
+  
+  // تنفيذ إجراء اللعب
+  const handlePlayerAction = (action: PlayerAction, amount?: number) => {
+    if (!gameState || !user?.id) return;
+    
+    // محاكاة تنفيذ الإجراء على البيانات التجريبية
+    const newGameState = simulatePlayerAction(gameState, user.id, action, amount);
+    
+    // تحديث حالة اللعبة
+    usePokerStore.setState({
+      gameState: newGameState
+    });
+    
+    // إظهار رسالة نجاح
+    toast({
+      title: 'تم تنفيذ الإجراء',
+      description: `قمت بـ ${getActionText(action)} ${amount ? `بمبلغ ${amount}` : ''}`,
+    });
+  };
+  
+  // الحصول على نص الإجراء بالعربية
+  const getActionText = (action: PlayerAction): string => {
+    switch (action) {
+      case 'fold': return 'طي الأوراق';
+      case 'check': return 'التمرير';
+      case 'call': return 'المجاراة';
+      case 'raise': return 'رفع الرهان';
+      case 'all_in': return 'المراهنة بكل الرقائق';
+      default: return action;
+    }
+  };
+  
+  // ربط معالج الإجراء بمكون أزرار البوكر
+  useEffect(() => {
+    // تجاوز أزرار الإجراء للاستخدام المباشر
+    const originalPerformAction = performAction;
+    usePokerStore.setState({
+      performAction: handlePlayerAction
+    });
+    
+    return () => {
+      // إعادة الإجراء الأصلي عند التنظيف
+      usePokerStore.setState({
+        performAction: originalPerformAction
+      });
+    };
+  }, [performAction]);
   
   // الحصول على بيانات اللاعب الحالي
-  const localPlayer = getLocalPlayer();
+  const localPlayer = gameState?.players.find(p => p.id === localPlayerId);
   
   // إظهار شاشة التحميل أثناء الاتصال أو الانضمام
   if (connecting || joiningTable) {
@@ -127,7 +139,7 @@ export default function TexasHoldemPoker() {
       <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-[#0A3A2A] to-black">
         <Loader2 className="w-16 h-16 text-[#D4AF37] animate-spin mb-4" />
         <h2 className="text-2xl text-white mb-2">
-          {connecting ? 'جاري الاتصال بخادم اللعبة...' : 'جاري الانضمام للطاولة...'}
+          {connecting ? 'جاري تحميل بيانات اللعبة...' : 'جاري الانضمام للطاولة...'}
         </h2>
         <p className="text-white/70">يرجى الانتظار قليلاً</p>
       </div>
@@ -155,10 +167,7 @@ export default function TexasHoldemPoker() {
               variant="outline" 
               onClick={() => {
                 setErrorMessage(null);
-                resetGame();
-                setConnecting(true);
-                initializeSocket(user?.id || 0, user?.username || 'ضيف');
-                setConnecting(false);
+                navigate(0); // إعادة تحميل الصفحة
               }}
             >
               إعادة المحاولة
@@ -218,7 +227,7 @@ export default function TexasHoldemPoker() {
       <div className="poker-game-area relative min-h-[calc(100vh-180px)] flex items-center justify-center p-4">
         <PokerTable />
         
-        {/* اللاعبين - استخدام بيانات حقيقية من المتجر */}
+        {/* اللاعبين - استخدام بيانات من المتجر */}
         {gameState && gameState.players.map(player => (
           <PokerPlayer 
             key={player.id} 

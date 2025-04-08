@@ -41,6 +41,11 @@ user_updates: Dict[int, List[Dict[str, Any]]] = {}
 # التخزين المؤقت للرسائل العامة
 broadcast_messages: List[Dict[str, Any]] = []
 
+# قواميس البوكر
+poker_tables: Dict[int, Dict[str, Any]] = {}  # قاموس لتخزين طاولات البوكر {table_id: {players: {}, game_state: {}, ...}}
+poker_connections: Dict[int, List[WebSocket]] = {}  # قاموس لتخزين اتصالات غرف البوكر {table_id: [connection1, connection2, ...]}
+player_connection_map: Dict[str, Dict[str, Any]] = {}  # قاموس لربط اللاعبين بالاتصالات {player_id: {connection: WebSocket, table_id: int}}
+
 # مدير الدخول/الخروج للتطبيق
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -150,6 +155,58 @@ async def send_to_user(user_id: int, message: Dict[str, Any]):
         user_updates[user_id].append(message)
         del active_connections[user_id]
         logger.info(f"تمت إزالة المستخدم {user_id} بسبب انقطاع الاتصال")
+
+
+async def broadcast_to_table(table_id: int, message: Dict[str, Any]):
+    """إرسال رسالة لجميع اللاعبين في طاولة البوكر"""
+    disconnected_connections = []
+    
+    if table_id not in poker_connections:
+        return
+    
+    # إرسال لجميع اللاعبين في الطاولة
+    for connection in poker_connections[table_id]:
+        try:
+            await connection.send_json(message)
+        except Exception as e:
+            logger.error(f"خطأ أثناء البث لطاولة البوكر {table_id}: {str(e)}")
+            disconnected_connections.append(connection)
+    
+    # إزالة الاتصالات المقطوعة
+    for conn in disconnected_connections:
+        poker_connections[table_id].remove(conn)
+    
+    # إذا لم تعد هناك اتصالات للطاولة، أزل الطاولة من القاموس
+    if not poker_connections[table_id]:
+        del poker_connections[table_id]
+        # مسح بيانات الطاولة اختياريًا بعد فترة من الزمن
+        # هنا يمكن إضافة منطق للاحتفاظ بالبيانات لفترة قبل حذفها
+
+
+async def send_to_player(player_id: str, message: Dict[str, Any]):
+    """إرسال رسالة إلى لاعب بوكر محدد"""
+    if player_id not in player_connection_map:
+        logger.warning(f"محاولة إرسال رسالة للاعب {player_id} غير متصل")
+        return
+    
+    player_data = player_connection_map[player_id]
+    connection = player_data.get("connection")
+    
+    # التحقق من وجود اتصال قبل محاولة إرسال الرسالة
+    if not connection:
+        logger.warning(f"محاولة إرسال رسالة للاعب {player_id} مع اتصال غير صالح")
+        return
+        
+    try:
+        await connection.send_json(message)
+    except Exception as e:
+        logger.error(f"خطأ أثناء إرسال رسالة للاعب {player_id}: {str(e)}")
+        # إزالة اللاعب من خريطة الاتصالات
+        table_id = player_data.get("table_id")
+        if table_id and table_id in poker_connections:
+            if connection in poker_connections[table_id]:
+                poker_connections[table_id].remove(connection)
+        del player_connection_map[player_id]
 
 
 # طرق واجهة برمجة التطبيقات
@@ -293,6 +350,236 @@ async def websocket_endpoint(websocket: WebSocket, user_id: int):
     
     except Exception as e:
         logger.error(f"حدث خطأ في اتصال المستخدم {user_id}: {str(e)}")
+
+
+@app.websocket("/ws/poker")
+async def poker_websocket_endpoint(websocket: WebSocket):
+    """نقطة نهاية WebSocket للعبة البوكر"""
+    await websocket.accept()
+    logger.info("اتصال WebSocket جديد للعبة البوكر")
+    
+    # إرسال رسالة ترحيب
+    await websocket.send_json({
+        "type": "connection_established",
+        "message": "تم الاتصال بخادم البوكر بنجاح",
+        "timestamp": datetime.now().isoformat()
+    })
+    
+    player_id = None
+    table_id = None
+    
+    try:
+        while True:
+            # انتظار رسائل من العميل
+            data = await websocket.receive_text()
+            
+            try:
+                message = json.loads(data)
+                logger.info(f"رسالة بوكر واردة: {message}")
+                
+                message_type = message.get("type")
+                
+                # معالجة الرسالة حسب نوعها
+                if message_type == "ping":
+                    # رد على نبض الحياة
+                    await websocket.send_json({
+                        "type": "pong",
+                        "timestamp": datetime.now().isoformat()
+                    })
+                
+                elif message_type == "join_table":
+                    # انضمام إلى طاولة بوكر
+                    table_id = message.get("tableId")
+                    player_info = message.get("data", {})
+                    player_id = player_info.get("playerId") or str(player_info.get("username", "unknown"))
+                    
+                    if not table_id:
+                        await websocket.send_json({
+                            "type": "error",
+                            "message": "معرف الطاولة مطلوب للانضمام",
+                            "timestamp": datetime.now().isoformat()
+                        })
+                        continue
+                    
+                    # إضافة الاتصال إلى قواميس البوكر
+                    if table_id not in poker_connections:
+                        poker_connections[table_id] = []
+                    poker_connections[table_id].append(websocket)
+                    
+                    # ربط اللاعب بالاتصال والطاولة
+                    player_connection_map[player_id] = {
+                        "connection": websocket,
+                        "table_id": table_id,
+                        "info": player_info
+                    }
+                    
+                    # إضافة اللاعب إلى الطاولة
+                    if table_id not in poker_tables:
+                        poker_tables[table_id] = {
+                            "players": {},
+                            "game_state": {
+                                "phase": "waiting",
+                                "pot": 0,
+                                "community_cards": [],
+                                "current_player": None,
+                                "dealer_position": 0,
+                                "blind_amount": player_info.get("blindAmount", 10),
+                                "min_bet": player_info.get("blindAmount", 10) * 2
+                            }
+                        }
+                    
+                    poker_tables[table_id]["players"][player_id] = player_info
+                    
+                    # إعلام جميع اللاعبين في الطاولة بالانضمام
+                    await broadcast_to_table(table_id, {
+                        "type": "player_joined",
+                        "data": player_info,
+                        "tableId": table_id,
+                        "timestamp": datetime.now().isoformat()
+                    })
+                    
+                    # إرسال حالة اللعبة الحالية للاعب المنضم
+                    await websocket.send_json({
+                        "type": "game_state",
+                        "tableId": table_id,
+                        "data": poker_tables[table_id]["game_state"],
+                        "players": poker_tables[table_id]["players"],
+                        "timestamp": datetime.now().isoformat()
+                    })
+                    
+                    logger.info(f"انضم اللاعب {player_id} إلى طاولة البوكر {table_id}")
+                
+                elif message_type == "leave_table":
+                    # مغادرة طاولة البوكر
+                    if player_id and player_id in player_connection_map:
+                        table_data = player_connection_map[player_id]
+                        table_id = table_data.get("table_id")
+                        
+                        if table_id and table_id in poker_tables and player_id in poker_tables[table_id]["players"]:
+                            # إزالة اللاعب من الطاولة
+                            del poker_tables[table_id]["players"][player_id]
+                            
+                            # إعلام جميع اللاعبين في الطاولة بالمغادرة
+                            await broadcast_to_table(table_id, {
+                                "type": "player_left",
+                                "playerId": player_id,
+                                "tableId": table_id,
+                                "timestamp": datetime.now().isoformat()
+                            })
+                            
+                            logger.info(f"غادر اللاعب {player_id} طاولة البوكر {table_id}")
+                        
+                        # إزالة اللاعب من خريطة الاتصالات
+                        del player_connection_map[player_id]
+                
+                elif message_type == "player_action":
+                    # إجراء اللاعب (مثل المراهنة، الطي، إلخ)
+                    if not player_id or not table_id:
+                        await websocket.send_json({
+                            "type": "error",
+                            "message": "يجب الانضمام إلى طاولة أولاً",
+                            "timestamp": datetime.now().isoformat()
+                        })
+                        continue
+                    
+                    action = message.get("action")
+                    amount = message.get("amount", 0)
+                    
+                    if table_id in poker_tables:
+                        # تحديث حالة اللعبة (هنا سيكون المنطق الكامل للعبة البوكر)
+                        # لأغراض هذا المثال، نقوم فقط بإعادة توجيه الإجراء إلى جميع اللاعبين
+                        
+                        # إعلام جميع اللاعبين في الطاولة بالإجراء
+                        await broadcast_to_table(table_id, {
+                            "type": "action_result",
+                            "playerId": player_id,
+                            "action": action,
+                            "amount": amount,
+                            "tableId": table_id,
+                            "timestamp": datetime.now().isoformat()
+                        })
+                        
+                        logger.info(f"قام اللاعب {player_id} بإجراء {action} بمبلغ {amount} في طاولة {table_id}")
+                
+                elif message_type == "chat_message":
+                    # رسالة دردشة
+                    if not player_id or not table_id:
+                        await websocket.send_json({
+                            "type": "error",
+                            "message": "يجب الانضمام إلى طاولة أولاً",
+                            "timestamp": datetime.now().isoformat()
+                        })
+                        continue
+                    
+                    message_text = message.get("message", "")
+                    
+                    if table_id in poker_connections:
+                        # إرسال رسالة الدردشة إلى جميع اللاعبين في الطاولة
+                        player_name = "مجهول"
+                        if player_id in player_connection_map:
+                            player_info = player_connection_map[player_id].get("info", {})
+                            player_name = player_info.get("username", player_id)
+                        
+                        await broadcast_to_table(table_id, {
+                            "type": "chat_message",
+                            "senderId": player_id,
+                            "senderName": player_name,
+                            "message": message_text,
+                            "tableId": table_id,
+                            "timestamp": datetime.now().isoformat()
+                        })
+                        
+                        logger.info(f"رسالة دردشة من اللاعب {player_id} في طاولة {table_id}: {message_text}")
+                
+                else:
+                    # رسائل أخرى غير معروفة
+                    logger.warning(f"نوع رسالة غير معروف من اتصال البوكر: {message_type}")
+                    await websocket.send_json({
+                        "type": "error",
+                        "message": "نوع رسالة غير معروف",
+                        "timestamp": datetime.now().isoformat()
+                    })
+            
+            except json.JSONDecodeError:
+                logger.warning("تم استلام رسالة غير صالحة من اتصال البوكر")
+                await websocket.send_json({
+                    "type": "error",
+                    "message": "رسالة غير صالحة",
+                    "timestamp": datetime.now().isoformat()
+                })
+    
+    except WebSocketDisconnect:
+        # تنظيف عند قطع الاتصال
+        if player_id and player_id in player_connection_map:
+            table_data = player_connection_map[player_id]
+            table_id = table_data.get("table_id")
+            
+            if table_id:
+                # إزالة الاتصال من قائمة اتصالات الطاولة
+                if table_id in poker_connections and websocket in poker_connections[table_id]:
+                    poker_connections[table_id].remove(websocket)
+                
+                # إزالة اللاعب من الطاولة
+                if table_id in poker_tables and player_id in poker_tables[table_id]["players"]:
+                    del poker_tables[table_id]["players"][player_id]
+                    
+                    # إعلام جميع اللاعبين في الطاولة بالمغادرة
+                    await broadcast_to_table(table_id, {
+                        "type": "player_left",
+                        "playerId": player_id,
+                        "tableId": table_id,
+                        "timestamp": datetime.now().isoformat()
+                    })
+            
+            # إزالة اللاعب من خريطة الاتصالات
+            del player_connection_map[player_id]
+        
+        logger.info(f"انقطع اتصال لاعب البوكر {player_id}")
+    
+    except Exception as e:
+        logger.error(f"حدث خطأ في اتصال البوكر: {str(e)}")
+        if player_id and player_id in player_connection_map:
+            del player_connection_map[player_id]
 
 
 # وظيفة لبدء الخادم

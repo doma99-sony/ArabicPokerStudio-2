@@ -97,7 +97,7 @@ export class SocketManager {
   /**
    * إنشاء اتصال WebSocket جديد
    */
-  public connect(url: string, userId: number, username: string): Promise<boolean> {
+  public connect(url: string | null, userId: number, username: string): Promise<boolean> {
     return new Promise((resolve, reject) => {
       try {
         this.userId = userId;
@@ -105,6 +105,20 @@ export class SocketManager {
         
         // إغلاق أي اتصال سابق
         this.closeConnection();
+        
+        // توليد عنوان URL لـ WebSocket ديناميكيًا إذا لم يتم تمريره
+        if (!url) {
+          // استخدم نفس البروتوكول والمضيف كما في اتصال المتصفح الحالي
+          const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+          const host = window.location.host;
+          
+          // قم بتوجيه جميع اتصالات WebSocket إلى مسار ws على نفس الخادم
+          url = `${protocol}://${host}/ws`;
+          
+          console.log('تم توليد عنوان WebSocket تلقائيًا:', url);
+        }
+        
+        console.log('محاولة الاتصال بـ WebSocket على العنوان:', url);
         
         // إنشاء اتصال جديد
         this.socket = new WebSocket(url);
@@ -379,10 +393,11 @@ export class SocketManager {
       // محاولة إعادة الاتصال بنفس معرفات المستخدم
       if (this.userId && this.username) {
         // نستخدم نفس عنوان الاتصال السابق إذا كان لدينا socket، وإلا نولد عنوان ديناميكي
-        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const wsHost = window.location.host;
-        const defaultUrl = `${wsProtocol}//${wsHost}/ws`;
-        const url = this.socket ? this.socket.url : defaultUrl;
+        const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+        const host = window.location.host;
+        
+        // استخدم نفس عنوان المضيف الحالي ونفس نقطة النهاية في /ws
+        const url = `${protocol}://${host}/ws`;
         console.log('محاولة إعادة الاتصال على العنوان:', url);
         this.connect(url, this.userId, this.username)
           .then(() => {
