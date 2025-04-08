@@ -51,26 +51,47 @@ function generateGuestUsername(): string {
 export function setupAuth(app: Express) {
   const sessionSecret = process.env.SESSION_SECRET || "poker-game-secret-key";
   
-  // إعداد مخزن جلسات PostgreSQL
-  const pgStore = new PostgreSqlStore({
-    // استخدام متغير البيئة الموفر من Replit
-    conString: process.env.DATABASE_URL,
-    tableName: 'sessions',   // اسم الجدول في قاعدة البيانات
-    createTableIfMissing: true, // إنشاء الجدول إذا لم يكن موجوداً
-    pruneSessionInterval: 60 * 60, // تنظيف الجلسات المنتهية كل ساعة
-    errorLog: console.error,
-    disableTouch: false // تمكين تحديث الجلسات
-  });
+  // تحديد مخزن الجلسات بناءً على توفر اتصال PostgreSQL
+  let sessionStore;
+  
+  // التحقق من وجود اتصال PostgreSQL
+  if (process.env.DATABASE_URL) {
+    console.log("استخدام مخزن PostgreSQL للجلسات");
+    try {
+      // محاولة إنشاء مخزن PostgreSQL
+      sessionStore = new PostgreSqlStore({
+        conString: process.env.DATABASE_URL,
+        tableName: 'sessions',
+        createTableIfMissing: true,
+        pruneSessionInterval: 60 * 60,
+        errorLog: console.error,
+        disableTouch: false
+      });
+    } catch (err) {
+      // في حالة فشل الاتصال بـ PostgreSQL
+      console.error("خطأ في إنشاء مخزن جلسات PostgreSQL:", err);
+      console.log("استخدام مخزن الذاكرة للجلسات (احتياطي)");
+      sessionStore = new MemoryStore({
+        checkPeriod: 86400000 // مسح الجلسات المنتهية كل 24 ساعة
+      });
+    }
+  } else {
+    // استخدام مخزن الذاكرة إذا لم يتم توفير اتصال PostgreSQL
+    console.log("عدم وجود اتصال PostgreSQL، استخدام مخزن الذاكرة للجلسات");
+    sessionStore = new MemoryStore({
+      checkPeriod: 86400000 // مسح الجلسات المنتهية كل 24 ساعة
+    });
+  }
   
   const sessionSettings: session.SessionOptions = {
     secret: sessionSecret,
     resave: false,
     saveUninitialized: false,
-    store: pgStore, // استخدام مخزن PostgreSQL
+    store: sessionStore, // استخدام المخزن المناسب
     cookie: { 
       secure: false, // تعطيل secure لبيئة التطوير
-      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 يوم (زيادة المدة)
-      sameSite: 'lax', // الإعداد الأساسي
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 يوم
+      sameSite: 'lax',
       httpOnly: true,
       path: '/'
     },
