@@ -237,10 +237,18 @@ export default function TexasHoldemPoker() {
         ))}
       </div>
       
-      {/* أزرار الإجراءات */}
-      <div className="poker-actions fixed bottom-0 left-0 right-0 bg-black/80">
-        <PokerActions className="p-2" />
-      </div>
+      {/* أزرار الإجراءات - تظهر فقط عندما يكون دور اللاعب المحلي */}
+      {localPlayer && (
+        <div className="poker-actions fixed bottom-0 left-0 right-0 bg-black/80 border-t border-[#D4AF37]/30">
+          <PokerActions
+            isCurrentTurn={localPlayer.isCurrentTurn}
+            currentBet={gameState?.currentRound.currentBet || 0}
+            chipCount={localPlayer.chips}
+            lastBet={gameState?.currentRound.currentBet || 0}
+            minRaise={gameState?.currentRound.minRaise || 10}
+          />
+        </div>
+      )}
     </div>
   );
 }

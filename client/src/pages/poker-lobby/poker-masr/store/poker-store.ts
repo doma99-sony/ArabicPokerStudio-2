@@ -22,6 +22,7 @@ interface PokerStore {
   errorMessage: string | null;
   chatMessages: ChatMessageType[];
   soundEnabled: boolean;
+  actionResult: ActionResult | null; // نتيجة آخر إجراء تم تنفيذه
   
   // الأحداث
   winners: WinnerInfo[] | null;
@@ -39,6 +40,7 @@ interface PokerStore {
   setErrorMessage: (message: string | null) => void;
   setSoundEnabled: (enabled: boolean) => void;
   clearWinners: () => void;
+  clearActionResult: () => void; // إزالة نتيجة الإجراء السابق
   
   // معلومات اللاعب المحلي
   getLocalPlayer: () => GamePlayer | null;
@@ -48,9 +50,9 @@ interface PokerStore {
   getMaxRaise: () => number;
   getCommunityCards: () => Card[];
   getCurrentPhase: () => GamePhase;
+  getActivePlayers: () => GamePlayer[]; // الحصول على اللاعبين النشطين
   
   // التصفيات والتحولات
-  getActivePlayers: () => GamePlayer[];
   isPlayerTurn: () => boolean;
   getActionDescription: (action: string, player: GamePlayer, amount?: number) => string;
 }
@@ -83,6 +85,7 @@ export const usePokerStore = create<PokerStore>((set, get) => ({
   chatMessages: [],
   soundEnabled: true,
   winners: null,
+  actionResult: null,
   
   /**
    * تهيئة اتصال WebSocket
@@ -146,11 +149,16 @@ export const usePokerStore = create<PokerStore>((set, get) => ({
         }
       });
       
-      // محاولة الاتصال باستخدام عنوان ديناميكي
+      // محاولة الاتصال باستخدام عنوان ديناميكي على أساس بروتوكول الصفحة الحالية
       const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       const wsHost = window.location.host;
+      
+      // استخدام مسار "/ws" وهو المسار المعد للاتصال WebSocket في الخادم
       const wsUrl = `${wsProtocol}//${wsHost}/ws`;
+      
       console.log('محاولة الاتصال بخادم البوكر على العنوان:', wsUrl);
+      
+      // محاولة الاتصال مع وقت انتظار أطول
       const connected = await socketManager.connect(wsUrl, userId, username);
       
       // تحديث الحالة
@@ -379,6 +387,13 @@ export const usePokerStore = create<PokerStore>((set, get) => ({
    */
   clearWinners: () => {
     set({ winners: null });
+  },
+  
+  /**
+   * مسح نتيجة الإجراء الأخير
+   */
+  clearActionResult: () => {
+    set({ actionResult: null });
   },
   
   /**

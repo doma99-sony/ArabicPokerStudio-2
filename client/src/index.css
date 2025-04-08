@@ -1,9 +1,8 @@
+@import url('./pages/poker-lobby/poker-masr/styles/poker-styles.css');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* استيراد أنماط البوكر */
-@import url('./pages/poker-lobby/poker-masr/styles/poker-styles.css');
 
 @layer utilities {
   /* تعريف تحريكات إضافية للعبة ملكة مصر */

@@ -36,6 +36,38 @@
   transform: rotateY(180deg);
 }
 
+/* حركات توزيع البطاقات */
+@keyframes dealCard {
+  0% {
+    opacity: 0;
+    transform: translate(-50px, -50px) rotate(-10deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0);
+  }
+}
+
+.card-dealing {
+  animation: dealCard 0.5s forwards;
+}
+
+/* حركة شريحة البطاقة */
+@keyframes slideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-in {
+  animation: slideIn 0.5s forwards;
+}
+
 /* الرقائق والرهانات */
 .chip-icon {
   background: radial-gradient(ellipse at center, #D4AF37 0%, #AA8C2C 100%);
@@ -58,6 +90,84 @@
 
 .current-turn {
   animation: pulse 1.5s infinite;
+}
+
+/* حركة القفز */
+@keyframes bounce {
+  0%, 100% { transform: translate(-50%, -50%); }
+  50% { transform: translate(-50%, -60%); }
+}
+
+@keyframes bounceOnce {
+  0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+  50% { transform: translate(-50%, -70%) scale(1.1); opacity: 1; }
+  80% { transform: translate(-50%, -50%) scale(0.95); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+.animate-bounce-once {
+  animation: bounceOnce 0.7s forwards;
+}
+
+/* حركات أفعال اللاعبين */
+.fold-animation {
+  animation: foldCards 0.5s forwards;
+}
+
+@keyframes foldCards {
+  0% { transform: scale(1); }
+  100% { transform: scale(0.8); opacity: 0.5; }
+}
+
+.check-animation {
+  animation: checkAction 0.5s forwards;
+}
+
+@keyframes checkAction {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+  100% { transform: translateX(0); }
+}
+
+.call-animation {
+  animation: callAction 0.5s forwards;
+}
+
+@keyframes callAction {
+  0% { transform: scale(1); background-color: rgba(34, 139, 34, 0.6); }
+  50% { transform: scale(1.1); background-color: rgba(34, 139, 34, 0.8); }
+  100% { transform: scale(1); background-color: rgba(34, 139, 34, 0.6); }
+}
+
+.raise-animation {
+  animation: raiseAction 0.5s forwards;
+}
+
+@keyframes raiseAction {
+  0% { transform: scale(1); background-color: rgba(218, 165, 32, 0.6); }
+  50% { transform: scale(1.1); background-color: rgba(218, 165, 32, 0.8); }
+  100% { transform: scale(1); background-color: rgba(218, 165, 32, 0.6); }
+}
+
+.all-in-animation {
+  animation: allInAction 0.7s forwards;
+}
+
+@keyframes allInAction {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(128, 0, 128, 0.7); }
+  50% { transform: scale(1.15); box-shadow: 0 0 20px 10px rgba(128, 0, 128, 0.7); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(128, 0, 128, 0.7); }
+}
+
+/* مؤقت الدور */
+.turn-timer {
+  opacity: 0.8;
+  transition: all 0.3s ease;
+}
+
+.turn-timer:hover {
+  opacity: 1;
 }
 
 /* تحسينات للهواتف المحمولة */

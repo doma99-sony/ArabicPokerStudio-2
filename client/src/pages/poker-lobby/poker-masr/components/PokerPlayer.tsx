@@ -1,6 +1,9 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { PlayerAction } from '../logic/poker-engine';
+import { usePokerStore } from '../store/poker-store';
+import TurnTimer from './TurnTimer';
 
 export interface PlayerProps {
   id: number;
@@ -34,6 +37,12 @@ export default function PokerPlayer({
   showCards,
   avatar
 }: PlayerProps) {
+  // استخدام متجر البوكر لمعالجة انتهاء وقت اللاعب
+  const { performAction } = usePokerStore();
+  
+  // حالة عرض البطاقات المرفوعة
+  const [isCardRaised, setIsCardRaised] = useState<number | null>(null);
+  
   // مصفوفة المواقع للاعبين حول الطاولة (تحدد الإحداثيات x,y)
   const positionCoordinates = [
     { top: 'auto', bottom: '5%', left: '45%', right: 'auto' }, // 0: اللاعب الرئيسي (في الأسفل)
@@ -76,9 +85,38 @@ export default function PokerPlayer({
     ? 'w-14 h-20' // اللاعب الرئيسي (أكبر)
     : 'w-10 h-14'; // اللاعبين الآخرين
   
+  // معالجة انتهاء وقت اللاعب الحالي - يتم استخدامها في مؤقت الدور
+  const handleTimeout = useCallback(() => {
+    if (isCurrentTurn && isActive && !isFolded && !isAllIn) {
+      console.log(`انتهى وقت اللاعب ${username} (ID: ${id})، تنفيذ انسحاب تلقائي`);
+      performAction(PlayerAction.FOLD);
+    }
+  }, [isCurrentTurn, isActive, isFolded, isAllIn, username, id, performAction]);
+  
+  // دالة معالجة مرور المؤشر على البطاقات
+  const handleCardHover = (index: number | null) => {
+    setIsCardRaised(index);
+  };
+  
+  // تصنيف الحركة للبطاقات حسب موقع اللاعب
+  const getCardTransform = (index: number) => {
+    if (isCardRaised === index) {
+      if (position === 0) {
+        return 'translateY(-10px)';
+      } else if (position === 4) {
+        return 'translateY(10px)';
+      } else if (position < 4) {
+        return 'translateX(10px)';
+      } else {
+        return 'translateX(-10px)';
+      }
+    }
+    return 'none';
+  };
+  
   return (
     <div 
-      className={`player-container absolute ${playerStatusColor} rounded-lg p-2 shadow-lg transition-all duration-300 z-10`}
+      className={`player-container absolute ${playerStatusColor} rounded-lg p-2 shadow-lg transition-all duration-300 z-10 ${isCurrentTurn ? 'current-turn' : ''}`}
       style={{
         top: coordinates.top,
         bottom: coordinates.bottom,
@@ -91,18 +129,28 @@ export default function PokerPlayer({
     >
       <div className="flex items-center gap-2">
         {/* صورة اللاعب */}
-        <Avatar className="border-2 border-[#D4AF37]">
-          <AvatarImage src={avatar} alt={username} />
-          <AvatarFallback className="bg-[#D4AF37] text-black font-bold">
-            {username.substring(0, 2)}
-          </AvatarFallback>
-        </Avatar>
+        <div className="relative">
+          <Avatar className={`border-2 ${isCurrentTurn ? 'border-yellow-400 animate-pulse' : 'border-[#D4AF37]'}`}>
+            <AvatarImage src={avatar} alt={username} />
+            <AvatarFallback className="bg-[#D4AF37] text-black font-bold">
+              {username.substring(0, 2)}
+            </AvatarFallback>
+          </Avatar>
+          
+          {/* مؤشر الدور (ديلر، الرهان الصغير، الرهان الكبير) */}
+          {isActive && !isFolded && (
+            <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-white shadow flex items-center justify-center text-xs font-bold">
+              {position === 0 ? 'D' : position === 1 ? 'S' : position === 2 ? 'B' : ''}
+            </div>
+          )}
+        </div>
         
         {/* معلومات اللاعب */}
         <div>
           <div className="text-white font-bold text-sm">
-            {username} {isAllIn && <span className="text-purple-400">(كل الرقائق)</span>}
-            {isFolded && <span className="text-gray-400">(طوى)</span>}
+            {username} 
+            {isAllIn && <span className="text-purple-400 mr-1">(كل الرقائق)</span>}
+            {isFolded && <span className="text-gray-400 mr-1">(طوى)</span>}
           </div>
           <div className="text-[#D4AF37] text-xs">
             ${chips.toLocaleString()}
@@ -111,9 +159,16 @@ export default function PokerPlayer({
           {/* الرهان الحالي، إذا كان موجودًا */}
           {currentBet > 0 && (
             <div className="bg-black/60 text-white text-xs px-2 py-1 rounded mt-1">
-              رهان: ${currentBet}
+              رهان: ${currentBet.toLocaleString()}
             </div>
           )}
+          
+          {/* مؤقت الدور - يظهر فقط للاعب الحالي */}
+          <TurnTimer
+            duration={10}
+            isActive={isCurrentTurn && isActive && !isFolded && !isAllIn}
+            onTimeout={handleTimeout}
+          />
         </div>
       </div>
       
@@ -122,18 +177,28 @@ export default function PokerPlayer({
         {cards.map((card, index) => (
           <div 
             key={index}
-            className={`${cardSize} flex items-center justify-center rounded ${card.hidden && !showCards ? 'bg-blue-800 border border-white/20' : 'bg-white'}`}
+            className={`${cardSize} flex items-center justify-center rounded relative 
+              ${card.hidden && !showCards ? 'bg-blue-800 border border-white/20' : 'bg-white border border-gray-300'} 
+              transition-all duration-200 ease-out card
+              ${(position === 0 || showCards) ? 'hover:shadow-lg' : ''}`}
+            style={{
+              transform: getCardTransform(index),
+              zIndex: isCardRaised === index ? 20 : 10
+            }}
+            onMouseEnter={() => (position === 0 || showCards) && handleCardHover(index)}
+            onMouseLeave={() => handleCardHover(null)}
           >
             {(!card.hidden || showCards) ? (
-              <div className={`card-content text-${card.suit === '♥' || card.suit === '♦' ? 'red' : 'black'} font-bold`}>
+              <div className={`card-content text-${card.suit === '♥' || card.suit === '♦' ? 'red-600' : 'black'} font-bold`}>
                 <div className="text-center">
-                  <div>{card.rank}</div>
-                  <div>{card.suit}</div>
+                  <div className={position === 0 ? 'text-lg' : 'text-base'}>{card.rank}</div>
+                  <div className={position === 0 ? 'text-2xl' : 'text-xl'}>{card.suit}</div>
                 </div>
               </div>
             ) : (
-              <div className="card-back text-xs text-white/50 rotate-90">
-                بوكر مصر
+              <div className="card-back flex flex-col items-center justify-center text-xs text-white/70">
+                <div className="rotate-90">بوكر</div>
+                <div className="rotate-90 text-[#D4AF37]">مصر</div>
               </div>
             )}
           </div>
