@@ -171,7 +171,8 @@ interface BigWinEffectsProps {
   onComplete?: () => void;
 }
 
-export function BigWinEffects({ isActive, winAmount, onComplete }: BigWinEffectsProps) {
+// المكون الرئيسي للعرض ثلاثي الأبعاد داخل Canvas
+function BigWinScene({ isActive, winAmount }: { isActive: boolean, winAmount: number }) {
   const [coins, setCoins] = useState<Array<{ id: number; position: [number, number, number]; delay: number }>>([]);
   const coinTexture = useTexture('/images/egypt-queen/coin-texture.png');
   const bgTexture = useTexture('/images/egypt-queen/big-win-bg.jpg');
@@ -194,59 +195,69 @@ export function BigWinEffects({ isActive, winAmount, onComplete }: BigWinEffects
       }));
       
       setCoins(newCoins);
-      
-      // تفعيل دالة الانتهاء بعد فترة
-      if (onComplete) {
-        const completeTimeout = setTimeout(() => {
-          onComplete();
-        }, 8000); // 8 ثواني للعرض
-        
-        return () => clearTimeout(completeTimeout);
-      }
     } else {
       setCoins([]);
+    }
+  }, [isActive, winAmount]);
+  
+  return (
+    <>
+      <PerspectiveCamera makeDefault position={[0, 0, 15]} />
+      <ambientLight intensity={0.7} />
+      <pointLight position={[10, 10, 10]} intensity={1} />
+      <spotLight position={[0, 10, 0]} intensity={0.5} angle={0.6} penumbra={0.5} castShadow />
+      
+      {/* خلفية الفوز الكبير */}
+      <mesh position={[0, 0, -10]}>
+        <planeGeometry args={[40, 30]} />
+        <meshBasicMaterial map={bgTexture} transparent opacity={0.7} />
+      </mesh>
+      
+      {/* مجموعة التأثيرات */}
+      <group ref={effectsRef}>
+        {/* نص الفوز الكبير */}
+        <BigWinText amount={winAmount} isActive={isActive} />
+        
+        {/* العملات المتساقطة */}
+        {coins.map(coin => (
+          <Coin 
+            key={coin.id}
+            position={coin.position}
+            texture={coinTexture}
+            delay={coin.delay}
+          />
+        ))}
+        
+        {/* شرار مضيء حول النص */}
+        <Float floatIntensity={1} speed={2}>
+          <group position={[0, 2, -2]}>
+            <mesh>
+              <sphereGeometry args={[3, 32, 32]} />
+              <meshBasicMaterial color="#FFCC00" transparent opacity={0.1} />
+            </mesh>
+          </group>
+        </Float>
+      </group>
+    </>
+  );
+}
+
+export function BigWinEffects({ isActive, winAmount, onComplete }: BigWinEffectsProps) {
+  // تفعيل دالة الانتهاء بعد فترة
+  useEffect(() => {
+    if (isActive && onComplete) {
+      const completeTimeout = setTimeout(() => {
+        onComplete();
+      }, 8000); // 8 ثواني للعرض
+      
+      return () => clearTimeout(completeTimeout);
     }
   }, [isActive, winAmount, onComplete]);
   
   return (
     <div className="absolute inset-0 z-50" style={{ display: isActive ? 'block' : 'none' }}>
       <Canvas>
-        <PerspectiveCamera makeDefault position={[0, 0, 15]} />
-        <ambientLight intensity={0.7} />
-        <pointLight position={[10, 10, 10]} intensity={1} />
-        <spotLight position={[0, 10, 0]} intensity={0.5} angle={0.6} penumbra={0.5} castShadow />
-        
-        {/* خلفية الفوز الكبير */}
-        <mesh position={[0, 0, -10]}>
-          <planeGeometry args={[40, 30]} />
-          <meshBasicMaterial map={bgTexture} transparent opacity={0.7} />
-        </mesh>
-        
-        {/* مجموعة التأثيرات */}
-        <group ref={effectsRef}>
-          {/* نص الفوز الكبير */}
-          <BigWinText amount={winAmount} isActive={isActive} />
-          
-          {/* العملات المتساقطة */}
-          {coins.map(coin => (
-            <Coin 
-              key={coin.id}
-              position={coin.position}
-              texture={coinTexture}
-              delay={coin.delay}
-            />
-          ))}
-          
-          {/* شرار مضيء حول النص */}
-          <Float floatIntensity={1} speed={2}>
-            <group position={[0, 2, -2]}>
-              <mesh>
-                <sphereGeometry args={[3, 32, 32]} />
-                <meshBasicMaterial color="#FFCC00" transparent opacity={0.1} />
-              </mesh>
-            </group>
-          </Float>
-        </group>
+        <BigWinScene isActive={isActive} winAmount={winAmount} />
       </Canvas>
     </div>
   );
