@@ -80,6 +80,9 @@ function Router() {
       <ProtectedRoute path="/egypt-rocket" component={EgyptRocketPage} />
       <ProtectedRoute path="/fishing-slots" component={FishingSlotsPage} />
       <ProtectedRoute path="/poker-lobby/poker-masr" component={PokerMasrLobby} />
+      <ProtectedRoute path="/poker-lobby/poker-masr/texas-holdem" component={() => import("@/pages/poker-lobby/poker-masr/texas-holdem").then(mod => <mod.default />)} />
+      <ProtectedRoute path="/poker-lobby/poker-masr/mecca-poker" component={() => import("@/pages/poker-lobby/poker-masr/mecca-poker").then(mod => <mod.default />)} />
+      <ProtectedRoute path="/poker-lobby/poker-masr/turkish-classic" component={() => import("@/pages/poker-lobby/poker-masr/turkish-classic").then(mod => <mod.default />)} />
       <ProtectedRoute path="/notifications" component={NotificationsPage} />
       <ProtectedRoute path="/notifications/:messageId" component={NotificationsPage} />
       <ProtectedRoute path="/inventory" component={InventoryPage} />

@@ -50,15 +50,8 @@ export default function PokerMasrLobby() {
   ];
   
   const handleRoomSelect = (roomId: string) => {
-    // للأغراض التجريبية، سنظهر رسالة فقط
-    toast({
-      title: "قريباً",
-      description: `سيتم إطلاق غرفة ${roomId} قريباً. يرجى المحاولة لاحقاً.`,
-      variant: "default",
-    });
-    
-    // في المستقبل، سننتقل إلى الغرفة المحددة
-    // navigate(`/poker-lobby/poker-masr/${roomId}`);
+    // التوجيه إلى صفحة الغرفة المطلوبة
+    navigate(`/poker-lobby/poker-masr/${roomId}`);
   };
   
   return (
