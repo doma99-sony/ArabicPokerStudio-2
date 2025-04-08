@@ -110,9 +110,28 @@ export class GameManager {
     minBuyIn: number = 200,
     maxBuyIn: number = 2000
   ) {
+    // تهيئة الحالة الأولية قبل استدعاء createNewRound
     this.state = {
       players: [],
-      currentRound: this.createNewRound(0),
+      currentRound: {
+        roundNumber: 0,
+        deck: [],
+        communityCards: [],
+        pot: 0,
+        sidePots: [],
+        currentBet: 0,
+        minRaise: blindAmount.big,
+        dealer: 0,
+        smallBlind: { position: 0, amount: blindAmount.small },
+        bigBlind: { position: 0, amount: blindAmount.big },
+        currentTurn: -1,
+        lastRaisePosition: 0,
+        gamePhase: GamePhase.PREFLOP,
+        bettingRoundComplete: false,
+        actionHistory: [],
+        turnStartTime: 0,
+        turnTimeLimit: 30
+      },
       blindAmount,
       minBuyIn,
       maxBuyIn,
@@ -120,6 +139,9 @@ export class GameManager {
       waitingForPlayers: true,
       tableCardReveals: 0
     };
+    
+    // بعد تهيئة الحالة الأولية، إنشاء جولة جديدة
+    this.state.currentRound = this.createNewRound(0);
   }
   
   /**
@@ -809,25 +831,30 @@ export class GameManager {
     // إنشاء وخلط مجموعة البطاقات
     const deck = shuffleDeck(createDeck());
     
-    // تحديد مواقع المكفوفين
-    const blindPositions = determineBlindPositions(dealerPosition, this.state.players.length);
+    // تحديد مواقع المكفوفين - استخدام 2 كقيمة افتراضية لعدد اللاعبين إذا كانت players غير موجودة
+    const playerCount = this.state?.players?.length || 2;
+    const blindPositions = determineBlindPositions(dealerPosition, playerCount);
+    
+    // استخدام blindAmount من this.state إذا كان موجودًا، وإلا استخدام القيم الافتراضية
+    const smallBlindAmount = this.state?.blindAmount?.small || 5;
+    const bigBlindAmount = this.state?.blindAmount?.big || 10;
     
     return {
-      roundNumber: this.state.currentRound ? this.state.currentRound.roundNumber + 1 : 1,
+      roundNumber: this.state?.currentRound ? this.state.currentRound.roundNumber + 1 : 1,
       deck,
       communityCards: [],
       pot: 0,
       sidePots: [],
-      currentBet: this.state.blindAmount.big,
-      minRaise: this.state.blindAmount.big,
+      currentBet: bigBlindAmount,
+      minRaise: bigBlindAmount,
       dealer: dealerPosition,
       smallBlind: {
         position: blindPositions.smallBlind,
-        amount: this.state.blindAmount.small
+        amount: smallBlindAmount
       },
       bigBlind: {
         position: blindPositions.bigBlind,
-        amount: this.state.blindAmount.big
+        amount: bigBlindAmount
       },
       currentTurn: -1,
       lastRaisePosition: blindPositions.bigBlind,

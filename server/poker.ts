@@ -90,22 +90,30 @@ export function setupPokerGame(app: Express, httpServer: Server) {
     minBuyIn: number,
     maxBuyIn: number
   ): PokerTable {
-    const gameManager = new GameManager(blindAmount, minBuyIn, maxBuyIn);
+    console.log(`إنشاء طاولة بوكر: ${name} مع blindAmount=${JSON.stringify(blindAmount)}, minBuyIn=${minBuyIn}, maxBuyIn=${maxBuyIn}`);
     
-    const table: PokerTable = {
-      id,
-      name,
-      gameManager,
-      players: new Map(),
-      createdAt: new Date()
-    };
-    
-    // تخزين الطاولة في المتغير العام
-    pokerModule.tables.set(id, table);
-    
-    console.log(`تم إنشاء طاولة بوكر جديدة: ${name} (ID: ${id})`);
-    
-    return table;
+    try {
+      const gameManager = new GameManager(blindAmount, minBuyIn, maxBuyIn);
+      console.log(`تم إنشاء مدير اللعبة بنجاح للطاولة: ${name}`);
+      
+      const table: PokerTable = {
+        id,
+        name,
+        gameManager,
+        players: new Map(),
+        createdAt: new Date()
+      };
+      
+      // تخزين الطاولة في المتغير العام
+      pokerModule.tables.set(id, table);
+      
+      console.log(`تم إنشاء طاولة بوكر جديدة: ${name} (ID: ${id})`);
+      
+      return table;
+    } catch (error) {
+      console.error(`خطأ في إنشاء طاولة البوكر: ${name}`, error);
+      throw error;
+    }
   }
   
   // إنشاء طاولات افتراضية للبوكر
@@ -120,8 +128,8 @@ export function setupPokerGame(app: Express, httpServer: Server) {
     createPokerTable(3, 'تكساس هولدم (10/20) - بوت كبير', { small: 10, big: 20 }, 400, 4000);
   }
   
-  // إنشاء طاولات البوكر الافتراضية
-  createDefaultPokerTables();
+  // سيتم إنشاء طاولات البوكر الافتراضية من خلال دالة setupPokerGame
+  // تم نقل الاستدعاء لتجنب الاستدعاء المبكر
   
   // Map لتتبع الاتصالات النشطة حسب معرف المستخدم
   const clients = new Map<number, ClientInfo>();
@@ -206,6 +214,9 @@ export function setupPokerGame(app: Express, httpServer: Server) {
     });
   }, PING_INTERVAL);
 
+  // إنشاء طاولات البوكر الافتراضية
+  createDefaultPokerTables();
+
   // إرسال رسالة لجميع المستخدمين في طاولة معينة
   function broadcastToTable(tableId: number, message: any, excludeUserId?: number) {
     if (tableId === undefined || isNaN(tableId)) {
@@ -250,6 +261,9 @@ export function setupPokerGame(app: Express, httpServer: Server) {
     return players;
   }
 
+  // إنشاء طاولات البوكر الافتراضية
+  // هذا الاستدعاء سيكون فقط داخل setupPokerGame
+  
   // إعداد التنظيف عند إغلاق الخادم
   process.on('SIGINT', cleanupServer);
   process.on('SIGTERM', cleanupServer);
