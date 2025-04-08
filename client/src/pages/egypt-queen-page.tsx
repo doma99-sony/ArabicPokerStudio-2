@@ -6,9 +6,9 @@ import { Slider } from '@/components/ui/slider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/use-auth';
-import { useRealtime } from '@/hooks/use-realtime-updates';
+import { useRealtimeUpdatesContext } from '@/hooks/use-realtime-updates';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { queryClient } from '@/lib/query-client';
+import { queryClient } from '@/lib/queryClient';
 import { Reels3DContainer } from '@/components/game/egypt-queen/3d-reel';
 import { BigWinEffects } from '@/components/game/egypt-queen/big-win-effects';
 import { TreasureHuntGame } from '@/components/game/egypt-queen/treasure-hunt-game';
@@ -32,7 +32,7 @@ interface WinLine {
 export default function EgyptQueenPage() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const realtime = useRealtime();
+  const realtime = useRealtimeUpdatesContext();
   
   // حالة اللعبة
   const [bet, setBet] = useState(1000);
@@ -150,10 +150,10 @@ const updateUserChips = useMutation({
       }
     };
     
-    realtime.on('user_update', handleUserUpdate);
+    realtime.addMessageListener('user_update', handleUserUpdate);
     
     return () => {
-      realtime.off('user_update', handleUserUpdate);
+      realtime.removeMessageListener('user_update', handleUserUpdate);
     };
   }, [realtime, refetchUser]);
   
