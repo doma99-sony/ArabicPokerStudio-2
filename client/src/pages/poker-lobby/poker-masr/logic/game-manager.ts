@@ -1,4 +1,6 @@
 import { Card, GamePhase, PlayerAction, calculateHandStrength, evaluatePlayerHand, rotateDealer, determineBlindPositions, determineFirstToAct, createDeck, shuffleDeck } from './poker-engine';
+// استيراد مكتبة pokersolver
+import * as pokerSolver from 'pokersolver';
 
 /**
  * واجهة اللاعب في اللعبة
@@ -598,24 +600,34 @@ export class GameManager {
       player.isCurrentTurn = false;
     }
     
+    // إضافة سجل للتاريخ يوضح نهاية المرحلة الحالية
+    round.actionHistory.push({
+      playerId: -1, // -1 يشير إلى إجراء النظام
+      action: PlayerAction.CHECK, // استخدام CHECK كإجراء افتراضي
+      timestamp: Date.now(),
+      amount: 0
+    });
+    
     // تحديد المرحلة الحالية والانتقال إلى المرحلة التالية
+    let newPhase: GamePhase;
+    
     switch (round.gamePhase) {
       case GamePhase.PREFLOP:
         // كشف بطاقات الفلوب (3 بطاقات)
         this.dealCommunityCards(3);
-        round.gamePhase = GamePhase.FLOP;
+        newPhase = GamePhase.FLOP;
         break;
         
       case GamePhase.FLOP:
         // كشف بطاقة التيرن (البطاقة الرابعة)
         this.dealCommunityCards(1);
-        round.gamePhase = GamePhase.TURN;
+        newPhase = GamePhase.TURN;
         break;
         
       case GamePhase.TURN:
         // كشف بطاقة الريفر (البطاقة الخامسة)
         this.dealCommunityCards(1);
-        round.gamePhase = GamePhase.RIVER;
+        newPhase = GamePhase.RIVER;
         break;
         
       case GamePhase.RIVER:
@@ -626,10 +638,26 @@ export class GameManager {
         return false;
     }
     
+    // اسجل المرحلة الجديدة في سجل التاريخ
+    round.gamePhase = newPhase;
+    round.actionHistory.push({
+      playerId: -1, // -1 يشير إلى إجراء النظام
+      action: PlayerAction.CHECK, // استخدام CHECK كإجراء افتراضي
+      timestamp: Date.now(),
+      amount: 0
+    });
+    
     // إعادة تعيين متغيرات المراهنة لجولة جديدة
     round.currentBet = 0;
     round.minRaise = this.state.blindAmount.big;
     round.bettingRoundComplete = false;
+    
+    // إعادة تعيين قيم الرهان للاعبين، مع الاحتفاظ بإجمالي الرهانات في البوت
+    for (const player of this.state.players) {
+      if (!player.folded && !player.isAllIn) {
+        player.betAmount = 0;
+      }
+    }
     
     // تعيين اللاعب الأول في الجولة الجديدة
     const firstPlayerPosition = determineFirstToAct(
@@ -647,6 +675,11 @@ export class GameManager {
       if (player) {
         player.isCurrentTurn = true;
         round.currentTurn = player.position;
+        round.turnStartTime = Date.now();
+        
+        // إعداد مؤقت لدور اللاعب الجديد
+        this.setTurnTimer(player.id);
+        
         found = true;
         break;
       }
@@ -654,8 +687,13 @@ export class GameManager {
     
     // إذا لم يتم العثور على لاعب نشط، انتقل إلى مرحلة إظهار البطاقات
     if (!found) {
-      round.gamePhase = GamePhase.RIVER;
-      return this.handleShowdown();
+      // إذا وصلنا إلى الريفر بالفعل، انتقل مباشرة إلى الـ showdown
+      if (round.gamePhase === GamePhase.RIVER) {
+        return this.handleShowdown();
+      }
+      
+      // وإلا، انتقل إلى المرحلة التالية
+      return this.moveToNextPhase();
     }
     
     return true;
@@ -690,7 +728,15 @@ export class GameManager {
       return true;
     }
     
-    // تقييم أيدي جميع اللاعبين
+    // كشف جميع بطاقات اللاعبين
+    activePlayers.forEach(player => {
+      // عند المرحلة النهائية، يتم كشف جميع البطاقات
+      player.cards.forEach(card => {
+        card.hidden = false;
+      });
+    });
+    
+    // تقييم أيدي جميع اللاعبين بأستخدام pokersolver للحصول على تقييم دقيق
     const playerHands = activePlayers.map(player => {
       const evaluation = evaluatePlayerHand(player.cards, round.communityCards);
       return {
@@ -700,7 +746,27 @@ export class GameManager {
       };
     });
     
-    // ترتيب اللاعبين حسب قوة اليد (من الأقوى إلى الأضعف)
+    // توفير تفاصيل عن اليد لكل لاعب
+    const handDetails = playerHands.map(ph => {
+      return {
+        playerId: ph.player.id,
+        username: ph.player.username,
+        handType: ph.evaluation.handType,
+        description: ph.evaluation.description,
+        strength: ph.evaluation.strength
+      };
+    });
+    
+    // إضافة تفاصيل اليد إلى سجل التاريخ للرجوع إليها لاحقًا
+    round.actionHistory.push({
+      playerId: -1, // -1 للإشارة إلى أنه حدث نظام
+      action: PlayerAction.CHECK, // استخدام CHECK كنوع إجراء افتراضي
+      timestamp: Date.now(),
+      amount: 0,
+      // يمكن إضافة معلومات مخصصة هنا أيضًا
+    });
+    
+    // ترتيب اللاعبين حسب قوة اليد (من الأقوى إلى الأضعف) باستخدام التقييم المحسن
     playerHands.sort((a, b) => b.handStrength - a.handStrength);
     
     // تقسيم البوت بين الفائزين
@@ -721,6 +787,23 @@ export class GameManager {
       winners = winners.concat(sidePotWinners);
     }
     
+    // إضافة معلومات الفائزين إلى سجل التاريخ
+    if (winners.length > 0) {
+      const winnerIds = winners.map(w => w.playerId);
+      const winnerUsernames = winners.map(w => {
+        const player = this.state.players.find(p => p.id === w.playerId);
+        return player ? player.username : 'غير معروف';
+      });
+      
+      round.actionHistory.push({
+        playerId: -2, // -2 للإشارة إلى إعلان الفائزين
+        action: PlayerAction.CHECK, // استخدام CHECK كنوع إجراء افتراضي
+        timestamp: Date.now(),
+        amount: 0,
+        // يمكن إضافة معلومات مخصصة هنا أيضًا
+      });
+    }
+    
     // إعادة تعيين القيم استعداداً للجولة التالية
     this.resetForNextRound(winners);
     
@@ -728,7 +811,7 @@ export class GameManager {
   }
   
   /**
-   * تحديد الفائزين وتوزيع البوت
+   * تحديد الفائزين وتوزيع البوت باستخدام مكتبة pokersolver
    */
   private determineWinners(
     rankedPlayers: { player: GamePlayer; evaluation: any; handStrength: number }[],
@@ -741,22 +824,57 @@ export class GameManager {
     }
     
     const winners: WinnerInfo[] = [];
-    const highestStrength = rankedPlayers[0].handStrength;
     
-    // جميع اللاعبين بنفس أعلى قوة لليد هم فائزون
-    const potWinners = rankedPlayers.filter(p => p.handStrength === highestStrength);
-    const winAmount = Math.floor(potAmount / potWinners.length);
+    // استخدام solverResult الأصلي من تقييم اليد
+    // هذا يسمح لنا باستخدام وظيفة المقارنة المدمجة في pokersolver
+    const solverResults = rankedPlayers
+      .filter(p => p.evaluation && p.evaluation.solverResult)
+      .map(p => p.evaluation.solverResult);
     
-    // توزيع البوت على الفائزين
-    for (const winner of potWinners) {
-      winner.player.chips += winAmount;
+    // إذا تمكنا من استخدام pokersolver للمقارنة
+    if (solverResults.length === rankedPlayers.length && solverResults.length > 0) {
+      // استخدام Hand.winners لتحديد الأيدي الفائزة
+      const winningHands = pokerSolver.Hand.winners(solverResults);
       
-      winners.push({
-        playerId: winner.player.id,
-        handDescription: winner.evaluation.description,
-        winningAmount: winAmount,
-        potNumber
-      });
+      // تحديد اللاعبين الذين يملكون الأيدي الفائزة
+      const potWinners = rankedPlayers.filter(p => 
+        winningHands.some((wh: any) => 
+          wh.name === p.evaluation.solverResult.name && 
+          JSON.stringify(wh.cards) === JSON.stringify(p.evaluation.solverResult.cards)
+        )
+      );
+      
+      // حساب المبلغ الذي يفوز به كل لاعب
+      const winAmount = Math.floor(potAmount / potWinners.length);
+      
+      // توزيع البوت على الفائزين
+      for (const winner of potWinners) {
+        winner.player.chips += winAmount;
+        
+        winners.push({
+          playerId: winner.player.id,
+          handDescription: winner.evaluation.description,
+          winningAmount: winAmount,
+          potNumber
+        });
+      }
+    } else {
+      // طريقة احتياطية: استخدام handStrength كما كان سابقًا
+      const highestStrength = Math.max(...rankedPlayers.map(p => p.handStrength));
+      const potWinners = rankedPlayers.filter(p => p.handStrength === highestStrength);
+      const winAmount = Math.floor(potAmount / potWinners.length);
+      
+      // توزيع البوت على الفائزين
+      for (const winner of potWinners) {
+        winner.player.chips += winAmount;
+        
+        winners.push({
+          playerId: winner.player.id,
+          handDescription: winner.evaluation.description,
+          winningAmount: winAmount,
+          potNumber
+        });
+      }
     }
     
     return winners;
