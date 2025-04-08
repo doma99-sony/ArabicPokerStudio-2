@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, forwardRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useTexture, Float, Text, PerspectiveCamera, useGLTF, 
          Html, Environment, MeshDistortMaterial, Sparkles } from '@react-three/drei';
@@ -16,10 +16,21 @@ interface SymbolProps {
 }
 
 // رمز كتاب الأسرار المصري (SCATTER)
-function EgyptianBook({ isWinning, bigWin, ...props }: SymbolProps) {
+const EgyptianBook = forwardRef(({ isWinning, bigWin, ...props }: SymbolProps, ref: any) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const texture = useTexture('/images/egypt-queen/symbols/book.svg');
   const glowRef = useRef<THREE.Mesh>(null);
+  
+  // إسناد المرجع الخارجي إلى meshRef
+  useEffect(() => {
+    if (ref && meshRef.current) {
+      if (typeof ref === 'function') {
+        ref(meshRef.current);
+      } else {
+        ref.current = meshRef.current;
+      }
+    }
+  }, [ref]);
   
   useEffect(() => {
     if (isWinning && meshRef.current) {
@@ -78,14 +89,25 @@ function EgyptianBook({ isWinning, bigWin, ...props }: SymbolProps) {
       )}
     </group>
   );
-}
+});
 
 // رمز كليوباترا (الرمز الأعلى قيمة)
-function CleopatraSymbol({ isWinning, bigWin, ...props }: SymbolProps) {
+const CleopatraSymbol = forwardRef(({ isWinning, bigWin, ...props }: SymbolProps, ref: any) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const texture = useTexture('/images/egypt-queen/symbols/cleopatra.svg');
   const glowRef = useRef<THREE.Mesh>(null);
   const [hover, setHover] = useState(false);
+  
+  // إسناد المرجع الخارجي إلى meshRef
+  useEffect(() => {
+    if (ref && meshRef.current) {
+      if (typeof ref === 'function') {
+        ref(meshRef.current);
+      } else {
+        ref.current = meshRef.current;
+      }
+    }
+  }, [ref]);
   
   useEffect(() => {
     if (isWinning && meshRef.current) {
@@ -129,7 +151,9 @@ function CleopatraSymbol({ isWinning, bigWin, ...props }: SymbolProps) {
     }
     if (glowRef.current && isWinning) {
       glowRef.current.rotation.z += 0.02;
-      glowRef.current.material.opacity = (Math.sin(state.clock.elapsedTime * 3) + 1) / 2;
+      if (glowRef.current.material instanceof THREE.Material) {
+        glowRef.current.material.opacity = (Math.sin(state.clock.elapsedTime * 3) + 1) / 2;
+      }
     }
   });
   
@@ -161,13 +185,24 @@ function CleopatraSymbol({ isWinning, bigWin, ...props }: SymbolProps) {
       )}
     </group>
   );
-}
+});
 
 // رمز عين حورس
-function EyeOfHorusSymbol({ isWinning, bigWin, ...props }: SymbolProps) {
+const EyeOfHorusSymbol = forwardRef(({ isWinning, bigWin, ...props }: SymbolProps, ref: any) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const texture = useTexture('/images/egypt-queen/symbols/eye.svg');
   const glowRef = useRef<THREE.Mesh>(null);
+  
+  // إسناد المرجع الخارجي إلى meshRef
+  useEffect(() => {
+    if (ref && meshRef.current) {
+      if (typeof ref === 'function') {
+        ref(meshRef.current);
+      } else {
+        ref.current = meshRef.current;
+      }
+    }
+  }, [ref]);
   
   useEffect(() => {
     if (isWinning && meshRef.current) {
@@ -195,7 +230,7 @@ function EyeOfHorusSymbol({ isWinning, bigWin, ...props }: SymbolProps) {
         meshRef.current.scale.y = 1 + Math.sin(state.clock.elapsedTime * 5) * 0.1;
       }
     }
-    if (glowRef.current && isWinning) {
+    if (glowRef.current && isWinning && glowRef.current.material instanceof THREE.Material) {
       glowRef.current.material.opacity = (Math.sin(state.clock.elapsedTime * 4) + 1) / 3 + 0.3;
     }
   });
@@ -225,12 +260,23 @@ function EyeOfHorusSymbol({ isWinning, bigWin, ...props }: SymbolProps) {
       )}
     </group>
   );
-}
+});
 
 // رمز أنوبيس
-function AnubisSymbol({ isWinning, bigWin, ...props }: SymbolProps) {
+const AnubisSymbol = forwardRef(({ isWinning, bigWin, ...props }: SymbolProps, ref: any) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const texture = useTexture('/images/egypt-queen/symbols/anubis.svg');
+  
+  // إسناد المرجع الخارجي إلى meshRef
+  useEffect(() => {
+    if (ref && meshRef.current) {
+      if (typeof ref === 'function') {
+        ref(meshRef.current);
+      } else {
+        ref.current = meshRef.current;
+      }
+    }
+  }, [ref]);
   
   useEffect(() => {
     if (isWinning && meshRef.current) {
@@ -278,12 +324,23 @@ function AnubisSymbol({ isWinning, bigWin, ...props }: SymbolProps) {
       )}
     </group>
   );
-}
+});
 
 // رمز القط المصري
-function EgyptianCatSymbol({ isWinning, bigWin, ...props }: SymbolProps) {
+const EgyptianCatSymbol = forwardRef(({ isWinning, bigWin, ...props }: SymbolProps, ref: any) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const texture = useTexture('/images/egypt-queen/symbols/cat.svg');
+  
+  // إسناد المرجع الخارجي إلى meshRef
+  useEffect(() => {
+    if (ref && meshRef.current) {
+      if (typeof ref === 'function') {
+        ref(meshRef.current);
+      } else {
+        ref.current = meshRef.current;
+      }
+    }
+  }, [ref]);
   
   useEffect(() => {
     if (isWinning && meshRef.current) {
@@ -335,13 +392,24 @@ function EgyptianCatSymbol({ isWinning, bigWin, ...props }: SymbolProps) {
       )}
     </group>
   );
-}
+});
 
 // رمز WILD المميز
-function WildSymbol({ isWinning, bigWin, ...props }: SymbolProps) {
+const WildSymbol = forwardRef(({ isWinning, bigWin, ...props }: SymbolProps, ref: any) => {
   const meshRef = useRef<THREE.Group>(null);
   const texture = useTexture('/images/egypt-queen/symbols/wild.png');
   const glowRef = useRef<THREE.Mesh>(null);
+  
+  // إسناد المرجع الخارجي إلى meshRef
+  useEffect(() => {
+    if (ref && meshRef.current) {
+      if (typeof ref === 'function') {
+        ref(meshRef.current);
+      } else {
+        ref.current = meshRef.current;
+      }
+    }
+  }, [ref]);
   
   useEffect(() => {
     if (isWinning && meshRef.current) {
@@ -376,7 +444,7 @@ function WildSymbol({ isWinning, bigWin, ...props }: SymbolProps) {
       }
     }
     
-    if (glowRef.current && isWinning) {
+    if (glowRef.current && isWinning && glowRef.current.material instanceof THREE.Material) {
       // تغيير شدة توهج الهالة
       glowRef.current.material.opacity = (Math.sin(state.clock.elapsedTime * 6) + 1) / 2 + 0.2;
       glowRef.current.scale.x = 1 + Math.sin(state.clock.elapsedTime * 3) * 0.1;
@@ -412,12 +480,23 @@ function WildSymbol({ isWinning, bigWin, ...props }: SymbolProps) {
       )}
     </group>
   );
-}
+});
 
 // رمز حرف A
-function CardSymbol({ type, isWinning, ...props }: SymbolProps) {
+const CardSymbol = forwardRef(({ type, isWinning, ...props }: SymbolProps, ref: any) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const texture = useTexture(`/images/egypt-queen/symbols/${type}.svg`);
+  
+  // إسناد المرجع الخارجي إلى meshRef
+  useEffect(() => {
+    if (ref && meshRef.current) {
+      if (typeof ref === 'function') {
+        ref(meshRef.current);
+      } else {
+        ref.current = meshRef.current;
+      }
+    }
+  }, [ref]);
   
   useEffect(() => {
     if (isWinning && meshRef.current) {
@@ -477,32 +556,33 @@ function CardSymbol({ type, isWinning, ...props }: SymbolProps) {
       )}
     </group>
   );
-}
+});
 
-export function EgyptSymbol3D({ type, isWinning = false, bigWin = false, ...props }: SymbolProps) {
-  switch(type) {
+// مكون الرمز المصري المُصدر - يتم استدعاؤه من خارج Canvas
+export const EgyptSymbol3D = forwardRef((props: SymbolProps, ref) => {
+  switch(props.type) {
     case 'cleopatra':
-      return <CleopatraSymbol type={type} isWinning={isWinning} bigWin={bigWin} {...props} />;
+      return <CleopatraSymbol {...props} ref={ref} />;
     case 'book':
-      return <EgyptianBook type={type} isWinning={isWinning} bigWin={bigWin} {...props} />;
+      return <EgyptianBook {...props} ref={ref} />;
     case 'eye':
-      return <EyeOfHorusSymbol type={type} isWinning={isWinning} bigWin={bigWin} {...props} />;
+      return <EyeOfHorusSymbol {...props} ref={ref} />;
     case 'anubis':
-      return <AnubisSymbol type={type} isWinning={isWinning} bigWin={bigWin} {...props} />;
+      return <AnubisSymbol {...props} ref={ref} />;
     case 'cat':
-      return <EgyptianCatSymbol type={type} isWinning={isWinning} bigWin={bigWin} {...props} />;
+      return <EgyptianCatSymbol {...props} ref={ref} />;
     case 'wild':
-      return <WildSymbol type={type} isWinning={isWinning} bigWin={bigWin} {...props} />;
+      return <WildSymbol {...props} ref={ref} />;
     case 'A':
     case 'K':
     case 'Q':
     case 'J':
     case '10':
-      return <CardSymbol type={type} isWinning={isWinning} bigWin={bigWin} {...props} />;
+      return <CardSymbol type={props.type} {...props} ref={ref} />;
     default:
       return null;
   }
-}
+});
 
 interface SymbolsSceneProps {
   symbols: Array<{
@@ -513,9 +593,10 @@ interface SymbolsSceneProps {
   }>;
 }
 
-export function SymbolsScene({ symbols }: SymbolsSceneProps) {
+// مشهد عرض الرموز داخل Canvas
+function SymbolsSceneContent({ symbols }: SymbolsSceneProps) {
   return (
-    <Canvas shadows>
+    <>
       <PerspectiveCamera makeDefault position={[0, 0, 5]} />
       <ambientLight intensity={0.5} />
       <pointLight position={[10, 10, 10]} intensity={1} castShadow />
@@ -530,6 +611,15 @@ export function SymbolsScene({ symbols }: SymbolsSceneProps) {
           bigWin={symbol.bigWin}
         />
       ))}
+    </>
+  );
+}
+
+// مكون الواجهة العامة لعرض الرموز
+export function SymbolsScene({ symbols }: SymbolsSceneProps) {
+  return (
+    <Canvas shadows>
+      <SymbolsSceneContent symbols={symbols} />
     </Canvas>
   );
 }

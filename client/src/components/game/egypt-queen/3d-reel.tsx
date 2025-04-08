@@ -33,13 +33,13 @@ function Reel3D({
   bigWin = false,
   reelStopDelay = 200
 }: ReelProps) {
+  const texture = useTexture('/images/egypt-queen/reels-bg.jpg');
   const reelRef = useRef<THREE.Group>(null);
   const [localSymbols, setLocalSymbols] = useState<SymbolType[]>(symbols);
   const [spinning3D, setSpinning3D] = useState(false);
   const symbolRefs = useRef<(THREE.Mesh | null)[]>([]);
   const spinSpeed = useRef(0);
   const spinEndY = useRef(0);
-  const textureBg = useTexture('/images/egypt-queen/reels-bg.jpg');
   
   // إعدادات دوران البكرة
   const reelSettings = useMemo(() => ({
@@ -177,7 +177,7 @@ function Reel3D({
       {/* خلفية البكرة */}
       <mesh position={[0, 0, -0.1]} receiveShadow>
         <planeGeometry args={[2.2, 7.2]} />
-        <meshStandardMaterial map={textureBg} color="#222222" transparent opacity={0.7} />
+        <meshStandardMaterial map={texture} color="#222222" transparent opacity={0.7} />
       </mesh>
       
       {/* إطار البكرة المضيء */}
@@ -208,6 +208,43 @@ function Reel3D({
         })}
       </group>
     </group>
+  );
+}
+
+function ReelsScene({
+  reels,
+  spinning,
+  onReelComplete,
+  winningPositions,
+  bigWin
+}) {
+  return (
+    <>
+      <PerspectiveCamera makeDefault position={[0, 0, 10]} />
+      <ambientLight intensity={0.7} />
+      <pointLight position={[5, 5, 5]} intensity={0.8} castShadow />
+      <spotLight position={[0, 5, 5]} intensity={0.6} castShadow penumbra={0.5} />
+      <Environment preset="sunset" />
+      
+      <group position={[-4.4, 0, 0]}>
+        {reels.map((reelSymbols, index) => (
+          <group 
+            key={`reel-container-${index}`}
+            position={[index * 2.2, 0, 0]}
+          >
+            <Reel3D
+              reelIndex={index}
+              symbols={reelSymbols}
+              spinning={spinning}
+              spinCompleted={onReelComplete}
+              winningPositions={winningPositions[index] || []}
+              bigWin={bigWin}
+              reelStopDelay={400} // تأخير توقف كل بكرة بعد البكرة السابقة
+            />
+          </group>
+        ))}
+      </group>
+    </>
   );
 }
 
@@ -276,30 +313,13 @@ export function Reels3DContainer({
   
   return (
     <Canvas shadows style={{ width: '100%', height: '100%' }}>
-      <PerspectiveCamera makeDefault position={[0, 0, 10]} />
-      <ambientLight intensity={0.7} />
-      <pointLight position={[5, 5, 5]} intensity={0.8} castShadow />
-      <spotLight position={[0, 5, 5]} intensity={0.6} castShadow penumbra={0.5} />
-      <Environment preset="sunset" />
-      
-      <group position={[-4.4, 0, 0]}>
-        {reels.map((reelSymbols, index) => (
-          <group 
-            key={`reel-container-${index}`}
-            position={[index * 2.2, 0, 0]}
-          >
-            <Reel3D
-              reelIndex={index}
-              symbols={reelSymbols}
-              spinning={spinning}
-              spinCompleted={handleReelComplete}
-              winningPositions={winningPositions[index] || []}
-              bigWin={bigWin}
-              reelStopDelay={400} // تأخير توقف كل بكرة بعد البكرة السابقة
-            />
-          </group>
-        ))}
-      </group>
+      <ReelsScene 
+        reels={reels}
+        spinning={spinning}
+        onReelComplete={handleReelComplete}
+        winningPositions={winningPositions}
+        bigWin={bigWin}
+      />
     </Canvas>
   );
 }
