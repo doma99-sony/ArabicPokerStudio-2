@@ -355,21 +355,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`محاولة إرسال تحديث فوري للمستخدم ${userId} مباشرةً عبر WebSocket...`);
       
       // استخدام WebSocket الداخلي لـ Node.js بدلاً من محاولة الاتصال بخادم FastAPI
-      if (pokerModule.clients && pokerModule.clients.has(userId)) {
+      if (pokerModule.clients) {
         try {
-          const clientInfo = pokerModule.clients.get(userId);
-          if (clientInfo && clientInfo.ws && clientInfo.ws.readyState === 1) { // WebSocket.OPEN
-            clientInfo.ws.send(JSON.stringify(message));
-            console.log(`تم إرسال التحديث المباشر للمستخدم ${userId} بنجاح عبر WebSocket الداخلي`);
-            return { success: true };
-          } else {
-            console.warn(`المستخدم ${userId} متصل ولكن WebSocket غير جاهز للإرسال`);
+          // تحقق من وجود المتغير وإمكانية استخدامه
+          if (pokerModule.clients.has && pokerModule.clients.has(userId)) {
+            const clientInfo = pokerModule.clients.get(userId);
+            if (clientInfo && clientInfo.ws && clientInfo.ws.readyState === 1) { // WebSocket.OPEN
+              clientInfo.ws.send(JSON.stringify(message));
+              console.log(`تم إرسال التحديث المباشر للمستخدم ${userId} بنجاح عبر WebSocket الداخلي`);
+              return { success: true };
+            } else {
+              console.warn(`المستخدم ${userId} متصل ولكن WebSocket غير جاهز للإرسال`);
+            }
           }
         } catch (wsError) {
           console.error(`خطأ في إرسال رسالة WebSocket للمستخدم ${userId}:`, wsError);
         }
       } else {
-        console.warn(`المستخدم ${userId} غير متصل بـ WebSocket حالياً`);
+        console.warn(`pokerModule.clients غير متاح أو غير مهيأ`);
       }
       
       // في حالة عدم وجود خادم Python WebSocket متاح، نعود بنجاح زائف ولا نعطل تجربة المستخدم

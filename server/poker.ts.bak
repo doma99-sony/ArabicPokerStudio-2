@@ -2,22 +2,72 @@ import { Express } from "express";
 import { Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
+import { v4 as uuidv4 } from "uuid";
+
+// استيراد الأنواع والوظائف من ملفات منطق اللعبة
+import { GameManager, GameState, GamePlayer, ActionResult, WinnerInfo } from "../client/src/pages/poker-lobby/poker-masr/logic/game-manager";
+import { PlayerAction } from "../client/src/pages/poker-lobby/poker-masr/logic/poker-engine";
+
+// أنواع رسائل WebSocket للبوكر
+export enum PokerSocketMessageType {
+  JOIN_TABLE = 'join_table',              // الانضمام لطاولة
+  LEAVE_TABLE = 'leave_table',            // مغادرة الطاولة
+  GAME_STATE = 'game_state',              // تحديث حالة اللعبة
+  PLAYER_ACTION = 'player_action',        // إجراء اللاعب
+  ACTION_RESULT = 'action_result',        // نتيجة الإجراء
+  ROUND_COMPLETE = 'round_complete',      // انتهاء الجولة
+  CHAT_MESSAGE = 'chat_message',          // رسالة دردشة
+  PLAYER_JOINED = 'player_joined',        // انضم لاعب
+  PLAYER_LEFT = 'player_left',            // غادر لاعب
+  ERROR = 'error',                        // خطأ
+  PING = 'ping',                          // نبض
+  PONG = 'pong',                          // استجابة للنبض
+  ONLINE_USERS_COUNT = 'online_users_count'  // عدد المستخدمين المتصلين
+}
+
+// واجهة رسالة WebSocket للبوكر
+interface PokerSocketMessage {
+  type: PokerSocketMessageType;           // نوع الرسالة
+  playerId?: number;                     // معرف اللاعب
+  tableId?: number;                      // معرف الطاولة
+  data?: any;                            // بيانات الرسالة
+  timestamp: number;                     // وقت الرسالة
+}
 
 // متغيرات عامة للاستخدام في ملفات أخرى
 export const pokerModule = {
   broadcastToTable: null as any,
-  userTables: null as Map<number, number> | null,
-  clients: null as Map<number, any> | null
+  userTables: new Map<number, number>(), // معرف المستخدم -> معرف الطاولة
+  clients: new Map<number, any>(),       // معرف المستخدم -> معلومات العميل
+  tables: new Map<number, PokerTable>()   // معرف الطاولة -> معلومات الطاولة
 };
+
+// واجهة طاولة البوكر
+interface PokerTable {
+  id: number;                            // معرف الطاولة
+  name: string;                          // اسم الطاولة
+  gameManager: GameManager;              // مدير اللعبة
+  players: Map<number, ExtendedWebSocket>;  // الاتصالات المرتبطة بالطاولة
+  createdAt: Date;                       // وقت إنشاء الطاولة
+}
+
+// واجهة اتصال WebSocket الممتد للبوكر
+interface ExtendedWebSocket extends WebSocket {
+  isAlive: boolean;                      // هل الاتصال حي؟
+  userId?: number;                       // معرف المستخدم
+  username?: string;                     // اسم المستخدم
+  tableId?: number;                      // معرف الطاولة التي انضم إليها
+}
 
 // Set up WebSocket server for real-time game updates
 export function setupPokerGame(app: Express, httpServer: Server) {
-  // تبسيط تكوين خادم WebSocket
+  // تكوين أبسط قدر ممكن لخادم WebSocket (VERSION 3)
+  // يعالج مشكلات التوافق المعروفة عبر المتصفحات المختلفة
+  // لا يوجد ضغط أو تعقيدات إضافية
   const wss = new WebSocketServer({ 
     server: httpServer,
     path: "/ws", // مسار محدد لاتصالات WebSocket
-    // تقليل تعقيد الإعدادات لحل مشاكل التوافق
-    perMessageDeflate: false, // تعطيل الضغط لتحسين التوافق
+    perMessageDeflate: false, // تعطيل الضغط لتعزيز التوافق والأداء
     clientTracking: true, // تتبع العملاء تلقائياً
   });
 
@@ -32,22 +82,60 @@ export function setupPokerGame(app: Express, httpServer: Server) {
     joinedAt: number;
   }
   
+  // إنشاء طاولة بوكر جديدة
+  function createPokerTable(
+    id: number,
+    name: string,
+    blindAmount: { small: number, big: number },
+    minBuyIn: number,
+    maxBuyIn: number
+  ): PokerTable {
+    const gameManager = new GameManager(blindAmount, minBuyIn, maxBuyIn);
+    
+    const table: PokerTable = {
+      id,
+      name,
+      gameManager,
+      players: new Map(),
+      createdAt: new Date()
+    };
+    
+    // تخزين الطاولة في المتغير العام
+    pokerModule.tables.set(id, table);
+    
+    console.log(`تم إنشاء طاولة بوكر جديدة: ${name} (ID: ${id})`);
+    
+    return table;
+  }
+  
+  // إنشاء طاولات افتراضية للبوكر
+  function createDefaultPokerTables() {
+    // طاولة تكساس هولدم عادية
+    createPokerTable(1, 'تكساس هولدم (5/10)', { small: 5, big: 10 }, 200, 2000);
+    
+    // طاولة تكساس هولدم VIP
+    createPokerTable(2, 'تكساس هولدم VIP (25/50)', { small: 25, big: 50 }, 1000, 10000);
+    
+    // طاولة تكساس هولدم بوت كبير
+    createPokerTable(3, 'تكساس هولدم (10/20) - بوت كبير', { small: 10, big: 20 }, 400, 4000);
+  }
+  
+  // إنشاء طاولات البوكر الافتراضية
+  createDefaultPokerTables();
+  
   // Map لتتبع الاتصالات النشطة حسب معرف المستخدم
-  // تبسيط نظام الاتصال: جعل المستخدم متصلاً بمجرد تسجيل الدخول
-  // وفقد الاتصال عند تسجيل الخروج أو إغلاق التطبيق فقط
   const clients = new Map<number, ClientInfo>();
   
   // Map لتتبع الطاولات التي ينضم إليها المستخدمون
   const userTables = new Map<number, number>();
   
   // Map لتتبع آخر حالة معروفة للمستخدم قبل قطع الاتصال (للاسترداد عند إعادة الاتصال)
-  // هذا ضروري للحفاظ على توافق الكود الحالي مع باقي الملف
   const lastKnownUserStates = new Map<number, {
     tableId?: number;
     lastActivity: number;
   }>();
 
-  // Broadcast message to all connected clients with improved error handling
+  // إرسال رسالة لجميع المستخدمين المتصلين
   const broadcast = (message: any, excludeUserId?: number) => {
     const serializedMessage = JSON.stringify(message);
     
@@ -57,21 +145,20 @@ export function setupPokerGame(app: Express, httpServer: Server) {
           clientInfo.ws.send(serializedMessage);
         } catch (err) {
           console.error(`خطأ أثناء البث للمستخدم ${userId}:`, err);
-          // لا يتم حذف العميل هنا، سنترك آلية heartbeat تتعامل مع ذلك
         }
       }
     });
   };
 
-  // عدد المستخدمين المتصلين الحقيقي (بدون لاعبين وهميين)
+  // عدد المستخدمين المتصلين
   const getOnlineCount = () => {
     return clients.size;
   };
 
-  // عداد لتتبع عدد المستخدمين في وقت معين
+  // عداد لتتبع عدد المستخدمين
   let activeCounter = 0;
   
-  // دالة محسنة لإرسال عدد المستخدمين المتصلين حاليًا
+  // إرسال عدد المستخدمين المتصلين
   const broadcastOnlineUsers = () => {
     const realCount = getOnlineCount();
     activeCounter++;
@@ -88,37 +175,29 @@ export function setupPokerGame(app: Express, httpServer: Server) {
     broadcast(message);
   };
   
-  // تعديل فاصل الـ ping للحفاظ على الاتصال حياً - مرة كل 5 ثوانٍ
+  // فواصل زمنية
   const PING_INTERVAL = 5000; // 5 ثوانٍ
-  const HEARTBEAT_TIMEOUT = 15000; // 15 ثانية فقط قبل اعتبار الاتصال مقطوعاً
-  const CONNECTION_RETRY_WINDOW = 2 * 60 * 1000; // نافذة 2 دقيقة لمحاولة إعادة الاتصال التلقائي
+  const UPDATE_INTERVAL = 5000;
   
   // تحديث عدد المستخدمين المتصلين كل 5 ثوانٍ
-  const UPDATE_INTERVAL = 5000;
   const updateIntervalId = setInterval(() => {
     broadcastOnlineUsers();
   }, UPDATE_INTERVAL);
 
-  // دالة التحقق من حالة الاتصالات وإرسال نبضات للحفاظ على الاتصال
-  // تبسيط نظام معالجة الاتصال: المستخدم متصل عند تسجيل الدخول، غير متصل عند الخروج
+  // إرسال نبضات للحفاظ على الاتصال
   const heartbeatIntervalId = setInterval(() => {
     console.log("إرسال نبض معلوماتي لجميع العملاء المتصلين...");
     
     const now = Date.now();
     
     clients.forEach((clientInfo, userId) => {
-      // نرسل فقط نبضات للحفاظ على الاتصال دون إنهاءه تلقائياً
       if (clientInfo.ws.readyState === WebSocket.OPEN) {
         try {
-          // إرسال رسالة معلوماتية بدلاً من ping ثنائي
           clientInfo.ws.send(JSON.stringify({ 
             type: "ping", 
             timestamp: now,
             serverTime: new Date().toISOString()
           }));
-          
-          // أيضاً إرسال ping ثنائي كاحتياط
-          clientInfo.ws.ping();
           clientInfo.lastPing = now;
         } catch (err) {
           console.error(`خطأ أثناء إرسال نبض للمستخدم ${userId}:`, err);
@@ -127,15 +206,13 @@ export function setupPokerGame(app: Express, httpServer: Server) {
     });
   }, PING_INTERVAL);
 
-  // إرسال رسالة لجميع المستخدمين في طاولة معينة باستثناء المرسل
+  // إرسال رسالة لجميع المستخدمين في طاولة معينة
   function broadcastToTable(tableId: number, message: any, excludeUserId?: number) {
-    // التحقق من صحة معرف الطاولة قبل المتابعة - التعامل مع قيم undefined
     if (tableId === undefined || isNaN(tableId)) {
       console.warn("محاولة بث رسالة لطاولة غير صالحة:", tableId, message);
       return;
     }
     
-    // إذا وصلنا إلى هنا، فإن معرف الطاولة صالح
     const players = getPlayersAtTable(tableId);
     const serializedMessage = JSON.stringify(message);
     
@@ -162,12 +239,8 @@ export function setupPokerGame(app: Express, httpServer: Server) {
   function getPlayersAtTable(tableId: number): number[] {
     const players: number[] = [];
     
-    // التحقق من صحة معرف الطاولة
-    if (isNaN(tableId)) {
-      return players;
-    }
+    if (isNaN(tableId)) return players;
     
-    // الحصول على جميع اللاعبين في الطاولة المحددة
     userTables.forEach((userTableId, userId) => {
       if (userTableId === tableId) {
         players.push(userId);
@@ -185,11 +258,9 @@ export function setupPokerGame(app: Express, httpServer: Server) {
   function cleanupServer() {
     console.log('تنظيف اتصالات WebSocket قبل إغلاق الخادم...');
     
-    // إيقاف الفواصل الزمنية
     clearInterval(updateIntervalId);
     clearInterval(heartbeatIntervalId);
     
-    // إغلاق جميع الاتصالات بشكل نظيف
     clients.forEach((clientInfo) => {
       try {
         clientInfo.ws.close(1000, 'Server shutdown');
@@ -198,10 +269,8 @@ export function setupPokerGame(app: Express, httpServer: Server) {
       }
     });
     
-    // إيقاف خادم WebSocket
     wss.close();
     
-    // السماح للعمليات الأخرى بالتنظيف قبل إنهاء العملية
     setTimeout(() => {
       process.exit(0);
     }, 1000);
@@ -212,35 +281,27 @@ export function setupPokerGame(app: Express, httpServer: Server) {
     let userId: number | undefined;
     const connectionTime = Date.now();
     
-    // إعداد اتصال جديد بالقيم الافتراضية
     const newClient: ClientInfo = {
       ws,
-      userId: 0, // سيتم تحديثه لاحقاً عند المصادقة
+      userId: 0,
       isAlive: true,
       lastPing: connectionTime,
       reconnectCount: 0,
       joinedAt: connectionTime
     };
 
-    // دالة heartbeat محدثة
+    // دالة heartbeat
     const heartbeat = () => {
-      // إذا كان المستخدم مصادق عليه
       if (userId && clients.has(userId)) {
         const clientInfo = clients.get(userId);
         if (clientInfo) {
           clientInfo.isAlive = true;
           console.log(`تم تحديث heartbeat للمستخدم ${userId}`);
         }
-      } else {
-        // للاتصالات الجديدة غير المصادق عليها بعد
-        console.log(`تم تحديث heartbeat للمستخدم غير معروف`);
       }
     };
 
-    // الاستجابة لـ pong من العميل (الثنائي)
     ws.on('pong', heartbeat);
-    
-    // تفعيل الاتصال الأولي
     heartbeat();
     
     // معالجة الرسائل الواردة
@@ -248,7 +309,6 @@ export function setupPokerGame(app: Express, httpServer: Server) {
       try {
         const data = JSON.parse(message.toString());
         
-        // معالجة رسائل pong من العميل (JSON)
         if (data.type === "pong" || data.type === "client_ping") {
           heartbeat();
         } else if (data.type === "auth") {
@@ -304,22 +364,18 @@ export function setupPokerGame(app: Express, httpServer: Server) {
           
           // بث عدد المستخدمين المتصلين بعد تسجيل الدخول
           broadcastOnlineUsers();
-        } else if (data.type === "chat_message") {
-          // Handle chat messages - تفعيل الرسائل حتى للمستخدمين غير المصادق عليهم مسبقاً
-          // استخدام معرف الرسالة المرسل من العميل، أو إنشاء واحد جديد
+        } else if (data.type === "chat_message" || data.type === "table_chat_message") {
+          // معالجة رسائل الدردشة (العامة أو دردشة الطاولة)
           const messageId = data.id || `msg_${Date.now()}`;
           
-          // استخدام معلومات المستخدم المرسلة في الرسالة أو الحصول عليها من تخزين الجلسة
           let username = data.username;
           let avatar = data.avatar;
           let timestamp = data.timestamp || Date.now();
           
-          // إذا كان هناك معرف مستخدم، نستخدم معلوماته المخزنة
           if (userId) {
             try {
               const user = await storage.getUser(userId);
               if (user) {
-                // استخدام اسم المستخدم والأفاتار من قاعدة البيانات إذا لم يتم توفيرهما
                 username = username || user.username;
                 avatar = avatar || user.avatar;
                 console.log(`معالجة رسالة من المستخدم ${username}`);
@@ -329,36 +385,38 @@ export function setupPokerGame(app: Express, httpServer: Server) {
             }
           }
           
-          // التحقق من وجود رسالة واسم مستخدم
           if (username && data.message && data.message.trim().length > 0) {
-            // تنسيق رسالة الشات
             const chatMessage = {
-              type: "chat_message",
+              type: data.type, // استخدم نوع الرسالة الذي تم استلامه
               id: messageId,
               username: username,
               message: data.message.trim(),
               avatar: avatar,
-              timestamp: timestamp
+              timestamp: timestamp,
+              tableId: data.tableId // معرف الطاولة للرسائل الخاصة بالطاولة
             };
             
-            console.log(`رسالة جديدة من ${username}: ${data.message.substring(0, 30)}${data.message.length > 30 ? '...' : ''}`);
+            const messageType = data.type === "table_chat_message" ? "دردشة الطاولة" : "الدردشة العامة";
+            console.log(`رسالة جديدة في ${messageType} من ${username}: ${data.message.substring(0, 30)}${data.message.length > 30 ? '...' : ''}`);
             
-            // إرسال الرسالة للمرسل أولاً لتأكيد الاستلام (إذا لم يتم معالجتها بالفعل في العميل)
             if (!data.clientHandled) {
               ws.send(JSON.stringify(chatMessage));
             }
             
-            // ثم بث إلى جميع العملاء المتصلين الآخرين
-            broadcast(chatMessage, userId);
+            // إذا كانت رسالة خاصة بالطاولة، قم بإرسالها فقط للاعبين في نفس الطاولة
+            if (data.type === "table_chat_message" && data.tableId) {
+              broadcastToTable(data.tableId, chatMessage, userId);
+            } else {
+              // وإلا، أرسلها لجميع المستخدمين (الدردشة العامة)
+              broadcast(chatMessage, userId);
+            }
           } else {
-            // إرسال رسالة خطأ إذا كانت البيانات غير مكتملة
             ws.send(JSON.stringify({ 
               type: "error", 
-              message: "الرسالة غير صالحة، يرجى التأكد من إرسال اسم مستخدم ومحتوى رسالة" 
+              message: "الرسالة غير صالحة" 
             }));
           }
         } else if (data.type === "join_table") {
-          // User joining a table
           if (!userId) {
             ws.send(JSON.stringify({ type: "error", message: "مستخدم غير مصرح به" }));
             return;
@@ -367,7 +425,6 @@ export function setupPokerGame(app: Express, httpServer: Server) {
           const tableId = data.tableId;
           userTables.set(userId, tableId);
           
-          // حفظ معرف الطاولة للاتصال الحالي
           if (clients.has(userId)) {
             const clientInfo = clients.get(userId);
             if (clientInfo) {
@@ -375,10 +432,8 @@ export function setupPokerGame(app: Express, httpServer: Server) {
             }
           }
           
-          // تحويل tableId إلى رقم للتأكد
           const safeTableId = Number(tableId);
           if (!isNaN(safeTableId)) {
-            // Notify other players at the table
             broadcastToTable(safeTableId, {
               type: "player_joined",
               userId: userId,
@@ -386,14 +441,12 @@ export function setupPokerGame(app: Express, httpServer: Server) {
             }, userId);
           }
           
-          // Send initial game state
           const gameState = await storage.getGameState(tableId, userId);
           ws.send(JSON.stringify({ 
             type: "game_state", 
             gameState 
           }));
         } else if (data.type === "leave_table") {
-          // User leaving a table
           if (!userId) {
             ws.send(JSON.stringify({ type: "error", message: "مستخدم غير مصرح به" }));
             return;
@@ -403,7 +456,6 @@ export function setupPokerGame(app: Express, httpServer: Server) {
           if (tableId) {
             userTables.delete(userId);
             
-            // إزالة معرف الطاولة من الاتصال
             if (clients.has(userId)) {
               const clientInfo = clients.get(userId);
               if (clientInfo) {
@@ -411,10 +463,8 @@ export function setupPokerGame(app: Express, httpServer: Server) {
               }
             }
             
-            // تحويل tableId إلى رقم للتأكد
             const safeLeaveTableId = Number(tableId);
             if (!isNaN(safeLeaveTableId)) {
-              // Notify other players at the table
               broadcastToTable(safeLeaveTableId, {
                 type: "player_left",
                 userId: userId,
@@ -423,53 +473,140 @@ export function setupPokerGame(app: Express, httpServer: Server) {
             }
           }
         } else if (data.type === "game_action") {
-          // User making a game action
           if (!userId) {
             ws.send(JSON.stringify({ type: "error", message: "مستخدم غير مصرح به" }));
             return;
           }
           
+          // التحقق مما إذا كانت هذه إجراءات خاصة بألعاب أخرى مثل آلة ملكة مصر
+          if (data.action === "slot_bet" || data.action === "slot_win" || data.action === "bonus_win") {
+            try {
+              // الحصول على المستخدم
+              const user = await storage.getUser(userId);
+              if (!user) {
+                ws.send(JSON.stringify({ type: "error", message: "المستخدم غير موجود" }));
+                return;
+              }
+              
+              // معالجة المراهنة (خصم من رصيد المستخدم)
+              if (data.action === "slot_bet") {
+                const betAmount = data.amount || 10000;
+                
+                // التحقق من كفاية الرصيد
+                if (user.chips < betAmount) {
+                  ws.send(JSON.stringify({ 
+                    type: "error", 
+                    message: "رصيد غير كاف للمراهنة"
+                  }));
+                  return;
+                }
+                
+                // خصم الرهان من رصيد المستخدم
+                const newChips = user.chips - betAmount;
+                const updatedUser = await storage.updateUserChips(userId, newChips);
+                
+                // إرسال التحديث إلى المستخدم
+                ws.send(JSON.stringify({
+                  type: "chips_update",
+                  chips: newChips,
+                  change: -betAmount,
+                  action: "slot_bet",
+                  game: data.data?.game || "egypt-queen"
+                }));
+                
+                console.log(`مستخدم ${userId} يراهن بمبلغ ${betAmount} في لعبة ${data.data?.game || "egypt-queen"}`);
+              } 
+              // معالجة الفوز (إضافة إلى رصيد المستخدم)
+              else if (data.action === "slot_win" || data.action === "bonus_win") {
+                const winAmount = data.amount || 0;
+                
+                // التحقق من أن مبلغ الفوز إيجابي
+                if (winAmount <= 0) {
+                  return;
+                }
+                
+                // إضافة الفوز إلى رصيد المستخدم
+                const newChips = user.chips + winAmount;
+                const updatedUser = await storage.updateUserChips(userId, newChips);
+                
+                // إرسال التحديث إلى المستخدم
+                ws.send(JSON.stringify({
+                  type: "chips_update",
+                  chips: newChips,
+                  change: winAmount,
+                  action: data.action,
+                  game: data.data?.game || "egypt-queen"
+                }));
+                
+                console.log(`مستخدم ${userId} يفوز بمبلغ ${winAmount} في لعبة ${data.data?.game || "egypt-queen"}`);
+              }
+              
+              return;
+            } catch (error) {
+              console.error("خطأ في معالجة إجراء اللعبة:", error);
+              ws.send(JSON.stringify({ 
+                type: "error", 
+                message: "حدث خطأ أثناء معالجة إجراء اللعبة" 
+              }));
+              return;
+            }
+          }
+          
+          // إجراءات لعبة البوكر العادية
           const tableId = userTables.get(userId);
           if (!tableId) {
             ws.send(JSON.stringify({ type: "error", message: "أنت لست في طاولة" }));
             return;
           }
           
-          // Perform the action
-          const result = await storage.performGameAction(
-            tableId,
-            userId,
-            data.action,
-            data.amount
-          );
+          // معالجة إجراءات البوكر
+          const pokerTable = pokerModule.tables.get(tableId);
           
-          if (!result.success) {
-            ws.send(JSON.stringify({ 
-              type: "error", 
-              message: result.message 
-            }));
+          if (!pokerTable) {
+            ws.send(JSON.stringify({ type: "error", message: "الطاولة غير موجودة" }));
             return;
           }
           
-          // إرسال حالة اللعبة المحدثة لجميع اللاعبين في الطاولة
-          // تحويل tableId إلى رقم للتأكد
-          const safeGameActionTableId = Number(tableId);
-          if (!isNaN(safeGameActionTableId)) {
-            const players = getPlayersAtTable(safeGameActionTableId);
-            for (const playerId of players) {
-              const clientInfo = clients.get(playerId);
-              if (clientInfo && clientInfo.ws.readyState === WebSocket.OPEN) {
-                try {
-                  const gameState = await storage.getGameState(tableId, playerId);
-                  clientInfo.ws.send(JSON.stringify({ 
-                    type: "game_state", 
-                    gameState 
-                  }));
-                } catch (err) {
-                  console.error(`خطأ في إرسال حالة اللعبة للمستخدم ${playerId}:`, err);
-                }
-              }
+          // تنفيذ الإجراء
+          try {
+            const action = data.action as PlayerAction;
+            const amount = data.amount;
+            
+            const result = pokerTable.gameManager.performAction(userId, action, amount);
+            
+            // إرسال نتيجة الإجراء للاعب
+            ws.send(JSON.stringify({
+              type: "action_result",
+              success: result.success,
+              message: result.message,
+              action: action
+            }));
+            
+            // إذا لم ينجح الإجراء، لا تقم بإرسال حالة اللعبة
+            if (!result.success) {
+              return;
             }
+            
+            // إرسال حالة اللعبة المحدثة لجميع اللاعبين
+            const gameState = pokerTable.gameManager.getGameState();
+            broadcastToTable(tableId, {
+              type: "game_state",
+              gameState: gameState
+            });
+            
+            // إذا انتهت الجولة وهناك فائزون
+            if (result.roundComplete && result.winners) {
+              broadcastToTable(tableId, {
+                type: "round_complete",
+                winners: result.winners
+              });
+            }
+          } catch (error) {
+            console.error(`خطأ في تنفيذ إجراء اللاعب ${userId} في الطاولة ${tableId}:`, error);
+            ws.send(JSON.stringify({ 
+              type: "error", 
+              message: "حدث خطأ أثناء تنفيذ الإجراء" 
+            }));
           }
         }
       } catch (error) {
@@ -485,24 +622,19 @@ export function setupPokerGame(app: Express, httpServer: Server) {
     ws.on("close", (code: number, reason: string) => {
       console.log(`إغلاق اتصال WebSocket للمستخدم ${userId || 'غير معروف'} (كود: ${code}, سبب: ${reason || 'غير محدد'})`);
       
-      // #### المنهج الجديد: لا نغلق الاتصال الحقيقي إلا عند تسجيل الخروج ####
-      // عند انقطاع شبكة أو فقدان اتصال، نبقي المستخدم متصلاً من وجهة نظر النظام
-      
       if (userId) {
         const now = Date.now();
         const tableId = userTables.get(userId);
         
-        // حالة الاتصال: اعتبار النظيف فقط عند تسجيل الخروج (كود 1000/1001)
-        const isCleanClose = code === 1000 || code === 1001;
-        
-        // حفظ حالة المستخدم دائماً لتسهيل إعادة الاتصال
         if (tableId) {
           lastKnownUserStates.set(userId, {
             tableId: tableId,
             lastActivity: now
           });
-        
-          // التعامل مع الخروج النظيف فقط (تسجيل خروج)
+          
+          // كود 1000 أو 1001 = إغلاق نظيف (تسجيل خروج)
+          const isCleanClose = code === 1000 || code === 1001;
+          
           if (isCleanClose) {
             const safeTableId = Number(tableId);
             if (!isNaN(safeTableId)) {
@@ -514,26 +646,18 @@ export function setupPokerGame(app: Express, httpServer: Server) {
               }, userId);
             }
             
-            // حذف اللاعب من الطاولة بعد تسجيل الخروج
             userTables.delete(userId);
-            
-            // إزالة المستخدم من قائمة المتصلين عند تسجيل الخروج فقط
             clients.delete(userId);
-            
             console.log(`تم حذف المستخدم ${userId} بعد تسجيل خروج منتظم`);
           } else {
-            // لحالات الاتصال غير النظيف (انقطاع شبكة)
+            // قطع اتصال غير مقصود - نحتفظ بالمستخدم في النظام
             console.log(`قطع اتصال غير نظيف للمستخدم ${userId} - الحفاظ على حالة الاتصال`);
-            
-            // نحتفظ بالمستخدم في clients ولا نحذفه
-            // لا نعمل شيء - سنترك الاتصال نشطاً على جانب الخادم 
           }
         } else {
-          // إذا لم يكن اللاعب في طاولة، يمكننا إزالته على الفور
+          // إذا لم يكن في طاولة، نحذفه
           clients.delete(userId);
         }
         
-        // تحديث عدد المستخدمين المتصلين بعد قطع الاتصال
         broadcastOnlineUsers();
       }
     });

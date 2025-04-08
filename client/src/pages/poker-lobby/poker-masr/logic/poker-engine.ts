@@ -2,6 +2,7 @@
  * محرك لعبة البوكر
  * محاكاة أساسية للعبة البوكر تكساس هولدم
  */
+import * as pokerSolver from 'pokersolver';
 
 // تعريف أنواع البطاقات
 export interface Card {
@@ -130,22 +131,157 @@ export enum PlayerAction {
 }
 
 /**
- * تحديد قوة اليد للاعب (تنفيذ أساسي)
- * في التطبيق الكامل، يجب أن تتضمن تحديد جميع أنواع التراكيب في البوكر
+ * تحديد قوة اليد للاعب باستخدام مكتبة pokersolver
+ * تقوم بتقييم ترتيب اليد (زوج، ثلاثيات، فلاش، الخ) وحساب القوة النسبية
+ */
+
+// واجهة لنتيجة تقييم اليد
+export interface HandEvaluation {
+  handType: string;       // نوع اليد (زوج، فلاش، ستريت، الخ)
+  handRank: number;       // قوة اليد (1-10، حيث 10 هي الأقوى)
+  handName: string;       // اسم اليد بالعربية
+  description: string;    // وصف تفصيلي لليد
+  cards: Card[];          // البطاقات المستخدمة في تكوين اليد
+  strength: number;       // قوة اليد (0-1)
+}
+
+// قاموس أنواع الأيدي بالعربية
+const handTypesArabic: Record<string, string> = {
+  'High Card': 'ورقة عالية',
+  'Pair': 'زوج',
+  'Two Pair': 'زوجان',
+  'Three of a Kind': 'ثلاثية',
+  'Straight': 'ستريت',
+  'Flush': 'فلاش',
+  'Full House': 'فل هاوس',
+  'Four of a Kind': 'رباعية',
+  'Straight Flush': 'ستريت فلاش',
+  'Royal Flush': 'رويال فلاش'
+};
+
+// ترتيب قوة أنواع الأيدي (من 1 إلى 10)
+const handRanks: Record<string, number> = {
+  'High Card': 1,
+  'Pair': 2,
+  'Two Pair': 3,
+  'Three of a Kind': 4,
+  'Straight': 5,
+  'Flush': 6,
+  'Full House': 7,
+  'Four of a Kind': 8,
+  'Straight Flush': 9,
+  'Royal Flush': 10
+};
+
+/**
+ * تحويل البطاقة إلى الصيغة المناسبة لمكتبة pokersolver
+ */
+export function formatCardForSolver(card: Card): string {
+  // تحويل الشكل إلى الأحرف التي تفهمها المكتبة
+  const suitMap: Record<string, string> = {
+    '♠': 's', // spades
+    '♥': 'h', // hearts
+    '♦': 'd', // diamonds
+    '♣': 'c'  // clubs
+  };
+  
+  // تحويل الرتبة إلى الصيغة المناسبة
+  let rank = card.rank;
+  
+  return rank + suitMap[card.suit];
+}
+
+/**
+ * تقييم يد اللاعب باستخدام مكتبة pokersolver
+ */
+export function evaluatePlayerHand(playerCards: Card[], communityCards: Card[]): HandEvaluation {
+  // تحويل البطاقات إلى الصيغة المناسبة
+  const allCardsFormatted = [...playerCards, ...communityCards].map(formatCardForSolver);
+  
+  // استخدام المكتبة لتقييم اليد
+  const hand = pokerSolver.Hand.solve(allCardsFormatted);
+  
+  // الحصول على نوع اليد والبطاقات المستخدمة
+  const handType = hand.name;
+  const handRank = handRanks[handType] || 0;
+  const handName = handTypesArabic[handType] || handType;
+  
+  // إنشاء وصف مفصل لليد
+  let description = `${handName}`;
+  
+  // إضافة تفاصيل حسب نوع اليد
+  if (handType === 'Pair') {
+    description += ` زوج`;
+  } else if (handType === 'Two Pair') {
+    description += ` زوجان`;
+  } else if (handType === 'Three of a Kind') {
+    description += ` ثلاثية`;
+  } else if (handType === 'Straight') {
+    description += ` ستريت`;
+  } else if (handType === 'Flush') {
+    description += ` فلاش`;
+  } else if (handType === 'Full House') {
+    description += ` فل هاوس`;
+  } else if (handType === 'Four of a Kind') {
+    description += ` رباعية`;
+  }
+  
+  // حساب قوة اليد النسبية من 0 إلى 1
+  const strength = handRank / 10;
+  
+  return {
+    handType,
+    handRank,
+    handName,
+    description,
+    cards: playerCards,  // نعيد البطاقات الأصلية للاعب
+    strength
+  };
+}
+
+/**
+ * ترجمة رتبة البطاقة إلى العربية
+ */
+function translateRank(rank: string): string {
+  const rankMap: Record<string, string> = {
+    'A': 'آس',
+    'K': 'ملك',
+    'Q': 'ملكة',
+    'J': 'شاب',
+    '10': '10',
+    '9': '9',
+    '8': '8',
+    '7': '7',
+    '6': '6',
+    '5': '5',
+    '4': '4',
+    '3': '3',
+    '2': '2'
+  };
+  
+  return rankMap[rank] || rank;
+}
+
+/**
+ * ترجمة شكل البطاقة إلى العربية
+ */
+function translateSuit(suit: string): string {
+  const suitMap: Record<string, string> = {
+    's': 'البستوني',
+    'h': 'القلوب',
+    'd': 'الديناري',
+    'c': 'الورقة'
+  };
+  
+  return suitMap[suit] || suit;
+}
+
+/**
+ * واجهة بديلة للحفاظ على التوافق مع الكود القديم
  */
 export function calculateHandStrength(playerCards: Card[], communityCards: Card[]): number {
-  // هذا تنفيذ أولي بسيط
-  // في تطبيق كامل، يجب تنفيذ محرك أكثر تعقيدًا لتقييم قوة اليد
-  
-  const allCards = [...playerCards, ...communityCards];
-  
-  // عوامل مختلفة تؤثر على قوة اليد
-  // 1. زوج موجود
-  // 2. احتمالية الحصول على لون أو ستريت
-  // 3. قوة البطاقات العالية
-  
-  // في هذا التنفيذ البسيط، نعود بقيمة عشوائية بين 0 و 1 للأغراض التوضيحية
-  return Math.random();
+  const evaluation = evaluatePlayerHand(playerCards, communityCards);
+  return evaluation.strength;
 }
 
 /**

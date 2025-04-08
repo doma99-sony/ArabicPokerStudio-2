@@ -2,13 +2,62 @@ import { Express } from "express";
 import { Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
+import { v4 as uuidv4 } from "uuid";
+
+// استيراد الأنواع والوظائف من ملفات منطق اللعبة
+import { GameManager, GameState, GamePlayer, ActionResult, WinnerInfo } from "../client/src/pages/poker-lobby/poker-masr/logic/game-manager";
+import { PlayerAction } from "../client/src/pages/poker-lobby/poker-masr/logic/poker-engine";
+
+// أنواع رسائل WebSocket للبوكر
+export enum PokerSocketMessageType {
+  JOIN_TABLE = 'join_table',              // الانضمام لطاولة
+  LEAVE_TABLE = 'leave_table',            // مغادرة الطاولة
+  GAME_STATE = 'game_state',              // تحديث حالة اللعبة
+  PLAYER_ACTION = 'player_action',        // إجراء اللاعب
+  ACTION_RESULT = 'action_result',        // نتيجة الإجراء
+  ROUND_COMPLETE = 'round_complete',      // انتهاء الجولة
+  CHAT_MESSAGE = 'chat_message',          // رسالة دردشة
+  PLAYER_JOINED = 'player_joined',        // انضم لاعب
+  PLAYER_LEFT = 'player_left',            // غادر لاعب
+  ERROR = 'error',                        // خطأ
+  PING = 'ping',                          // نبض
+  PONG = 'pong',                          // استجابة للنبض
+  ONLINE_USERS_COUNT = 'online_users_count'  // عدد المستخدمين المتصلين
+}
+
+// واجهة رسالة WebSocket للبوكر
+interface PokerSocketMessage {
+  type: PokerSocketMessageType;           // نوع الرسالة
+  playerId?: number;                     // معرف اللاعب
+  tableId?: number;                      // معرف الطاولة
+  data?: any;                            // بيانات الرسالة
+  timestamp: number;                     // وقت الرسالة
+}
 
 // متغيرات عامة للاستخدام في ملفات أخرى
 export const pokerModule = {
   broadcastToTable: null as any,
-  userTables: null as Map<number, number> | null,
-  clients: null as Map<number, any> | null
+  userTables: new Map<number, number>(), // معرف المستخدم -> معرف الطاولة
+  clients: new Map<number, any>(),       // معرف المستخدم -> معلومات العميل
+  tables: new Map<number, PokerTable>()   // معرف الطاولة -> معلومات الطاولة
 };
+
+// واجهة طاولة البوكر
+interface PokerTable {
+  id: number;                            // معرف الطاولة
+  name: string;                          // اسم الطاولة
+  gameManager: GameManager;              // مدير اللعبة
+  players: Map<number, ExtendedWebSocket>;  // الاتصالات المرتبطة بالطاولة
+  createdAt: Date;                       // وقت إنشاء الطاولة
+}
+
+// واجهة اتصال WebSocket الممتد للبوكر
+interface ExtendedWebSocket extends WebSocket {
+  isAlive: boolean;                      // هل الاتصال حي؟
+  userId?: number;                       // معرف المستخدم
+  username?: string;                     // اسم المستخدم
+  tableId?: number;                      // معرف الطاولة التي انضم إليها
+}
 
 // Set up WebSocket server for real-time game updates
 export function setupPokerGame(app: Express, httpServer: Server) {
@@ -20,10 +69,6 @@ export function setupPokerGame(app: Express, httpServer: Server) {
     path: "/ws", // مسار محدد لاتصالات WebSocket
     perMessageDeflate: false, // تعطيل الضغط لتعزيز التوافق والأداء
     clientTracking: true, // تتبع العملاء تلقائياً
-    // الإعدادات التالية تم حذفها لتبسيط التكوين
-    // backlog: undefined,
-    // maxPayload: 104857600, // 100 ميجابايت
-    // skipUTF8Validation: false,
   });
 
   // تحسين تتبع العملاء بإضافة معلومات حالة إضافية
@@ -36,6 +81,47 @@ export function setupPokerGame(app: Express, httpServer: Server) {
     tableId?: number;
     joinedAt: number;
   }
+  
+  // إنشاء طاولة بوكر جديدة
+  function createPokerTable(
+    id: number,
+    name: string,
+    blindAmount: { small: number, big: number },
+    minBuyIn: number,
+    maxBuyIn: number
+  ): PokerTable {
+    const gameManager = new GameManager(blindAmount, minBuyIn, maxBuyIn);
+    
+    const table: PokerTable = {
+      id,
+      name,
+      gameManager,
+      players: new Map(),
+      createdAt: new Date()
+    };
+    
+    // تخزين الطاولة في المتغير العام
+    pokerModule.tables.set(id, table);
+    
+    console.log(`تم إنشاء طاولة بوكر جديدة: ${name} (ID: ${id})`);
+    
+    return table;
+  }
+  
+  // إنشاء طاولات افتراضية للبوكر
+  function createDefaultPokerTables() {
+    // طاولة تكساس هولدم عادية
+    createPokerTable(1, 'تكساس هولدم (5/10)', { small: 5, big: 10 }, 200, 2000);
+    
+    // طاولة تكساس هولدم VIP
+    createPokerTable(2, 'تكساس هولدم VIP (25/50)', { small: 25, big: 50 }, 1000, 10000);
+    
+    // طاولة تكساس هولدم بوت كبير
+    createPokerTable(3, 'تكساس هولدم (10/20) - بوت كبير', { small: 10, big: 20 }, 400, 4000);
+  }
+  
+  // إنشاء طاولات البوكر الافتراضية
+  createDefaultPokerTables();
   
   // Map لتتبع الاتصالات النشطة حسب معرف المستخدم
   const clients = new Map<number, ClientInfo>();
@@ -473,38 +559,54 @@ export function setupPokerGame(app: Express, httpServer: Server) {
             return;
           }
           
-          const result = await storage.performGameAction(
-            tableId,
-            userId,
-            data.action,
-            data.amount
-          );
+          // معالجة إجراءات البوكر
+          const pokerTable = pokerModule.tables.get(tableId);
           
-          if (!result.success) {
-            ws.send(JSON.stringify({ 
-              type: "error", 
-              message: result.message 
-            }));
+          if (!pokerTable) {
+            ws.send(JSON.stringify({ type: "error", message: "الطاولة غير موجودة" }));
             return;
           }
           
-          const safeGameActionTableId = Number(tableId);
-          if (!isNaN(safeGameActionTableId)) {
-            const players = getPlayersAtTable(safeGameActionTableId);
-            for (const playerId of players) {
-              const clientInfo = clients.get(playerId);
-              if (clientInfo && clientInfo.ws.readyState === WebSocket.OPEN) {
-                try {
-                  const gameState = await storage.getGameState(tableId, playerId);
-                  clientInfo.ws.send(JSON.stringify({ 
-                    type: "game_state", 
-                    gameState 
-                  }));
-                } catch (err) {
-                  console.error(`خطأ في إرسال حالة اللعبة للمستخدم ${playerId}:`, err);
-                }
-              }
+          // تنفيذ الإجراء
+          try {
+            const action = data.action as PlayerAction;
+            const amount = data.amount;
+            
+            const result = pokerTable.gameManager.performAction(userId, action, amount);
+            
+            // إرسال نتيجة الإجراء للاعب
+            ws.send(JSON.stringify({
+              type: "action_result",
+              success: result.success,
+              message: result.message,
+              action: action
+            }));
+            
+            // إذا لم ينجح الإجراء، لا تقم بإرسال حالة اللعبة
+            if (!result.success) {
+              return;
             }
+            
+            // إرسال حالة اللعبة المحدثة لجميع اللاعبين
+            const gameState = pokerTable.gameManager.getGameState();
+            broadcastToTable(tableId, {
+              type: "game_state",
+              gameState: gameState
+            });
+            
+            // إذا انتهت الجولة وهناك فائزون
+            if (result.roundComplete && result.winners) {
+              broadcastToTable(tableId, {
+                type: "round_complete",
+                winners: result.winners
+              });
+            }
+          } catch (error) {
+            console.error(`خطأ في تنفيذ إجراء اللاعب ${userId} في الطاولة ${tableId}:`, error);
+            ws.send(JSON.stringify({ 
+              type: "error", 
+              message: "حدث خطأ أثناء تنفيذ الإجراء" 
+            }));
           }
         }
       } catch (error) {
@@ -522,11 +624,11 @@ export function setupPokerGame(app: Express, httpServer: Server) {
       
       if (userId) {
         const now = Date.now();
-        const tableId = userTables.get(userId);
+        const userTableId = userTables.get(userId);
         
-        if (tableId) {
+        if (userTableId) {
           lastKnownUserStates.set(userId, {
-            tableId: tableId,
+            tableId: userTableId,
             lastActivity: now
           });
           
@@ -534,7 +636,7 @@ export function setupPokerGame(app: Express, httpServer: Server) {
           const isCleanClose = code === 1000 || code === 1001;
           
           if (isCleanClose) {
-            const safeTableId = Number(tableId);
+            const safeTableId = Number(userTableId);
             if (!isNaN(safeTableId)) {
               broadcastToTable(safeTableId, {
                 type: "player_left",
