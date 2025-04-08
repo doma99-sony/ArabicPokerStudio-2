@@ -29,6 +29,9 @@ import EgyptQueenPage from "@/pages/egypt-queen-page";
 import EgyptRocketPage from "@/pages/egypt-rocket-page";
 import FishingSlotsPage from "@/pages/fishing-slots";
 import PokerMasrLobby from "@/pages/poker-lobby/poker-masr";
+import TexasHoldemPoker from "@/pages/poker-lobby/poker-masr/texas-holdem";
+import MeccaPoker from "@/pages/poker-lobby/poker-masr/mecca-poker";
+import TurkishClassicPoker from "@/pages/poker-lobby/poker-masr/turkish-classic";
 import { ProtectedRoute } from "./lib/protected-route";
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
@@ -80,9 +83,9 @@ function Router() {
       <ProtectedRoute path="/egypt-rocket" component={EgyptRocketPage} />
       <ProtectedRoute path="/fishing-slots" component={FishingSlotsPage} />
       <ProtectedRoute path="/poker-lobby/poker-masr" component={PokerMasrLobby} />
-      <ProtectedRoute path="/poker-lobby/poker-masr/texas-holdem" component={() => import("@/pages/poker-lobby/poker-masr/texas-holdem").then(mod => <mod.default />)} />
-      <ProtectedRoute path="/poker-lobby/poker-masr/mecca-poker" component={() => import("@/pages/poker-lobby/poker-masr/mecca-poker").then(mod => <mod.default />)} />
-      <ProtectedRoute path="/poker-lobby/poker-masr/turkish-classic" component={() => import("@/pages/poker-lobby/poker-masr/turkish-classic").then(mod => <mod.default />)} />
+      <ProtectedRoute path="/poker-lobby/poker-masr/texas-holdem" component={TexasHoldemPoker} />
+      <ProtectedRoute path="/poker-lobby/poker-masr/mecca-poker" component={MeccaPoker} />
+      <ProtectedRoute path="/poker-lobby/poker-masr/turkish-classic" component={TurkishClassicPoker} />
       <ProtectedRoute path="/notifications" component={NotificationsPage} />
       <ProtectedRoute path="/notifications/:messageId" component={NotificationsPage} />
       <ProtectedRoute path="/inventory" component={InventoryPage} />

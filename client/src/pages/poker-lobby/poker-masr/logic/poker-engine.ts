@@ -1,155 +1,194 @@
 /**
- * محرك منطق لعبة البوكر - يتحكم في منطق اللعبة ويدير الحالات المختلفة
+ * محرك لعبة البوكر
+ * محاكاة أساسية للعبة البوكر تكساس هولدم
  */
 
-// تعريف أنواع البيانات
-export type Suit = '♠' | '♥' | '♦' | '♣';
-export type Rank = 'A' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10' | 'J' | 'Q' | 'K';
-
+// تعريف أنواع البطاقات
 export interface Card {
-  suit: Suit;
-  rank: Rank;
-  hidden?: boolean;
+  suit: string; // الشكل (♠, ♥, ♦, ♣)
+  rank: string; // القيمة (2-10, J, Q, K, A)
+  hidden?: boolean; // هل البطاقة مخفية أم لا
 }
 
-export interface Player {
-  id: number;
-  username: string;
-  chips: number;
-  avatar?: string;
-  position: number;
-  cards: Card[];
-  isActive: boolean;
-  isCurrentTurn: boolean;
-  isFolded: boolean;
-  isAllIn: boolean;
-  currentBet: number;
-}
+// الأشكال المتاحة
+const SUITS = ['♠', '♥', '♦', '♣'];
 
-export type GameStage = 'waiting' | 'preflop' | 'flop' | 'turn' | 'river' | 'showdown';
+// قيم البطاقات
+const RANKS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
 
-export interface GameState {
-  players: Player[];
-  communityCards: Card[];
-  pot: number;
-  currentBet: number;
-  minBet: number;
-  dealerPosition: number;
-  currentTurnPosition: number;
-  gameStage: GameStage;
-  lastAction?: {
-    playerId: number;
-    action: string;
-    amount?: number;
-  };
-}
-
-// دالة إنشاء مجموعة كاملة من الكروت (52 كارت)
+/**
+ * إنشاء مجموعة بطاقات كاملة (52 بطاقة)
+ */
 export function createDeck(): Card[] {
-  const suits: Suit[] = ['♠', '♥', '♦', '♣'];
-  const ranks: Rank[] = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
   const deck: Card[] = [];
   
-  for (const suit of suits) {
-    for (const rank of ranks) {
-      deck.push({ suit, rank });
+  for (const suit of SUITS) {
+    for (const rank of RANKS) {
+      deck.push({ suit, rank, hidden: false });
     }
   }
   
   return deck;
 }
 
-// دالة خلط الكروت
+/**
+ * خلط البطاقات باستخدام خوارزمية Fisher-Yates
+ */
 export function shuffleDeck(deck: Card[]): Card[] {
-  const shuffled = [...deck];
+  const shuffledDeck = [...deck];
   
-  for (let i = shuffled.length - 1; i > 0; i--) {
+  for (let i = shuffledDeck.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    [shuffledDeck[i], shuffledDeck[j]] = [shuffledDeck[j], shuffledDeck[i]];
   }
   
-  return shuffled;
+  return shuffledDeck;
 }
 
-// دالة توزيع الكروت على اللاعبين
-export function dealCards(deck: Card[], players: Player[], cardsPerPlayer: number = 2): [Card[], Player[]] {
-  const updatedPlayers = [...players];
-  const remainingDeck = [...deck];
+/**
+ * توزيع البطاقات على اللاعبين
+ */
+export function dealCards(deck: Card[], numPlayers: number, cardsPerPlayer: number = 2): Card[][] {
+  const hands: Card[][] = [];
   
-  // توزيع الكروت للاعبين
-  for (let i = 0; i < cardsPerPlayer; i++) {
-    for (let j = 0; j < updatedPlayers.length; j++) {
-      if (updatedPlayers[j].isActive && !updatedPlayers[j].isFolded) {
-        const card = remainingDeck.pop();
-        if (card) {
-          updatedPlayers[j].cards.push({ ...card, hidden: true });
-        }
-      }
+  // التحقق من أن عدد البطاقات كافٍ
+  if (deck.length < numPlayers * cardsPerPlayer) {
+    throw new Error('عدد البطاقات غير كافٍ للتوزيع على جميع اللاعبين');
+  }
+  
+  // تهيئة مصفوفة الأيدي
+  for (let i = 0; i < numPlayers; i++) {
+    hands.push([]);
+  }
+  
+  // توزيع البطاقات
+  for (let c = 0; c < cardsPerPlayer; c++) {
+    for (let p = 0; p < numPlayers; p++) {
+      const card = { ...deck[c * numPlayers + p] };
+      // تعيين البطاقات كمخفية للاعبين الآخرين
+      card.hidden = true;
+      hands[p].push(card);
     }
   }
   
-  return [remainingDeck, updatedPlayers];
+  return hands;
 }
 
-// دالة توزيع كروت الطاولة المشتركة
-export function dealCommunityCards(deck: Card[], count: number, existing: Card[] = []): [Card[], Card[]] {
-  const remainingDeck = [...deck];
-  const communityCards = [...existing];
+/**
+ * تقييم أولي لقوة اليد (للاستخدام من قبل اللاعبين الوهميين)
+ * قيمة بين 0 و 1، حيث 1 هي الأقوى
+ */
+export function evaluateHand(cards: Card[], communityCards: Card[] = []): number {
+  // التنفيذ المبسط هنا يقيم فقط البطاقات الأولية
+  // في تطبيق كامل، يجب أن يشمل ترتيب الأيدي الكامل للبوكر
   
-  for (let i = 0; i < count; i++) {
-    const card = remainingDeck.pop();
-    if (card) {
-      communityCards.push(card);
+  const allCards = [...cards, ...communityCards];
+  
+  // حساب أولي استنادًا إلى قيمة البطاقات
+  let value = 0;
+  
+  for (const card of cards) {
+    // تحويل قيمة البطاقة إلى رقم
+    let rankValue = 0;
+    
+    switch (card.rank) {
+      case 'A': rankValue = 14; break;
+      case 'K': rankValue = 13; break;
+      case 'Q': rankValue = 12; break;
+      case 'J': rankValue = 11; break;
+      default: rankValue = parseInt(card.rank, 10);
     }
+    
+    // زيادة القيمة بناءً على قيمة البطاقة (البطاقات العالية تحصل على قيمة أعلى)
+    value += rankValue / 14;
   }
   
-  return [remainingDeck, communityCards];
+  // معادلة بسيطة لتطبيع القيمة بين 0 و 1
+  return value / cards.length;
 }
 
-// دالة تحديد اللاعب التالي
-export function getNextActivePlayer(players: Player[], currentPosition: number): number {
-  const count = players.length;
-  let nextPosition = (currentPosition + 1) % count;
+/**
+ * إضافة منطق اللعب والدورات للعبة البوكر تكساس هولدم
+ */
+
+// أنواع مراحل اللعبة
+export enum GamePhase {
+  PREFLOP = 'preflop', // قبل الفلوب
+  FLOP = 'flop',       // الفلوب (3 بطاقات)
+  TURN = 'turn',       // التيرن (بطاقة رابعة)
+  RIVER = 'river',     // الريفر (بطاقة خامسة)
+  SHOWDOWN = 'showdown' // كشف الأوراق والتحقق من الفائز
+}
+
+// أنواع إجراءات اللاعبين
+export enum PlayerAction {
+  FOLD = 'fold',    // طي
+  CHECK = 'check',  // تمرير
+  CALL = 'call',    // مجاراة
+  RAISE = 'raise',  // زيادة
+  ALL_IN = 'all_in' // كل الرقائق
+}
+
+/**
+ * تحديد قوة اليد للاعب (تنفيذ أساسي)
+ * في التطبيق الكامل، يجب أن تتضمن تحديد جميع أنواع التراكيب في البوكر
+ */
+export function calculateHandStrength(playerCards: Card[], communityCards: Card[]): number {
+  // هذا تنفيذ أولي بسيط
+  // في تطبيق كامل، يجب تنفيذ محرك أكثر تعقيدًا لتقييم قوة اليد
   
-  // البحث عن اللاعب التالي النشط
-  while (
-    nextPosition !== currentPosition && 
-    (!players[nextPosition].isActive || players[nextPosition].isFolded || players[nextPosition].isAllIn)
-  ) {
-    nextPosition = (nextPosition + 1) % count;
+  const allCards = [...playerCards, ...communityCards];
+  
+  // عوامل مختلفة تؤثر على قوة اليد
+  // 1. زوج موجود
+  // 2. احتمالية الحصول على لون أو ستريت
+  // 3. قوة البطاقات العالية
+  
+  // في هذا التنفيذ البسيط، نعود بقيمة عشوائية بين 0 و 1 للأغراض التوضيحية
+  return Math.random();
+}
+
+/**
+ * تدوير الموزع والمكفوفين (الدور التالي)
+ */
+export function rotateDealer(currentDealerPosition: number, activePlayers: number): number {
+  // ضمان بقاء الموقع ضمن نطاق عدد اللاعبين النشطين
+  return (currentDealerPosition + 1) % activePlayers;
+}
+
+/**
+ * تحديد المكفوفين الصغير والكبير
+ */
+export function determineBlindPositions(dealerPosition: number, activePlayers: number): { smallBlind: number, bigBlind: number } {
+  // في حالة لاعبين فقط
+  if (activePlayers === 2) {
+    return {
+      smallBlind: dealerPosition,
+      bigBlind: (dealerPosition + 1) % activePlayers
+    };
   }
   
-  return nextPosition;
+  // في حالة 3 لاعبين أو أكثر
+  return {
+    smallBlind: (dealerPosition + 1) % activePlayers,
+    bigBlind: (dealerPosition + 2) % activePlayers
+  };
 }
 
-// دالة لحساب قيمة يد اللاعب (مبسطة)
-export function evaluateHand(playerCards: Card[], communityCards: Card[]): number {
-  // سيتم تطوير هذه الدالة لاحقاً لتقييم قوة اليد الفعلية
-  // حاليًا تعيد قيمة عشوائية للتجربة
-  return Math.random() * 1000;
+/**
+ * تحديد اللاعب الذي يبدأ الجولة
+ */
+export function determineFirstToAct(dealerPosition: number, activePlayers: number, phase: GamePhase): number {
+  // في مرحلة ما قبل الفلوب، يبدأ اللاعب الذي يلي المكفوف الكبير
+  if (phase === GamePhase.PREFLOP) {
+    // في حالة لاعبين فقط، يبدأ الموزع (المكفوف الصغير)
+    if (activePlayers === 2) {
+      return dealerPosition;
+    }
+    // في حالة 3 لاعبين أو أكثر، يبدأ اللاعب الثالث بعد الموزع
+    return (dealerPosition + 3) % activePlayers;
+  }
+  
+  // في المراحل الأخرى، يبدأ اللاعب الذي يلي الموزع
+  return (dealerPosition + 1) % activePlayers;
 }
-
-// دالة تحديد الفائز
-export function determineWinner(players: Player[], communityCards: Card[]): Player[] {
-  // تطبق فقط على اللاعبين النشطين الذين لم يطووا
-  const activePlayers = players.filter(p => p.isActive && !p.isFolded);
-  
-  // حساب قيمة يد كل لاعب
-  const handValues = activePlayers.map(player => ({
-    player,
-    handValue: evaluateHand(player.cards, communityCards)
-  }));
-  
-  // ترتيب اللاعبين حسب قيمة اليد (من الأعلى للأدنى)
-  handValues.sort((a, b) => b.handValue - a.handValue);
-  
-  // إرجاع الفائز أو الفائزين في حالة التعادل
-  const winningValue = handValues[0].handValue;
-  const winners = handValues
-    .filter(item => item.handValue === winningValue)
-    .map(item => item.player);
-  
-  return winners;
-}
-
-// مزيد من المنطق سيتم إضافته لاحقاً لإدارة تقدم الجولة، توزيع الرقائق، إلخ.

@@ -6,6 +6,9 @@ import PokerActions from '../components/PokerActions';
 import PokerPlayer, { PlayerProps } from '../components/PokerPlayer';
 import { createDeck, shuffleDeck, Card } from '../logic/poker-engine';
 
+// استيراد أنماط CSS الخاصة ببوكر مصر
+import '../styles/poker-styles.css';
+
 /**
  * صفحة بوكر تكساس هولديم
  */
