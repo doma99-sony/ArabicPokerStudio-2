@@ -378,8 +378,12 @@ export class SocketManager {
     this.reconnectTimeout = setTimeout(() => {
       // محاولة إعادة الاتصال بنفس معرفات المستخدم
       if (this.userId && this.username) {
-        // نستخدم نفس عنوان الاتصال السابق إذا كان لدينا socket
-        const url = this.socket ? this.socket.url : 'wss://localhost:3000/poker';
+        // نستخدم نفس عنوان الاتصال السابق إذا كان لدينا socket، وإلا نولد عنوان ديناميكي
+        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsHost = window.location.host;
+        const defaultUrl = `${wsProtocol}//${wsHost}/ws`;
+        const url = this.socket ? this.socket.url : defaultUrl;
+        console.log('محاولة إعادة الاتصال على العنوان:', url);
         this.connect(url, this.userId, this.username)
           .then(() => {
             console.log('تمت إعادة الاتصال بنجاح');

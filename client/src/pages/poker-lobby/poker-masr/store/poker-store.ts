@@ -146,8 +146,12 @@ export const usePokerStore = create<PokerStore>((set, get) => ({
         }
       });
       
-      // محاولة الاتصال
-      const connected = await socketManager.connect('wss://1ce60656-4249-4497-a454-d68123b667b0-00-37uru2h3zkwvh.riker.replit.dev/poker', userId, username);
+      // محاولة الاتصال باستخدام عنوان ديناميكي
+      const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsHost = window.location.host;
+      const wsUrl = `${wsProtocol}//${wsHost}/ws`;
+      console.log('محاولة الاتصال بخادم البوكر على العنوان:', wsUrl);
+      const connected = await socketManager.connect(wsUrl, userId, username);
       
       // تحديث الحالة
       set({
