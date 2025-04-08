@@ -422,6 +422,18 @@ export default function LobbyPage() {
                       maxBet: 500000,
                       isVIP: true,
                       onClick: () => navigate("/zeus-king")
+                    },
+                    {
+                      id: "poker-masr",
+                      title: "بوكر مصر",
+                      image: "/images/egyptian-poker-bg.jpg",
+                      playerCount: 1820,
+                      tableCount: 45,
+                      minBet: 100,
+                      maxBet: 150000,
+                      isNew: true,
+                      isHot: true,
+                      onClick: () => navigate("/poker-lobby/poker-masr")
                     }
                   ]}
                 />
