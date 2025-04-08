@@ -1,38 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- خلفية دائرية -->
-  <circle cx="60" cy="60" r="55" fill="#3F2E3E" stroke="#8B6914" stroke-width="4"/>
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <title>Ancient Egyptian Book Symbol</title>
+  <defs>
+    <linearGradient id="bookGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8D6E63" />
+      <stop offset="50%" stop-color="#5D4037" />
+      <stop offset="100%" stop-color="#3E2723" />
+    </linearGradient>
+    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF9C4" />
+      <stop offset="50%" stop-color="#FFC107" />
+      <stop offset="100%" stop-color="#FF8F00" />
+    </linearGradient>
+  </defs>
   
-  <!-- الكتاب المغلق -->
-  <rect x="30" y="30" width="60" height="60" rx="2" fill="#8B4513" stroke="#5D3A0F" stroke-width="2"/>
+  <!-- Background Frame -->
+  <rect x="10" y="10" width="180" height="180" rx="5" fill="#111" stroke="url(#goldGradient)" stroke-width="5"/>
   
-  <!-- غلاف الكتاب بزخارف مصرية -->
-  <rect x="30" y="30" width="60" height="8" fill="#D4AF37" stroke="#8B6914" stroke-width="1"/>
-  <rect x="30" y="82" width="60" height="8" fill="#D4AF37" stroke="#8B6914" stroke-width="1"/>
-  <rect x="84" y="30" width="6" height="60" fill="#8B4513" stroke="#5D3A0F" stroke-width="1"/>
+  <!-- Book Cover -->
+  <rect x="40" y="30" width="120" height="140" rx="3" fill="url(#bookGradient)" stroke="#000" stroke-width="2"/>
   
-  <!-- زخارف ورموز هيروغليفية على الكتاب -->
-  <!-- عين حورس -->
-  <path d="M45 50L55 50" stroke="#D4AF37" stroke-width="2"/>
-  <ellipse cx="50" cy="50" rx="7" ry="5" stroke="#D4AF37" stroke-width="2" fill="none"/>
-  <circle cx="50" cy="50" r="2" fill="#D4AF37"/>
-  <path d="M57 50C60 53 65 53 67 53" stroke="#D4AF37" stroke-width="2"/>
+  <!-- Book Spine Detail -->
+  <rect x="40" y="30" width="15" height="140" fill="#3E2723" stroke="#000" stroke-width="1"/>
   
-  <!-- رموز هيروغليفية -->
-  <rect x="40" y="60" width="5" height="10" fill="#D4AF37"/>
-  <rect x="50" y="60" width="5" height="10" fill="#D4AF37"/>
-  <rect x="60" y="60" width="5" height="10" fill="#D4AF37"/>
-  <rect x="70" y="60" width="5" height="10" fill="#D4AF37"/>
+  <!-- Golden Decorative Elements -->
+  <path d="M60,50 L140,50" stroke="url(#goldGradient)" stroke-width="3" />
+  <path d="M60,150 L140,150" stroke="url(#goldGradient)" stroke-width="3" />
   
-  <!-- خطوط أفقية في الكتاب -->
-  <line x1="35" y1="45" x2="80" y2="45" stroke="#D4AF37" stroke-width="1"/>
-  <line x1="35" y1="75" x2="80" y2="75" stroke="#D4AF37" stroke-width="1"/>
+  <!-- Eye of Horus Symbol -->
+  <path d="M70,80 
+           C75,75 85,70 100,70 
+           C115,70 125,75 130,80 
+           L125,90
+           C120,87 110,85 100,85
+           C90,85 80,87 75,90
+           Z" fill="url(#goldGradient)" stroke="#000" stroke-width="1"/>
+  <path d="M100,90 L120,105" stroke="url(#goldGradient)" stroke-width="3" />
+  <path d="M95,90 L80,105" stroke="url(#goldGradient)" stroke-width="3" />
+  <path d="M100,90 L100,115" stroke="url(#goldGradient)" stroke-width="3" />
+  <circle cx="100" cy="80" r="5" fill="#000"/>
   
-  <!-- أثر لمعان على الكتاب -->
-  <rect x="35" y="35" width="30" height="3" fill="#F5E7A2" fill-opacity="0.7"/>
+  <!-- Hieroglyphic Symbols -->
+  <rect x="70" y="120" width="5" height="15" fill="url(#goldGradient)" />
+  <rect x="85" y="120" width="5" height="15" fill="url(#goldGradient)" />
+  <rect x="100" y="120" width="5" height="15" fill="url(#goldGradient)" />
+  <rect x="115" y="120" width="5" height="15" fill="url(#goldGradient)" />
   
-  <!-- توهج حول الكتاب - للإشارة إلى خصائصه السحرية كـ scatter -->
-  <rect x="30" y="30" width="60" height="60" rx="2" stroke="#FFD700" stroke-width="1" stroke-opacity="0.8"/>
-  <rect x="28" y="28" width="64" height="64" rx="3" stroke="#FFD700" stroke-width="1" stroke-opacity="0.5"/>
-  <rect x="26" y="26" width="68" height="68" rx="4" stroke="#FFD700" stroke-width="1" stroke-opacity="0.3"/>
+  <circle cx="77" cy="120" r="3" fill="url(#goldGradient)" />
+  <circle cx="92" cy="120" r="3" fill="url(#goldGradient)" />
+  <circle cx="107" cy="120" r="3" fill="url(#goldGradient)" />
+  <circle cx="122" cy="120" r="3" fill="url(#goldGradient)" />
 </svg>

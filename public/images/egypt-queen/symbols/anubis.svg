@@ -1,26 +1,57 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- خلفية دائرية -->
-  <circle cx="60" cy="60" r="55" fill="#382933" stroke="#241B21" stroke-width="4"/>
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <title>Anubis Symbol</title>
+  <defs>
+    <linearGradient id="bodyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#424242" />
+      <stop offset="50%" stop-color="#212121" />
+      <stop offset="100%" stop-color="#000000" />
+    </linearGradient>
+    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF9C4" />
+      <stop offset="50%" stop-color="#FFC107" />
+      <stop offset="100%" stop-color="#FF8F00" />
+    </linearGradient>
+  </defs>
   
-  <!-- رأس أنوبيس - إله الموت المصري برأس ذئب/كلب -->
-  <path d="M60 20C50 20 40 25 35 35C30 45 30 55 35 65C40 75 45 80 45 90C45 95 50 100 60 100C70 100 75 95 75 90C75 80 80 75 85 65C90 55 90 45 85 35C80 25 70 20 60 20Z" fill="#1E1E24" stroke="#000" stroke-width="2"/>
+  <!-- Background Frame -->
+  <rect x="10" y="10" width="180" height="180" rx="5" fill="#111" stroke="url(#goldGradient)" stroke-width="5"/>
   
-  <!-- آذان أنوبيس المميزة -->
-  <path d="M40 30C35 20 40 10 45 10C50 10 50 20 50 25" fill="#1E1E24" stroke="#000" stroke-width="2"/>
-  <path d="M80 30C85 20 80 10 75 10C70 10 70 20 70 25" fill="#1E1E24" stroke="#000" stroke-width="2"/>
+  <!-- Neck and Shoulders -->
+  <path d="M80,140 L80,160 L120,160 L120,140 Z" fill="url(#bodyGradient)"/>
   
-  <!-- تفاصيل الوجه -->
-  <ellipse cx="50" cy="45" rx="5" ry="3" fill="#D4AF37"/> <!-- العين اليسرى ذهبية -->
-  <ellipse cx="70" cy="45" rx="5" ry="3" fill="#D4AF37"/> <!-- العين اليمنى ذهبية -->
-  <path d="M50 60L70 60" stroke="#D4AF37" stroke-width="1"/> <!-- أنف/خطم -->
-  <path d="M60 60L60 70" stroke="#D4AF37" stroke-width="1"/> <!-- أنف طولي -->
+  <!-- Head Shape -->
+  <path d="M65,60 
+           L65,115 
+           C65,140 135,140 135,115
+           L135,60
+           L120,40
+           L110,55
+           L100,40
+           L90,55
+           L80,40
+           Z" fill="url(#bodyGradient)"/>
   
-  <!-- قلادة أنوبيس المصرية -->
-  <path d="M40 85C45 90 75 90 80 85" fill="#D4AF37" stroke="#B8860B" stroke-width="2"/>
-  <circle cx="60" cy="87" r="2" fill="#D40000" stroke="#B8860B" stroke-width="1"/>
+  <!-- Ears -->
+  <path d="M65,70 L50,40 L65,60 Z" fill="url(#bodyGradient)"/>
+  <path d="M135,70 L150,40 L135,60 Z" fill="url(#bodyGradient)"/>
   
-  <!-- توهج خارجي باللون الذهبي -->
-  <circle cx="60" cy="60" r="57" stroke="#D4AF37" stroke-width="1" stroke-opacity="0.5"/>
-  <circle cx="60" cy="60" r="59" stroke="#D4AF37" stroke-width="1" stroke-opacity="0.3"/>
+  <!-- Eyes -->
+  <ellipse cx="85" cy="85" rx="8" ry="12" fill="#D50000"/>
+  <ellipse cx="115" cy="85" rx="8" ry="12" fill="#D50000"/>
+  
+  <!-- Nose -->
+  <path d="M90,95 L100,115 L110,95 Z" fill="#000"/>
+  
+  <!-- Decorative Collar -->
+  <path d="M70,130 Q100,150 130,130" stroke="url(#goldGradient)" stroke-width="8" fill="none"/>
+  
+  <!-- Golden Details around Eyes -->
+  <path d="M75,75 L65,70" stroke="url(#goldGradient)" stroke-width="2" />
+  <path d="M75,95 L65,100" stroke="url(#goldGradient)" stroke-width="2" />
+  <path d="M125,75 L135,70" stroke="url(#goldGradient)" stroke-width="2" />
+  <path d="M125,95 L135,100" stroke="url(#goldGradient)" stroke-width="2" />
+  
+  <!-- Crown -->
+  <path d="M85,45 L100,30 L115,45 Z" fill="url(#goldGradient)" stroke="#000" stroke-width="1"/>
 </svg>

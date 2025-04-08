@@ -1,33 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- خلفية دائرية -->
-  <circle cx="60" cy="60" r="55" fill="#8C6057" stroke="#6B4942" stroke-width="4"/>
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <title>Card Symbol Q</title>
+  <defs>
+    <linearGradient id="cardGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#CE93D8" />
+      <stop offset="50%" stop-color="#8E24AA" />
+      <stop offset="100%" stop-color="#4A148C" />
+    </linearGradient>
+    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF9C4" />
+      <stop offset="50%" stop-color="#FFC107" />
+      <stop offset="100%" stop-color="#FF8F00" />
+    </linearGradient>
+  </defs>
   
-  <!-- حرف Q بتصميم مصري -->
-  <circle cx="60" cy="60" r="30" stroke="#D4AF37" stroke-width="8" fill="none"/>
-  <path d="M75 75L90 90" stroke="#D4AF37" stroke-width="8" stroke-linecap="round"/>
+  <!-- Background Circle -->
+  <circle cx="100" cy="100" r="95" fill="#111" stroke="url(#goldGradient)" stroke-width="5"/>
   
-  <!-- تاج مصري صغير على حرف Q -->
-  <path d="M55 35C50 25 70 25 65 35" fill="#D4AF37" stroke="#B8860B" stroke-width="1"/>
-  <rect x="58" y="28" width="4" height="5" fill="#D4AF37" stroke="#B8860B" stroke-width="0.5"/>
-  <circle cx="60" cy="27" r="2" fill="#D4AF37" stroke="#B8860B" stroke-width="0.5"/>
-
-  <!-- زخارف هيروغليفية على الحواف -->
-  <circle cx="30" cy="30" r="5" fill="#D4AF37"/>
-  <circle cx="90" cy="30" r="5" fill="#D4AF37"/>
-  <circle cx="30" cy="90" r="5" fill="#D4AF37"/>
+  <!-- Card Symbol -->
+  <text x="100" y="135" 
+        font-family="Times New Roman, serif" 
+        font-size="120" 
+        font-weight="bold" 
+        text-anchor="middle" 
+        fill="url(#cardGradient)" 
+        stroke="#000000" 
+        stroke-width="2">
+    Q
+  </text>
   
-  <!-- خطوط زخرفية مصرية -->
-  <rect x="25" y="45" width="8" height="2" fill="#D4AF37"/>
-  <rect x="25" y="55" width="8" height="2" fill="#D4AF37"/>
-  <rect x="25" y="65" width="8" height="2" fill="#D4AF37"/>
-  <rect x="25" y="75" width="8" height="2" fill="#D4AF37"/>
-  
-  <rect x="87" y="45" width="8" height="2" fill="#D4AF37"/>
-  <rect x="87" y="55" width="8" height="2" fill="#D4AF37"/>
-  <rect x="87" y="65" width="8" height="2" fill="#D4AF37"/>
-  
-  <!-- توهج خارجي -->
-  <circle cx="60" cy="60" r="57" stroke="#D4AF37" stroke-width="1" stroke-opacity="0.5"/>
-  <circle cx="60" cy="60" r="59" stroke="#D4AF37" stroke-width="1" stroke-opacity="0.3"/>
+  <!-- Egyptian Tiara -->
+  <path d="M70,40 Q100,25 130,40" stroke="url(#goldGradient)" stroke-width="3" fill="none"/>
+  <circle cx="100" cy="30" r="5" fill="url(#goldGradient)"/>
+  <path d="M65,165 L135,165" stroke="url(#goldGradient)" stroke-width="3" />
 </svg>

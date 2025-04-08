@@ -1,33 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- خلفية دائرية -->
-  <circle cx="60" cy="60" r="55" fill="#7A4069" stroke="#5B2E4D" stroke-width="4"/>
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <title>Card Symbol 10</title>
+  <defs>
+    <linearGradient id="cardGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFD54F" />
+      <stop offset="50%" stop-color="#FFA000" />
+      <stop offset="100%" stop-color="#FF6F00" />
+    </linearGradient>
+    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF9C4" />
+      <stop offset="50%" stop-color="#FFC107" />
+      <stop offset="100%" stop-color="#FF8F00" />
+    </linearGradient>
+  </defs>
   
-  <!-- رقم 10 بتصميم مصري -->
-  <path d="M35 35L35 85" stroke="#D4AF37" stroke-width="8" stroke-linecap="round"/>
-  <path d="M30 35L40 35" stroke="#D4AF37" stroke-width="4" stroke-linecap="round"/>
-  <path d="M30 85L40 85" stroke="#D4AF37" stroke-width="4" stroke-linecap="round"/>
+  <!-- Background Circle -->
+  <circle cx="100" cy="100" r="95" fill="#111" stroke="url(#goldGradient)" stroke-width="5"/>
   
-  <circle cx="67" cy="60" r="25" stroke="#D4AF37" stroke-width="8" fill="none"/>
+  <!-- Card Symbol -->
+  <text x="70" y="135" 
+        font-family="Times New Roman, serif" 
+        font-size="105" 
+        font-weight="bold" 
+        text-anchor="middle" 
+        fill="url(#cardGradient)" 
+        stroke="#000000" 
+        stroke-width="2">
+    1
+  </text>
+  <text x="130" y="135" 
+        font-family="Times New Roman, serif" 
+        font-size="105" 
+        font-weight="bold" 
+        text-anchor="middle" 
+        fill="url(#cardGradient)" 
+        stroke="#000000" 
+        stroke-width="2">
+    0
+  </text>
   
-  <!-- زخارف هيروغليفية على الحواف -->
-  <circle cx="30" cy="30" r="5" fill="#D4AF37"/>
-  <circle cx="90" cy="30" r="5" fill="#D4AF37"/>
-  <circle cx="30" cy="90" r="5" fill="#D4AF37"/>
-  <circle cx="90" cy="90" r="5" fill="#D4AF37"/>
-  
-  <!-- خطوط زخرفية مصرية -->
-  <rect x="20" y="45" width="8" height="2" fill="#D4AF37"/>
-  <rect x="20" y="55" width="8" height="2" fill="#D4AF37"/>
-  <rect x="20" y="65" width="8" height="2" fill="#D4AF37"/>
-  <rect x="20" y="75" width="8" height="2" fill="#D4AF37"/>
-  
-  <rect x="92" y="45" width="8" height="2" fill="#D4AF37"/>
-  <rect x="92" y="55" width="8" height="2" fill="#D4AF37"/>
-  <rect x="92" y="65" width="8" height="2" fill="#D4AF37"/>
-  <rect x="92" y="75" width="8" height="2" fill="#D4AF37"/>
-  
-  <!-- توهج خارجي -->
-  <circle cx="60" cy="60" r="57" stroke="#D4AF37" stroke-width="1" stroke-opacity="0.5"/>
-  <circle cx="60" cy="60" r="59" stroke="#D4AF37" stroke-width="1" stroke-opacity="0.3"/>
+  <!-- Egyptian Decorative Element -->
+  <path d="M75,40 L125,40" stroke="url(#goldGradient)" stroke-width="3" />
+  <circle cx="100" cy="40" r="5" fill="url(#goldGradient)"/>
+  <path d="M65,165 L135,165" stroke="url(#goldGradient)" stroke-width="3" />
 </svg>

@@ -1,1324 +1,674 @@
-import { useState, useEffect, useRef, useMemo } from "react";
-import { useGlobalWebSocket } from "@/hooks/use-global-websocket";
-import { useAuth } from "@/hooks/use-auth";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
-import { 
-  Coins, ArrowLeft, Volume2, VolumeX, Trophy, Settings, 
-  Info, RotateCw, Sparkles, Gift, GiftIcon, X 
-} from "lucide-react";
-import { formatChips } from "@/lib/utils";
-import { GoldDustEffect } from "@/components/effects/snow-effect";
-import { useLocation } from "wouter";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { useState, useEffect, useRef } from 'react';
+import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Slider } from '@/components/ui/slider';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
+import { useAuth } from '@/hooks/use-auth';
+import { useRealtime } from '@/hooks/use-realtime-updates';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { queryClient } from '@/lib/query-client';
+import { Reels3DContainer } from '@/components/game/egypt-queen/3d-reel';
+import { BigWinEffects } from '@/components/game/egypt-queen/big-win-effects';
+import { TreasureHuntGame } from '@/components/game/egypt-queen/treasure-hunt-game';
 
-// تعريف أنواع رموز اللعبة
+// أنواع رموز الماكينة
 type SymbolType = 
-  | "cleopatra" // كليوباترا (رمز عالي القيمة)
-  | "book" // كتاب الأسرار (Scatter)
-  | "eye" // عين حورس
-  | "anubis" // أنوبيس
-  | "cat" // القط المصري
-  | "A" | "K" | "Q" | "J" | "10" // الرموز التقليدية للبطاقات
-  | "wild"; // الجوكر (يمكن أن يحل محل أي رمز)
+  | "cleopatra" 
+  | "book" 
+  | "eye" 
+  | "anubis" 
+  | "cat" 
+  | "A" | "K" | "Q" | "J" | "10"
+  | "wild";
 
-// واجهة تمثل موضع الرمز في البكرات
-interface ReelPosition {
+// خط فوز - تمثيل صف وعمود
+interface WinLine {
   row: number;
   col: number;
-  symbol: SymbolType;
 }
 
 export default function EgyptQueenPage() {
-  const [location, navigate] = useLocation();
-  const { user, setUser } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
-  const globalWs = useGlobalWebSocket();
-  const gameContainerRef = useRef<HTMLDivElement>(null);
-  const [isMuted, setIsMuted] = useState(false);
-  const [isSpinning, setIsSpinning] = useState(false);
-  const [betAmount, setBetAmount] = useState(10000);
-  const [isGameStarted, setIsGameStarted] = useState(false);
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const spinAudioRef = useRef<HTMLAudioElement>(null);
-  const winAudioRef = useRef<HTMLAudioElement>(null);
+  const realtime = useRealtime();
   
-  // حالة البكرات - 5 بكرات × 3 صفوف
+  // حالة اللعبة
+  const [bet, setBet] = useState(1000);
+  const [spinning, setSpinning] = useState(false);
   const [reels, setReels] = useState<SymbolType[][]>([
-    ["cat", "A", "cleopatra"],
-    ["eye", "book", "K"],
-    ["cleopatra", "anubis", "Q"],
-    ["J", "wild", "cat"],
-    ["book", "10", "anubis"],
+    ["cleopatra", "book", "eye"],
+    ["cat", "wild", "A"],
+    ["K", "Q", "J"],
+    ["10", "anubis", "cat"],
+    ["eye", "cleopatra", "book"]
   ]);
+  const [winningLines, setWinningLines] = useState<WinLine[][]>([]);
+  const [winAmount, setWinAmount] = useState(0);
+  const [showBigWin, setShowBigWin] = useState(false);
+  const [freespins, setFreespins] = useState(0);
+  const [showTreasureHunt, setShowTreasureHunt] = useState(false);
+  const [gameVolume, setGameVolume] = useState(50);
+  const [audio, setAudio] = useState<{
+    spin?: HTMLAudioElement;
+    win?: HTMLAudioElement;
+    bigWin?: HTMLAudioElement;
+    background?: HTMLAudioElement;
+    treasureOpen?: HTMLAudioElement;
+  }>({});
   
-  // مؤقت الدوران للحصول على تأثير الحركة
-  const [spinTimer, setSpinTimer] = useState<NodeJS.Timeout | null>(null);
+  // عداد لتتبع دورات اللعب المجانية
+  const freespinsCounter = useRef(0);
   
-  // حالة الخطوط الفائزة
-  const [winningLines, setWinningLines] = useState<ReelPosition[][]>([]);
-  
-  // عدد اللفات المجانية المتبقية
-  const [freeSpins, setFreeSpins] = useState(0);
-  
-  // مضاعف الفوز الحالي
-  const [winMultiplier, setWinMultiplier] = useState(1);
-  
-  // حالة لعبة المكافأة (الصناديق الفرعونية)
-  const [bonusGameOpen, setBonusGameOpen] = useState(false);
-  // تعريف أنواع صناديق الكنز
-  type TreasureChestValues = 'normal' | 'special' | 'golden';
-  const [treasureChests, setTreasureChests] = useState<Array<{opened: boolean, reward: number, type: TreasureChestValues}>>([]);
-  const [chestsOpened, setChestsOpened] = useState(0);
-  const [totalBonusWin, setTotalBonusWin] = useState(0);
-  
-  // لا حاجة للاستماع إلى رسائل الخادم هنا، حيث يتم التعامل معها في مكون use-auth.tsx
-  // ورفع تحديثات رصيد اللاعب تلقائياً
-
-  // نحن فقط سنقوم بإدارة متابعة التحديثات في حالة اللاعب
+  // تهيئة الأصوات
   useEffect(() => {
-    console.log("تم تحديث معلومات المستخدم في صفحة ملكة مصر:", user?.chips);
+    const spinSound = new Audio('/sounds/spin.mp3');
+    const winSound = new Audio('/sounds/win.mp3');
+    const bigWinSound = new Audio('/sounds/big-win.mp3');
+    const backgroundMusic = new Audio('/sounds/egypt-background.mp3');
+    const treasureOpenSound = new Audio('/sounds/chest-open.mp3');
     
-    // تنظيف عند تفكيك المكون
+    // إعداد حلقة الصوت الخلفي
+    backgroundMusic.loop = true;
+    backgroundMusic.volume = gameVolume / 100;
+    
+    // إضافة الأصوات إلى الحالة
+    setAudio({
+      spin: spinSound,
+      win: winSound,
+      bigWin: bigWinSound,
+      background: backgroundMusic,
+      treasureOpen: treasureOpenSound
+    });
+    
+    // تشغيل الموسيقى الخلفية عند تحميل الصفحة
+    backgroundMusic.play().catch(e => console.error('لا يمكن تشغيل الصوت: ', e));
+    
+    // تنظيف الأصوات عند إلغاء تحميل المكون
     return () => {
-      console.log('تم مغادرة صفحة ملكة مصر');
+      backgroundMusic.pause();
+      backgroundMusic.currentTime = 0;
     };
-  }, [user]);
-
-  // تشغيل الموسيقى الخلفية عند تحميل الصفحة
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = 0.3;
-      audioRef.current.loop = true;
-      
-      // تشغيل الموسيقى الخلفية عند التفاعل مع الصفحة
-      const playOnInteraction = () => {
-        if (audioRef.current) {
-          audioRef.current.play().catch(error => {
-            console.error('فشل في تشغيل الموسيقى:', error);
-          });
-        }
-        
-        document.removeEventListener('click', playOnInteraction);
-      };
-      
-      document.addEventListener('click', playOnInteraction);
-      
-      return () => {
-        document.removeEventListener('click', playOnInteraction);
-        if (audioRef.current) {
-          audioRef.current.pause();
-        }
-      };
-    }
   }, []);
   
-  // تحديث كتم/تشغيل الصوت
+  // مزامنة مستوى الصوت مع تغييره
   useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.muted = isMuted;
+    if (audio.background) {
+      audio.background.volume = gameVolume / 100;
     }
-    if (spinAudioRef.current) {
-      spinAudioRef.current.muted = isMuted;
-    }
-    if (winAudioRef.current) {
-      winAudioRef.current.muted = isMuted;
-    }
-  }, [isMuted]);
+  }, [gameVolume, audio]);
   
-  // دالة لبدء اللعبة
-  const startGame = () => {
-    // تشغيل صوت النقر
-    const clickSound = document.getElementById('egypt-click-sound') as HTMLAudioElement;
-    if (clickSound && !isMuted) {
-      clickSound.currentTime = 0;
-      clickSound.play().catch(e => console.error(e));
-    }
-    
-    setIsGameStarted(true);
-    
-    // تشغيل الموسيقى إذا لم تكن مكتومة
-    if (audioRef.current && !isMuted) {
-      audioRef.current.play().catch(error => {
-        console.error('فشل في تشغيل الموسيقى:', error);
+  // طلب رصيد المستخدم الحالي
+  const { data: userData, refetch: refetchUser } = useQuery({
+    queryKey: ['/api/user'],
+    enabled: !!user,
+  });
+  
+  // طلب لتحديث رصيد اللاعب عند الفوز/الخسارة
+  // تعريف دالة لإرسال طلبات API
+const apiRequest = async (url: string, options: RequestInit = {}) => {
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+  });
+  
+  return response.json();
+};
+
+const updateUserChips = useMutation({
+    mutationFn: async (payload: { betAmount: number, winAmount: number, gameType: string }) => {
+      return apiRequest('/api/games/egypt-queen/update-chips', {
+        method: 'POST',
+        body: JSON.stringify(payload)
       });
-    }
-  };
-  
-  // دالة مساعدة لإنشاء رمز عشوائي
-  const generateRandomSymbol = (): SymbolType => {
-    const allSymbols: SymbolType[] = [
-      "cleopatra", "book", "eye", "anubis", "cat", 
-      "A", "K", "Q", "J", "10", "wild"
-    ];
-    
-    // توزيع وزن الاحتمالات - الرموز ذات القيمة العالية أقل احتمالية
-    const weights = {
-      "cleopatra": 1, // نادر
-      "book": 1,      // نادر (Scatter)
-      "wild": 1,      // نادر (يمكن أن يحل محل أي رمز)
-      "eye": 2,       // أقل شيوعاً
-      "anubis": 2,    // أقل شيوعاً
-      "cat": 3,       // متوسط الشيوع
-      "A": 4,         // شائع
-      "K": 4,         // شائع
-      "Q": 5,         // شائع جداً
-      "J": 5,         // شائع جداً
-      "10": 5,        // شائع جداً
-    };
-    
-    // إنشاء مصفوفة موزونة للسحب العشوائي
-    const weightedArray: SymbolType[] = [];
-    
-    for (const symbol of allSymbols) {
-      const weight = weights[symbol as keyof typeof weights];
-      for (let i = 0; i < weight; i++) {
-        weightedArray.push(symbol);
-      }
-    }
-    
-    // اختيار رمز عشوائي من المصفوفة الموزونة
-    const randomIndex = Math.floor(Math.random() * weightedArray.length);
-    return weightedArray[randomIndex];
-  };
-  
-  // دالة لإنشاء بكرات عشوائية جديدة
-  const generateNewReels = (): SymbolType[][] => {
-    const newReels: SymbolType[][] = [];
-    
-    // إنشاء 5 بكرات كل منها بـ 3 صفوف
-    for (let i = 0; i < 5; i++) {
-      const reel: SymbolType[] = [];
-      for (let j = 0; j < 3; j++) {
-        reel.push(generateRandomSymbol());
-      }
-      newReels.push(reel);
-    }
-    
-    return newReels;
-  };
-  
-  // دالة للتحقق من خطوط الفوز
-  const checkWinningLines = (reelsState: SymbolType[][]): ReelPosition[][] => {
-    const winningLines: ReelPosition[][] = [];
-    
-    // خطوط الدفع (3 خطوط أفقية)
-    // خط الصف العلوي
-    checkLine(reelsState, 0, winningLines);
-    // خط الصف الأوسط
-    checkLine(reelsState, 1, winningLines);
-    // خط الصف السفلي
-    checkLine(reelsState, 2, winningLines);
-    
-    return winningLines;
-  };
-  
-  // دالة مساعدة للتحقق من خط فوز محدد
-  const checkLine = (reelsState: SymbolType[][], row: number, winningLines: ReelPosition[][]) => {
-    const line: ReelPosition[] = [];
-    
-    // الرمز المرجعي (الأول في الخط)
-    const firstSymbol = reelsState[0][row];
-    let matchCount = 1;
-    
-    // إضافة الرمز الأول إلى الخط
-    line.push({ row, col: 0, symbol: firstSymbol });
-    
-    // التحقق من بقية الرموز في نفس الصف
-    for (let col = 1; col < reelsState.length; col++) {
-      const currentSymbol = reelsState[col][row];
-      
-      // إذا كان الرمز الحالي يتطابق مع الأول أو كان "wild"
-      if (currentSymbol === firstSymbol || currentSymbol === "wild" || firstSymbol === "wild") {
-        matchCount++;
-        line.push({ row, col, symbol: currentSymbol });
+    },
+    onSuccess: (response) => {
+      if (response.success) {
+        refetchUser();
       } else {
-        break; // توقف عند أول رمز غير متطابق
+        toast({
+          title: "خطأ",
+          description: response.message || "حدث خطأ أثناء تحديث الرصيد",
+          variant: "destructive"
+        });
       }
     }
-    
-    // إذا كان هناك 3 رموز متطابقة على الأقل، فهناك فوز
-    if (matchCount >= 3) {
-      winningLines.push(line);
-    }
-  };
+  });
   
-  // حساب قيمة الفوز بناءً على خطوط الفوز والرموز والرهان
-  const calculateWinAmount = (winningLines: ReelPosition[][], bet: number): number => {
-    let totalWin = 0;
+  // التفاعل مع الأحداث في الوقت الحقيقي
+  useEffect(() => {
+    if (!realtime) return;
     
-    // قيم الرموز
-    const symbolValues = {
-      "cleopatra": 10, // أعلى قيمة
-      "book": 0,       // يعامل بشكل خاص (scatter)
-      "wild": 8,       // قيمة عالية
-      "anubis": 6,     
-      "eye": 5,
-      "cat": 4,
-      "A": 3,
-      "K": 3,
-      "Q": 2,
-      "J": 2,
-      "10": 1,
-    };
-    
-    // حساب القيمة لكل خط فائز
-    for (const line of winningLines) {
-      // تحديد قيمة الرمز الأساسي (مع مراعاة الـ wild)
-      const baseSymbol = line[0].symbol === "wild" && line.length > 1 
-        ? line[1].symbol 
-        : line[0].symbol;
-      
-      // تجاهل خطوط الـ scatter (سيتم التعامل معها بشكل منفصل)
-      if (baseSymbol === "book") continue;
-      
-      // عدد الرموز المتطابقة
-      const matchCount = line.length;
-      
-      // القيمة الأساسية للرمز
-      const baseValue = symbolValues[baseSymbol as keyof typeof symbolValues];
-      
-      // حساب القيمة بناءً على عدد التطابقات
-      // 3 رموز = 1x القيمة، 4 رموز = 2x القيمة، 5 رموز = 5x القيمة
-      let multiplier = 1;
-      if (matchCount === 4) multiplier = 2;
-      if (matchCount === 5) multiplier = 5;
-      
-      // حساب الفوز لهذا الخط مع تطبيق مضاعف اللفات المجانية
-      const lineWin = baseValue * multiplier * bet / 10 * winMultiplier;
-      totalWin += lineWin;
-    }
-    
-    // إضافة مكافأة خاصة إذا كان هناك 3 أو أكثر من رمز "book" (scatter) في أي مكان
-    const scatterCount = countScatters(reels);
-    if (scatterCount >= 3) {
-      // 3 scatters = 5x الرهان، 4 scatters = 20x الرهان، 5 scatters = 50x الرهان
-      let scatterMultiplier = 0;
-      if (scatterCount === 3) scatterMultiplier = 5;
-      if (scatterCount === 4) scatterMultiplier = 20;
-      if (scatterCount === 5) scatterMultiplier = 50;
-      
-      totalWin += scatterMultiplier * bet;
-      
-      // منح لفات مجانية
-      if (scatterCount >= 3) {
-        // تعيين عدد اللفات المجانية بناءً على عدد رموز الـ scatter
-        // 3 كتب = 10 لفات، 4 كتب = 15 لفة، 5 كتب = 20 لفة
-        let spinCount = 10;
-        if (scatterCount === 4) spinCount = 15;
-        if (scatterCount === 5) spinCount = 20;
-        
-        // منح لفات مجانية
-        setFreeSpins(prev => prev + spinCount);
-        
-        // ضبط مضاعف الربح للفات المجانية
-        setWinMultiplier(2); // مضاعف 2x خلال اللفات المجانية
-      }
-    }
-    
-    return Math.round(totalWin);
-  };
-  
-  // دالة مساعدة لعد رموز الـ scatter في أي مكان على الشاشة
-  const countScatters = (reelsState: SymbolType[][]): number => {
-    let count = 0;
-    
-    for (let col = 0; col < reelsState.length; col++) {
-      for (let row = 0; row < reelsState[col].length; row++) {
-        if (reelsState[col][row] === "book") {
-          count++;
-        }
-      }
-    }
-    
-    return count;
-  };
-  
-  // دالة إعداد لعبة المكافأة - صناديق الكنز الفرعونية
-  const setupBonusGame = () => {
-    // إنشاء 5 صناديق للكنز
-    const chests: Array<{opened: boolean, reward: number, type: TreasureChestValues}> = Array(5).fill(null).map(() => {
-      // إنشاء جائزة عشوائية تتناسب مع مستوى الرهان
-      // زيادة نطاق المكافآت المحتملة لتكون أكثر إثارة
-      // صندوق واحد على الأقل سيحتوي على مكافأة كبيرة
-      // القيمة الأساسية بين 5 و 30 مضروبة في مستوى الرهان
-      const rewardMultiplier = Math.floor(Math.random() * 25) + 5;
-      // تحديد نوع الصندوق عشوائيًا 
-      const chestType: TreasureChestValues = Math.random() < 0.2 ? 'special' : 'normal';
-      return {
-        opened: false,
-        reward: rewardMultiplier * betAmount,
-        // إضافة نوع الصندوق للحصول على تأثيرات بصرية مختلفة
-        type: chestType
-      };
-    });
-    
-    // التأكد من وجود صندوق واحد على الأقل ذو قيمة عالية جداً (50-100x)
-    const luckyIndex = Math.floor(Math.random() * 5);
-    const superRewardMultiplier = Math.floor(Math.random() * 50) + 50;
-    // تعريف الصندوق الذهبي (الخاص بالمكافأة الكبيرة)
-    chests[luckyIndex] = {
-      opened: false,
-      reward: superRewardMultiplier * betAmount,
-      type: 'golden'
-    };
-    
-    // إعادة تعيين المتغيرات
-    setTreasureChests(chests);
-    setChestsOpened(0);
-    setTotalBonusWin(0);
-    
-    // تشغيل صوت بدء لعبة المكافأة
-    const bonusSound = document.getElementById('egypt-bonus-sound') as HTMLAudioElement;
-    if (bonusSound && !isMuted) {
-      bonusSound.currentTime = 0;
-      bonusSound.play().catch(e => console.error(e));
-    }
-    
-    // عرض نافذة لعبة المكافأة
-    setBonusGameOpen(true);
-    
-    // إظهار رسالة لعبة المكافأة
-    toast({
-      title: "لعبة المكافأة! 🏺",
-      description: "اختر 3 صناديق للحصول على جوائز إضافية من كنوز الفراعنة!",
-      variant: "default"
-    });
-  };
-
-  // دالة لفتح صندوق كنز
-  const openTreasureChest = (index: number) => {
-    // تجنب فتح صندوق سبق فتحه
-    if (treasureChests[index].opened) return;
-    
-    // نسخ حالة الصناديق
-    const updatedChests = [...treasureChests];
-    
-    // فتح الصندوق
-    updatedChests[index].opened = true;
-    
-    // تحديد نوع الصوت بناءً على نوع الصندوق
-    let soundElement;
-    
-    if (updatedChests[index].type === 'golden') {
-      // صوت مميز للكنز الذهبي
-      soundElement = document.getElementById('egypt-big-win-sound') as HTMLAudioElement;
-    } else {
-      // صوت عادي لفتح الصندوق
-      soundElement = document.getElementById('egypt-chest-open-sound') as HTMLAudioElement;
-    }
-    
-    if (soundElement && !isMuted) {
-      soundElement.currentTime = 0;
-      soundElement.play().catch(e => console.error(e));
-    }
-    
-    // تحديث العدد
-    const newChestsOpened = chestsOpened + 1;
-    
-    // إضافة الجائزة إلى المجموع
-    const chestReward = updatedChests[index].reward;
-    const newTotalBonus = totalBonusWin + chestReward;
-    
-    // تحديث الحالة
-    setTreasureChests(updatedChests);
-    setChestsOpened(newChestsOpened);
-    setTotalBonusWin(newTotalBonus);
-    
-    // تحديد نوع الرسالة بناءً على نوع الصندوق وقيمة المكافأة
-    let messageTitle = "كنز فرعوني! 💰";
-    let messageVariant = "default";
-    
-    if (updatedChests[index].type === 'golden') {
-      messageTitle = "كنز ذهبي عظيم! 👑✨";
-      messageVariant = "default";
-    } else if (updatedChests[index].type === 'special') {
-      messageTitle = "كنز مميز! 🏺✨";
-    }
-    
-    // عرض رسالة بالمكافأة التي تم الحصول عليها
-    toast({
-      title: messageTitle,
-      description: `وجدت ${chestReward} رقاقة في هذا الصندوق!`,
-      variant: messageVariant as any
-    });
-    
-    // إذا تم فتح 3 صناديق، أغلق اللعبة بعد عرض النتائج
-    if (newChestsOpened >= 3) {
-      // تأثير التأخير للجوائز المتتالية
-      setTimeout(() => {
-        // تشغيل صوت الفوز الكبير
-        const bigWinSound = document.getElementById('egypt-big-win-sound') as HTMLAudioElement;
-        if (bigWinSound && !isMuted) {
-          bigWinSound.currentTime = 0;
-          bigWinSound.play().catch(e => console.error(e));
-        }
-        
-        // إغلاق لعبة المكافأة بعد فترة
-        setTimeout(() => {
-          setBonusGameOpen(false);
-          
-          // عرض الفوز الإجمالي
-          toast({
-            title: "مكافأة كاملة! 🏆",
-            description: `مجموع المكافأة: ${newTotalBonus} رقاقة!`,
-            variant: "default"
-          });
-          
-          // إرسال المكافأة إلى الخادم (إذا كان المستخدم متصلاً)
-          if (user && user.id && globalWs && globalWs.isConnected) {
-            try {
-              // استخدام الدالة المناسبة لإرسال إجراء اللعبة
-              globalWs.sendGameAction(-1, 'slot_bonus_win', newTotalBonus);
-              
-              console.log('تم إرسال معلومات مكافأة السلوت للخادم');
-            } catch (error) {
-              console.error('فشل في إرسال معلومات المكافأة:', error);
-            }
-          } else {
-            // حفظ في المتصفح مؤقتاً إذا لم يكن هناك اتصال بالخادم
-            console.log('لا يمكن إرسال معلومات المكافأة للخادم - المستخدم غير متصل');
-          }
-        }, 2000);
-      }, 500);
-    }
-  };
-
-  // دالة محاكاة دوران البكرات مع تأثير بصري متطور
-  const animateReels = () => {
-    // إيقاف أي مؤقت سابق
-    if (spinTimer) {
-      clearInterval(spinTimer);
-    }
-    
-    // محاكاة دوران تدريجي للبكرات - كل بكرة تتوقف بعد الأخرى
-    const totalSpinTime = 3000; // 3 ثواني للدوران الكامل
-    const initialSpinFrames = 10; // عدد إطارات الدوران السريع الأولي
-    const reelStopDelay = 300; // الفاصل الزمني بين توقف كل بكرة (بالمللي ثانية)
-    
-    let currentFrame = 0;
-    const totalReels = 5;
-    let stoppedReels = 0;
-    let finalReelsResult = generateNewReels(); // النتيجة النهائية محددة مسبقاً
-    
-    // تحديث الرمز الدوار مع تأثير محسن
-    const updateSpinningReels = () => {
-      // نسخة من الحالة الحالية
-      let updatedReels = [...reels];
-      
-      // تحديث البكرات التي لا تزال تدور
-      for (let i = stoppedReels; i < totalReels; i++) {
-        // إنشاء بكرة جديدة مع رموز عشوائية
-        const spinningReel: SymbolType[] = [];
-        for (let j = 0; j < 3; j++) {
-          spinningReel.push(generateRandomSymbol());
-        }
-        updatedReels[i] = spinningReel;
-      }
-      
-      // تحديث الحالة
-      setReels(updatedReels);
-    };
-    
-    // تشغيل صوت النقرة عند توقف كل بكرة
-    const playReelStopSound = () => {
-      const clickSound = document.getElementById('egypt-click-sound') as HTMLAudioElement;
-      if (clickSound && !isMuted) {
-        clickSound.currentTime = 0;
-        clickSound.volume = 0.5;
-        clickSound.play().catch(e => console.error(e));
+    // الاستماع لتحديثات الرصيد
+    const handleUserUpdate = (data: any) => {
+      if (data.updateType === 'chips_update') {
+        refetchUser();
       }
     };
     
-    // إنشاء مؤقت للتحريك الأولي السريع
-    const initialSpinTimer = setInterval(() => {
-      if (currentFrame < initialSpinFrames) {
-        // تحريك سريع في البداية
-        updateSpinningReels();
-        currentFrame++;
-      } else {
-        // إيقاف المؤقت الأولي والانتقال إلى مرحلة توقف البكرات
-        clearInterval(initialSpinTimer);
-        
-        // بدء توقف البكرات واحدة تلو الأخرى
-        const stopReelsSequentially = () => {
-          if (stoppedReels < totalReels) {
-            // تثبيت رموز البكرة التي ستتوقف
-            let updatedReels = [...reels];
-            updatedReels[stoppedReels] = finalReelsResult[stoppedReels];
-            setReels(updatedReels);
-            
-            // تشغيل صوت توقف البكرة
-            playReelStopSound();
-            
-            // زيادة عداد البكرات المتوقفة
-            stoppedReels++;
-            
-            // استمرار تحريك البكرات المتبقية
-            const spinRemainingTimer = setInterval(() => {
-              updateSpinningReels();
-            }, 100);
-            
-            // جدولة توقف البكرة التالية
-            if (stoppedReels < totalReels) {
-              setTimeout(() => {
-                clearInterval(spinRemainingTimer);
-                stopReelsSequentially();
-              }, reelStopDelay);
-            } else {
-              // عند توقف جميع البكرات، تنظيف وإنهاء
-              clearInterval(spinRemainingTimer);
-              
-              // التحقق من الفوز
-              const wins = checkWinningLines(finalReelsResult);
-              setWinningLines(wins);
-              
-              // حساب مبلغ الفوز
-              if (wins.length > 0) {
-                const winAmount = calculateWinAmount(wins, betAmount);
-                
-                // تشغيل صوت الفوز بعد تأخير قصير
-                setTimeout(() => {
-                  if (winAudioRef.current && !isMuted) {
-                    winAudioRef.current.currentTime = 0;
-                    winAudioRef.current.play().catch(e => console.error(e));
-                  }
-                  
-                  // عرض رسالة الفوز
-                  toast({
-                    title: "مبروك! 🎉",
-                    description: `لقد ربحت ${formatChips(winAmount)} رقاقة`,
-                    variant: "default"
-                  });
-                }, 500);
-                
-                // إرسال معلومات الفوز إلى الخادم
-                if (user && user.id && globalWs && globalWs.isConnected) {
-                  try {
-                    // استخدام الدالة المناسبة لإرسال إجراء اللعبة
-                    globalWs.sendGameAction(-1, 'slot_win', winAmount);
-                    console.log(`تم إرسال معلومات الفوز للخادم: ${winAmount} رقاقة`);
-                  } catch (error) {
-                    console.error('فشل في إرسال معلومات الفوز:', error);
-                  }
-                }
-              }
-              
-              // التحقق من تفعيل لعبة المكافأة
-              const scatterCount = countScatters(finalReelsResult);
-              if (scatterCount >= 3) {
-                // بدء لعبة المكافأة بعد ثانية للسماح للاعب برؤية الفوز أولاً
-                setTimeout(() => {
-                  setupBonusGame();
-                }, 1500);
-              }
-              
-              // إنهاء حالة الدوران
-              setSpinTimer(null);
-              setIsSpinning(false);
-            }
-          }
-        };
-        
-        // بدء تسلسل توقف البكرات
-        setTimeout(stopReelsSequentially, 500);
-      }
-    }, 100);
+    realtime.on('user_update', handleUserUpdate);
     
-    // حفظ مرجع المؤقت
-    setSpinTimer(initialSpinTimer);
+    return () => {
+      realtime.off('user_update', handleUserUpdate);
+    };
+  }, [realtime, refetchUser]);
+  
+  // فحص ما إذا كان الرهان صالحاً
+  const isBetValid = () => {
+    if (!userData) return false;
+    return bet > 0 && bet <= userData.chips;
   };
   
-  // دالة لتدوير عجلات السلوت
-  const spin = () => {
-    // تجنب تشغيل اللعبة مرة أخرى أثناء الدوران
-    if (isSpinning) return;
-    
-    // التحقق مما إذا كانت هذه لفة مجانية
-    const isFreeSpinUsed = freeSpins > 0;
-    
-    // التحقق من أن لدى اللاعب رصيد كاف (فقط إذا لم تكن لفة مجانية)
-    if (!isFreeSpinUsed && (user?.chips || 0) < betAmount) {
+  // زيادة/نقصان الرهان
+  const changeBet = (amount: number) => {
+    const newBet = Math.max(100, Math.min(bet + amount, userData?.chips || 10000));
+    setBet(newBet);
+  };
+  
+  // ضبط الرهان إلى قيم محددة مسبقاً
+  const setQuickBet = (percentage: number) => {
+    if (!userData) return;
+    const maxBet = Math.min(userData.chips, 1000000);
+    const newBet = Math.floor(maxBet * (percentage / 100));
+    setBet(Math.max(100, newBet));
+  };
+  
+  // معالجة حدث دوران البكرات
+  const handleSpin = async () => {
+    if (!isBetValid() && freespinsCounter.current <= 0) {
       toast({
-        title: "رصيد غير كاف",
-        description: "لا يوجد لديك رصيد كاف للمراهنة",
+        title: "رهان غير صالح",
+        description: "يرجى التأكد من أن لديك رصيد كاف وأن الرهان أكبر من صفر",
         variant: "destructive"
       });
       return;
     }
     
-    // إرسال معلومات الرهان إلى الخادم (فقط إذا لم تكن لفة مجانية)
-    if (!isFreeSpinUsed && user && user.id && globalWs) {
-      // استخدام setTimeout لتجنب تحديثات الحالة المتزامنة
-      setTimeout(() => {
-        try {
-          // إرسال الرسالة فقط إذا كان الاتصال مفتوحاً
-          if (globalWs.isConnected) {
-            // إرسال رسالة إجراء اللعبة للخادم
-            globalWs.sendGameAction(-1, 'slot_bet', betAmount);
-            console.log(`تم إرسال معلومات الرهان للخادم: ${betAmount} رقاقة`);
-          }
-          
-          // لا نقوم بتحديث رصيد المستخدم هنا - سيتم ذلك تلقائياً عندما يرد الخادم
-          
-        } catch (error) {
-          console.error('فشل في إرسال معلومات الرهان:', error);
-          toast({
-            title: "خطأ في المراهنة",
-            description: "حدث خطأ أثناء محاولة المراهنة. يرجى المحاولة مرة أخرى.",
-            variant: "destructive"
-          });
-          return;
-        }
-      }, 0);
+    // تعيين حالة الدوران
+    setSpinning(true);
+    setWinningLines([]);
+    setWinAmount(0);
+    
+    // تشغيل صوت الدوران
+    if (audio.spin) {
+      audio.spin.currentTime = 0;
+      audio.spin.play().catch(e => console.error(e));
     }
     
-    // تشغيل صوت النقر
-    const clickSound = document.getElementById('egypt-click-sound') as HTMLAudioElement;
-    if (clickSound && !isMuted) {
-      clickSound.currentTime = 0;
-      clickSound.play().catch(e => console.error(e));
-      
-      // بعد صوت النقر بفترة قصيرة، نشغل صوت الدوران
-      setTimeout(() => {
-        // إذا كانت هذه لفة مجانية، نشغل صوت خاص باللفات المجانية
-        if (isFreeSpinUsed) {
-          const freeSpinSound = document.getElementById('egypt-free-spins-sound') as HTMLAudioElement;
-          if (freeSpinSound && !isMuted) {
-            freeSpinSound.currentTime = 0;
-            freeSpinSound.play().catch(e => console.error(e));
-          }
-        } else if (spinAudioRef.current && !isMuted) {
-          // صوت الدوران العادي
-          spinAudioRef.current.currentTime = 0;
-          spinAudioRef.current.play().catch(e => console.error(e));
-        }
-      }, 200);
-    } else if (spinAudioRef.current && !isMuted) {
-      // في حالة عدم وجود صوت النقر
-      if (isFreeSpinUsed) {
-        const freeSpinSound = document.getElementById('egypt-free-spins-sound') as HTMLAudioElement;
-        if (freeSpinSound && !isMuted) {
-          freeSpinSound.currentTime = 0;
-          freeSpinSound.play().catch(e => console.error(e));
-        }
-      } else {
-        // صوت الدوران العادي
-        spinAudioRef.current.currentTime = 0;
-        spinAudioRef.current.play().catch(e => console.error(e));
+    // إذا كان هذا دوران مجاني، قم بتقليل العداد
+    if (freespinsCounter.current > 0) {
+      freespinsCounter.current--;
+      setFreespins(freespinsCounter.current);
+    } else {
+      // خصم الرهان من رصيد المستخدم عبر API
+      try {
+        await updateUserChips.mutateAsync({
+          betAmount: bet,
+          winAmount: 0,
+          gameType: 'egypt_queen_bet'
+        });
+      } catch (error) {
+        console.error("خطأ في تحديث الرصيد:", error);
+        setSpinning(false);
+        toast({
+          title: "خطأ",
+          description: "حدث خطأ أثناء معالجة رهانك",
+          variant: "destructive"
+        });
+        return;
       }
     }
+  };
+  
+  // معالجة نتائج الدوران بعد اكتماله
+  const handleSpinComplete = (finalReels: SymbolType[][]) => {
+    // حساب المكافآت وخطوط الفوز
+    const { winLines, totalWin, hasScatter, hasBonus } = calculateWinnings(finalReels);
     
-    // إذا كانت لفة مجانية، نقلل العداد
-    if (isFreeSpinUsed) {
-      setFreeSpins(prevSpins => {
-        const remainingSpins = prevSpins - 1;
-        
-        // إذا كانت هذه هي اللفة المجانية الأخيرة
-        if (remainingSpins === 0) {
-          // إعادة تعيين المضاعف عند انتهاء اللفات المجانية
-          setWinMultiplier(1);
-          
-          // إظهار رسالة انتهاء اللفات المجانية
-          toast({
-            title: "انتهت اللفات المجانية! 🎲",
-            description: "استمتع بألعاب ملكة مصر!",
-            variant: "default"
-          });
-        }
-        
-        return remainingSpins;
+    setReels(finalReels);
+    setWinningLines(winLines);
+    setWinAmount(totalWin);
+    
+    // تحقق من تنشيط المكافآت الخاصة
+    if (hasScatter && freespinsCounter.current <= 0) {
+      // تفعيل الدورات المجانية
+      const newFreespins = 10; // 10 دورات مجانية قياسية
+      freespinsCounter.current = newFreespins;
+      setFreespins(newFreespins);
+      
+      toast({
+        title: "دورات مجانية!",
+        description: `حصلت على ${newFreespins} دورات مجانية!`,
+        variant: "default",
       });
     }
     
-    // إعادة تعيين خطوط الفوز
-    setWinningLines([]);
-    
-    // بدء الدوران
-    setIsSpinning(true);
-    
-    // تحريك البكرات
-    animateReels();
-  };
-  
-  // زيادة مبلغ الرهان (مضاعفة)
-  const increaseBet = () => {
-    if (isSpinning) return;
-    
-    // تشغيل صوت النقر
-    const clickSound = document.getElementById('egypt-click-sound') as HTMLAudioElement;
-    if (clickSound && !isMuted) {
-      clickSound.currentTime = 0;
-      clickSound.play().catch(e => console.error(e));
+    if (hasBonus) {
+      // تفعيل لعبة صيد الكنز
+      setShowTreasureHunt(true);
     }
     
-    // مضاعفة المبلغ
-    setBetAmount(prev => Math.min(prev * 2, 100000));
-  };
-  
-  // تقليل مبلغ الرهان (النصف)
-  const decreaseBet = () => {
-    if (isSpinning) return;
-    
-    // تشغيل صوت النقر
-    const clickSound = document.getElementById('egypt-click-sound') as HTMLAudioElement;
-    if (clickSound && !isMuted) {
-      clickSound.currentTime = 0;
-      clickSound.play().catch(e => console.error(e));
+    // تشغيل صوت الفوز المناسب
+    if (totalWin > 0) {
+      if (totalWin >= bet * 10) {
+        // فوز كبير
+        setShowBigWin(true);
+        if (audio.bigWin) {
+          audio.bigWin.currentTime = 0;
+          audio.bigWin.play().catch(e => console.error(e));
+        }
+      } else {
+        // فوز عادي
+        if (audio.win) {
+          audio.win.currentTime = 0;
+          audio.win.play().catch(e => console.error(e));
+        }
+      }
+      
+      // تحديث رصيد اللاعب بالمبلغ المربوح
+      updateUserChips.mutate({
+        betAmount: freespinsCounter.current > 0 ? 0 : bet,
+        winAmount: totalWin,
+        gameType: 'egypt_queen_win'
+      });
     }
     
-    // تقليل المبلغ إلى النصف
-    setBetAmount(prev => Math.max(Math.floor(prev / 2), 10000));
+    // إنهاء حالة الدوران
+    setSpinning(false);
+    
+    // بدء دوران جديد تلقائياً إذا كان هناك دورات مجانية متبقية
+    if (freespinsCounter.current > 0) {
+      setTimeout(() => {
+        handleSpin();
+      }, 2000);
+    }
   };
   
-  // دالة للعودة إلى القائمة الرئيسية
-  const goToHome = () => {
-    navigate('/');
-  };
-  
-  // تبديل كتم الصوت
-  const toggleMute = () => {
-    setIsMuted(!isMuted);
-  };
-  
-  // دالة لعرض رمز معين باستخدام الصور أو الرموز التعبيرية
-  const renderSymbol = (symbol: SymbolType, isWinning: boolean = false): React.ReactNode => {
-    // تعيين الرموز المرئية لكل نوع
-    const symbolMap: Record<SymbolType, { icon: React.ReactNode; description: string }> = {
-      "cleopatra": { 
-        icon: <img src="/images/egypt-queen/symbols/cleopatra.svg" alt="كليوباترا" className="w-16 h-16 object-contain" 
-          onError={(e) => (e.currentTarget.textContent = "👸")}/>, 
-        description: "كليوباترا" 
-      },
-      "book": { 
-        icon: <img src="/images/egypt-queen/symbols/book.svg" alt="كتاب الأسرار" className="w-16 h-16 object-contain"
-          onError={(e) => (e.currentTarget.textContent = "📜")}/>,
-        description: "كتاب الأسرار" 
-      },
-      "eye": { 
-        icon: <img src="/images/egypt-queen/symbols/eye.svg" alt="عين حورس" className="w-16 h-16 object-contain"
-          onError={(e) => (e.currentTarget.textContent = "👁️")}/>,
-        description: "عين حورس" 
-      },
-      "anubis": { 
-        icon: <img src="/images/egypt-queen/symbols/anubis.svg" alt="أنوبيس" className="w-16 h-16 object-contain"
-          onError={(e) => (e.currentTarget.textContent = "🐺")}/>,
-        description: "أنوبيس" 
-      },
-      "cat": { 
-        icon: <img src="/images/egypt-queen/symbols/cat.svg" alt="القط المصري" className="w-16 h-16 object-contain"
-          onError={(e) => (e.currentTarget.textContent = "🐱")}/>,
-        description: "القط المصري" 
-      },
-      "wild": { 
-        icon: <span className="text-4xl font-bold text-amber-500">✨</span>, 
-        description: "الجوكر" 
-      },
-      "A": { 
-        icon: <img src="/images/egypt-queen/symbols/A.svg" alt="A" className="w-16 h-16 object-contain"
-          onError={(e) => (e.currentTarget.textContent = "🅰️")}/>,
-        description: "A" 
-      },
-      "K": { 
-        icon: <img src="/images/egypt-queen/symbols/K.svg" alt="K" className="w-16 h-16 object-contain"
-          onError={(e) => (e.currentTarget.textContent = "🎰")}/>,
-        description: "K" 
-      },
-      "Q": { 
-        icon: <img src="/images/egypt-queen/symbols/Q.svg" alt="Q" className="w-16 h-16 object-contain"
-          onError={(e) => (e.currentTarget.textContent = "🎯")}/>,
-        description: "Q" 
-      },
-      "J": { 
-        icon: <img src="/images/egypt-queen/symbols/J.svg" alt="J" className="w-16 h-16 object-contain"
-          onError={(e) => (e.currentTarget.textContent = "🎲")}/>,
-        description: "J" 
-      },
-      "10": { 
-        icon: <img src="/images/egypt-queen/symbols/10.svg" alt="10" className="w-16 h-16 object-contain"
-          onError={(e) => (e.currentTarget.textContent = "🔟")}/>,
-        description: "10" 
-      },
+  // حساب المكافآت وخطوط الفوز
+  const calculateWinnings = (finalReels: SymbolType[][]) => {
+    const symbolValues: Record<SymbolType, number> = {
+      'cleopatra': 500, // الأعلى قيمة
+      'book': 300, // رمز ال SCATTER
+      'eye': 200,
+      'anubis': 150,
+      'cat': 100,
+      'A': 50,
+      'K': 40,
+      'Q': 30,
+      'J': 20,
+      '10': 10,
+      'wild': 250 // يمكن أن يحل محل أي رمز
     };
     
-    // استخدام رموز تعبيرية احتياطية إذا تعذر تحميل الصور
-    const fallbackSymbols: Record<SymbolType, string> = {
-      "cleopatra": "👸",
-      "book": "📜",
-      "eye": "👁️",
-      "anubis": "🐺",
-      "cat": "🐱",
-      "wild": "✨",
-      "A": "🅰️",
-      "K": "🎰",
-      "Q": "🎯",
-      "J": "🎲",
-      "10": "🔟",
-    };
+    // خطوط الفوز المحتملة (أفقية، قطرية، إلخ)
+    const paylines = [
+      // الخطوط الأفقية
+      [
+        {row: 0, col: 0}, {row: 0, col: 1}, {row: 0, col: 2}, {row: 0, col: 3}, {row: 0, col: 4}
+      ],
+      [
+        {row: 1, col: 0}, {row: 1, col: 1}, {row: 1, col: 2}, {row: 1, col: 3}, {row: 1, col: 4}
+      ],
+      [
+        {row: 2, col: 0}, {row: 2, col: 1}, {row: 2, col: 2}, {row: 2, col: 3}, {row: 2, col: 4}
+      ],
+      // خطوط متعرجة
+      [
+        {row: 0, col: 0}, {row: 1, col: 1}, {row: 2, col: 2}, {row: 1, col: 3}, {row: 0, col: 4}
+      ],
+      [
+        {row: 2, col: 0}, {row: 1, col: 1}, {row: 0, col: 2}, {row: 1, col: 3}, {row: 2, col: 4}
+      ],
+      // خطوط إضافية على شكل V
+      [
+        {row: 0, col: 0}, {row: 1, col: 1}, {row: 2, col: 2}, {row: 1, col: 3}, {row: 0, col: 4}
+      ],
+      [
+        {row: 2, col: 0}, {row: 1, col: 1}, {row: 0, col: 2}, {row: 1, col: 3}, {row: 2, col: 4}
+      ],
+      // متعرجة أخرى
+      [
+        {row: 1, col: 0}, {row: 0, col: 1}, {row: 1, col: 2}, {row: 2, col: 3}, {row: 1, col: 4}
+      ],
+      [
+        {row: 1, col: 0}, {row: 2, col: 1}, {row: 1, col: 2}, {row: 0, col: 3}, {row: 1, col: 4}
+      ],
+    ];
     
-    // إذا كان رمزاً فائزاً، أضف تأثيرات إضافية
-    if (isWinning) {
-      return (
-        <div className="relative animate-pulse">
-          {symbolMap[symbol].icon}
-          <div className="absolute inset-0 bg-[#D4AF37]/20 rounded-full animate-ping-slow"></div>
-        </div>
-      );
+    const winLines: WinLine[][] = [];
+    let totalWin = 0;
+    let hasScatter = false;
+    let hasBonus = false;
+    
+    // عدد رموز SCATTER على البكرات
+    const scatterCount = finalReels.flat().filter(symbol => symbol === 'book').length;
+    if (scatterCount >= 3) {
+      hasScatter = true;
+      totalWin += bet * (scatterCount * 2); // مكافأة SCATTER
     }
     
-    // في حالة عدم الفوز، عرض الرمز العادي
-    return symbolMap[symbol].icon || <span className="text-4xl">{fallbackSymbols[symbol]}</span>;
-  };
-  
-  // إذا لم تبدأ اللعبة بعد، اعرض شاشة البداية
-  if (!isGameStarted) {
-    return (
-      <div 
-        className="h-screen w-full overflow-hidden flex flex-col items-center justify-center bg-cover bg-center relative"
-        style={{ backgroundImage: "url('/images/egypt-queen/backgrounds/egyptian-temple.svg')" }}
-      >
-        {/* تأثير الغبار الذهبي */}
-        <GoldDustEffect />
+    // عدد رموز BONUS (عين حورس) على البكرات
+    const bonusCount = finalReels.flat().filter(symbol => symbol === 'eye').length;
+    if (bonusCount >= 3) {
+      hasBonus = true;
+    }
+    
+    // فحص كل خط فوز
+    paylines.forEach(line => {
+      const symbols: SymbolType[] = [];
+      
+      // استخراج الرموز من البكرات حسب خط الفوز
+      line.forEach(pos => {
+        if (finalReels[pos.col] && finalReels[pos.col][pos.row]) {
+          symbols.push(finalReels[pos.col][pos.row]);
+        }
+      });
+      
+      // التحقق من الفوز بالخط
+      if (symbols.length >= 3) {
+        const firstSymbol = symbols[0];
+        let matchCount = 1;
+        let hasWild = firstSymbol === 'wild';
         
-        {/* طبقات الإضاءة والتأثيرات */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60"></div>
-        <div className="absolute inset-0 bg-[url('/images/fog-overlay.png')] bg-cover opacity-15 mix-blend-overlay animate-float-slow"></div>
-        
-        {/* محتوى شاشة البداية */}
-        <div className="relative z-10 flex flex-col items-center">
-          <h1 className="text-6xl font-bold text-[#D4AF37] mb-8 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] animate-pulse-slow">
-            ملكة مصر
-          </h1>
-          <h2 className="text-3xl font-semibold text-white mb-12 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
-            Queen of Egypt Slots
-          </h2>
+        for (let i = 1; i < symbols.length; i++) {
+          const currentSymbol = symbols[i];
           
-          {/* صورة الملكة (ستضاف لاحقاً) */}
-          <div className="w-64 h-64 mb-10 relative overflow-hidden rounded-full border-4 border-[#D4AF37] shadow-xl">
+          if (currentSymbol === 'wild') {
+            hasWild = true;
+            matchCount++;
+          } else if (currentSymbol === firstSymbol || firstSymbol === 'wild') {
+            matchCount++;
+          } else {
+            break;
+          }
+        }
+        
+        // احتساب الفوز إذا كان هناك 3 أو أكثر متطابقة
+        if (matchCount >= 3) {
+          const symbolValue = symbolValues[firstSymbol === 'wild' && symbols[1] !== 'wild' ? symbols[1] : firstSymbol];
+          const lineWin = symbolValue * matchCount * (hasWild ? 2 : 1) * (bet / 1000);
+          
+          totalWin += lineWin;
+          winLines.push(line.slice(0, matchCount));
+        }
+      }
+    });
+    
+    return { winLines, totalWin, hasScatter, hasBonus };
+  };
+  
+  // معالجة اكتمال لعبة صيد الكنز
+  const handleTreasureHuntComplete = (treasureValue: number) => {
+    setShowTreasureHunt(false);
+    
+    // إضافة قيمة الكنز إلى الفوز الكلي
+    const totalWinWithTreasure = winAmount + treasureValue;
+    setWinAmount(totalWinWithTreasure);
+    
+    // تفعيل تأثير الفوز الكبير إذا كانت قيمة الكنز كبيرة
+    if (treasureValue >= bet * 5) {
+      setShowBigWin(true);
+      if (audio.bigWin) {
+        audio.bigWin.currentTime = 0;
+        audio.bigWin.play().catch(e => console.error(e));
+      }
+    }
+    
+    // تحديث رصيد اللاعب بقيمة الكنوز
+    updateUserChips.mutate({
+      betAmount: 0, // لا يوجد رهان إضافي
+      winAmount: treasureValue,
+      gameType: 'egypt_queen_treasure'
+    });
+  };
+  
+  return (
+    <div className="h-full w-full relative bg-amber-950/20 overflow-hidden">
+      {/* خلفية اللعبة */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center opacity-50 z-0" 
+        style={{ backgroundImage: 'url("/images/egypt-queen/backgrounds/pyramids-desert.svg")' }}
+      />
+      
+      {/* الطبقة الرئيسية */}
+      <div className="relative z-10 h-full flex flex-col">
+        {/* شريط معلومات اللعبة */}
+        <div className="bg-amber-950/80 text-amber-100 p-3 flex justify-between items-center border-b border-amber-700">
+          <div className="flex items-center gap-2">
             <img 
-              src="/images/egypt-queen/queen-icon.png" 
-              alt="ملكة مصر" 
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = '/assets/poker-icon-gold.png';
-                console.log('صورة الملكة غير متوفرة، تم استخدام صورة بديلة');
-              }}
+              src="/images/egypt-queen/symbols/cleopatra.svg" 
+              alt="Egypt Queen Logo" 
+              className="h-10 w-10"
             />
-            {/* توهج حول الصورة */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[#D4AF37]/40 to-[#D4AF37]/0 rounded-full animate-pulse-slow opacity-60"></div>
+            <h1 className="text-xl font-bold text-amber-100">ملكة مصر</h1>
           </div>
           
-          {/* زر ابدأ اللعب */}
-          <Button 
-            className="bg-gradient-to-r from-[#D4AF37] to-[#8B6914] hover:from-[#FFD700] hover:to-[#B8860B] text-white text-xl font-bold py-6 px-12 rounded-full shadow-lg transform transition-all hover:scale-105 active:scale-95"
-            onClick={startGame}
-          >
-            ابدأ اللعب
-          </Button>
-          
-          {/* زر العودة */}
-          <Button
-            variant="link"
-            className="text-white/70 mt-8 hover:text-white"
-            onClick={goToHome}
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            العودة للصفحة الرئيسية
-          </Button>
+          <div className="flex items-center gap-4">
+            <div className="bg-amber-900/90 px-4 py-2 rounded-lg border border-amber-700">
+              <span className="text-amber-300 font-bold">{freespins}</span>
+              <span className="text-amber-100 ms-2">دورات مجانية</span>
+            </div>
+            
+            <div className="bg-amber-900/90 px-4 py-2 rounded-lg border border-amber-700">
+              <span className="text-amber-300 font-bold">
+                {userData?.chips?.toLocaleString('ar-EG') || 0}
+              </span>
+              <span className="text-amber-100 ms-2">رقاقة</span>
+            </div>
+          </div>
         </div>
         
-        {/* الصوتيات */}
-        <audio ref={audioRef} src="/audio/egypt-theme.mp3"></audio>
-      </div>
-    );
-  }
-  
-  // واجهة اللعبة الرئيسية
-  return (
-    <div 
-      className="h-screen w-full overflow-hidden flex flex-col bg-cover bg-center relative"
-      style={{ backgroundImage: "url('/images/egypt-queen/backgrounds/royal-palace-gold.svg')" }}
-    >
-      {/* نافذة لعبة المكافأة - صناديق الكنز الفرعونية */}
-      <Dialog open={bonusGameOpen} onOpenChange={setBonusGameOpen}>
-        <DialogContent 
-          className="border-4 border-[#D4AF37] p-6 max-w-3xl mx-auto bg-cover bg-center overflow-hidden relative"
-          style={{
-            backgroundImage: "url('/images/egypt-queen/backgrounds/nile-queen.svg')",
-            backgroundColor: "#000"
-          }}
-        >
-          <div className="absolute inset-0 bg-black/60"></div>
-          <div className="relative z-10">
-            <DialogHeader>
-              <DialogTitle className="text-3xl text-center text-[#D4AF37] font-bold">
-                لعبة الكنوز الفرعونية 🏺
-              </DialogTitle>
-              <DialogDescription className="text-xl text-center text-white/80">
-                اختر 3 صناديق لاكتشاف الكنوز المخفية!
-              </DialogDescription>
-            </DialogHeader>
-            
-            {/* عرض صناديق الكنز */}
-            <div className="grid grid-cols-5 gap-4 my-8">
-              {treasureChests.map((chest, index) => {
-                // تحديد الفئة والمظهر حسب نوع الصندوق
-                let chestBorderClass = "border-[#D4AF37]";
-                let chestIconColor = "text-[#D4AF37]";
-                let chestGlowEffect = "";
-                let chestBackground = chest.opened ? 'bg-[#D4AF37]/10' : 'hover:bg-[#D4AF37]/5 bg-[#2D1B09]';
-                
-                // مظهر خاص للصناديق الذهبية
-                if (chest.type === 'golden') {
-                  chestBorderClass = "border-[#FFD700]";
-                  chestIconColor = "text-[#FFD700]";
-                  chestGlowEffect = "shadow-[0_0_15px_rgba(255,215,0,0.5)]";
-                  chestBackground = chest.opened ? 'bg-gradient-to-b from-[#5A3805]/30 to-[#FFD700]/20' : 'hover:bg-[#5A3805]/30 bg-gradient-to-b from-[#3A2604] to-[#2D1B09]';
-                } 
-                // مظهر للصناديق المميزة
-                else if (chest.type === 'special') {
-                  chestBorderClass = "border-[#F5DEB3]";
-                  chestIconColor = "text-[#F5DEB3]";
-                  chestGlowEffect = "shadow-[0_0_10px_rgba(245,222,179,0.3)]";
-                  chestBackground = chest.opened ? 'bg-[#F5DEB3]/10' : 'hover:bg-[#F5DEB3]/5 bg-[#2D1B09]';
-                }
+        {/* منطقة اللعب الرئيسية */}
+        <div className="flex-1 flex flex-col md:flex-row">
+          {/* منطقة البكرات - تحتل معظم المساحة */}
+          <div className="flex-1 p-4 flex justify-center items-center min-h-[300px]">
+            <div className="w-full max-w-3xl aspect-[5/3] relative">
+              {/* حاوية البكرات ثلاثية الأبعاد */}
+              <div className="absolute inset-0">
+                <Reels3DContainer 
+                  reels={reels}
+                  spinning={spinning}
+                  onSpinComplete={handleSpinComplete}
+                  winningLines={winningLines}
+                  bigWin={showBigWin}
+                />
+              </div>
               
-                return (
-                  <div 
-                    key={index}
-                    className={`h-32 cursor-pointer transition-all duration-300 transform ${
-                      chest.opened ? 'scale-105' : 'hover:scale-105'
-                    } ${chestBackground} border-2 ${chestBorderClass} rounded-md flex flex-col items-center justify-center relative overflow-hidden ${chestGlowEffect}`}
-                    onClick={() => !chest.opened && openTreasureChest(index)}
-                  >
-                    {chest.opened ? (
-                      // صندوق مفتوح يعرض المكافأة
-                      <div className="flex flex-col items-center gap-1">
-                        {chest.type === 'golden' ? (
-                          <Sparkles className={`h-12 w-12 ${chestIconColor} animate-pulse`} />
-                        ) : (
-                          <GiftIcon className={`h-12 w-12 ${chestIconColor}`} />
-                        )}
-                        <span className={`font-bold text-xl ${chest.type === 'golden' ? 'text-[#FFD700]' : 'text-white'}`}>
-                          {chest.reward}
-                        </span>
+              {/* تأثيرات الفوز الكبير */}
+              <BigWinEffects 
+                isActive={showBigWin} 
+                winAmount={winAmount}
+                onComplete={() => setShowBigWin(false)}
+              />
+              
+              {/* لعبة صيد الكنز */}
+              <TreasureHuntGame 
+                isActive={showTreasureHunt}
+                onComplete={handleTreasureHuntComplete}
+                initialTreasures={12}
+                gameTime={45}
+              />
+            </div>
+          </div>
+          
+          {/* لوحة التحكم - الجانب */}
+          <div className="bg-amber-950/80 border-t md:border-t-0 md:border-l border-amber-700 p-4 w-full md:w-80 flex flex-col">
+            <Tabs defaultValue="bet" className="w-full">
+              <TabsList className="grid grid-cols-2 mb-4">
+                <TabsTrigger value="bet">الرهان</TabsTrigger>
+                <TabsTrigger value="info">معلومات</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="bet" className="space-y-4">
+                {/* قسم الرهان */}
+                <Card className="bg-amber-900/50 border-amber-700">
+                  <div className="p-4 space-y-4">
+                    <div className="text-center mb-4">
+                      <h3 className="text-amber-100 mb-1">الرهان الحالي</h3>
+                      <div className="flex items-center">
+                        <Button 
+                          variant="outline" 
+                          size="icon" 
+                          className="border-amber-600 text-amber-100"
+                          onClick={() => changeBet(-100)}
+                          disabled={bet <= 100}
+                        >
+                          -
+                        </Button>
+                        <Input 
+                          type="number" 
+                          value={bet} 
+                          onChange={(e) => setBet(Number(e.target.value))}
+                          className="mx-2 bg-amber-950/50 border-amber-600 text-amber-100 text-center"
+                        />
+                        <Button 
+                          variant="outline" 
+                          size="icon" 
+                          className="border-amber-600 text-amber-100"
+                          onClick={() => changeBet(100)}
+                          disabled={bet >= (userData?.chips || 0)}
+                        >
+                          +
+                        </Button>
                       </div>
-                    ) : (
-                      // صندوق مغلق
-                      <div className="flex flex-col items-center">
-                        {chest.type === 'golden' ? (
-                          <>
-                            <Gift className={`h-16 w-16 ${chestIconColor}`} />
-                            <div className="absolute inset-0 bg-[#FFD700]/5 animate-pulse-slow"></div>
-                          </>
-                        ) : chest.type === 'special' ? (
-                          <Gift className={`h-16 w-16 ${chestIconColor}`} />
-                        ) : (
-                          <Gift className={`h-16 w-16 ${chestIconColor}`} />
-                        )}
+                    </div>
+                    
+                    <div className="grid grid-cols-3 gap-2">
+                      <Button 
+                        variant="secondary" 
+                        className="bg-amber-800 hover:bg-amber-700 text-amber-100"
+                        onClick={() => setQuickBet(5)}
+                      >
+                        5%
+                      </Button>
+                      <Button 
+                        variant="secondary" 
+                        className="bg-amber-800 hover:bg-amber-700 text-amber-100"
+                        onClick={() => setQuickBet(10)}
+                      >
+                        10%
+                      </Button>
+                      <Button 
+                        variant="secondary" 
+                        className="bg-amber-800 hover:bg-amber-700 text-amber-100"
+                        onClick={() => setQuickBet(25)}
+                      >
+                        25%
+                      </Button>
+                      <Button 
+                        variant="secondary" 
+                        className="bg-amber-800 hover:bg-amber-700 text-amber-100"
+                        onClick={() => setQuickBet(50)}
+                      >
+                        50%
+                      </Button>
+                      <Button 
+                        variant="secondary" 
+                        className="bg-amber-800 hover:bg-amber-700 text-amber-100"
+                        onClick={() => setQuickBet(75)}
+                      >
+                        75%
+                      </Button>
+                      <Button 
+                        variant="secondary" 
+                        className="bg-amber-800 hover:bg-amber-700 text-amber-100"
+                        onClick={() => setQuickBet(100)}
+                      >
+                        الكل
+                      </Button>
+                    </div>
+                    
+                    <div className="pt-4">
+                      <Button 
+                        variant="default" 
+                        className="w-full bg-amber-600 hover:bg-amber-500 text-white py-6 text-lg font-bold"
+                        onClick={handleSpin}
+                        disabled={spinning || (!isBetValid() && freespinsCounter.current <= 0)}
+                      >
+                        {spinning ? "جاري الدوران..." : "دوران"}
+                      </Button>
+                    </div>
+                    
+                    {winAmount > 0 && (
+                      <div className="mt-4 p-3 bg-amber-600/30 border border-amber-500 rounded-lg text-center">
+                        <h3 className="text-amber-100 text-sm">الفوز</h3>
+                        <p className="text-amber-300 text-2xl font-bold">
+                          {winAmount.toLocaleString('ar-EG')}
+                        </p>
                       </div>
-                    )}
-                    {/* تأثير لامع على الصندوق المفتوح */}
-                    {chest.opened && (
-                      <div className={`absolute inset-0 ${
-                        chest.type === 'golden' 
-                          ? 'bg-[#FFD700]/15 animate-pulse-fast' 
-                          : chest.type === 'special'
-                            ? 'bg-[#F5DEB3]/10 animate-pulse' 
-                            : 'bg-[#D4AF37]/10 animate-pulse'
-                      }`}></div>
                     )}
                   </div>
-                );
-              })}
-            </div>
-            
-            {/* عداد الصناديق المفتوحة والمجموع */}
-            <div className="flex flex-col items-center gap-2">
-              <div className="bg-[#0F0904] border border-[#D4AF37] rounded-md px-4 py-2 text-center w-full">
-                <span className="text-white text-lg">الصناديق المفتوحة: <span className="text-[#D4AF37] font-bold">{chestsOpened}/3</span></span>
-              </div>
-              <div className="bg-[#0F0904] border border-[#D4AF37] rounded-md px-4 py-2 text-center w-full">
-                <span className="text-white text-lg">مجموع المكافآت: <span className="text-[#D4AF37] font-bold">{totalBonusWin}</span></span>
-              </div>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-      
-      {/* تأثير الغبار الذهبي */}
-      <GoldDustEffect />
-      
-      {/* طبقات الإضاءة والتأثيرات */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/30"></div>
-      <div className="absolute inset-0 bg-[url('/images/fog-overlay.png')] bg-cover opacity-10 mix-blend-overlay animate-float-slow"></div>
-      
-      {/* شريط الأدوات العلوي */}
-      <div className="relative z-10 bg-black/60 backdrop-blur-sm p-3 border-b border-[#D4AF37]/50 shadow-md">
-        <div className="container mx-auto flex justify-between items-center">
-          {/* زر الرجوع والعنوان */}
-          <div className="flex items-center">
-            <Button
-              variant="ghost"
-              className="text-white hover:bg-white/10 mr-2"
-              onClick={goToHome}
-            >
-              <ArrowLeft className="h-6 w-6" />
-            </Button>
-            <h1 className="text-2xl font-bold text-[#D4AF37]">ملكة مصر</h1>
-          </div>
-          
-          {/* معلومات اللاعب */}
-          <div className="flex items-center gap-4">
-            <div className="bg-black/50 border border-[#D4AF37]/70 rounded-full py-1 px-4 flex items-center shadow-md">
-              <Coins className="h-5 w-5 text-[#D4AF37] mr-2" />
-              <span className="text-white font-bold">{formatChips(user?.chips || 0)}</span>
-            </div>
-            
-            {/* أزرار الواجهة */}
-            <Button
-              variant="ghost"
-              className="h-9 w-9 p-0 rounded-full bg-black/20 border border-white/20 text-white hover:bg-white/10"
-              onClick={toggleMute}
-            >
-              {isMuted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
-            </Button>
-            
-            <Button
-              variant="ghost"
-              className="h-9 w-9 p-0 rounded-full bg-black/20 border border-white/20 text-white hover:bg-white/10"
-              onClick={() => navigate('/rankings')}
-            >
-              <Trophy className="h-5 w-5" />
-            </Button>
-            
-            <Button
-              variant="ghost"
-              className="h-9 w-9 p-0 rounded-full bg-black/20 border border-white/20 text-white hover:bg-white/10"
-              onClick={() => navigate('/settings')}
-            >
-              <Settings className="h-5 w-5" />
-            </Button>
-            
-            <Button
-              variant="ghost"
-              className="h-9 w-9 p-0 rounded-full bg-black/20 border border-white/20 text-white hover:bg-white/10"
-              onClick={() => {
-                toast({
-                  title: "قواعد اللعبة",
-                  description: "ملكة مصر هي لعبة سلوت. قم بمطابقة الرموز من اليسار إلى اليمين على خطوط الدفع.",
-                  variant: "default"
-                });
-              }}
-            >
-              <Info className="h-5 w-5" />
-            </Button>
-          </div>
-        </div>
-      </div>
-      
-      {/* محتوى اللعبة الرئيسي */}
-      <div className="flex-1 relative z-10 flex flex-col items-center justify-center p-4" ref={gameContainerRef}>
-        {/* حاوية آلة السلوت */}
-        <div className="bg-[#361F10]/90 border-4 border-[#D4AF37] rounded-lg shadow-2xl overflow-hidden backdrop-blur-sm w-full max-w-5xl h-[600px] flex flex-col">
-          {/* منطقة عرض البكرات (reels) مع شبكة 5×3 */}
-          <div className="flex-1 bg-[url('/images/egypt-queen/reels-bg.jpg')] bg-cover bg-center relative p-2">
-            {/* خطوط الدفع */}
-            <div className="absolute inset-0 flex flex-col justify-between p-2 z-10 pointer-events-none">
-              <div className="border-l-4 border-r-4 border-[#D4AF37] h-[30%] rounded-md border-opacity-50"></div>
-              <div className="border-l-4 border-r-4 border-[#D4AF37] h-[30%] rounded-md border-opacity-70"></div>
-              <div className="border-l-4 border-r-4 border-[#D4AF37] h-[30%] rounded-md border-opacity-50"></div>
-            </div>
-            
-            {/* إطار البكرات - عرض البكرات 5×3 */}
-            <div className="grid grid-cols-5 gap-1 h-full relative z-20">
-              {reels.map((reel, reelIndex) => (
-                <div key={reelIndex} className="flex flex-col gap-1">
-                  {reel.map((symbol, symbolIndex) => {
-                    // تحديد ما إذا كان هذا الرمز جزءاً من خط فائز
-                    const isWinningSymbol = winningLines.some(line => 
-                      line.some(pos => pos.col === reelIndex && pos.row === symbolIndex)
-                    );
-                    
-                    // تعيين الرموز المرئية لكل نوع
-                    let symbolContent;
-                    let symbolClass = "text-4xl";
-                    
-                    switch(symbol) {
-                      case "cleopatra":
-                        symbolContent = "👸";
-                        break;
-                      case "book":
-                        symbolContent = "📜";
-                        break;
-                      case "eye":
-                        symbolContent = "👁️";
-                        break;
-                      case "anubis":
-                        symbolContent = "🐺";
-                        break;
-                      case "cat":
-                        symbolContent = "🐱";
-                        break;
-                      case "wild":
-                        symbolContent = "✨";
-                        symbolClass = "text-5xl text-[#D4AF37]";
-                        break;
-                      case "A":
-                        symbolContent = "A";
-                        symbolClass = "text-4xl font-bold text-red-600";
-                        break;
-                      case "K":
-                        symbolContent = "K";
-                        symbolClass = "text-4xl font-bold text-blue-600";
-                        break;
-                      case "Q":
-                        symbolContent = "Q";
-                        symbolClass = "text-4xl font-bold text-purple-600";
-                        break;
-                      case "J":
-                        symbolContent = "J";
-                        symbolClass = "text-4xl font-bold text-green-600";
-                        break;
-                      case "10":
-                        symbolContent = "10";
-                        symbolClass = "text-4xl font-bold text-yellow-600";
-                        break;
-                      default:
-                        symbolContent = "?";
-                    }
-                    
-                    return (
-                      <div 
-                        key={`${reelIndex}-${symbolIndex}`} 
-                        className={`flex-1 rounded-md flex items-center justify-center p-3
-                          ${isSpinning ? 'animate-pulse-slow' : ''}
-                          ${isWinningSymbol 
-                            ? 'bg-gradient-to-r from-[#D4AF37]/30 to-[#8B6914]/40 border-2 border-[#FFD700] shadow-[0_0_20px_rgba(255,215,0,0.6)]' 
-                            : 'bg-[#222]/80 hover:bg-[#333]/80 transition-colors duration-300'}`}
-                      >
-                        <span className={`${symbolClass} ${isWinningSymbol ? 'scale-110 transform transition-transform duration-300' : ''}`}>
-                          {isWinningSymbol ? (
-                            <div className="animate-pulse relative">
-                              <div className="z-10 relative">{symbolContent}</div>
-                              <div className="absolute inset-0 bg-[#FFD700]/20 rounded-full animate-ping-slow"></div>
-                              <div className="absolute -inset-3 bg-gradient-to-r from-[#FFD700]/10 to-[#D4AF37]/5 rounded-full animate-pulse-slow"></div>
-                            </div>
-                          ) : (
-                            symbolContent
-                          )}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              ))}
-            </div>
-            
-            {/* عرض اللفات المجانية إذا كانت متاحة */}
-            {freeSpins > 0 && (
-              <div className="absolute top-0 right-0 bg-[#D4AF37] text-black font-bold px-4 py-2 rounded-bl-lg z-30 flex items-center">
-                <Sparkles className="w-4 h-4 mr-1" /> 
-                <span>{freeSpins} لفة مجانية</span>
-              </div>
-            )}
-            
-            {/* عرض المضاعف إذا كان أكثر من 1 */}
-            {winMultiplier > 1 && (
-              <div className="absolute top-0 left-0 bg-[#D4AF37] text-black font-bold px-4 py-2 rounded-br-lg z-30">
-                <span>مضاعف {winMultiplier}×</span>
-              </div>
-            )}
-          </div>
-          
-          {/* لوحة التحكم */}
-          <div className="bg-[#0C0907] p-4 border-t-2 border-[#D4AF37] flex items-center justify-between">
-            {/* ضبط المراهنة واللفات المجانية */}
-            <div className="flex items-center gap-4">
-              {/* عرض اللفات المجانية */}
-              {freeSpins > 0 && (
-                <div className="flex flex-col items-center bg-[#8B6914] border border-[#D4AF37] px-4 py-2 rounded-md animate-pulse-slow">
-                  <span className="text-white text-xs">لفات مجانية</span>
-                  <span className="text-[#FFD700] font-bold text-lg">{freeSpins}</span>
-                  {winMultiplier > 1 && (
-                    <span className="text-white text-xs">x{winMultiplier} مضاعف</span>
-                  )}
-                </div>
-              )}
+                </Card>
+                
+                {/* التحكم في الصوت */}
+                <Card className="bg-amber-900/50 border-amber-700">
+                  <div className="p-4">
+                    <h3 className="text-amber-100 mb-2">مستوى الصوت</h3>
+                    <div className="flex items-center gap-2">
+                      <span className="text-amber-100">0</span>
+                      <Slider 
+                        value={[gameVolume]} 
+                        onValueChange={(values) => setGameVolume(values[0])} 
+                        max={100} 
+                        step={1}
+                        className="flex-1"
+                      />
+                      <span className="text-amber-100">100</span>
+                    </div>
+                  </div>
+                </Card>
+              </TabsContent>
               
-              {/* أزرار الرهان */}
-              <div className="flex items-center gap-2">
-                <Button 
-                  className="h-12 w-12 rounded-full bg-[#D4AF37] text-black font-bold text-xl"
-                  onClick={decreaseBet}
-                  disabled={isSpinning || betAmount <= 10000}
-                  title="تنصيف المبلغ"
-                >
-                  ½
-                </Button>
-                
-                <div className="bg-black/80 border border-[#D4AF37] px-4 py-2 rounded-md min-w-[120px] text-center">
-                  <span className="text-[#D4AF37] font-bold">{formatChips(betAmount)}</span>
-                </div>
-                
-                <Button 
-                  className="h-12 w-12 rounded-full bg-[#D4AF37] text-black font-bold text-xl"
-                  onClick={increaseBet}
-                  disabled={isSpinning || betAmount >= 100000}
-                  title="مضاعفة المبلغ"
-                >
-                  x2
-                </Button>
-              </div>
-            </div>
-            
-            {/* زر البدء */}
-            <Button 
-              className={`h-20 w-40 rounded-full ${isSpinning 
-                ? 'bg-gray-600 cursor-not-allowed' 
-                : 'bg-gradient-to-r from-[#D4AF37] to-[#8B6914] hover:from-[#FFD700] hover:to-[#B8860B]'
-              } text-white text-2xl font-bold shadow-lg shadow-[#D4AF37]/20 transform transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-2 border-2 border-[#FFD700]/30`}
-              onClick={spin}
-              disabled={isSpinning}
-            >
-              {isSpinning ? (
-                <RotateCw className="h-8 w-8 animate-spin" />
-              ) : (
-                <>دوران</>
-              )}
-            </Button>
-            
-            {/* وضع سبين تلقائي (سيتم إضافة المنطق لاحقاً) */}
-            <Button 
-              className="bg-[#333] hover:bg-[#444] text-white font-semibold px-4 py-2 rounded-md shadow-md"
-              disabled={isSpinning}
-            >
-              دوران تلقائي
-            </Button>
+              <TabsContent value="info">
+                <Card className="bg-amber-900/50 border-amber-700">
+                  <div className="p-4 space-y-4 text-amber-100">
+                    <h3 className="font-bold text-lg border-b border-amber-700 pb-2">
+                      قيم الرموز (على رهان 1000)
+                    </h3>
+                    
+                    <div className="space-y-2">
+                      {/* قيم الرموز */}
+                      <div className="flex items-center gap-2">
+                        <img src="/images/egypt-queen/symbols/cleopatra.svg" className="w-8 h-8" />
+                        <span>كليوباترا: 500 × عدد الرموز المتطابقة</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <img src="/images/egypt-queen/symbols/book.svg" className="w-8 h-8" />
+                        <span>كتاب الأسرار (SCATTER): 300 × عدد الرموز</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <img src="/images/egypt-queen/symbols/eye.svg" className="w-8 h-8" />
+                        <span>عين حورس (BONUS): 200 × عدد الرموز المتطابقة</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <img src="/images/egypt-queen/symbols/wild.png" className="w-8 h-8" />
+                        <span>WILD: يضاعف أي فوز عند استخدامه</span>
+                      </div>
+                    </div>
+                    
+                    <h3 className="font-bold text-lg border-b border-amber-700 pb-2 pt-2">
+                      المكافآت
+                    </h3>
+                    
+                    <div className="space-y-2">
+                      <p>3 أو أكثر من كتاب الأسرار = 10 دورات مجانية</p>
+                      <p>3 أو أكثر من عين حورس = لعبة صيد الكنز</p>
+                      <p>تتضاعف قيمة الفوز عند استخدام WILD</p>
+                    </div>
+                  </div>
+                </Card>
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
       </div>
       
-      {/* الصوتيات */}
-      <audio ref={audioRef} src="/audio/egypt-theme.mp3"></audio>
-      <audio ref={spinAudioRef} src="/audio/egypt-spin.wav"></audio>
-      <audio ref={winAudioRef} src="/audio/egypt-win.wav"></audio>
-      
-      {/* إضافة عناصر صوت إضافية للعبة المكافأة والنقر */}
-      <audio id="egypt-bonus-sound" src="/audio/egypt-bonus.wav"></audio>
-      <audio id="egypt-click-sound" src="/audio/egypt-click.wav"></audio>
-      <audio id="egypt-chest-open-sound" src="/audio/egypt-chest-open.wav"></audio>
-      <audio id="egypt-big-win-sound" src="/audio/egypt-big-win.wav"></audio>
-      <audio id="egypt-free-spins-sound" src="/audio/egypt-bonus.wav"></audio>
-      
-      {/* تحميل مكتبة الصوت */}
-      <script src="/audio/egypt-theme.js"></script>
+      {/* عناصر الصوت المخفية */}
+      <audio id="egypt-chest-open-sound" src="/sounds/chest-open.mp3" preload="auto"></audio>
     </div>
   );
 }

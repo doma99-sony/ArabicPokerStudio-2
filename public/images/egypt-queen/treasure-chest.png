@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <title>Treasure Chest</title>
+  <defs>
+    <linearGradient id="woodGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#8D6E63" />
+      <stop offset="40%" stop-color="#6D4C41" />
+      <stop offset="100%" stop-color="#4E342E" />
+    </linearGradient>
+    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF9C4" />
+      <stop offset="50%" stop-color="#FFC107" />
+      <stop offset="100%" stop-color="#FF8F00" />
+    </linearGradient>
+    <linearGradient id="treasureGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF9C4" />
+      <stop offset="20%" stop-color="#FFEB3B" />
+      <stop offset="50%" stop-color="#FFC107" />
+      <stop offset="100%" stop-color="#FF8F00" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Chest Base -->
+  <rect x="30" y="80" width="140" height="90" rx="10" ry="10" fill="url(#woodGradient)" stroke="#4E342E" stroke-width="4"/>
+  
+  <!-- Chest Lid (Open) -->
+  <path d="M30,80 
+           L30,60
+           C30,40 170,40 170,60
+           L170,80"
+        fill="url(#woodGradient)" 
+        stroke="#4E342E" 
+        stroke-width="4"/>
+  
+  <!-- Chest Lid Top -->
+  <path d="M30,60
+           C30,40 170,40 170,60"
+        fill="#6D4C41" 
+        stroke="#4E342E" 
+        stroke-width="4"/>
+  
+  <!-- Metal Bands -->
+  <path d="M30,100 L170,100" stroke="#5D4037" stroke-width="5" />
+  <path d="M30,140 L170,140" stroke="#5D4037" stroke-width="5" />
+  
+  <!-- Metal Hinges -->
+  <rect x="70" y="70" width="15" height="20" rx="2" ry="2" fill="#5D4037" stroke="#4E342E" stroke-width="1" />
+  <rect x="115" y="70" width="15" height="20" rx="2" ry="2" fill="#5D4037" stroke="#4E342E" stroke-width="1" />
+  
+  <!-- Lock/Clasp -->
+  <rect x="90" y="90" width="20" height="25" rx="3" ry="3" fill="url(#goldGradient)" stroke="#FF8F00" stroke-width="1" />
+  <circle cx="100" cy="102.5" r="5" fill="#4E342E" />
+  
+  <!-- Treasure Inside -->
+  <ellipse cx="100" cy="120" rx="50" ry="15" fill="url(#treasureGradient)" />
+  
+  <!-- Gold Coins Detail -->
+  <circle cx="80" cy="115" r="8" fill="url(#goldGradient)" stroke="#FF8F00" stroke-width="1" />
+  <circle cx="95" cy="110" r="8" fill="url(#goldGradient)" stroke="#FF8F00" stroke-width="1" />
+  <circle cx="112" cy="112" r="8" fill="url(#goldGradient)" stroke="#FF8F00" stroke-width="1" />
+  <circle cx="90" cy="125" r="8" fill="url(#goldGradient)" stroke="#FF8F00" stroke-width="1" />
+  <circle cx="110" cy="128" r="8" fill="url(#goldGradient)" stroke="#FF8F00" stroke-width="1" />
+  
+  <!-- Chest Detail - Corner Decorations -->
+  <path d="M40,90 L50,90 L50,100 L40,100 Z" fill="url(#goldGradient)" stroke="#FF8F00" stroke-width="1" />
+  <path d="M150,90 L160,90 L160,100 L150,100 Z" fill="url(#goldGradient)" stroke="#FF8F00" stroke-width="1" />
+  <path d="M40,150 L50,150 L50,160 L40,160 Z" fill="url(#goldGradient)" stroke="#FF8F00" stroke-width="1" />
+  <path d="M150,150 L160,150 L160,160 L150,160 Z" fill="url(#goldGradient)" stroke="#FF8F00" stroke-width="1" />
+  
+  <!-- Reflections/Highlights -->
+  <path d="M50,95 L40,95" stroke="#FFFFFF" stroke-width="1.5" opacity="0.5" />
+  <path d="M50,155 L40,155" stroke="#FFFFFF" stroke-width="1.5" opacity="0.5" />
+  <path d="M150,95 L160,95" stroke="#FFFFFF" stroke-width="1.5" opacity="0.5" />
+  <path d="M150,155 L160,155" stroke="#FFFFFF" stroke-width="1.5" opacity="0.5" />
+  <path d="M70,75 L80,75" stroke="#FFFFFF" stroke-width="1" opacity="0.5" />
+  <path d="M120,75 L125,75" stroke="#FFFFFF" stroke-width="1" opacity="0.5" />
+</svg>
