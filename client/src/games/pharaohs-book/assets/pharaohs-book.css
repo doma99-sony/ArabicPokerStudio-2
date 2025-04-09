@@ -71,6 +71,76 @@
   100% { transform: rotate(360deg); opacity: 0.1; }
 }
 
+/* تأثيرات متحركة جديدة للخلفية */
+@keyframes goldDustFloat {
+  0%, 100% { 
+    transform: translate(0, 0);
+    opacity: 0.1;
+  }
+  25% { 
+    transform: translate(2px, -10px);
+    opacity: 0.2;
+  }
+  50% { 
+    transform: translate(5px, -5px);
+    opacity: 0.3;
+  }
+  75% { 
+    transform: translate(-2px, -8px);
+    opacity: 0.2;
+  }
+}
+
+@keyframes softLightMove {
+  0% { 
+    background-position: 0% 0%; 
+    opacity: 0.2;
+  }
+  50% { 
+    background-position: 100% 20%; 
+    opacity: 0.4;
+  }
+  100% { 
+    background-position: 0% 0%; 
+    opacity: 0.2;
+  }
+}
+
+@keyframes glowPulse {
+  0%, 100% { 
+    filter: brightness(1) blur(8px);
+    opacity: 0.3;
+  }
+  50% { 
+    filter: brightness(1.2) blur(12px);
+    opacity: 0.5;
+  }
+}
+
+@keyframes heatHaze {
+  0% {
+    filter: blur(0) brightness(1);
+    transform: scaleY(1) translateY(0);
+  }
+  50% {
+    filter: blur(1px) brightness(1.05);
+    transform: scaleY(1.01) translateY(-2px);
+  }
+  100% {
+    filter: blur(0) brightness(1);
+    transform: scaleY(1) translateY(0);
+  }
+}
+
+@keyframes shimmerEffect {
+  0% {
+    background-position: -100% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
 /* الحاوية الرئيسية للعبة مع الخلفية المتحركة */
 .pharaohs-book-container {
   background-color: var(--dark-bg);
@@ -157,6 +227,232 @@
   animation: sandMove 40s infinite linear;
   z-index: 2;
   pointer-events: none;
+}
+
+/* طبقة الغبار الذهبي المتحرك */
+.gold-dust-particles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 25% 25%, rgba(255, 215, 0, 0.15) 1px, transparent 2px),
+    radial-gradient(circle at 75% 35%, rgba(255, 215, 0, 0.15) 1px, transparent 2px),
+    radial-gradient(circle at 10% 65%, rgba(255, 215, 0, 0.12) 1px, transparent 2px),
+    radial-gradient(circle at 40% 80%, rgba(255, 215, 0, 0.12) 1px, transparent 2px),
+    radial-gradient(circle at 60% 15%, rgba(255, 215, 0, 0.12) 1px, transparent 2px),
+    radial-gradient(circle at 85% 70%, rgba(255, 215, 0, 0.12) 1px, transparent 2px);
+  background-size: 20% 20%;
+  opacity: 0.6;
+  z-index: 3;
+  pointer-events: none;
+  animation: goldDustFloat 15s infinite ease-in-out;
+}
+
+/* طبقة التوهج الضوئي الناعم */
+.soft-light-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(
+      ellipse at 30% 40%, 
+      rgba(255, 215, 0, 0.1) 0%, 
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse at 70% 60%, 
+      rgba(255, 215, 0, 0.1) 0%, 
+      transparent 70%
+    );
+  background-size: 200% 200%, 200% 200%;
+  background-position: 0% 0%, 100% 100%;
+  opacity: 0.8;
+  z-index: 2;
+  pointer-events: none;
+  animation: softLightMove 20s infinite alternate;
+  filter: blur(15px);
+}
+
+/* طبقة التأثير الضوئي المتحرك */
+.moving-light-effect {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: 
+    radial-gradient(
+      circle at center, 
+      rgba(255, 255, 255, 0.03) 0%, 
+      transparent 50%
+    );
+  animation: lightRays 80s infinite linear;
+  opacity: 0.4;
+  z-index: 1;
+  pointer-events: none;
+  filter: blur(10px);
+}
+
+/* طبقة التوهج اللامع المتحرك */
+.animated-shimmer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 215, 0, 0.05) 25%,
+    rgba(255, 215, 0, 0.08) 50%,
+    rgba(255, 215, 0, 0.05) 75%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  z-index: 3;
+  pointer-events: none;
+  animation: shimmerEffect 15s infinite linear;
+  opacity: 0.4;
+  mix-blend-mode: overlay;
+}
+
+/* الشخصيات الفرعونية على الجوانب */
+@keyframes pharaohGlow {
+  0%, 100% {
+    filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.6));
+    opacity: 0.8;
+  }
+  50% {
+    filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.8));
+    opacity: 1;
+  }
+}
+
+@keyframes pharaohActivePulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 15px rgba(52, 152, 219, 0.7)) drop-shadow(0 0 30px rgba(255, 215, 0, 0.6));
+    transform: scale(1);
+  }
+  50% {
+    filter: drop-shadow(0 0 25px rgba(52, 152, 219, 0.9)) drop-shadow(0 0 40px rgba(255, 215, 0, 0.8));
+    transform: scale(1.03);
+  }
+}
+
+@keyframes pharaohCelebrateMotion {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateY(-10px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateY(0);
+  }
+}
+
+.pharaoh-guardian {
+  position: absolute;
+  height: 70%;
+  width: 120px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  z-index: 5;
+  pointer-events: none;
+  transition: all 0.5s ease;
+}
+
+.pharaoh-guardian::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.7));
+  animation: pharaohGlow 3s infinite alternate ease-in-out;
+  z-index: -1;
+  opacity: 0.9;
+}
+
+.pharaoh-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at center,
+    rgba(255, 215, 0, 0.3) 0%,
+    rgba(255, 215, 0, 0.1) 40%,
+    transparent 70%
+  );
+  filter: blur(10px);
+  opacity: 0.6;
+  z-index: -1;
+  animation: pharaohGlow 4s infinite alternate ease-in-out;
+}
+
+.pharaoh-left {
+  left: 0;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 300"><path d="M50 0 L70 40 L70 120 L90 180 L70 240 L60 300 L40 300 L30 240 L10 180 L30 120 L30 40 Z" fill="%23D4AF37" stroke="%23000" stroke-width="1"/><path d="M40 50 L60 50 L65 80 L35 80 Z" fill="%231E1E1E" stroke="%23000" stroke-width="1"/><path d="M40 85 L60 85 L60 110 L40 110 Z" fill="%231E1E1E" stroke="%23000" stroke-width="1"/><path d="M20 125 L80 125 L75 160 L25 160 Z" fill="%23D4AF37" stroke="%23000" stroke-width="1"/><path d="M30 165 L70 165 L60 190 L40 190 Z" fill="%23D4AF37" stroke="%23000" stroke-width="1"/><path d="M40 195 L60 195 L55 270 L45 270 Z" fill="%23D4AF37" stroke="%23000" stroke-width="1"/><circle cx="50" cy="30" r="12" fill="%23D4AF37" stroke="%23000" stroke-width="1"/><path d="M38 30 L30 28 L25 15 L40 25 Z" fill="%23D4AF37" stroke="%23000" stroke-width="1"/><path d="M62 30 L70 28 L75 15 L60 25 Z" fill="%23D4AF37" stroke="%23000" stroke-width="1"/></svg>');
+}
+
+.pharaoh-left::before {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 300"><path d="M50 0 L70 40 L70 120 L90 180 L70 240 L60 300 L40 300 L30 240 L10 180 L30 120 L30 40 Z" fill="%23D4AF37" stroke="%23D4AF37" stroke-width="2"/><circle cx="50" cy="30" r="12" fill="%23D4AF37" stroke="%23D4AF37" stroke-width="2"/><path d="M38 30 L30 28 L25 15 L40 25 Z" fill="%23D4AF37" stroke="%23D4AF37" stroke-width="2"/><path d="M62 30 L70 28 L75 15 L60 25 Z" fill="%23D4AF37" stroke="%23D4AF37" stroke-width="2"/></svg>');
+}
+
+.pharaoh-right {
+  right: 0;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 300"><path d="M50 0 L70 40 L70 120 L90 180 L70 240 L60 300 L40 300 L30 240 L10 180 L30 120 L30 40 Z" fill="%23D4AF37" stroke="%23000" stroke-width="1"/><path d="M40 50 L60 50 L65 80 L35 80 Z" fill="%231E1E1E" stroke="%23000" stroke-width="1"/><path d="M40 85 L60 85 L60 110 L40 110 Z" fill="%231E1E1E" stroke="%23000" stroke-width="1"/><path d="M20 125 L80 125 L75 160 L25 160 Z" fill="%23D4AF37" stroke="%23000" stroke-width="1"/><path d="M30 165 L70 165 L60 190 L40 190 Z" fill="%23D4AF37" stroke="%23000" stroke-width="1"/><path d="M40 195 L60 195 L55 270 L45 270 Z" fill="%23D4AF37" stroke="%23000" stroke-width="1"/><circle cx="50" cy="30" r="12" fill="%23D4AF37" stroke="%23000" stroke-width="1"/><path d="M38 30 L30 28 L25 15 L40 25 Z" fill="%23D4AF37" stroke="%23000" stroke-width="1"/><path d="M62 30 L70 28 L75 15 L60 25 Z" fill="%23D4AF37" stroke="%23000" stroke-width="1"/><path d="M20 140 L25 130 L40 135 L45 145 L20 140 Z" fill="%23D4AF37" stroke="%23000" stroke-width="1"/></svg>');
+  transform: translateY(-50%) scaleX(-1);
+}
+
+.pharaoh-right::before {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 300"><path d="M50 0 L70 40 L70 120 L90 180 L70 240 L60 300 L40 300 L30 240 L10 180 L30 120 L30 40 Z" fill="%23D4AF37" stroke="%23D4AF37" stroke-width="2"/><circle cx="50" cy="30" r="12" fill="%23D4AF37" stroke="%23D4AF37" stroke-width="2"/><path d="M38 30 L30 28 L25 15 L40 25 Z" fill="%23D4AF37" stroke="%23D4AF37" stroke-width="2"/><path d="M62 30 L70 28 L75 15 L60 25 Z" fill="%23D4AF37" stroke="%23D4AF37" stroke-width="2"/></svg>');
+}
+
+/* حالات خاصة للحراس الفرعونيين */
+.pharaoh-guardian.active {
+  animation: pharaohActivePulse 2s infinite ease-in-out;
+}
+
+.pharaoh-guardian.active .pharaoh-glow {
+  background: radial-gradient(
+    circle at center,
+    rgba(52, 152, 219, 0.4) 0%,
+    rgba(255, 215, 0, 0.3) 40%,
+    transparent 70%
+  );
+  filter: blur(15px);
+  opacity: 0.8;
+}
+
+.pharaoh-guardian.celebrating {
+  animation: pharaohCelebrateMotion 1.2s infinite ease-in-out;
+}
+
+.pharaoh-guardian.celebrating .pharaoh-glow {
+  background: radial-gradient(
+    circle at center,
+    rgba(255, 215, 0, 0.5) 0%,
+    rgba(212, 175, 55, 0.3) 40%,
+    transparent 70%
+  );
+  filter: blur(20px);
+  opacity: 1;
+  animation: goldDustFloat 2s infinite alternate;
 }
 
 /* تأثير شريط زخرفة علوي وسفلي */

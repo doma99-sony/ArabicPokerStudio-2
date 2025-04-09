@@ -550,9 +550,21 @@ export default function PharaohsBook() {
 
   return (
     <div className="pharaohs-book-container min-h-screen flex flex-col overflow-hidden">
-      {/* طبقات الخلفية المتحركة */}
+      {/* طبقات الخلفية المتحركة المحسنة */}
       <div className="animated-light-rays"></div>
       <div className="animated-sand"></div>
+      <div className="gold-dust-particles"></div>
+      <div className="soft-light-glow"></div>
+      <div className="moving-light-effect"></div>
+      <div className="animated-shimmer"></div>
+      
+      {/* الشخصيات الفرعونية على الجوانب */}
+      <div className={`pharaoh-guardian pharaoh-left ${freeSpins > 0 ? 'active' : ''} ${win > bet * 10 ? 'celebrating' : ''}`}>
+        <div className="pharaoh-glow"></div>
+      </div>
+      <div className={`pharaoh-guardian pharaoh-right ${freeSpins > 0 ? 'active' : ''} ${win > bet * 10 ? 'celebrating' : ''}`}>
+        <div className="pharaoh-glow"></div>
+      </div>
       
       {/* شريط الزخرفة العلوي والسفلي */}
       <div className="decorative-border-top"></div>
