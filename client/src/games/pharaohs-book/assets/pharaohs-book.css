@@ -288,6 +288,8 @@
   transition: all 0.3s ease-in-out;
   box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
   min-height: 80px; /* تحديد الحد الأدنى للارتفاع */
+  padding: 0; /* عدم وجود هوامش داخلية */
+  margin: 0; /* عدم وجود هوامش خارجية */
 }
 
 .symbol.spinning {
@@ -296,12 +298,14 @@
 }
 
 .symbol-icon {
-  width: 92%; /* زيادة حجم الرمز */
-  height: 92%; /* زيادة حجم الرمز */
+  width: 100%; /* ملء الحاوية بالكامل */
+  height: 100%; /* ملء الحاوية بالكامل */
   display: flex;
   align-items: center;
   justify-content: center;
   filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.5));
+  padding: 0; /* عدم وجود هوامش داخلية */
+  margin: 0; /* عدم وجود هوامش خارجية */
 }
 
 .symbol-inner-container {
@@ -312,15 +316,20 @@
   justify-content: center;
   position: relative;
   transition: transform 0.3s ease;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
 }
 
 /* تنسيقات عرض صور SVG */
 .symbol-svg {
-  width: 90%;
-  height: 90%;
+  width: 100%;
+  height: 100%;
   object-fit: contain; /* حفظ نسب العرض للصورة */
   filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.3));
   transition: all 0.3s ease;
+  padding: 0;
+  margin: 0;
 }
 
 /* تنسيقات خاصة بالـ SVG المضمنة */
@@ -329,12 +338,25 @@
   align-items: center;
   justify-content: center;
   overflow: visible;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
 }
 
 .svg-embed svg {
-  width: 95%;
-  height: 95%;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
   filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.5));
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
 /* تأثيرات إضافية لصور SVG */
@@ -346,13 +368,7 @@
   filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.8));
 }
 
-/* تنسيقات مخصصة لرموز معينة */
-.symbol-anubis .symbol-svg,
-.symbol-scarab .symbol-svg,
-.symbol-eye .symbol-svg {
-  width: 85%;
-  height: 85%;
-}
+/* تنسيقات مخصصة لرموز معينة - ملغية لتوحيد الحجم */
 
 /* تنسيقات للصورة البديلة */
 .image-container {
