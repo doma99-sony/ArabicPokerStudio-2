@@ -596,6 +596,54 @@
   animation: pulse 1.5s infinite;
 }
 
+/* تنسيقات زر اللفات المجانية */
+.spin-button.free-spins-button {
+  background: linear-gradient(145deg, 
+    rgba(184, 134, 11, 1), 
+    rgba(255, 215, 0, 1)
+  );
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+  font-weight: bold;
+  transition: all 0.3s;
+  animation: pulse-gold 1.5s infinite;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+}
+
+/* شريط عنوان اللفات المجانية */
+.free-spins-badge {
+  background: linear-gradient(to right, 
+    rgba(184, 134, 11, 0.9), 
+    rgba(255, 215, 0, 0.9)
+  );
+  color: #000;
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+  box-shadow: 
+    0 0 20px rgba(255, 215, 0, 0.7),
+    inset 0 0 10px rgba(255, 255, 255, 0.5);
+  font-weight: bold;
+  border: 2px solid rgba(255, 215, 0, 0.8);
+  animation: 
+    pulse 2s infinite ease-in-out,
+    glow-border 1.5s infinite alternate;
+  z-index: 5;
+  position: relative;
+}
+
+@keyframes glow-border {
+  0% {
+    border-color: rgba(255, 215, 0, 0.6);
+    box-shadow: 
+      0 0 10px rgba(255, 215, 0, 0.5),
+      inset 0 0 5px rgba(255, 255, 255, 0.3);
+  }
+  100% {
+    border-color: rgba(255, 255, 255, 0.9);
+    box-shadow: 
+      0 0 20px rgba(255, 215, 0, 0.8),
+      inset 0 0 10px rgba(255, 255, 255, 0.6);
+  }
+}
+
 .message-container {
   width: 100%;
   text-align: center;

@@ -32,12 +32,7 @@ export default function ControlPanel({
   return (
     <div className="controls-panel">
       <div className="flex flex-wrap justify-between items-center gap-2">
-        {/* الدورات المجانية في أعلى اللوحة */}
-        {freeSpins > 0 && (
-          <div className="free-spins-badge absolute top-[-50px] left-0 right-0 mx-auto w-max z-20 bg-gradient-to-r from-[#B8860B] to-[#FFD700] text-black py-2 px-6 rounded-full text-xl font-bold shadow-lg animate-pulse">
-            {freeSpins} دورة مجانية متبقية
-          </div>
-        )}
+        {/* تم حذف عداد الدورات المجانية من هنا لتجنب الازدواجية، سيتم عرضه فقط على زر الدوران أثناء حالة اللفات المجانية */}
 
         {/* التحكم بالرهان - قائمة منسدلة */}
         <div className="bet-controls flex items-center">
@@ -63,14 +58,26 @@ export default function ControlPanel({
           <span className="text-white mx-2 font-bold">الرهان</span>
         </div>
 
-        {/* زر الدوران */}
+        {/* زر الدوران مع عرض حالة اللفات المجانية */}
         <button 
           onClick={spin} 
           disabled={spinning || (credits < bet && freeSpins === 0)}
-          className={`spin-button bg-[#D4AF37] hover:bg-[#FFD700] text-black font-bold py-2 px-6 rounded-full ${spinning ? 'opacity-50 cursor-not-allowed' : 'animate-pulse'}`}
+          className={`spin-button ${freeSpins > 0 ? 'free-spins-button' : ''} text-black font-bold py-2 px-6 rounded-full ${spinning ? 'opacity-50 cursor-not-allowed' : 'animate-pulse'}`}
         >
-          {spinning ? 'جاري الدوران...' : 'دوران'}
+          {spinning 
+            ? 'جاري الدوران...' 
+            : freeSpins > 0 
+              ? `لفات مجانية: ${freeSpins}` 
+              : 'دوران'
+          }
         </button>
+        
+        {/* عرض شريط اللفات المجانية فوق البكرات (يظهر فقط أثناء اللفات المجانية) */}
+        {freeSpins > 0 && (
+          <div className="free-spins-badge absolute top-[-120px] left-0 right-0 mx-auto w-max z-20 bg-gradient-to-r from-[#B8860B] to-[#FFD700] text-black py-3 px-8 rounded-xl text-2xl font-bold shadow-lg animate-pulse border-2 border-[#FFD700]">
+            🎁 دورات مجانية 🎁
+          </div>
+        )}
 
         {/* اللعب التلقائي */}
         <button 
