@@ -558,41 +558,28 @@ export default function PharaohsBook() {
       <div className="moving-light-effect"></div>
       <div className="animated-shimmer"></div>
 
-      {/* الإطار الخارجي الفرعوني */}
+      {/* الإطار الخارجي الفرعوني المحسن */}
       <div className="egyptian-frame-container">
         {/* زخارف الإطار العلوية */}
         <div className="frame-top">
           <div className="frame-top-center">
             <div className="winged-scarab"></div>
           </div>
-          <div className="frame-top-left-corner"></div>
-          <div className="frame-top-right-corner"></div>
         </div>
         
-        {/* زخارف الإطار الجانبية */}
-        <div className="frame-left">
-          <div className="frame-left-decoration top"></div>
-          <div className="frame-left-decoration middle"></div>
-          <div className="frame-left-decoration bottom"></div>
-        </div>
-        <div className="frame-right">
-          <div className="frame-right-decoration top"></div>
-          <div className="frame-right-decoration middle"></div>
-          <div className="frame-right-decoration bottom"></div>
-        </div>
+        {/* الأعمدة الجانبية */}
+        <div className="frame-column left"></div>
+        <div className="frame-column right"></div>
         
         {/* زخارف الإطار السفلية */}
         <div className="frame-bottom">
-          <div className="frame-bottom-left-corner"></div>
           <div className="frame-bottom-center">
             <div className="hieroglyphs-decoration"></div>
           </div>
-          <div className="frame-bottom-right-corner"></div>
         </div>
         
-        {/* تماثيل أنوبيس على الجانبين */}
-        <div className="anubis-statue left"></div>
-        <div className="anubis-statue right"></div>
+        {/* تأثير إضاءة المعبد */}
+        <div className="temple-light-overlay"></div>
       </div>
       
       {/* الشخصيات الفرعونية على الجوانب */}

@@ -29,6 +29,7 @@ import EgyptQueenPage from "@/pages/egypt-queen-page";
 import EgyptRocketPage from "@/pages/egypt-rocket-page";
 import FishingSlotsPage from "@/pages/fishing-slots";
 import PharaohsBook from "@/games/pharaohs-book/index";
+import RiseOfOlympus from "@/games/rise-of-olympus/index";
 import PokerMasrLobby from "@/pages/poker-lobby/poker-masr";
 import TexasHoldemPoker from "@/pages/poker-lobby/poker-masr/texas-holdem";
 import MeccaPoker from "@/pages/poker-lobby/poker-masr/mecca-poker";
@@ -88,6 +89,7 @@ function Router() {
       <ProtectedRoute path="/poker-lobby/poker-masr/mecca-poker" component={MeccaPoker} />
       <ProtectedRoute path="/poker-lobby/poker-masr/turkish-classic" component={TurkishClassicPoker} />
       <ProtectedRoute path="/slots/pharaohs-book" component={PharaohsBook} />
+      <ProtectedRoute path="/slots/rise-of-olympus" component={RiseOfOlympus} />
       <ProtectedRoute path="/notifications" component={NotificationsPage} />
       <ProtectedRoute path="/notifications/:messageId" component={NotificationsPage} />
       <ProtectedRoute path="/inventory" component={InventoryPage} />

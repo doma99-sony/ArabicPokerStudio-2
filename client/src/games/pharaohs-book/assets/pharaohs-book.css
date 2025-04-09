@@ -143,12 +143,21 @@
 
 /* الحاوية الرئيسية للعبة مع الخلفية المتحركة */
 .pharaohs-book-container {
-  background-color: #121212;
+  background-color: #0A0A0F;
   position: relative;
   min-height: 100vh;
   color: #fff;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   overflow: hidden;
+  background-image: linear-gradient(
+      rgba(0, 0, 0, 0.7),
+      rgba(0, 0, 0, 0.6)
+    ),
+    url('/attached_assets/futuristic-casino-architecture.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
 /* طبقة الخلفية الأساسية - معبد فرعوني ليلي */
@@ -160,8 +169,7 @@
   right: 0;
   bottom: 0;
   background-image: 
-    linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.6)), 
-    url('/attached_assets/futuristic-casino-architecture.jpg');
+    linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.6) 50%, rgba(25,25,35,0.8) 100%);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -361,7 +369,7 @@
   }
 }
 
-/* الإطار الخارجي الفرعوني */
+/* الإطار الخارجي الفرعوني المحسن */
 .egyptian-frame-container {
   position: absolute;
   top: 0;
@@ -372,26 +380,58 @@
   pointer-events: none; /* السماح بالتفاعل مع العناصر خلف الإطار */
 }
 
+/* تأثير إضاءة المعبد */
+.temple-light-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+    ellipse at top,
+    rgba(255, 215, 0, 0.1) 0%,
+    transparent 60%
+  ),
+  radial-gradient(
+    ellipse at bottom,
+    rgba(255, 215, 0, 0.1) 0%,
+    transparent 60%
+  );
+  filter: blur(40px);
+  z-index: 5;
+  opacity: 0.7;
+  animation: templeGlow 8s infinite alternate ease-in-out;
+}
+
+@keyframes templeGlow {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
 /* الجزء العلوي من الإطار */
 .frame-top {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  height: 100px;
+  height: 90px;
   z-index: 10;
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100"><rect x="0" y="0" width="1000" height="100" fill="%23A78D64" /><path d="M0 90 L1000 90 L1000 100 L0 100 Z" fill="%236D5C3D" /><path d="M100 50 L900 50 L880 90 L120 90 Z" fill="%236D5C3D" /><path d="M120 40 L880 40 L860 70 L140 70 Z" fill="%23A78D64" stroke="%236D5C3D" stroke-width="3" /></svg>');
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100"><defs><linearGradient id="gold-gradient" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="%23D4AF37" /><stop offset="50%" stop-color="%23FFD700" /><stop offset="100%" stop-color="%23D4AF37" /></linearGradient></defs><path d="M0 0 L1000 0 L1000 90 L860 70 L500 100 L140 70 L0 90 Z" fill="%23121212" stroke="url(%23gold-gradient)" stroke-width="3" /><path d="M50 35 L950 35 L920 70 L80 70 Z" fill="none" stroke="%23D4AF37" stroke-width="2" stroke-opacity="0.6" /><path d="M100 15 L900 15 L880 50 L120 50 Z" fill="none" stroke="%23D4AF37" stroke-width="1" stroke-opacity="0.4" /></svg>');
   background-size: 100% 100%;
   background-repeat: no-repeat;
-  filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.4));
+  filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.3));
 }
 
 .frame-top-center {
   position: absolute;
-  top: 15px;
+  top: 10px;
   left: 50%;
   transform: translateX(-50%);
-  width: 200px;
+  width: 220px;
   height: 80px;
   z-index: 11;
 }
@@ -399,96 +439,45 @@
 .winged-scarab {
   width: 100%;
   height: 100%;
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 150"><path d="M150 20 C180 20, 200 40, 200 70 C200 90, 180 110, 150 110 C120 110, 100 90, 100 70 C100 40, 120 20, 150 20 Z" fill="%23D4AF37" stroke="%236D5C3D" stroke-width="3" /><path d="M100 70 C60 50, 20 70, 10 110 C60 90, 90 80, 100 70 Z" fill="%23D4AF37" stroke="%236D5C3D" stroke-width="3" /><path d="M200 70 C240 50, 280 70, 290 110 C240 90, 210 80, 200 70 Z" fill="%23D4AF37" stroke="%236D5C3D" stroke-width="3" /><circle cx="135" cy="60" r="10" fill="%236D5C3D" /><circle cx="165" cy="60" r="10" fill="%236D5C3D" /><path d="M130 85 C140 95, 160 95, 170 85" stroke="%236D5C3D" stroke-width="3" fill="none" /></svg>');
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 150"><defs><linearGradient id="scarab-gold" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="%23B8860B" /><stop offset="50%" stop-color="%23FFD700" /><stop offset="100%" stop-color="%23B8860B" /></linearGradient></defs><path d="M150 20 C180 20, 200 40, 200 70 C200 90, 180 110, 150 110 C120 110, 100 90, 100 70 C100 40, 120 20, 150 20 Z" fill="url(%23scarab-gold)" stroke="%236D5C3D" stroke-width="3" /><path d="M100 70 C60 50, 20 70, 10 110 C60 90, 90 80, 100 70 Z" fill="url(%23scarab-gold)" stroke="%236D5C3D" stroke-width="3" /><path d="M200 70 C240 50, 280 70, 290 110 C240 90, 210 80, 200 70 Z" fill="url(%23scarab-gold)" stroke="%236D5C3D" stroke-width="3" /><circle cx="135" cy="60" r="10" fill="%236D5C3D" /><circle cx="165" cy="60" r="10" fill="%236D5C3D" /><path d="M130 85 C140 95, 160 95, 170 85" stroke="%236D5C3D" stroke-width="3" fill="none" /></svg>');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
   animation: scarabWingsFlutter 3s infinite ease-in-out;
+  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6));
 }
 
-.frame-top-left-corner, .frame-top-right-corner {
+/* الأعمدة الجانبية */
+@keyframes columnGlow {
+  0%, 100% {
+    filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.3));
+    opacity: 0.85;
+  }
+  50% {
+    filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.5));
+    opacity: 1;
+  }
+}
+
+.frame-column {
   position: absolute;
-  top: 0;
-  width: 120px;
-  height: 120px;
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><path d="M0 0 L120 0 L120 120 L60 60 L0 60 Z" fill="%23A78D64" /><path d="M10 10 L110 10 L110 50 L60 50 L10 50 Z" fill="%236D5C3D" /><circle cx="60" cy="30" r="15" fill="%23D4AF37" stroke="%236D5C3D" stroke-width="2" /></svg>');
-  background-size: contain;
-  background-repeat: no-repeat;
-}
-
-.frame-top-left-corner {
-  left: 0;
-}
-
-.frame-top-right-corner {
-  right: 0;
-  transform: scaleX(-1);
-}
-
-/* الأجزاء الجانبية من الإطار */
-.frame-left, .frame-right {
-  position: absolute;
-  top: 100px;
-  bottom: 100px;
-  width: 40px;
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 600"><rect x="0" y="0" width="40" height="600" fill="%23A78D64" /><rect x="30" y="0" width="10" height="600" fill="%236D5C3D" /><rect x="5" y="50" width="30" height="500" fill="%236D5C3D" opacity="0.3" /></svg>');
+  top: 90px;
+  bottom: 90px;
+  width: 35px;
+  z-index: 10;
   background-size: 100% 100%;
   background-repeat: repeat-y;
-  z-index: 10;
+  animation: columnGlow 6s infinite alternate ease-in-out;
 }
 
-.frame-left {
-  left: 0;
+.frame-column.left {
+  left: 5px;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 400"><defs><linearGradient id="column-gold" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="%23B8860B" /><stop offset="50%" stop-color="%23D4AF37" /><stop offset="100%" stop-color="%23B8860B" /></linearGradient></defs><rect x="0" y="0" width="40" height="400" fill="%23121212" rx="5" /><rect x="5" y="0" width="30" height="400" fill="none" stroke="url(%23column-gold)" stroke-width="1" /><rect x="10" y="30" width="20" height="340" fill="none" stroke="%23D4AF37" stroke-width="1" stroke-opacity="0.5" stroke-dasharray="2,10" /><path d="M10 0 L30 0 L30 400 L10 400 Z" fill="%23D4AF37" fill-opacity="0.1" /><rect x="15" y="30" width="10" height="340" fill="%23D4AF37" fill-opacity="0.1" /><circle cx="20" cy="20" r="10" fill="none" stroke="%23D4AF37" stroke-width="1" /><circle cx="20" cy="380" r="10" fill="none" stroke="%23D4AF37" stroke-width="1" /></svg>');
 }
 
-.frame-right {
-  right: 0;
-  transform: scaleX(-1);
-}
-
-.frame-left-decoration, .frame-right-decoration {
-  position: absolute;
-  width: 60px;
-  height: 100px;
-  background-size: contain;
-  background-repeat: no-repeat;
-  left: 0;
-  animation: glyphsGlow 4s infinite alternate ease-in-out;
-}
-
-.frame-left-decoration.top {
-  top: 50px;
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 100"><rect x="0" y="0" width="60" height="100" fill="%23A78D64" /><path d="M10 20 L50 20 L40 80 L20 80 Z" fill="%23D4AF37" stroke="%236D5C3D" stroke-width="2" /><path d="M25 30 L35 30 L35 40 L25 40 Z" fill="%236D5C3D" /><path d="M20 50 L40 50 L35 70 L25 70 Z" fill="%236D5C3D" /></svg>');
-}
-
-.frame-left-decoration.middle {
-  top: calc(50% - 50px);
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 100"><rect x="0" y="0" width="60" height="100" fill="%23A78D64" /><path d="M15 10 L45 10 L50 30 L30 90 L10 30 Z" fill="%23D4AF37" stroke="%236D5C3D" stroke-width="2" /><circle cx="30" cy="40" r="10" fill="%236D5C3D" /></svg>');
-}
-
-.frame-left-decoration.bottom {
-  bottom: 50px;
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 100"><rect x="0" y="0" width="60" height="100" fill="%23A78D64" /><path d="M20 10 L40 10 L50 50 L30 90 L10 50 Z" fill="%23D4AF37" stroke="%236D5C3D" stroke-width="2" /><path d="M25 30 L35 30 L40 50 L30 70 L20 50 Z" fill="%236D5C3D" /></svg>');
-}
-
-.frame-right-decoration {
-  right: 0;
-  left: auto;
-}
-
-.frame-right-decoration.top {
-  top: 50px;
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 100"><rect x="0" y="0" width="60" height="100" fill="%23A78D64" /><path d="M10 10 L50 10 L45 50 L15 50 Z" fill="%23D4AF37" stroke="%236D5C3D" stroke-width="2" /><path d="M20 20 L40 20 L38 40 L22 40 Z" fill="%236D5C3D" /><circle cx="30" cy="30" r="5" fill="%236D5C3D" /></svg>');
-}
-
-.frame-right-decoration.middle {
-  top: calc(50% - 50px);
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 100"><rect x="0" y="0" width="60" height="100" fill="%23A78D64" /><path d="M10 20 L50 20 L45 80 L15 80 Z" fill="%23D4AF37" stroke="%236D5C3D" stroke-width="2" /><path d="M20 35 L40 35 L35 65 L25 65 Z" fill="%236D5C3D" /><circle cx="30" cy="50" r="10" fill="%236D5C3D" /></svg>');
-}
-
-.frame-right-decoration.bottom {
-  bottom: 50px;
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 100"><rect x="0" y="0" width="60" height="100" fill="%23A78D64" /><path d="M15 10 L45 10 L50 90 L10 90 Z" fill="%23D4AF37" stroke="%236D5C3D" stroke-width="2" /><path d="M25 30 L35 30 L40 70 L20 70 Z" fill="%236D5C3D" /></svg>');
+.frame-column.right {
+  right: 5px;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 400"><defs><linearGradient id="column-gold" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="%23B8860B" /><stop offset="50%" stop-color="%23D4AF37" /><stop offset="100%" stop-color="%23B8860B" /></linearGradient></defs><rect x="0" y="0" width="40" height="400" fill="%23121212" rx="5" /><rect x="5" y="0" width="30" height="400" fill="none" stroke="url(%23column-gold)" stroke-width="1" /><rect x="10" y="30" width="20" height="340" fill="none" stroke="%23D4AF37" stroke-width="1" stroke-opacity="0.5" stroke-dasharray="2,10" /><path d="M10 0 L30 0 L30 400 L10 400 Z" fill="%23D4AF37" fill-opacity="0.1" /><rect x="15" y="30" width="10" height="340" fill="%23D4AF37" fill-opacity="0.1" /><circle cx="20" cy="20" r="10" fill="none" stroke="%23D4AF37" stroke-width="1" /><circle cx="20" cy="380" r="10" fill="none" stroke="%23D4AF37" stroke-width="1" /></svg>');
 }
 
 /* الجزء السفلي من الإطار */
@@ -497,31 +486,12 @@
   bottom: 0;
   left: 0;
   right: 0;
-  height: 100px;
+  height: 90px;
   z-index: 10;
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100"><rect x="0" y="0" width="1000" height="100" fill="%23A78D64" /><path d="M0 0 L1000 0 L1000 10 L0 10 Z" fill="%236D5C3D" /><path d="M100 40 L900 40 L880 10 L120 10 Z" fill="%236D5C3D" /><path d="M120 70 L880 70 L860 30 L140 30 Z" fill="%23A78D64" stroke="%236D5C3D" stroke-width="3" /></svg>');
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100"><defs><linearGradient id="gold-gradient" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="%23D4AF37" /><stop offset="50%" stop-color="%23FFD700" /><stop offset="100%" stop-color="%23D4AF37" /></linearGradient></defs><path d="M0 100 L1000 100 L1000 10 L860 30 L500 0 L140 30 L0 10 Z" fill="%23121212" stroke="url(%23gold-gradient)" stroke-width="3" /><path d="M50 65 L950 65 L920 30 L80 30 Z" fill="none" stroke="%23D4AF37" stroke-width="2" stroke-opacity="0.6" /><path d="M100 85 L900 85 L880 50 L120 50 Z" fill="none" stroke="%23D4AF37" stroke-width="1" stroke-opacity="0.4" /></svg>');
   background-size: 100% 100%;
   background-repeat: no-repeat;
-  filter: drop-shadow(0 -10px 15px rgba(0, 0, 0, 0.4));
-}
-
-.frame-bottom-left-corner, .frame-bottom-right-corner {
-  position: absolute;
-  bottom: 0;
-  width: 120px;
-  height: 120px;
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><path d="M0 120 L120 120 L120 60 L60 60 L0 0 Z" fill="%23A78D64" /><path d="M10 110 L110 110 L110 70 L60 70 L10 40 Z" fill="%236D5C3D" /><circle cx="60" cy="90" r="15" fill="%23D4AF37" stroke="%236D5C3D" stroke-width="2" /></svg>');
-  background-size: contain;
-  background-repeat: no-repeat;
-}
-
-.frame-bottom-left-corner {
-  left: 0;
-}
-
-.frame-bottom-right-corner {
-  right: 0;
-  transform: scaleX(-1);
+  filter: drop-shadow(0 -5px 10px rgba(0, 0, 0, 0.3));
 }
 
 .frame-bottom-center {
@@ -529,43 +499,19 @@
   bottom: 15px;
   left: 50%;
   transform: translateX(-50%);
-  width: 300px;
-  height: 80px;
+  width: 320px;
+  height: 65px;
   z-index: 11;
 }
 
 .hieroglyphs-decoration {
   width: 100%;
   height: 100%;
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 80"><rect x="0" y="0" width="300" height="80" fill="%23A78D64" rx="10" ry="10" stroke="%236D5C3D" stroke-width="3" /><path d="M30 20 L60 20 L60 60 L30 60 Z" fill="%23D4AF37" stroke="%236D5C3D" stroke-width="1" /><path d="M80 20 L110 20 L100 60 L70 60 Z" fill="%23D4AF37" stroke="%236D5C3D" stroke-width="1" /><path d="M130 20 L160 20 L170 60 L140 60 Z" fill="%23D4AF37" stroke="%236D5C3D" stroke-width="1" /><path d="M190 20 L220 20 L220 60 L190 60 Z" fill="%23D4AF37" stroke="%236D5C3D" stroke-width="1" /><path d="M240 20 L270 20 L260 60 L230 60 Z" fill="%23D4AF37" stroke="%236D5C3D" stroke-width="1" /><circle cx="45" cy="40" r="8" fill="%236D5C3D" /><circle cx="90" cy="40" r="8" fill="%236D5C3D" /><circle cx="150" cy="40" r="8" fill="%236D5C3D" /><circle cx="205" cy="40" r="8" fill="%236D5C3D" /><circle cx="250" cy="40" r="8" fill="%236D5C3D" /></svg>');
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 70"><defs><linearGradient id="gold-gradient" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="%23B8860B" /><stop offset="50%" stop-color="%23FFD700" /><stop offset="100%" stop-color="%23B8860B" /></linearGradient></defs><rect x="5" y="5" width="310" height="60" rx="10" fill="%23121212" stroke="url(%23gold-gradient)" stroke-width="2" /><path d="M30 15 L40 15 L45 55 L25 55 Z" fill="none" stroke="%23D4AF37" stroke-width="1" /><path d="M60 15 L70 15 L75 55 L55 55 Z" fill="none" stroke="%23D4AF37" stroke-width="1" /><path d="M90 15 L100 15 L105 55 L85 55 Z" fill="none" stroke="%23D4AF37" stroke-width="1" /><rect x="120" y="15" width="20" height="40" fill="none" stroke="%23D4AF37" stroke-width="1" /><path d="M155 15 C160 15, 170 15, 175 15 L165 55 C160 55, 150 55, 145 55 Z" fill="none" stroke="%23D4AF37" stroke-width="1" /><rect x="185" y="15" width="20" height="40" fill="none" stroke="%23D4AF37" stroke-width="1" /><path d="M220 15 L230 15 L235 55 L215 55 Z" fill="none" stroke="%23D4AF37" stroke-width="1" /><path d="M250 15 L260 15 L265 55 L245 55 Z" fill="none" stroke="%23D4AF37" stroke-width="1" /><path d="M280 15 L290 15 L295 55 L275 55 Z" fill="none" stroke="%23D4AF37" stroke-width="1" /></svg>');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
   animation: glyphsGlow 4s infinite alternate-reverse ease-in-out;
-}
-
-/* تماثيل أنوبيس على الجانبين */
-.anubis-statue {
-  position: absolute;
-  width: 150px;
-  height: 300px;
-  bottom: 100px;
-  z-index: 9;
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: bottom center;
-  animation: anubisGlow 4s infinite alternate ease-in-out;
-  filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.5));
-}
-
-.anubis-statue.left {
-  left: 20px;
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 300"><path d="M60 0 L90 0 L100 40 L80 60 L50 60 L30 40 L40 0 Z" fill="%23301E0F" stroke="%23000" stroke-width="2" /><path d="M40 60 L90 60 L100 100 L30 100 Z" fill="%23301E0F" stroke="%23000" stroke-width="2" /><path d="M50 100 L80 100 L70 140 L60 140 Z" fill="%23301E0F" stroke="%23000" stroke-width="2" /><path d="M60 140 L70 140 L80 300 L50 300 Z" fill="%23301E0F" stroke="%23000" stroke-width="2" /><circle cx="55" cy="30" r="5" fill="%23D4AF37" /><circle cx="75" cy="30" r="5" fill="%23D4AF37" /><path d="M50 40 L80 40 L70 50 L60 50 Z" fill="%23D4AF37" /><path d="M30 40 L40 60 L20 80 L10 50 Z" fill="%23301E0F" stroke="%23000" stroke-width="1" /><path d="M100 40 L90 60 L110 80 L120 50 Z" fill="%23301E0F" stroke="%23000" stroke-width="1" /></svg>');
-}
-
-.anubis-statue.right {
-  right: 20px;
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 300"><path d="M60 0 L90 0 L100 40 L80 60 L50 60 L30 40 L40 0 Z" fill="%23301E0F" stroke="%23000" stroke-width="2" /><path d="M40 60 L90 60 L100 100 L30 100 Z" fill="%23301E0F" stroke="%23000" stroke-width="2" /><path d="M50 100 L80 100 L70 140 L60 140 Z" fill="%23301E0F" stroke="%23000" stroke-width="2" /><path d="M60 140 L70 140 L80 300 L50 300 Z" fill="%23301E0F" stroke="%23000" stroke-width="2" /><circle cx="55" cy="30" r="5" fill="%23D4AF37" /><circle cx="75" cy="30" r="5" fill="%23D4AF37" /><path d="M50 40 L80 40 L70 50 L60 50 Z" fill="%23D4AF37" /><path d="M30 40 L40 60 L20 80 L10 50 Z" fill="%23301E0F" stroke="%23000" stroke-width="1" /><path d="M100 40 L90 60 L110 80 L120 50 Z" fill="%23301E0F" stroke="%23000" stroke-width="1" /><path d="M20 150 L30 130 L40 140 L30 160 Z" fill="%23D4AF37" stroke="%23000" stroke-width="1" /></svg>');
 }
 
 /* الشخصيات الفرعونية على الجوانب */

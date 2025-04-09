@@ -1,0 +1,446 @@
+/* 
+ * خلفية لعبة صعود أوليمبوس (Rise of Olympus)
+ * أسلوب كرتوني ثلاثي الأبعاد مستوحى من الأساطير اليونانية
+ */
+
+:root {
+  /* ألوان أساسية */
+  --olympus-sky-blue: #4a89dc;
+  --olympus-deep-blue: #324e7b;
+  --olympus-gold: #ffd700;
+  --olympus-marble: #f5f5f5;
+  --olympus-cloud-white: #ffffff;
+  --olympus-accent: #9b59b6;
+  --olympus-shadow: rgba(0, 0, 0, 0.5);
+  
+  /* تدرجات لونية */
+  --olympus-sky-gradient: linear-gradient(to bottom, 
+    #4a89dc 0%, 
+    #79a6f2 40%, 
+    #a9c9ff 70%, 
+    #daeaff 100%
+  );
+  
+  /* قيم تحكم */
+  --cloud-speed: 120s;
+  --glow-pulse: 4s;
+  --statue-glow: 10s;
+  --light-rays-rotate: 180s;
+}
+
+/* الحاوية الرئيسية للعبة */
+.olympus-container {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  color: white;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* طبقة السماء الأساسية */
+.olympus-sky-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--olympus-sky-gradient);
+  z-index: 0;
+}
+
+/* طبقة السحب المتحركة */
+.olympus-clouds {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" opacity="0.7"><path d="M100 300 C150 250, 250 250, 300 300 S450 350, 500 300" fill="none" stroke="white" stroke-width="40" stroke-linecap="round" /><path d="M700 200 C750 150, 850 150, 900 200" fill="none" stroke="white" stroke-width="35" stroke-linecap="round" /><path d="M400 500 C450 450, 550 450, 600 500" fill="none" stroke="white" stroke-width="30" stroke-linecap="round" /><path d="M150 700 C200 650, 300 650, 350 700" fill="none" stroke="white" stroke-width="35" stroke-linecap="round" /><path d="M650 600 C700 550, 800 550, 850 600" fill="none" stroke="white" stroke-width="40" stroke-linecap="round" /></svg>'),
+    url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" opacity="0.5"><path d="M50 400 C100 350, 200 350, 250 400 S400 450, 450 400" fill="none" stroke="white" stroke-width="50" stroke-linecap="round" /><path d="M500 300 C550 250, 650 250, 700 300" fill="none" stroke="white" stroke-width="45" stroke-linecap="round" /><path d="M700 500 C750 450, 850 450, 900 500" fill="none" stroke="white" stroke-width="40" stroke-linecap="round" /><path d="M300 600 C350 550, 450 550, 500 600" fill="none" stroke="white" stroke-width="55" stroke-linecap="round" /></svg>');
+  background-size: 110% 110%, 100% 100%;
+  background-position: 0 0, 0 0;
+  opacity: 0.8;
+  filter: blur(5px);
+  animation: moveClouds var(--cloud-speed) infinite linear;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* طبقة المعبد الأوليمبي */
+.olympus-temple {
+  position: absolute;
+  top: 15%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  height: 60%;
+  max-width: 900px;
+  z-index: 3;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700"><defs><linearGradient id="marble" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="%23e0e0e0" /><stop offset="50%" stop-color="%23f5f5f5" /><stop offset="100%" stop-color="%23e0e0e0" /></linearGradient><linearGradient id="gold-trim" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="%23d4af37" /><stop offset="50%" stop-color="%23ffd700" /><stop offset="100%" stop-color="%23d4af37" /></linearGradient></defs><rect x="150" y="400" width="700" height="50" fill="url(%23marble)" stroke="%23a0a0a0" stroke-width="2" /><rect x="100" y="450" width="800" height="200" fill="url(%23marble)" stroke="%23a0a0a0" stroke-width="2" /><rect x="50" y="650" width="900" height="50" fill="url(%23marble)" stroke="url(%23gold-trim)" stroke-width="3" /><rect x="200" y="250" width="40" height="150" fill="url(%23marble)" stroke="%23a0a0a0" stroke-width="2" /><rect x="300" y="250" width="40" height="150" fill="url(%23marble)" stroke="%23a0a0a0" stroke-width="2" /><rect x="400" y="250" width="40" height="150" fill="url(%23marble)" stroke="%23a0a0a0" stroke-width="2" /><rect x="500" y="250" width="40" height="150" fill="url(%23marble)" stroke="%23a0a0a0" stroke-width="2" /><rect x="600" y="250" width="40" height="150" fill="url(%23marble)" stroke="%23a0a0a0" stroke-width="2" /><rect x="700" y="250" width="40" height="150" fill="url(%23marble)" stroke="%23a0a0a0" stroke-width="2" /><rect x="800" y="250" width="40" height="150" fill="url(%23marble)" stroke="%23a0a0a0" stroke-width="2" /><path d="M100 250 L900 250 L800 150 L200 150 Z" fill="url(%23marble)" stroke="url(%23gold-trim)" stroke-width="3" /><rect x="450" y="80" width="100" height="70" fill="url(%23gold-trim)" stroke="%23a0a0a0" stroke-width="1" rx="10" ry="10" /><path d="M430 80 L570 80 L500 30 Z" fill="url(%23gold-trim)" stroke="%23a0a0a0" stroke-width="1" /></svg>');
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.2));
+}
+
+/* تماثيل الآلهة على الجانبين - تصميم ثلاثي الأبعاد احترافي */
+.olympus-statue {
+  position: absolute;
+  width: 15%;
+  height: 40%;
+  top: 35%;
+  z-index: 4;
+  perspective: 1000px;
+  transform-style: preserve-3d;
+  transition: transform 0.5s ease-in-out;
+}
+
+.olympus-statue:hover {
+  transform: scale(1.05);
+}
+
+.olympus-statue-inner {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  animation: statueFloat 8s infinite ease-in-out;
+}
+
+.olympus-statue::after {
+  content: '';
+  position: absolute;
+  bottom: -10%;
+  left: 10%;
+  right: 10%;
+  height: 20px;
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0.3) 0%, transparent 70%);
+  border-radius: 50%;
+  filter: blur(5px);
+  transform: rotateX(60deg);
+  z-index: -1;
+}
+
+.olympus-statue-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 215, 0, 0.3) 0%,
+    transparent 70%
+  );
+  filter: blur(15px);
+  opacity: 0;
+  animation: statueGlow var(--statue-glow) infinite alternate ease-in-out;
+  z-index: -1;
+  transform: translateZ(-20px);
+}
+
+.olympus-statue.zeus {
+  left: 5%;
+}
+
+.olympus-statue.zeus .olympus-statue-inner {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 600"><defs><linearGradient id="marble-zeus" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="%23e0e0e0" /><stop offset="50%" stop-color="%23f5f5f5" /><stop offset="100%" stop-color="%23e0e0e0" /></linearGradient><linearGradient id="zeus-shadow" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="rgba(0,0,0,0.2)" /><stop offset="100%" stop-color="rgba(0,0,0,0)" /></linearGradient><linearGradient id="zeus-highlight" x1="100%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="rgba(255,255,255,0.3)" /><stop offset="100%" stop-color="rgba(255,255,255,0)" /></linearGradient><linearGradient id="zeus-gold" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%23d4af37" /><stop offset="50%" stop-color="%23ffd700" /><stop offset="100%" stop-color="%23d4af37" /></linearGradient></defs><path d="M120 100 L180 100 L170 200 L150 220 L130 200 L120 100 Z" fill="url(%23marble-zeus)" stroke="%23aaa" stroke-width="2" /><path d="M120 100 L180 100 L170 200 L150 220 L130 200 L120 100 Z" fill="url(%23zeus-shadow)" stroke="none" /><path d="M150 100 L180 100 L170 200 L150 220 Z" fill="url(%23zeus-highlight)" stroke="none" /><circle cx="150" cy="80" r="40" fill="url(%23marble-zeus)" stroke="%23aaa" stroke-width="2" /><path d="M150 80 m-40 0 a40,40 0 1,0 80,0" fill="url(%23zeus-highlight)" stroke="none" /><path d="M150 80 m0,-40 a40,40 0 1,1 -80,0" fill="url(%23zeus-shadow)" stroke="none" /><path d="M110 80 C110 50, 150 30, 190 80" fill="none" stroke="%23d4af37" stroke-width="4" /><path d="M120 70 L130 50 L140 70 M150 40 L150 70 M160 70 L170 50 L180 70" fill="none" stroke="%23d4af37" stroke-width="3" /><path d="M110 220 L190 220 L200 500 L100 500 Z" fill="url(%23marble-zeus)" stroke="%23aaa" stroke-width="2" /><path d="M150 220 L190 220 L200 500 L150 500 Z" fill="url(%23zeus-highlight)" stroke="none" opacity="0.7" /><path d="M110 220 L150 220 L150 500 L100 500 Z" fill="url(%23zeus-shadow)" stroke="none" opacity="0.7" /><path d="M190 220 C220 250, 230 300, 240 350 C250 400, 230 450, 200 500" fill="none" stroke="%23aaa" stroke-width="4" /><path d="M190 220 C220 250, 230 300, 240 350 C250 400, 230 450, 200 500" fill="none" stroke="url(%23zeus-highlight)" stroke-width="6" stroke-opacity="0.3" /><path d="M110 220 C80 250, 70 300, 60 350 C50 400, 70 450, 100 500" fill="none" stroke="%23aaa" stroke-width="4" /><path d="M110 220 C80 250, 70 300, 60 350 C50 400, 70 450, 100 500" fill="none" stroke="url(%23zeus-shadow)" stroke-width="6" stroke-opacity="0.3" /><rect x="100" y="500" width="100" height="30" fill="url(%23marble-zeus)" stroke="%23aaa" stroke-width="2" /><rect x="80" y="530" width="140" height="50" fill="url(%23marble-zeus)" stroke="%23aaa" stroke-width="2" /><rect x="100" y="500" width="50" height="30" fill="url(%23zeus-highlight)" stroke="none" opacity="0.6" /><rect x="80" y="530" width="70" height="50" fill="url(%23zeus-shadow)" stroke="none" opacity="0.6" /><path d="M140 90 L130 85 L140 80" fill="none" stroke="%23444" stroke-width="2.5" /><path d="M160 90 L170 85 L160 80" fill="none" stroke="%23444" stroke-width="2.5" /><path d="M140 100 L160 100" fill="none" stroke="%23444" stroke-width="2" /><path d="M210 300 L150 400 L190 410 L130 520" fill="none" stroke="url(%23zeus-gold)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" /><path d="M210 300 L150 400 L190 410 L130 520" fill="none" stroke="%23fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.6" /><circle cx="150" cy="70" r="50" fill="none" stroke="url(%23zeus-gold)" stroke-width="3" stroke-dasharray="5,5" opacity="0.6" /></svg>');
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.olympus-statue.zeus .olympus-statue-glow {
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 215, 0, 0.4) 0%,
+    rgba(255, 165, 0, 0.2) 40%,
+    transparent 70%
+  );
+}
+
+/* إضافة تأثير صواعق متحركة لزيوس */
+.olympus-statue.zeus::before {
+  content: '';
+  position: absolute;
+  top: -20%;
+  left: -20%;
+  right: -20%;
+  bottom: -20%;
+  background-image: 
+    url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 600" opacity="0.7"><path d="M140 50 L160 20 M90 100 L60 70 M210 100 L240 70 M130 150 L100 180 M170 150 L200 180" stroke="%23ffd700" stroke-width="3" stroke-linecap="round" /></svg>'),
+    url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 600" opacity="0.5"><path d="M150 10 L150 40 M70 70 L100 100 M230 70 L200 100 M100 200 L130 170 M200 200 L170 170" stroke="%23ffffff" stroke-width="2" stroke-linecap="round" /></svg>');
+  background-size: 100% 100%;
+  opacity: 0;
+  animation: lightningFlash 10s infinite;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.olympus-statue.poseidon {
+  right: 5%;
+}
+
+.olympus-statue.poseidon .olympus-statue-inner {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 600"><defs><linearGradient id="marble-poseidon" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="%23e0e0e0" /><stop offset="50%" stop-color="%23f5f5f5" /><stop offset="100%" stop-color="%23e0e0e0" /></linearGradient><linearGradient id="poseidon-shadow" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="rgba(0,0,0,0.2)" /><stop offset="100%" stop-color="rgba(0,0,0,0)" /></linearGradient><linearGradient id="poseidon-highlight" x1="100%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="rgba(255,255,255,0.3)" /><stop offset="100%" stop-color="rgba(255,255,255,0)" /></linearGradient><linearGradient id="poseidon-blue" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%234a89dc" /><stop offset="50%" stop-color="%2379a6f2" /><stop offset="100%" stop-color="%234a89dc" /></linearGradient></defs><path d="M120 100 L180 100 L170 200 L150 220 L130 200 L120 100 Z" fill="url(%23marble-poseidon)" stroke="%23aaa" stroke-width="2" /><path d="M120 100 L180 100 L170 200 L150 220 L130 200 L120 100 Z" fill="url(%23poseidon-shadow)" stroke="none" /><path d="M150 100 L180 100 L170 200 L150 220 Z" fill="url(%23poseidon-highlight)" stroke="none" /><circle cx="150" cy="80" r="40" fill="url(%23marble-poseidon)" stroke="%23aaa" stroke-width="2" /><path d="M150 80 m-40 0 a40,40 0 1,0 80,0" fill="url(%23poseidon-highlight)" stroke="none" /><path d="M150 80 m0,-40 a40,40 0 1,1 -80,0" fill="url(%23poseidon-shadow)" stroke="none" /><path d="M110 60 C130 30, 170 30, 190 60" fill="none" stroke="%234a89dc" stroke-width="4" /><path d="M120 60 L115 40 L125 45 L130 30 L135 45 L145 40 L150 50 L155 40 L165 45 L170 30 L175 45 L185 40 L180 60" fill="none" stroke="%234a89dc" stroke-width="2.5" /><path d="M110 220 L190 220 L200 500 L100 500 Z" fill="url(%23marble-poseidon)" stroke="%23aaa" stroke-width="2" /><path d="M150 220 L190 220 L200 500 L150 500 Z" fill="url(%23poseidon-highlight)" stroke="none" opacity="0.7" /><path d="M110 220 L150 220 L150 500 L100 500 Z" fill="url(%23poseidon-shadow)" stroke="none" opacity="0.7" /><rect x="100" y="500" width="100" height="30" fill="url(%23marble-poseidon)" stroke="%23aaa" stroke-width="2" /><rect x="80" y="530" width="140" height="50" fill="url(%23marble-poseidon)" stroke="%23aaa" stroke-width="2" /><rect x="100" y="500" width="50" height="30" fill="url(%23poseidon-highlight)" stroke="none" opacity="0.6" /><rect x="80" y="530" width="70" height="50" fill="url(%23poseidon-shadow)" stroke="none" opacity="0.6" /><path d="M140 90 L130 85 L140 80" fill="none" stroke="%23444" stroke-width="2.5" /><path d="M160 90 L170 85 L160 80" fill="none" stroke="%23444" stroke-width="2.5" /><path d="M140 100 L160 100" fill="none" stroke="%23444" stroke-width="2" /><path d="M150 220 L150 500" fill="none" stroke="%23aaa" stroke-width="5" /><path d="M150 220 L150 500" fill="none" stroke="url(%23poseidon-shadow)" stroke-width="7" stroke-opacity="0.3" /><path d="M150 220 L140 250 L150 270 L160 250 L150 220" fill="url(%23poseidon-blue)" stroke="%23aaa" stroke-width="1.5" /><path d="M150 270 L140 300 L150 320 L160 300 L150 270" fill="url(%23poseidon-blue)" stroke="%23aaa" stroke-width="1.5" /><path d="M150 320 L140 350 L150 370 L160 350 L150 320" fill="url(%23poseidon-blue)" stroke="%23aaa" stroke-width="1.5" /><path d="M130 230 L110 180" fill="none" stroke="%23aaa" stroke-width="3" /><path d="M170 230 L190 180" fill="none" stroke="%23aaa" stroke-width="3" /><path d="M110 180 L100 160" fill="none" stroke="url(%23poseidon-blue)" stroke-width="3" /><path d="M190 180 L200 160" fill="none" stroke="url(%23poseidon-blue)" stroke-width="3" /><path d="M70 540 C90 530, 110 550, 130 540 C150 530, 170 550, 190 540 C210 530, 230 550, 250 540" fill="none" stroke="url(%23poseidon-blue)" stroke-width="5" opacity="0.7" stroke-linecap="round" /></svg>');
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.olympus-statue.poseidon .olympus-statue-glow {
+  background: radial-gradient(
+    ellipse at center,
+    rgba(74, 137, 220, 0.4) 0%,
+    rgba(74, 137, 220, 0.2) 40%,
+    transparent 70%
+  );
+}
+
+/* إضافة تأثير مائي متحرك لبوسيدون */
+.olympus-statue.poseidon::before {
+  content: '';
+  position: absolute;
+  bottom: -10%;
+  left: -30%;
+  right: -30%;
+  height: 40%;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200" opacity="0.7"><defs><linearGradient id="water-gradient" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="%234a89dc" stop-opacity="0.1" /><stop offset="50%" stop-color="%234a89dc" stop-opacity="0.3" /><stop offset="100%" stop-color="%234a89dc" stop-opacity="0.1" /></linearGradient></defs><path d="M0 100 C40 70, 80 130, 120 100 C160 70, 200 130, 240 100 C280 70, 320 130, 360 100 C400 70, 440 130, 480 100 L480 200 L0 200 Z" fill="url(%23water-gradient)" /></svg>');
+  background-size: 200% 100%;
+  background-position: 0 0;
+  opacity: 0.8;
+  animation: waterWaves 20s infinite linear;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* تأثيرات ثلاثية الأبعاد إضافية */
+@keyframes statueFloat {
+  0%, 100% {
+    transform: translateY(0) rotateY(0deg);
+  }
+  25% {
+    transform: translateY(-5px) rotateY(1deg);
+  }
+  50% {
+    transform: translateY(0) rotateY(0deg);
+  }
+  75% {
+    transform: translateY(5px) rotateY(-1deg);
+  }
+}
+
+@keyframes statueGlow {
+  0% {
+    opacity: 0;
+    transform: translateZ(-20px) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateZ(-20px) scale(1.1);
+  }
+}
+
+@keyframes lightningFlash {
+  0%, 15%, 17%, 21%, 100% {
+    opacity: 0;
+  }
+  16%, 20% {
+    opacity: 0.8;
+  }
+  16.5%, 19.5% {
+    opacity: 0.3;
+  }
+}
+
+@keyframes waterWaves {
+  0% {
+    background-position: 0% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* طبقة الأشعة المضيئة */
+.olympus-light-rays {
+  position: absolute;
+  top: -100%;
+  left: -100%;
+  right: -100%;
+  bottom: -100%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    rgba(255, 215, 0, 0.05) 10deg,
+    transparent 20deg,
+    transparent 40deg,
+    rgba(255, 215, 0, 0.05) 50deg,
+    transparent 60deg,
+    transparent 80deg,
+    rgba(255, 215, 0, 0.05) 90deg,
+    transparent 100deg,
+    transparent 120deg,
+    rgba(255, 215, 0, 0.05) 130deg,
+    transparent 140deg,
+    transparent 160deg,
+    rgba(255, 215, 0, 0.05) 170deg,
+    transparent 180deg,
+    transparent 200deg,
+    rgba(255, 215, 0, 0.05) 210deg,
+    transparent 220deg,
+    transparent 240deg,
+    rgba(255, 215, 0, 0.05) 250deg,
+    transparent 260deg,
+    transparent 280deg,
+    rgba(255, 215, 0, 0.05) 290deg,
+    transparent 300deg,
+    transparent 320deg,
+    rgba(255, 215, 0, 0.05) 330deg,
+    transparent 340deg
+  );
+  opacity: 0.7;
+  animation: rotateRays var(--light-rays-rotate) infinite linear;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* طبقة الإضاءة الذهبية الناعمة */
+.olympus-golden-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 215, 0, 0.2) 0%,
+    transparent 70%
+  );
+  opacity: 0.6;
+  animation: pulseGlow var(--glow-pulse) infinite alternate ease-in-out;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* طبقة المؤثرات السحابية */
+.olympus-fog-effect {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 30%;
+  background-image: linear-gradient(
+    to top,
+    rgba(255, 255, 255, 0.3) 0%,
+    rgba(255, 255, 255, 0.2) 40%,
+    transparent 100%
+  );
+  opacity: 0.5;
+  filter: blur(15px);
+  z-index: 5;
+  pointer-events: none;
+}
+
+/* طبقة جزيئات الغبار المضيئة */
+.olympus-particles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 20% 30%, rgba(255, 215, 0, 0.7) 0%, rgba(255, 215, 0, 0.7) 1px, transparent 1px),
+    radial-gradient(circle at 40% 70%, rgba(255, 215, 0, 0.7) 0%, rgba(255, 215, 0, 0.7) 1px, transparent 1px),
+    radial-gradient(circle at 60% 40%, rgba(255, 215, 0, 0.7) 0%, rgba(255, 215, 0, 0.7) 1px, transparent 1px),
+    radial-gradient(circle at 80% 60%, rgba(255, 215, 0, 0.7) 0%, rgba(255, 215, 0, 0.7) 1px, transparent 1px),
+    radial-gradient(circle at 30% 80%, rgba(255, 215, 0, 0.7) 0%, rgba(255, 215, 0, 0.7) 1px, transparent 1px),
+    radial-gradient(circle at 70% 20%, rgba(255, 215, 0, 0.7) 0%, rgba(255, 215, 0, 0.7) 1px, transparent 1px);
+  background-size: 100% 100%;
+  opacity: 0.3;
+  animation: floatParticles 15s infinite ease-in-out;
+  z-index: 6;
+  pointer-events: none;
+}
+
+/* تأثيرات حركية */
+@keyframes moveClouds {
+  0% {
+    background-position: 0% 0%, 0% 0%;
+  }
+  100% {
+    background-position: 200% 0%, -100% 0%;
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes statueGlow {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes rotateRays {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes floatParticles {
+  0%, 100% {
+    background-position: 0% 0%;
+  }
+  25% {
+    background-position: 2% 1%;
+  }
+  50% {
+    background-position: 0% 2%;
+  }
+  75% {
+    background-position: -1% 0%;
+  }
+}
+
+/* تصميم متجاوب */
+@media (max-width: 768px) {
+  .olympus-temple {
+    width: 95%;
+    height: 50%;
+  }
+  
+  .olympus-statue {
+    width: 18%;
+    height: 30%;
+  }
+}
+
+@media (max-width: 480px) {
+  .olympus-temple {
+    top: 25%;
+    height: 40%;
+  }
+  
+  .olympus-statue {
+    width: 20%;
+    height: 25%;
+  }
+}
