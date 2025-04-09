@@ -368,6 +368,44 @@
   filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.8));
 }
 
+/* تنسيق كلمة سكاتر على رمز الكتاب */
+.symbol-book {
+  position: relative;
+}
+
+.symbol-book::after {
+  content: 'سكاتر';
+  position: absolute;
+  bottom: 5px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  color: #FFD700;
+  font-weight: bold;
+  font-size: 0.9rem;
+  text-shadow: 0 0 6px rgba(0, 0, 0, 0.8), 0 0 3px #000;
+  z-index: 5;
+  background: linear-gradient(to right, 
+    rgba(0,0,0,0.7) 0%, 
+    rgba(70, 40, 0, 0.9) 30%, 
+    rgba(70, 40, 0, 0.9) 70%, 
+    rgba(0,0,0,0.7) 100%
+  );
+  padding: 3px 0;
+  border-radius: 8px;
+  box-shadow: 0 0 8px var(--primary-gold), inset 0 0 4px var(--light-gold);
+  letter-spacing: 1px;
+  transform: translateY(0);
+  animation: scatters-glow 1.5s infinite alternate;
+  border: 1px solid var(--primary-gold);
+}
+
+/* تأثير لوميض كلمة سكاتر */
+@keyframes scatters-glow {
+  0% { box-shadow: 0 0 3px var(--primary-gold), inset 0 0 2px var(--light-gold); color: #FFD700; transform: translateY(0); }
+  100% { box-shadow: 0 0 8px var(--light-gold), inset 0 0 5px var(--light-gold); color: #FFF; transform: translateY(-2px); }
+}
+
 /* تنسيقات مخصصة لرموز معينة - ملغية لتوحيد الحجم */
 
 /* تنسيقات للصورة البديلة */
@@ -431,6 +469,27 @@
 .winning-symbol .svg-embed svg {
   transform: scale(1.1);
   filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.8));
+}
+
+/* تأثير خاص لكلمة سكاتر عند الفوز */
+.winning-symbol.symbol-book::after {
+  animation: scatters-win 0.5s infinite alternate;
+  background: linear-gradient(to right, 
+    rgba(30, 15, 0, 0.9) 0%, 
+    rgba(100, 60, 0, 0.9) 30%, 
+    rgba(100, 60, 0, 0.9) 70%, 
+    rgba(30, 15, 0, 0.9) 100%
+  );
+  box-shadow: 0 0 12px gold, inset 0 0 6px white;
+  color: white;
+  text-shadow: 0 0 8px gold, 0 0 4px gold;
+  border-color: white;
+  padding: 4px 0;
+}
+
+@keyframes scatters-win {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.1); }
 }
 
 /* تأثيرات الرموز الخاصة */
