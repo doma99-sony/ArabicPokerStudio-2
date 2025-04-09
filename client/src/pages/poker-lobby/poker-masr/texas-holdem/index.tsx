@@ -46,12 +46,33 @@ export default function TexasHoldemPoker() {
     resetGame,
     setErrorMessage,
     clearWinners,
-    performAction
+    performAction,
+    sendSocketMessage
   } = usePokerStore();
   
   // حالة تحكم الاتصال
   const [connecting, setConnecting] = useState(false);
   const [joiningTable, setJoiningTable] = useState(false);
+  const [tableId, setTableId] = useState<number | null>(null);
+  
+  // قراءة معرف الطاولة من URL عند تحميل الصفحة
+  useEffect(() => {
+    // الحصول على معرف الطاولة من باراميتر URL
+    const params = new URLSearchParams(window.location.search);
+    const tableParam = params.get("table");
+    
+    if (tableParam) {
+      const parsedTableId = parseInt(tableParam, 10);
+      if (!isNaN(parsedTableId)) {
+        setTableId(parsedTableId);
+        console.log("معرّف الطاولة من URL:", parsedTableId);
+      } else {
+        console.error("معرّف الطاولة غير صالح:", tableParam);
+      }
+    } else {
+      console.log("معرّف الطاولة غير موجود:", null);
+    }
+  }, []);
   
   // إعداد اتصال WebSocket عند تحميل الصفحة
   useEffect(() => {
@@ -82,6 +103,11 @@ export default function TexasHoldemPoker() {
             title: 'تم الاتصال بنجاح',
             description: 'أنت الآن متصل بخادم بوكر تكساس هولديم!'
           });
+          
+          // الانضمام للطاولة إذا كان هناك معرف طاولة في URL
+          if (tableId) {
+            joinTable(tableId);
+          }
         } else {
           setErrorMessage('فشل الاتصال بخادم البوكر. يرجى المحاولة مرة أخرى.');
           setConnecting(false);
@@ -103,18 +129,90 @@ export default function TexasHoldemPoker() {
     };
   }, [user?.id, user?.username, resetGame, setErrorMessage]);
   
+  // دالة للانضمام إلى طاولة معينة
+  const joinTable = (tableId: number) => {
+    if (!tableId) return;
+    
+    setJoiningTable(true);
+    console.log(`محاولة الانضمام للطاولة رقم ${tableId}`);
+    
+    // استخدام joinTable من متجر البوكر بدلاً من sendSocketMessage
+    const { joinTable: storeJoinTable } = usePokerStore.getState();
+    
+    if (storeJoinTable) {
+      // ندعي أن اللاعب يملك 1000 رقاقة كبداية
+      // في التطبيق الحقيقي، يجب أن نحصل على هذه القيمة من حالة اللاعب
+      const initialChips = 1000;
+      
+      // استخدام الواجهة البرمجية الرسمية في socket-manager
+      storeJoinTable(tableId, initialChips)
+        .then(success => {
+          setJoiningTable(false);
+          
+          if (success) {
+            toast({
+              title: 'تم الانضمام للطاولة',
+              description: `أنت الآن على الطاولة رقم ${tableId}`
+            });
+          } else {
+            setErrorMessage('فشل الانضمام للطاولة. يرجى المحاولة مرة أخرى.');
+          }
+        })
+        .catch(error => {
+          console.error('خطأ أثناء الانضمام للطاولة:', error);
+          setJoiningTable(false);
+          setErrorMessage('حدث خطأ أثناء الانضمام للطاولة. يرجى المحاولة مرة أخرى.');
+        });
+    } else {
+      setJoiningTable(false);
+      setErrorMessage('لا يمكن الاتصال بالخادم، يرجى المحاولة مرة أخرى.');
+    }
+  };
+  
   // تنفيذ إجراء اللعب
   const handlePlayerAction = (action: PlayerAction, amount?: number): void => {
     if (!gameState || !user?.id) return;
     
-    // في الإصدار الحقيقي، نرسل الإجراء عبر WebSocket ونتلقى التحديثات من الخادم
+    // الحصول على مكونات متجر البوكر لإرسال الإجراء
+    const { performAction: storePerformAction } = usePokerStore.getState();
+    
     console.log(`إرسال إجراء ${action} ${amount ? `بمبلغ ${amount}` : ''} للخادم`);
     
-    // إظهار رسالة نجاح
-    toast({
-      title: 'تم إرسال الإجراء',
-      description: `قمت بـ ${getActionText(action)} ${amount ? `بمبلغ ${amount}` : ''}`,
-    });
+    // استخدام performAction من متجر البوكر لإرسال الإجراء
+    if (storePerformAction && tableId) {
+      // إرسال الإجراء إلى السيرفر
+      storePerformAction(action, amount)
+        .then((success: boolean) => {
+          if (success) {
+            // إظهار رسالة نجاح
+            toast({
+              title: 'تم إرسال الإجراء',
+              description: `قمت بـ ${getActionText(action)} ${amount ? `بمبلغ ${amount}` : ''}`,
+            });
+          } else {
+            toast({
+              title: 'خطأ',
+              description: 'تعذر إرسال الإجراء، يرجى المحاولة مرة أخرى',
+              variant: 'destructive'
+            });
+          }
+        })
+        .catch((error: Error) => {
+          console.error('خطأ في إرسال الإجراء:', error);
+          toast({
+            title: 'خطأ',
+            description: 'حدث خطأ أثناء إرسال الإجراء',
+            variant: 'destructive'
+          });
+        });
+    } else {
+      console.error('لا يمكن إرسال الإجراء: غير متصل بالطاولة أو معرف الطاولة غير محدد');
+      toast({
+        title: 'خطأ',
+        description: 'غير متصل بالطاولة، يرجى الانضمام أولاً',
+        variant: 'destructive'
+      });
+    }
   };
   
   // الحصول على نص الإجراء بالعربية
@@ -218,7 +316,10 @@ export default function TexasHoldemPoker() {
           <ChevronLeft size={24} />
         </button>
         
-        <h1 className="text-2xl text-white font-bold">بوكر تكساس هولديم</h1>
+        <h1 className="text-2xl text-white font-bold">
+          بوكر تكساس هولديم
+          {tableId && <span className="ml-2 text-sm opacity-70">| طاولة رقم {tableId}</span>}
+        </h1>
         
         <div className="chip-count flex items-center">
           <div className="chip-icon w-8 h-8 bg-[#D4AF37] rounded-full flex items-center justify-center mr-2 text-black font-bold">$</div>

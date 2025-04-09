@@ -10,18 +10,36 @@ import { GameState, GamePlayer, ActionResult, WinnerInfo } from './game-manager'
  * أنواع رسائل WebSocket
  */
 export enum SocketMessageType {
+  // إدارة الغرف والطاولات
+  GET_ROOMS = 'get_rooms',                // طلب قائمة الغرف
+  ROOMS_LIST = 'rooms_list',              // قائمة الغرف
+  GET_TABLES = 'get_tables',              // طلب قائمة الطاولات في غرفة معينة
+  TABLES_LIST = 'tables_list',            // قائمة الطاولات
+  CREATE_TABLE = 'create_table',          // إنشاء طاولة جديدة
+  TABLE_CREATED = 'table_created',        // تم إنشاء طاولة
+  TABLE_UPDATE = 'table_update',          // تحديث بيانات طاولة
+  JOIN_ROOM = 'join_room',                // الانضمام لغرفة
+  LEAVE_ROOM = 'leave_room',              // مغادرة الغرفة
+  ROOM_UPDATE = 'room_update',            // تحديث بيانات الغرفة
+  
+  // إدارة دورة اللعب
   JOIN_TABLE = 'join_table',              // الانضمام لطاولة
   LEAVE_TABLE = 'leave_table',            // مغادرة الطاولة
   GAME_STATE = 'game_state',              // تحديث حالة اللعبة
   PLAYER_ACTION = 'player_action',        // إجراء اللاعب
   ACTION_RESULT = 'action_result',        // نتيجة الإجراء
+  START_ROUND = 'start_round',            // بدء جولة جديدة
   ROUND_COMPLETE = 'round_complete',      // انتهاء الجولة
+  REVEAL_CARDS = 'reveal_cards',          // كشف الأوراق
+  
+  // الاتصال والمراسلة
   CHAT_MESSAGE = 'chat_message',          // رسالة دردشة
   PLAYER_JOINED = 'player_joined',        // انضم لاعب
   PLAYER_LEFT = 'player_left',            // غادر لاعب
   ERROR = 'error',                        // خطأ
   PING = 'ping',                          // نبض
-  PONG = 'pong'                           // استجابة للنبض
+  PONG = 'pong',                          // استجابة للنبض
+  ONLINE_USERS_COUNT = 'online_users_count'  // عدد المستخدمين المتصلين
 }
 
 /**
@@ -256,6 +274,25 @@ export class SocketManager {
       return true;
     } catch (error) {
       console.error('خطأ في إرسال رسالة عبر WebSocket:', error);
+      return false;
+    }
+  }
+  
+  /**
+   * إرسال بيانات نصية مباشرة عبر WebSocket
+   * هذه الطريقة مفيدة لإرسال رسائل مخصصة أو معالجة أنماط رسائل خاصة
+   */
+  public send(data: string): boolean {
+    if (!this.isSocketConnected()) {
+      console.error('محاولة إرسال بيانات عبر اتصال WebSocket مغلق');
+      return false;
+    }
+    
+    try {
+      this.socket!.send(data);
+      return true;
+    } catch (error) {
+      console.error('خطأ في إرسال بيانات عبر WebSocket:', error);
       return false;
     }
   }

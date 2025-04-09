@@ -34,6 +34,7 @@ interface PokerStore {
   leaveTable: () => void;
   performAction: (action: PlayerAction, amount?: number) => Promise<boolean>;
   sendChatMessage: (message: string) => void;
+  sendSocketMessage: (message: any) => boolean; // دالة عامة لإرسال رسائل WebSocket
   addSystemMessage: (message: string) => void; // إضافة رسالة نظام
   getWinnersText: (winners: WinnerInfo[]) => string; // الحصول على نص الفائزين
   resetGame: () => void;
@@ -308,6 +309,50 @@ export const usePokerStore = create<PokerStore>((set, get) => ({
     set(state => ({
       chatMessages: [...state.chatMessages, newMessage]
     }));
+  },
+  
+  /**
+   * إرسال رسالة WebSocket عامة
+   */
+  sendSocketMessage: (message: any) => {
+    const { socketManager, isConnected } = get();
+    
+    // التحقق من وجود اتصال
+    if (!socketManager || !isConnected) {
+      console.error('محاولة إرسال رسالة بدون اتصال WebSocket');
+      return false;
+    }
+    
+    // التحقق من وجود رسالة
+    if (!message) {
+      console.error('محاولة إرسال رسالة فارغة');
+      return false;
+    }
+    
+    try {
+      // إرسال الرسالة عبر WebSocket
+      console.log('إرسال رسالة WebSocket:', message);
+      
+      // يمكن إرسال الرسالة بإحدى طريقتين:
+      // 1- استخدام sendMessage مع نوع الرسالة والبيانات كما في الرسائل المنظمة
+      // 2- استخدام send مع الرسالة كاملة كسلسلة نصية (JSON) للرسائل المخصصة
+      
+      if (typeof message === 'object') {
+        if (message.type && message.type in SocketMessageType) {
+          // إرسال الرسالة المنظمة باستخدام sendMessage
+          return socketManager.sendMessage(message.type as SocketMessageType, message.data || {});
+        } else {
+          // إرسال الرسالة كاملة كسلسلة نصية JSON
+          return socketManager.send(JSON.stringify(message));
+        }
+      } else {
+        // إذا كان النوع غير متوقع، إرسال كسلسلة نصية
+        return socketManager.send(typeof message === 'string' ? message : JSON.stringify(message));
+      }
+    } catch (error) {
+      console.error('خطأ عند إرسال رسالة WebSocket:', error);
+      return false;
+    }
   },
   
   /**
