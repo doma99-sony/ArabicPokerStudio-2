@@ -557,6 +557,43 @@ export default function PharaohsBook() {
       <div className="soft-light-glow"></div>
       <div className="moving-light-effect"></div>
       <div className="animated-shimmer"></div>
+
+      {/* الإطار الخارجي الفرعوني */}
+      <div className="egyptian-frame-container">
+        {/* زخارف الإطار العلوية */}
+        <div className="frame-top">
+          <div className="frame-top-center">
+            <div className="winged-scarab"></div>
+          </div>
+          <div className="frame-top-left-corner"></div>
+          <div className="frame-top-right-corner"></div>
+        </div>
+        
+        {/* زخارف الإطار الجانبية */}
+        <div className="frame-left">
+          <div className="frame-left-decoration top"></div>
+          <div className="frame-left-decoration middle"></div>
+          <div className="frame-left-decoration bottom"></div>
+        </div>
+        <div className="frame-right">
+          <div className="frame-right-decoration top"></div>
+          <div className="frame-right-decoration middle"></div>
+          <div className="frame-right-decoration bottom"></div>
+        </div>
+        
+        {/* زخارف الإطار السفلية */}
+        <div className="frame-bottom">
+          <div className="frame-bottom-left-corner"></div>
+          <div className="frame-bottom-center">
+            <div className="hieroglyphs-decoration"></div>
+          </div>
+          <div className="frame-bottom-right-corner"></div>
+        </div>
+        
+        {/* تماثيل أنوبيس على الجانبين */}
+        <div className="anubis-statue left"></div>
+        <div className="anubis-statue right"></div>
+      </div>
       
       {/* الشخصيات الفرعونية على الجوانب */}
       <div className={`pharaoh-guardian pharaoh-left ${freeSpins > 0 ? 'active' : ''} ${win > bet * 10 ? 'celebrating' : ''}`}>
