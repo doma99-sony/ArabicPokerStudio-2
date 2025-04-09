@@ -108,14 +108,21 @@ export class SocketManager {
         
         // توليد عنوان URL لـ WebSocket ديناميكيًا إذا لم يتم تمريره
         if (!url) {
-          // استخدم نفس البروتوكول والمضيف كما في اتصال المتصفح الحالي
+          // استخدم نفس البروتوكول كما في اتصال المتصفح الحالي
           const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-          const host = window.location.host;
           
-          // قم بتوجيه جميع اتصالات WebSocket إلى مسار ws على نفس الخادم
-          url = `${protocol}://${host}/ws`;
+          // الحصول على عنوان المضيف للبيئة الحالية
+          // في Replit، نستخدم عنوان URL الكامل للتطبيق
+          // مع استبدال الـ HTTP/HTTPS بـ WS/WSS
+          const replitUrl = window.location.hostname;
           
-          console.log('تم توليد عنوان WebSocket تلقائيًا:', url);
+          // تأكد من استخدام عنوان replit.dev/replit.co للـ WebSocket
+          let host = window.location.host;
+          
+          // قم بتوجيه اتصالات WebSocket للبوكر إلى مسار ws/poker على نفس الخادم
+          url = `${protocol}://${host}/ws/poker`;
+          
+          console.log('تم توليد عنوان WebSocket للبوكر تلقائيًا:', url);
         }
         
         console.log('محاولة الاتصال بـ WebSocket على العنوان:', url);
@@ -392,12 +399,13 @@ export class SocketManager {
     this.reconnectTimeout = setTimeout(() => {
       // محاولة إعادة الاتصال بنفس معرفات المستخدم
       if (this.userId && this.username) {
-        // نستخدم نفس عنوان الاتصال السابق إذا كان لدينا socket، وإلا نولد عنوان ديناميكي
+        // نحصل على نفس عنوان URL المستخدم في الاتصال الأصلي
+        // لضمان استخدام نفس العنوان في كل من الاتصال الأصلي وإعادة الاتصال
         const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
         const host = window.location.host;
         
-        // استخدم نفس عنوان المضيف الحالي ونفس نقطة النهاية في /ws
-        const url = `${protocol}://${host}/ws`;
+        // استخدم نفس عنوان المضيف الحالي ونفس نقطة النهاية في /ws/poker
+        const url = `${protocol}://${host}/ws/poker`;
         console.log('محاولة إعادة الاتصال على العنوان:', url);
         this.connect(url, this.userId, this.username)
           .then(() => {

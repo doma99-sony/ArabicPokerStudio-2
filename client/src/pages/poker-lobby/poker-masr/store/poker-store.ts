@@ -154,8 +154,9 @@ export const usePokerStore = create<PokerStore>((set, get) => ({
       // بناءً على بيئة التشغيل (تطوير أو إنتاج)
       console.log('محاولة الاتصال بخادم البوكر...');
       
-      // تمرير '' (سلسلة فارغة) لـ url يجعل SocketManager يولد العنوان تلقائيًا
-      const connected = await socketManager.connect('', userId, username);
+      // نسمح لـ SocketManager باستخدام منطق توليد العنوان الداخلي المحسن
+      // بتمرير null بدلاً من سلسلة فارغة
+      const connected = await socketManager.connect(null, userId, username);
       
       // تحديث الحالة
       set({

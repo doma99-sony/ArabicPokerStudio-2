@@ -164,11 +164,14 @@ export default function PokerPlayer({
           )}
           
           {/* مؤقت الدور - يظهر فقط للاعب الحالي */}
-          <TurnTimer
-            duration={10}
-            isActive={isCurrentTurn && isActive && !isFolded && !isAllIn}
-            onTimeout={handleTimeout}
-          />
+          {isCurrentTurn && isActive && !isFolded && !isAllIn && (
+            <TurnTimer
+              isCurrentTurn={true}
+              playerId={id}
+              duration={10}
+              onTimeout={handleTimeout}
+            />
+          )}
         </div>
       </div>
       

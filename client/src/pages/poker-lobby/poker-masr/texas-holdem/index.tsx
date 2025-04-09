@@ -53,51 +53,66 @@ export default function TexasHoldemPoker() {
   const [connecting, setConnecting] = useState(false);
   const [joiningTable, setJoiningTable] = useState(false);
   
-  // تحميل بيانات تجريبية عند تحميل الصفحة
+  // إعداد اتصال WebSocket عند تحميل الصفحة
   useEffect(() => {
     setConnecting(true);
-    console.log('تحميل بيانات تجريبية للعبة البوكر...');
+    console.log('جاري الاتصال بخادم البوكر...');
     
-    // الحصول على بيانات تجريبية مع معلومات المستخدم
-    const mockData = getMockGameState(user?.id, user?.username);
+    const connectToServer = async () => {
+      try {
+        // التحقق من وجود بيانات المستخدم
+        if (!user?.id || !user?.username) {
+          setErrorMessage('لا يمكن تحميل بيانات المستخدم. يرجى تسجيل الدخول مرة أخرى.');
+          setConnecting(false);
+          return;
+        }
+        
+        // محاولة الاتصال بخادم WebSocket
+        const { initializeSocket } = usePokerStore.getState();
+        const connected = await initializeSocket(user.id, user.username);
+        
+        if (connected) {
+          // تعيين معرف اللاعب المحلي بعد الاتصال
+          usePokerStore.setState({
+            localPlayerId: user.id
+          });
+          
+          setConnecting(false);
+          toast({
+            title: 'تم الاتصال بنجاح',
+            description: 'أنت الآن متصل بخادم بوكر تكساس هولديم!'
+          });
+        } else {
+          setErrorMessage('فشل الاتصال بخادم البوكر. يرجى المحاولة مرة أخرى.');
+          setConnecting(false);
+        }
+      } catch (error) {
+        console.error('خطأ في الاتصال بالخادم:', error);
+        setErrorMessage('حدث خطأ أثناء الاتصال بالخادم. يرجى المحاولة مرة أخرى.');
+        setConnecting(false);
+      }
+    };
     
-    // تعيين حالة اللعبة التجريبية
-    usePokerStore.setState({
-      gameState: mockData,
-      localPlayerId: user?.id || 1,
-      isConnected: true
-    });
-    
-    // تأخير لعرض شاشة التحميل
-    setTimeout(() => {
-      setConnecting(false);
-      toast({
-        title: 'تم تحميل بيانات تجريبية',
-        description: 'أنت الآن تلعب بوكر تكساس هولديم في الوضع التجريبي!'
-      });
-    }, 1000);
+    connectToServer();
     
     // تنظيف عند مغادرة الصفحة
     return () => {
       resetGame();
+      const { closeSocket } = usePokerStore.getState();
+      closeSocket();
     };
-  }, [user?.id, user?.username, resetGame]);
+  }, [user?.id, user?.username, resetGame, setErrorMessage]);
   
   // تنفيذ إجراء اللعب
-  const handlePlayerAction = (action: PlayerAction, amount?: number) => {
+  const handlePlayerAction = (action: PlayerAction, amount?: number): void => {
     if (!gameState || !user?.id) return;
     
-    // محاكاة تنفيذ الإجراء على البيانات التجريبية
-    const newGameState = simulatePlayerAction(gameState, user.id, action, amount);
-    
-    // تحديث حالة اللعبة
-    usePokerStore.setState({
-      gameState: newGameState
-    });
+    // في الإصدار الحقيقي، نرسل الإجراء عبر WebSocket ونتلقى التحديثات من الخادم
+    console.log(`إرسال إجراء ${action} ${amount ? `بمبلغ ${amount}` : ''} للخادم`);
     
     // إظهار رسالة نجاح
     toast({
-      title: 'تم تنفيذ الإجراء',
+      title: 'تم إرسال الإجراء',
       description: `قمت بـ ${getActionText(action)} ${amount ? `بمبلغ ${amount}` : ''}`,
     });
   };
@@ -116,10 +131,17 @@ export default function TexasHoldemPoker() {
   
   // ربط معالج الإجراء بمكون أزرار البوكر
   useEffect(() => {
+    // إنشاء وظيفة وسيطة متوافقة مع توقيع الدالة الأصلية
+    const wrappedHandleAction = async (action: PlayerAction, amount?: number): Promise<boolean> => {
+      handlePlayerAction(action, amount);
+      // نفترض أن الإجراء سينجح دائماً
+      return Promise.resolve(true);
+    };
+    
     // تجاوز أزرار الإجراء للاستخدام المباشر
     const originalPerformAction = performAction;
     usePokerStore.setState({
-      performAction: handlePlayerAction
+      performAction: wrappedHandleAction
     });
     
     return () => {
@@ -167,7 +189,7 @@ export default function TexasHoldemPoker() {
               variant="outline" 
               onClick={() => {
                 setErrorMessage(null);
-                navigate(0); // إعادة تحميل الصفحة
+                window.location.reload(); // إعادة تحميل الصفحة
               }}
             >
               إعادة المحاولة

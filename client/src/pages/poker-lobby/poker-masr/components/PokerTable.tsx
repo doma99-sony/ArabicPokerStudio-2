@@ -136,7 +136,10 @@ export default function PokerTable() {
   };
   
   return (
-    <div className="poker-table relative w-[800px] h-[400px] max-w-full mx-auto rounded-[50%] bg-gradient-to-b from-[#076324] to-[#0A3A2A] border-8 border-[#4A2511] shadow-2xl flex items-center justify-center">
+    <div className="poker-table relative w-[800px] h-[400px] max-w-full mx-auto rounded-[50%] bg-gradient-to-b from-[#076324] to-[#0A3A2A] border-8 border-[#4A2511] shadow-xl shadow-black/30 flex items-center justify-center overflow-hidden">
+      {/* ظلال ولمعان على سطح الطاولة */}
+      <div className="absolute inset-0 bg-gradient-radial from-transparent via-transparent to-black/30 pointer-events-none"></div>
+      <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-white/10 to-transparent pointer-events-none"></div>
       {/* حافة الطاولة */}
       <div className="table-rim absolute inset-0 rounded-[50%] border-8 border-[#B8860B] pointer-events-none"></div>
       
@@ -158,6 +161,10 @@ export default function PokerTable() {
       
       {/* المنطقة الوسطى في الطاولة */}
       <div className="table-center absolute w-[85%] h-[85%] rounded-[50%] bg-[#076324] flex flex-col items-center justify-center">
+        {/* مناطق وتأثيرات بصرية للطاولة */}
+        <div className="absolute inset-0 rounded-[50%] bg-gradient-radial from-[#0A7C32] via-[#076324] to-[#076324] opacity-70 pointer-events-none"></div>
+        <div className="absolute inset-0 rounded-[50%] border-4 border-[#065520]/30 pointer-events-none"></div>
+        <div className="absolute w-[70%] h-[60%] rounded-[50%] border border-dashed border-[#D4AF37]/20 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
         {/* معلومات وحالة اللعبة */}
         <div className="game-info absolute top-2 left-0 right-0 text-center text-white/70 text-xs">
           {phase === GamePhase.PREFLOP ? 'الجولة الأولى' :
