@@ -7,7 +7,12 @@ interface ControlPanelProps {
   freeSpins: number;
   autoPlay: boolean;
   toggleAutoPlay: () => void;
+  isMuted?: boolean;
+  toggleMute?: () => void;
 }
+
+// قيم الرهان الثابتة
+const BET_VALUES = [10000, 100000, 500000, 1000000, 5000000, 10000000];
 
 /**
  * مكون لوحة التحكم للعبة كتاب الفرعون
@@ -20,40 +25,42 @@ export default function ControlPanel({
   spinning,
   freeSpins,
   autoPlay,
-  toggleAutoPlay
+  toggleAutoPlay,
+  isMuted = false,
+  toggleMute = () => {}
 }: ControlPanelProps) {
   return (
     <div className="controls-panel">
       <div className="flex flex-wrap justify-between items-center gap-2">
-        {/* التحكم بالرهان */}
-        <div className="bet-controls flex items-center">
-          <button 
-            onClick={() => changeBet(-1)} 
-            className="btn-bet-change text-white bg-[#B22222] px-3 py-1 rounded-l"
-            disabled={spinning || bet <= 1}
-          >
-            -
-          </button>
-          <div className="bet-amount bg-[#2C3E50] text-[#D4AF37] px-3 py-1">
-            {bet}
+        {/* الدورات المجانية في أعلى اللوحة */}
+        {freeSpins > 0 && (
+          <div className="free-spins-badge absolute top-[-50px] left-0 right-0 mx-auto w-max z-20 bg-gradient-to-r from-[#B8860B] to-[#FFD700] text-black py-2 px-6 rounded-full text-xl font-bold shadow-lg animate-pulse">
+            {freeSpins} دورة مجانية متبقية
           </div>
-          <button 
-            onClick={() => changeBet(1)} 
-            className="btn-bet-change text-white bg-[#006400] px-3 py-1 rounded-r"
-            disabled={spinning || bet >= 100}
-          >
-            +
-          </button>
-          <span className="text-white mx-2">الرهان</span>
-        </div>
+        )}
 
-        {/* معلومات الرصيد والدورات المجانية */}
-        <div className="chips-info flex items-center gap-2">
-          {freeSpins > 0 && (
-            <div className="free-spins px-2 py-1 bg-[#D4AF37] text-black text-sm rounded-md">
-              {freeSpins} دورة مجانية
+        {/* التحكم بالرهان - قائمة منسدلة */}
+        <div className="bet-controls flex items-center">
+          <div className="relative">
+            <select 
+              value={bet}
+              onChange={(e) => changeBet(parseInt(e.target.value) - bet)}
+              disabled={spinning || freeSpins > 0}
+              className="bet-select bg-[#2C3E50] text-[#D4AF37] px-3 py-2 rounded border-2 border-[#D4AF37] appearance-none pr-10 font-bold cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {BET_VALUES.map(value => (
+                <option key={value} value={value}>
+                  {value.toLocaleString()}
+                </option>
+              ))}
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-[#D4AF37]">
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/>
+              </svg>
             </div>
-          )}
+          </div>
+          <span className="text-white mx-2 font-bold">الرهان</span>
         </div>
 
         {/* زر الدوران */}
@@ -75,50 +82,51 @@ export default function ControlPanel({
         </button>
       </div>
       
-      {/* أزرار استخدام مجموعات الرهان السريعة */}
-      <div className="quick-bet-buttons flex justify-center mt-3 gap-2">
+      {/* أزرار الرهان السريعة */}
+      <div className="quick-bet-buttons flex flex-wrap justify-center mt-4 gap-2">
+        {BET_VALUES.map(value => (
+          <button 
+            key={value}
+            onClick={() => changeBet(value - bet)} 
+            className={`quick-bet-button ${bet === value ? 'bg-[#D4AF37] text-black' : 'bg-[#1A2530] text-white'} py-1 px-3 rounded text-sm font-bold transition-colors`}
+            disabled={spinning || freeSpins > 0}
+          >
+            {value.toLocaleString()}
+          </button>
+        ))}
+        
+        {/* زر كتم الصوت */}
         <button 
-          onClick={() => changeBet(-bet + 1)} 
-          className="quick-bet-button bg-[#1A2530] text-white py-1 px-2 rounded text-xs"
-          disabled={spinning || bet === 1}
+          onClick={toggleMute}
+          className={`sound-button bg-[#1A2530] text-white py-1 px-3 rounded text-sm flex items-center ml-2`}
         >
-          الحد الأدنى (1)
+          {isMuted ? (
+            // أيقونة الصوت المغلق
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="1" y1="1" x2="23" y2="23"></line>
+              <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"></path>
+              <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"></path>
+              <line x1="12" y1="19" x2="12" y2="23"></line>
+              <line x1="8" y1="23" x2="16" y2="23"></line>
+            </svg>
+          ) : (
+            // أيقونة الصوت المفعل
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+              <line x1="12" y1="19" x2="12" y2="23"></line>
+              <line x1="8" y1="23" x2="16" y2="23"></line>
+            </svg>
+          )}
+          <span className="mr-1">{isMuted ? 'تشغيل الصوت' : 'كتم الصوت'}</span>
         </button>
-        <button 
-          onClick={() => changeBet(-bet + 5)} 
-          className="quick-bet-button bg-[#1A2530] text-white py-1 px-2 rounded text-xs"
-          disabled={spinning}
-        >
-          5
-        </button>
-        <button 
-          onClick={() => changeBet(-bet + 10)} 
-          className="quick-bet-button bg-[#1A2530] text-white py-1 px-2 rounded text-xs"
-          disabled={spinning}
-        >
-          10
-        </button>
-        <button 
-          onClick={() => changeBet(-bet + 25)} 
-          className="quick-bet-button bg-[#1A2530] text-white py-1 px-2 rounded text-xs"
-          disabled={spinning}
-        >
-          25
-        </button>
-        <button 
-          onClick={() => changeBet(-bet + 50)} 
-          className="quick-bet-button bg-[#1A2530] text-white py-1 px-2 rounded text-xs"
-          disabled={spinning}
-        >
-          50
-        </button>
-        <button 
-          onClick={() => changeBet(-bet + 100)} 
-          className="quick-bet-button bg-[#1A2530] text-white py-1 px-2 rounded text-xs"
-          disabled={spinning}
-        >
-          الحد الأقصى (100)
-        </button>
+      </div>
+
+      {/* عرض الرصيد الحالي */}
+      <div className="credits-display flex justify-center mt-3">
+        <div className="bg-[#0A1A1A] text-[#D4AF37] py-1 px-4 rounded-full border border-[#D4AF37] font-bold">
+          الرصيد: {credits.toLocaleString()}
+        </div>
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 interface ReelsProps {
   reels: string[][];
@@ -15,11 +15,29 @@ export default function Reels({ reels, spinning, specialSymbol, winningLines = [
   const [isSpinning, setIsSpinning] = useState(spinning);
   const [spinDelay, setSpinDelay] = useState<number[]>([]);
   const [highlightedCells, setHighlightedCells] = useState<Set<string>>(new Set());
+  const [winAnimationActive, setWinAnimationActive] = useState(false);
+  const [winLineIndex, setWinLineIndex] = useState(0);
+  
+  // مراجع للعناصر لإضافة تأثيرات متقدمة
+  const reelsContainerRef = useRef<HTMLDivElement>(null);
+  const winningAnimationRef = useRef<number | null>(null);
 
   // تأثير الدوران المتأخر لكل بكرة
   useEffect(() => {
     if (spinning) {
       setIsSpinning(true);
+      setWinAnimationActive(false);
+      
+      // إلغاء أي تأثيرات سابقة
+      if (winningAnimationRef.current) {
+        cancelAnimationFrame(winningAnimationRef.current);
+        winningAnimationRef.current = null;
+      }
+      
+      // إضافة تأثير الاهتزاز للبكرات أثناء الدوران
+      if (reelsContainerRef.current) {
+        reelsContainerRef.current.classList.add('shaking');
+      }
       
       // إنشاء تأخير مختلف لكل بكرة
       const delays = Array(5).fill(0).map((_, i) => 100 + i * 200);
@@ -33,78 +51,151 @@ export default function Reels({ reels, spinning, specialSymbol, winningLines = [
       setTimeout(() => {
         setIsSpinning(false);
         
+        // إزالة تأثير الاهتزاز
+        if (reelsContainerRef.current) {
+          reelsContainerRef.current.classList.remove('shaking');
+        }
+        
         // بعد انتهاء الدوران، إضاءة الخطوط الفائزة بتأثير متسلسل
         if (winningLines.length > 0) {
           // تأخير قليل قبل بدء عرض الخطوط الفائزة
           setTimeout(() => {
-            const showWinningLines = () => {
-              // جمع كل الخلايا الفائزة في مجموعة واحدة
-              const allHighlightedCells = new Set<string>();
-              
-              winningLines.forEach((line, lineIndex) => {
-                line.forEach(cellIndex => {
-                  const row = Math.floor(cellIndex / 5);
-                  const reelIndex = cellIndex % 5;
-                  allHighlightedCells.add(`${reelIndex}-${row}`);
-                });
+            setWinAnimationActive(true);
+            setWinLineIndex(0);
+            
+            // عرض خطوط الفوز بتأثير متتابع
+            const animateWinningLines = () => {
+              setHighlightedCells(prevCells => {
+                const newCells = new Set(prevCells);
+                
+                // إضافة الخط الحالي فقط للتأثير المتتابع
+                if (winLineIndex < winningLines.length) {
+                  const currentLine = winningLines[winLineIndex];
+                  currentLine.forEach(cellIndex => {
+                    const row = Math.floor(cellIndex / 5);
+                    const reelIndex = cellIndex % 5;
+                    newCells.add(`${reelIndex}-${row}`);
+                  });
+                }
+                
+                return newCells;
               });
               
-              // تحديث الخلايا المضاءة مرة واحدة
-              setHighlightedCells(allHighlightedCells);
+              // التقدم إلى الخط التالي بعد وقت مناسب
+              setTimeout(() => {
+                if (winLineIndex < winningLines.length - 1) {
+                  setWinLineIndex(prev => prev + 1);
+                } else {
+                  // إعادة البدء من أول خط بعد عرض جميع الخطوط
+                  setWinLineIndex(0);
+                  
+                  // بعد دورة كاملة، إضاءة كل الخطوط معاً
+                  setTimeout(() => {
+                    const allHighlightedCells = new Set<string>();
+                    
+                    winningLines.forEach(line => {
+                      line.forEach(cellIndex => {
+                        const row = Math.floor(cellIndex / 5);
+                        const reelIndex = cellIndex % 5;
+                        allHighlightedCells.add(`${reelIndex}-${row}`);
+                      });
+                    });
+                    
+                    setHighlightedCells(allHighlightedCells);
+                  }, 500);
+                }
+              }, 800);
             };
             
-            showWinningLines();
+            // بدء تأثير التتابع
+            animateWinningLines();
           }, 500);
         }
       }, maxDelay + 1000);
     }
-  }, [spinning, winningLines]);
+    
+    // تنظيف عند إلغاء التحميل
+    return () => {
+      if (winningAnimationRef.current) {
+        cancelAnimationFrame(winningAnimationRef.current);
+      }
+    };
+  }, [spinning, winningLines, winLineIndex]);
 
   // دالة مساعدة لعرض الرمز
   const renderSymbol = (symbol: string) => {
-    // استخدام الصور إذا كانت متوفرة أو استخدام الرموز النصية كبديل
+    // استخدام الصور لجميع الرموز
     try {
-      // أولاً نحاول استخدام الصور
-      if (['pharaoh', 'book', 'anubis'].includes(symbol)) {
-        return <img 
-          src={`/images/pharaohs-book/${symbol}.svg`} 
-          alt={symbol} 
-          className="w-full h-full object-contain"
-        />;
-      }
+      // استخدام مرجع مباشر للرمز المطلوب
+      const symbolPath = `/images/pharaohs-book/${symbol}.svg`;
       
-      // استخدام الرموز كبديل
-      const symbolIcons: Record<string, string> = {
-        'pharaoh': '🧙‍♂️',
-        'book': '📕',
-        'anubis': '🐕',
-        'eye': '👁️',
-        'scarab': '🪲',
-        'a': 'A',
-        'k': 'K',
-        'q': 'Q',
-        'j': 'J',
-        '10': '10'
-      };
-      
-      return symbolIcons[symbol] || symbol;
+      // بديل آمن وأكثر مباشرة 
+      return (
+        <div className="symbol-inner-container">
+          {/* محاولة عرض الصورة أولاً */}
+          <img 
+            src={symbolPath} 
+            alt={symbol} 
+            className="w-full h-full object-contain"
+            loading="eager"
+            style={{ display: 'block' }}
+            onError={(e) => {
+              // إخفاء الصورة الفاشلة
+              const imgEl = e.currentTarget;
+              imgEl.style.display = 'none';
+              
+              // البحث عن العنصر الأب
+              const parentEl = imgEl.parentElement;
+              if (parentEl) {
+                // إنشاء عنصر الرمز البديل مباشرة إذا لم يكن موجوداً
+                let fallbackEl = parentEl.querySelector('.fallback-icon') as HTMLElement | null;
+                
+                if (!fallbackEl) {
+                  fallbackEl = document.createElement('div');
+                  fallbackEl.className = 'fallback-icon w-full h-full flex items-center justify-center text-3xl';
+                  fallbackEl.textContent = getFallbackIcon(symbol);
+                  parentEl.appendChild(fallbackEl);
+                }
+                
+                // إظهار الرمز البديل
+                if (fallbackEl) {
+                  fallbackEl.style.display = 'flex';
+                }
+              }
+            }}
+          />
+          
+          {/* عنصر الرمز البديل محجوب افتراضياً */}
+          <div 
+            className="fallback-icon w-full h-full flex items-center justify-center text-3xl" 
+            style={{ display: 'none' }}
+          >
+            {getFallbackIcon(symbol)}
+          </div>
+        </div>
+      );
     } catch (error) {
       // في حالة حدوث خطأ استخدم الرموز النصية
-      const fallbackIcons: Record<string, string> = {
-        'pharaoh': '🧙‍♂️',
-        'book': '📕',
-        'anubis': '🐕',
-        'eye': '👁️',
-        'scarab': '🪲',
-        'a': 'A',
-        'k': 'K',
-        'q': 'Q',
-        'j': 'J',
-        '10': '10'
-      };
-      
-      return fallbackIcons[symbol] || symbol;
+      return <div className="fallback-icon flex items-center justify-center text-3xl">{getFallbackIcon(symbol)}</div>;
     }
+  };
+
+  // الحصول على الرمز النصي البديل
+  const getFallbackIcon = (symbol: string): string => {
+    const fallbackIcons: Record<string, string> = {
+      'pharaoh': '🧙‍♂️',
+      'book': '📕',
+      'anubis': '🐕',
+      'eye': '👁️',
+      'scarab': '🪲',
+      'a': 'A',
+      'k': 'K',
+      'q': 'Q',
+      'j': 'J',
+      '10': '10'
+    };
+    
+    return fallbackIcons[symbol] || symbol;
   };
 
   // التحقق مما إذا كان الرمز هو الرمز الخاص في الدورات المجانية
@@ -117,8 +208,33 @@ export default function Reels({ reels, spinning, specialSymbol, winningLines = [
     return highlightedCells.has(`${reelIndex}-${symbolIndex}`);
   };
 
+  // دالة لتحديد فئة تأثير الفوز (لتنويع التأثيرات)
+  const getWinEffectClass = (reelIndex: number, symbolIndex: number) => {
+    if (!isHighlighted(reelIndex, symbolIndex)) return '';
+    
+    // تحديد نوع التأثير بناءً على موقع الرمز
+    const effectIndex = (reelIndex + symbolIndex) % 4;
+    return `win-effect-${effectIndex + 1}`;
+  };
+
   return (
-    <div className="reels-container">
+    <div className="reels-container relative" ref={reelsContainerRef}>
+      {/* تأثيرات الفوز حول البكرات */}
+      {winAnimationActive && (
+        <div className="win-effects absolute inset-0 z-10 pointer-events-none">
+          <div className="win-glow absolute inset-0 animate-pulse-gold"></div>
+          <div className="win-particles absolute inset-0"></div>
+        </div>
+      )}
+      
+      {/* خطوط الفوز */}
+      {winAnimationActive && winningLines.map((line, index) => (
+        <div 
+          key={`line-${index}`} 
+          className={`win-line win-line-${index % 5} ${winLineIndex === index ? 'active' : ''}`}
+        ></div>
+      ))}
+      
       <div className="reels-grid">
         {reels.map((reel, reelIndex) => (
           <div 
@@ -137,15 +253,28 @@ export default function Reels({ reels, spinning, specialSymbol, winningLines = [
                   ${symbol === 'book' ? 'special-symbol' : ''} 
                   ${isSpecial(symbol) ? 'special-symbol' : ''} 
                   ${isHighlighted(reelIndex, symbolIndex) ? 'winning-symbol' : ''}
+                  ${getWinEffectClass(reelIndex, symbolIndex)}
                 `}
                 style={{ 
                   animationDelay: isSpinning ? `${spinDelay[reelIndex] + symbolIndex * 100}ms` : '0ms',
                   transition: 'all 0.3s ease'
                 }}
               >
-                <div className={`symbol-icon ${symbol}`}>
+                {/* تأثير توهج حول الرموز الفائزة */}
+                {isHighlighted(reelIndex, symbolIndex) && (
+                  <div className="symbol-glow absolute inset-0 rounded-lg z-0"></div>
+                )}
+                
+                <div className={`symbol-icon ${symbol} relative z-10`}>
                   {renderSymbol(symbol)}
                 </div>
+                
+                {/* تأثير نجوم متساقطة على الرموز الفائزة */}
+                {isHighlighted(reelIndex, symbolIndex) && (
+                  <div className="symbol-stars absolute inset-0 overflow-hidden z-20">
+                    <div className="stars-inner"></div>
+                  </div>
+                )}
               </div>
             ))}
           </div>

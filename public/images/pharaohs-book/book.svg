@@ -1,12 +1,46 @@
 <svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
   <rect width="100%" height="100%" fill="#1A2530" />
-  <g fill="#FFD700">
-    <path d="M60,40 L140,40 L140,160 L60,160 Z" />
-    <path d="M65,45 L100,85 L135,45 Z" fill="#B22222" />
-    <path d="M65,55 L135,55 L135,155 L65,155 Z" fill="#8B4513" />
-    <path d="M75,70 L125,70 L125,80 L75,80 Z" fill="#FFD700" />
-    <path d="M75,90 L125,90 L125,100 L75,100 Z" fill="#FFD700" />
-    <path d="M75,110 L125,110 L125,120 L75,120 Z" fill="#FFD700" />
-    <path d="M75,130 L125,130 L125,140 L75,140 Z" fill="#FFD700" />
+  <g>
+    <!-- Glowing background for the book -->
+    <circle cx="100" cy="100" r="65" fill="#FFD700" opacity="0.25">
+      <animate attributeName="opacity" values="0.2;0.3;0.2" dur="3s" repeatCount="indefinite" />
+    </circle>
+    
+    <!-- Book back cover -->
+    <rect x="60" y="50" width="80" height="110" rx="5" fill="#8B4513" stroke="#FFD700" stroke-width="2" />
+    
+    <!-- Book spine -->
+    <rect x="60" y="50" width="10" height="110" fill="#6B3E26" stroke="#FFD700" stroke-width="1" />
+    
+    <!-- Book front cover (slightly open) -->
+    <path d="M 70 50 L 145 60 L 145 150 L 70 160 Z" fill="#B8860B" stroke="#FFD700" stroke-width="2" />
+    
+    <!-- Hieroglyphs on cover -->
+    <!-- Eye of Horus -->
+    <path d="M 95 80 C 105 75, 115 75, 125 80 C 125 85, 115 90, 95 85 Z" stroke="#FFD700" fill="none" />
+    <circle cx="110" cy="82" r="3" fill="#FFD700" />
+    
+    <!-- Ankh symbol -->
+    <path d="M 100 100 C 95 95, 95 90, 100 90 C 105 90, 105 95, 100 100 L 100 110" stroke="#FFD700" stroke-width="1.5" fill="none" />
+    <path d="M 95 95 L 105 95" stroke="#FFD700" stroke-width="1.5" />
+    
+    <!-- Scarab -->
+    <path d="M 90 120 C 100 115, 110 115, 120 120 C 120 125, 110 130, 90 125 Z" stroke="#FFD700" fill="none" />
+    <path d="M 105 120 L 105 125" stroke="#FFD700" />
+    <path d="M 100 120 L 100 125" stroke="#FFD700" />
+    <path d="M 110 120 L 110 125" stroke="#FFD700" />
+    
+    <!-- Book clasp -->
+    <rect x="140" y="95" width="10" height="20" rx="2" fill="#D4AF37" stroke="#FFD700" />
+    
+    <!-- Pages edge -->
+    <path d="M 70 50 C 100 55, 130 55, 145 60" fill="none" stroke="#FFF" stroke-width="1" opacity="0.7" />
+    <path d="M 70 160 C 100 155, 130 155, 145 150" fill="none" stroke="#FFF" stroke-width="1" opacity="0.7" />
+    
+    <!-- Book glow effect -->
+    <rect x="60" y="50" width="85" height="110" rx="5" fill="none" stroke="#FFD700" stroke-width="1" opacity="0.5">
+      <animate attributeName="opacity" values="0.3;0.8;0.3" dur="2s" repeatCount="indefinite" />
+      <animate attributeName="stroke-width" values="1;2;1" dur="2s" repeatCount="indefinite" />
+    </rect>
   </g>
 </svg>

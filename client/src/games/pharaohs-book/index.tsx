@@ -15,8 +15,8 @@ export default function PharaohsBook() {
   const [location, navigate] = useLocation();
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [credits, setCredits] = useState(user?.chips || 1000);
-  const [bet, setBet] = useState(10);
+  const [credits, setCredits] = useState(user?.chips || 10000000); // زيادة الرصيد الافتراضي ليتناسب مع قيم الرهان الجديدة
+  const [bet, setBet] = useState(10000); // تغيير قيمة الرهان الافتراضية للقيمة الأولى في مصفوفة الرهانات
   const [reels, setReels] = useState<string[][]>([]);
   const [spinning, setSpinning] = useState(false);
   const [message, setMessage] = useState('');
@@ -25,6 +25,8 @@ export default function PharaohsBook() {
   const [autoPlay, setAutoPlay] = useState(false);
   const [specialSymbol, setSpecialSymbol] = useState<string | null>(null);
   const [winningLines, setWinningLines] = useState<number[][]>([]);
+  const [backgroundMusic, setBackgroundMusic] = useState<HTMLAudioElement | null>(null);
+  const [isMuted, setIsMuted] = useState(false);
 
   // رموز اللعبة
   const symbols = [
@@ -63,12 +65,16 @@ export default function PharaohsBook() {
     // إنشاء البكرات الافتراضية للعبة
     initializeReels();
 
-    // تحميل الصور فقط للرموز التي لها صور SVG
-    const svgSymbols = ['pharaoh', 'book', 'anubis'];
+    // تحميل الصور لجميع الرموز
+    const svgSymbols = [
+      'pharaoh', 'book', 'anubis', 'eye', 'scarab',
+      'a', 'k', 'q', 'j', '10'
+    ];
+    
     const imagesToLoad = svgSymbols.length;
     let imagesLoaded = 0;
 
-    // تحميل الصور المتوفرة فقط
+    // تحميل الصور مسبقاً
     svgSymbols.forEach(symbol => {
       const img = new Image();
       img.src = `/images/pharaohs-book/${symbol}.svg`;
@@ -87,14 +93,35 @@ export default function PharaohsBook() {
       };
     });
 
+    // إعداد موسيقى الخلفية
+    const bgMusic = new Audio('/sounds/pharaohs-book/background.mp3');
+    bgMusic.loop = true;
+    bgMusic.volume = 0.3;
+    
+    // محاولة تشغيل الموسيقى (ستعمل فقط بعد تفاعل المستخدم مع الصفحة)
+    const musicPromise = bgMusic.play();
+    if (musicPromise !== undefined) {
+      musicPromise.catch(error => {
+        console.log('لا يمكن تشغيل الموسيقى تلقائياً، يحتاج تفاعل المستخدم أولاً');
+      });
+    }
+    
+    setBackgroundMusic(bgMusic);
+    
     // استخدام زمن قصير للتحميل في حالة عدم توفر الصور
     setTimeout(() => {
       setLoading(false);
     }, 1000);
 
     return () => {
+      // إيقاف اللعب التلقائي والموسيقى عند مغادرة الصفحة
       if (autoPlay) {
         setAutoPlay(false);
+      }
+      
+      if (backgroundMusic) {
+        backgroundMusic.pause();
+        backgroundMusic.currentTime = 0;
       }
     };
   }, [user]);
@@ -113,14 +140,58 @@ export default function PharaohsBook() {
     setReels(newReels);
   };
 
+  // قيم الرهان الثابتة
+  const BET_VALUES = [10000, 100000, 500000, 1000000, 5000000, 10000000];
+
   // تغيير قيمة الرهان
   const changeBet = (amount: number) => {
-    const newBet = Math.max(1, Math.min(100, bet + amount));
-    setBet(newBet);
+    // في حالة كان هناك لفات مجانية، لا يمكن تغيير الرهان
+    if (freeSpins > 0) return;
+    
+    // تعديل الرهان مباشرة بقيمة محددة
+    const newBet = bet + amount;
+    
+    // التحقق من أن القيمة الجديدة موجودة في مصفوفة قيم الرهان
+    if (BET_VALUES.includes(newBet)) {
+      setBet(newBet);
+    } else {
+      // في حالة إدخال قيمة غير موجودة في المصفوفة، نختار القيمة الأقرب
+      const closestValue = BET_VALUES.reduce((prev, curr) => {
+        return (Math.abs(curr - newBet) < Math.abs(prev - newBet) ? curr : prev);
+      });
+      setBet(closestValue);
+    }
+  };
+
+  // تبديل حالة كتم الصوت
+  const toggleMute = () => {
+    setIsMuted(prevMuted => {
+      const newMutedState = !prevMuted;
+      
+      // تطبيق حالة كتم الصوت على موسيقى الخلفية
+      if (backgroundMusic) {
+        if (newMutedState) {
+          backgroundMusic.pause();
+        } else {
+          // محاولة إعادة تشغيل الموسيقى
+          const playPromise = backgroundMusic.play();
+          if (playPromise !== undefined) {
+            playPromise.catch(error => {
+              console.log('فشل إعادة تشغيل الموسيقى، يحتاج تفاعل المستخدم أولاً');
+            });
+          }
+        }
+      }
+      
+      return newMutedState;
+    });
   };
 
   // تشغيل الأصوات
   const playSound = (soundName: string) => {
+    // لا تشغل الأصوات إذا كان وضع كتم الصوت مفعلاً
+    if (isMuted) return;
+    
     try {
       // استخدام القيمة الافتراضية في حالة عدم وجود الملف الصوتي
       // هذا يعمل على تجنب الأخطاء في حالة عدم وجود ملفات صوتية
@@ -153,6 +224,39 @@ export default function PharaohsBook() {
     }
   };
 
+  // احتمالية ظهور كل رمز (الرموز الأعلى قيمة لها احتمالية أقل)
+  const symbolProbabilities = {
+    'pharaoh': 0.07, // الفرعون (أعلى قيمة، احتمالية منخفضة)
+    'book': 0.06,    // الكتاب (سكاتر، احتمالية منخفضة)
+    'anubis': 0.08,  // أنوبيس
+    'eye': 0.1,      // عين حورس
+    'scarab': 0.12,  // الجعران
+    'a': 0.12,       // A
+    'k': 0.13,       // K
+    'q': 0.14,       // Q
+    'j': 0.14,       // J
+    '10': 0.15       // 10 (أقل قيمة، احتمالية عالية)
+  };
+
+  // دالة اختيار رمز عشوائي بناءً على الاحتمالات المحددة
+  const getRandomSymbol = (): string => {
+    const rand = Math.random();
+    let cumulativeProbability = 0;
+    
+    for (const symbol in symbolProbabilities) {
+      cumulativeProbability += symbolProbabilities[symbol as keyof typeof symbolProbabilities];
+      if (rand <= cumulativeProbability) {
+        return symbol;
+      }
+    }
+    
+    // إرجاع الرمز الأقل قيمة كاحتياط في حالة حدوث أخطاء في الاحتمالات
+    return '10';
+  };
+
+  // خوارزمية تقييم الفوز - تتحكم في احتمالية تحقيق الفوز
+  const WIN_RATE = 0.35; // نسبة الفوز 35%
+
   // دالة للدوران
   const spin = async () => {
     if (spinning) return;
@@ -178,16 +282,76 @@ export default function PharaohsBook() {
     // صوت الدوران
     playSound('spin');
 
-    // محاكاة دوران البكرات
+    // محاكاة دوران البكرات مع خوارزمية موزونة للاحتمالات
     const newReels: string[][] = [];
-
-    // إنشاء نتيجة عشوائية
-    for (let i = 0; i < 5; i++) {
-      const reel: string[] = [];
-      for (let j = 0; j < 3; j++) {
-        reel.push(symbols[Math.floor(Math.random() * symbols.length)]);
+    
+    // تحديد ما إذا كانت هذه الدورة ستكون فائزة أم لا
+    const shouldWin = Math.random() <= WIN_RATE;
+    
+    // في حالة الدورات المجانية، نزيد احتمالية الفوز
+    const freeSpinBoost = freeSpins > 0 ? 0.2 : 0;
+    
+    // تحديد ما إذا كان سيظهر 3 كتب (سكاتر) في هذه الدورة
+    // احتمالية منخفضة للحصول على دورات مجانية (5%)
+    const shouldGiveFreeSpins = Math.random() <= 0.05 + freeSpinBoost;
+    
+    if (shouldGiveFreeSpins) {
+      // إنشاء نتيجة تحتوي على 3 كتب على الأقل
+      let bookPositions: [number, number][] = [];
+      
+      // اختيار 3 مواضع عشوائية للكتب
+      while (bookPositions.length < 3) {
+        const reel = Math.floor(Math.random() * 5);
+        const row = Math.floor(Math.random() * 3);
+        
+        // التأكد من عدم تكرار نفس الموضع
+        if (!bookPositions.some(pos => pos[0] === reel && pos[1] === row)) {
+          bookPositions.push([reel, row]);
+        }
       }
-      newReels.push(reel);
+      
+      // إنشاء البكرات مع وضع الكتب في المواضع المختارة
+      for (let i = 0; i < 5; i++) {
+        const reel: string[] = [];
+        for (let j = 0; j < 3; j++) {
+          const isBookPosition = bookPositions.some(pos => pos[0] === i && pos[1] === j);
+          reel.push(isBookPosition ? 'book' : getRandomSymbol());
+        }
+        newReels.push(reel);
+      }
+    } else if (shouldWin) {
+      // إنشاء نتيجة فائزة - نضع نفس الرمز في خط واحد على الأقل
+      
+      // اختيار رمز عشوائي للفوز
+      const winningSymbol = symbols[Math.floor(Math.random() * symbols.length)];
+      
+      // اختيار صف عشوائي للفوز
+      const winningRow = Math.floor(Math.random() * 3);
+      
+      // عدد البكرات المتطابقة في الصف - على الأقل 3 للفوز
+      const matchingReels = 3 + Math.floor(Math.random() * 3); // 3 إلى 5 بكرات متطابقة
+      
+      // إنشاء البكرات مع وضع الرمز الفائز في المواضع المناسبة
+      for (let i = 0; i < 5; i++) {
+        const reel: string[] = [];
+        for (let j = 0; j < 3; j++) {
+          if (j === winningRow && i < matchingReels) {
+            reel.push(winningSymbol);
+          } else {
+            reel.push(getRandomSymbol());
+          }
+        }
+        newReels.push(reel);
+      }
+    } else {
+      // إنشاء نتيجة غير فائزة - رموز عشوائية بدون نمط
+      for (let i = 0; i < 5; i++) {
+        const reel: string[] = [];
+        for (let j = 0; j < 3; j++) {
+          reel.push(getRandomSymbol());
+        }
+        newReels.push(reel);
+      }
     }
 
     // تأخير لإظهار تأثير الدوران
@@ -201,7 +365,7 @@ export default function PharaohsBook() {
         playSound('win');
         setWin(result.win);
         setCredits(prev => prev + result.win);
-        setMessage(`ربحت ${result.win} رقاقة!`);
+        setMessage(`ربحت ${result.win.toLocaleString()} رقاقة!`);
         
         // عرض تأثيرات الربح
         showWinAnimation(result.winningLines);
@@ -219,7 +383,9 @@ export default function PharaohsBook() {
         playSound('freespin');
         
         // اختيار رمز خاص عشوائي للدورات المجانية
-        const randomSymbol = symbols[Math.floor(Math.random() * (symbols.length - 2)) + 1];
+        // نستثني الرموز ذات القيمة العالية جدًا
+        const specialSymbolOptions = symbols.filter(s => s !== 'pharaoh' && s !== 'book');
+        const randomSymbol = specialSymbolOptions[Math.floor(Math.random() * specialSymbolOptions.length)];
         setSpecialSymbol(randomSymbol);
       }
       
@@ -314,7 +480,45 @@ export default function PharaohsBook() {
     // تحديث state للخطوط الفائزة لعرضها في مكون البكرات
     setWinningLines(winningLines);
     
-    // إضافة تأثيرات صوتية/مرئية أخرى حسب الحاجة
+    // حساب قيمة الربح لاختيار تأثيرات مناسبة
+    const winAmount = win || 0;
+    
+    // تشغيل صوت الفوز المناسب حسب قيمة الربح
+    if (winAmount > bet * 20) {
+      // ربح كبير - صوت خاص للفوز الكبير
+      playSound('bigwin');
+      
+      // إضافة تأثير اهتزاز للشاشة للفوز الكبير
+      const screenElement = document.querySelector('.pharaohs-book-container');
+      if (screenElement) {
+        screenElement.classList.add('big-win-effect');
+        setTimeout(() => {
+          screenElement.classList.remove('big-win-effect');
+        }, 3000);
+      }
+    } else if (winAmount > bet * 5) {
+      // ربح متوسط
+      playSound('win');
+      
+      // تشغيل صوت الفوز مرتين للتأكيد
+      setTimeout(() => {
+        playSound('win');
+      }, 300);
+    } else {
+      // ربح عادي
+      playSound('win');
+    }
+    
+    // عرض رسالة مختلفة حسب قيمة الربح
+    if (winAmount > bet * 20) {
+      setMessage(`ربح هائل! 🔥 ${winAmount.toLocaleString()} رقاقة!`);
+    } else if (winAmount > bet * 5) {
+      setMessage(`ربح جيد! ${winAmount.toLocaleString()} رقاقة!`);
+    } else {
+      setMessage(`ربحت ${winAmount.toLocaleString()} رقاقة!`);
+    }
+    
+    // سجل التفاصيل في وحدة التحكم للتصحيح
     console.log('خطوط الربح:', winningLines);
   };
 
@@ -345,9 +549,17 @@ export default function PharaohsBook() {
   }
 
   return (
-    <div className="pharaohs-book-container bg-black min-h-screen flex flex-col overflow-hidden">
+    <div className="pharaohs-book-container min-h-screen flex flex-col overflow-hidden">
+      {/* طبقات الخلفية المتحركة */}
+      <div className="animated-light-rays"></div>
+      <div className="animated-sand"></div>
+      
+      {/* شريط الزخرفة العلوي والسفلي */}
+      <div className="decorative-border-top"></div>
+      <div className="decorative-border-bottom"></div>
+      
       {/* شريط العنوان */}
-      <header className="bg-[#0A1A1A] border-b-2 border-[#D4AF37] p-3 flex justify-between items-center shadow-lg">
+      <header className="bg-[#0A1A1A] border-b-2 border-[#D4AF37] p-3 flex justify-between items-center shadow-lg relative z-10">
         <button 
           onClick={goBack}
           className="text-[#D4AF37] hover:text-white transition-colors duration-300"
@@ -358,8 +570,8 @@ export default function PharaohsBook() {
           </svg>
         </button>
         <h1 className="text-xl font-bold text-center text-[#D4AF37]">كتاب الفرعون</h1>
-        <div className="flex items-center">
-          <span className="text-[#D4AF37] mr-2">{credits}</span>
+        <div className="flex items-center bg-gradient-to-r from-[#1A2530] to-[#0A1A1A] px-3 py-1 rounded-full border border-[#D4AF37]">
+          <span className="text-[#D4AF37] mr-2 font-bold">{credits.toLocaleString()}</span>
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#D4AF37]">
             <circle cx="12" cy="12" r="8"/>
             <path d="M12 6v6l4 2"/>
@@ -372,8 +584,21 @@ export default function PharaohsBook() {
         {/* رسالة الربح والرسائل الأخرى */}
         {message && (
           <div className="message-container absolute top-4 left-0 right-0 mx-auto text-center z-10">
-            <div className={`message inline-block py-2 px-4 rounded-full ${win > 0 || freeSpins > 0 ? 'bg-[#D4AF37] text-black' : 'bg-red-600 text-white'}`}>
+            <div 
+              className={`
+                message inline-block py-2 px-6 rounded-full 
+                ${win > bet * 20 ? 'bg-gradient-to-r from-[#B8860B] to-[#FFD700] text-black font-bold text-xl animate-bounce' : 
+                  win > bet * 5 ? 'bg-gradient-to-r from-[#D4AF37] to-[#FFD700] text-black font-bold' : 
+                  win > 0 ? 'bg-[#D4AF37] text-black' : 
+                  freeSpins > 0 ? 'bg-gradient-to-r from-[#8B4513] to-[#D4AF37] text-white font-bold' : 
+                  'bg-red-600 text-white'}
+                shadow-lg border ${win > 0 ? 'border-[#FFD700]' : 'border-transparent'}
+              `}
+            >
               {message}
+              {win > bet * 20 && (
+                <span className="win-sparkles absolute inset-0 overflow-hidden rounded-full"></span>
+              )}
             </div>
           </div>
         )}
@@ -388,8 +613,24 @@ export default function PharaohsBook() {
 
         {/* الدورات المجانية */}
         {freeSpins > 0 && (
-          <div className="free-spins-counter bg-[#D4AF37] text-black py-1 px-3 rounded-full mb-4">
-            <span>دورات مجانية متبقية: {freeSpins}</span>
+          <div className="free-spins-banner absolute top-24 left-0 right-0 z-20 flex flex-col items-center">
+            <div className="free-spins-counter bg-gradient-to-r from-[#B8860B] to-[#FFD700] text-black py-2 px-6 rounded-full mb-4 text-xl font-bold shadow-lg animate-pulse">
+              <span>دورات مجانية متبقية: {freeSpins}</span>
+            </div>
+            {specialSymbol && (
+              <div className="special-symbol-badge bg-black/70 py-1 px-4 rounded-full text-[#D4AF37] text-sm border border-[#D4AF37]">
+                الرمز الخاص: 
+                <span className="ml-2 font-bold">
+                  {
+                    specialSymbol === 'pharaoh' ? 'الفرعون' :
+                    specialSymbol === 'anubis' ? 'أنوبيس' :
+                    specialSymbol === 'eye' ? 'عين حورس' :
+                    specialSymbol === 'scarab' ? 'الجعران' :
+                    specialSymbol
+                  }
+                </span>
+              </div>
+            )}
           </div>
         )}
 
@@ -403,6 +644,8 @@ export default function PharaohsBook() {
           freeSpins={freeSpins}
           autoPlay={autoPlay}
           toggleAutoPlay={toggleAutoPlay}
+          isMuted={isMuted}
+          toggleMute={toggleMute}
         />
 
         {/* جدول المكافآت */}
