@@ -29,8 +29,8 @@ export enum SocketMessageType {
  */
 export interface SocketMessage {
   type: SocketMessageType;               // نوع الرسالة
-  tableId?: number;                      // معرف الطاولة
-  playerId?: number;                     // معرف اللاعب
+  tableId?: number | null;               // معرف الطاولة (مع دعم القيم null)
+  playerId?: number | null;              // معرف اللاعب (مع دعم القيم null)
   data?: any;                            // بيانات الرسالة
   timestamp: number;                     // وقت الرسالة
 }
@@ -119,8 +119,9 @@ export class SocketManager {
           // تأكد من استخدام عنوان replit.dev/replit.co للـ WebSocket
           let host = window.location.host;
           
-          // قم بتوجيه اتصالات WebSocket للبوكر إلى مسار ws/poker على نفس الخادم
-          url = `${protocol}://${host}/ws/poker`;
+          // قم بتوجيه اتصالات WebSocket للبوكر إلى مسار المنفذ 5000 (خادم Node.js للتطبيق)
+          // استخدم مسار /ws الذي يتم إنشاؤه في server/poker.ts
+          url = `${protocol}://${host}/ws`;
           
           console.log('تم توليد عنوان WebSocket للبوكر تلقائيًا:', url);
         }
@@ -239,12 +240,17 @@ export class SocketManager {
     }
     
     try {
+      // تطويع صيغة الرسالة لتتوافق مع توقعات الخادم في server/poker.ts
       const message: SocketMessage = {
         type,
         playerId: this.userId || undefined,
+        tableId: this.currentTableId || undefined, // إضافة معرف الطاولة إلى جميع الرسائل، مع التعامل مع القيمة null
         data,
         timestamp: Date.now()
       };
+      
+      // طباعة الرسائل المرسلة للتصحيح
+      console.log('إرسال رسالة WebSocket:', message);
       
       this.socket!.send(JSON.stringify(message));
       return true;
@@ -325,7 +331,10 @@ export class SocketManager {
    */
   private handleMessage(event: MessageEvent): void {
     try {
+      console.log('تم استلام رسالة WebSocket:', event.data);
+      
       const message: SocketMessage = JSON.parse(event.data);
+      console.log('تم تفسير رسالة واردة:', message);
       
       // معالجة نبضة الخادم
       if (message.type === SocketMessageType.PING) {
@@ -335,8 +344,23 @@ export class SocketManager {
       
       // استدعاء المعالج المناسب إذا وجد
       const handler = this.handlers[message.type];
-      if (handler && message.data) {
-        handler(message.data);
+      
+      // تعديل لدعم هياكل البيانات المختلفة من الخادم
+      // بعض الخوادم ترسل البيانات كـ message.data وبعضها ترسلها مباشرة
+      if (handler) {
+        if (message.data) {
+          console.log('تنفيذ معالج الرسالة مع البيانات:', message.data);
+          handler(message.data);
+        } else {
+          // إذا لم يكن هناك message.data، نفترض أن البيانات هي الرسالة نفسها بعد حذف حقل type
+          const { type, ...data } = message;
+          if (Object.keys(data).length > 0) {
+            console.log('تنفيذ معالج الرسالة مع البيانات المستخرجة من الرسالة الرئيسية:', data);
+            handler(data);
+          }
+        }
+      } else {
+        console.warn(`لم يتم العثور على معالج للرسالة من النوع ${message.type}`);
       }
     } catch (error) {
       console.error('خطأ في معالجة رسالة WebSocket:', error);
@@ -404,8 +428,8 @@ export class SocketManager {
         const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
         const host = window.location.host;
         
-        // استخدم نفس عنوان المضيف الحالي ونفس نقطة النهاية في /ws/poker
-        const url = `${protocol}://${host}/ws/poker`;
+        // استخدم نفس عنوان المضيف الحالي ونفس نقطة النهاية في /ws
+        const url = `${protocol}://${host}/ws`;
         console.log('محاولة إعادة الاتصال على العنوان:', url);
         this.connect(url, this.userId, this.username)
           .then(() => {

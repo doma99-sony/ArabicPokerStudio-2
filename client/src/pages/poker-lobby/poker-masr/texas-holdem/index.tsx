@@ -129,8 +129,11 @@ export default function TexasHoldemPoker() {
     }
   };
   
-  // ربط معالج الإجراء بمكون أزرار البوكر
+  // ربط معالج الإجراء بمكون أزرار البوكر - مع إضافة التبعيات بشكل صحيح
   useEffect(() => {
+    // تخزين الإجراء الأصلي في متغير محلي لتجنب التبعية الدائرية
+    const originalPerformAction = performAction;
+    
     // إنشاء وظيفة وسيطة متوافقة مع توقيع الدالة الأصلية
     const wrappedHandleAction = async (action: PlayerAction, amount?: number): Promise<boolean> => {
       handlePlayerAction(action, amount);
@@ -138,19 +141,22 @@ export default function TexasHoldemPoker() {
       return Promise.resolve(true);
     };
     
-    // تجاوز أزرار الإجراء للاستخدام المباشر
-    const originalPerformAction = performAction;
+    // تجاوز أزرار الإجراء للاستخدام المباشر بوظيفة نطاقها ثابت
     usePokerStore.setState({
       performAction: wrappedHandleAction
     });
+    
+    // سجل للتصحيح
+    console.log('تم تعديل معالج إجراءات البوكر');
     
     return () => {
       // إعادة الإجراء الأصلي عند التنظيف
       usePokerStore.setState({
         performAction: originalPerformAction
       });
+      console.log('تم استعادة معالج إجراءات البوكر الأصلي');
     };
-  }, [performAction]);
+  }, []); // إزالة التبعية غير المستقرة
   
   // الحصول على بيانات اللاعب الحالي
   const localPlayer = gameState?.players.find(p => p.id === localPlayerId);

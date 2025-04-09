@@ -64,9 +64,15 @@ export default function PokerTable() {
   
   // تتبع اللاعب الحالي وإجراءاته - محاكاة للإجراءات
   useEffect(() => {
-    const currentPlayer = gameState?.players.find(p => p.isCurrentTurn);
+    if (!gameState) return; // تفادي المشاكل إذا لم تكن هناك حالة لعبة
     
-    if (currentPlayer && currentPlayer.id !== lastAction?.playerId) {
+    const currentPlayer = gameState.players.find(p => p.isCurrentTurn);
+    
+    // تخزين معرف اللاعب في متغير مؤقت للمقارنة
+    const currentPlayerId = currentPlayer?.id;
+    const lastActionPlayerId = lastAction?.playerId;
+    
+    if (currentPlayer && currentPlayerId !== lastActionPlayerId) {
       // في الواقع، سوف نستقبل هذه المعلومات من الخادم وليس هنا
       // هذا فقط لأغراض العرض
       
