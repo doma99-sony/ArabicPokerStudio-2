@@ -1,0 +1,272 @@
+/* كتاب الفرعون - تنسيقات اللعبة */
+
+:root {
+  --primary-gold: #D4AF37;
+  --dark-gold: #B8860B;
+  --light-gold: #FFD700;
+  --dark-bg: #0A1A1A;
+  --bg-gradient-start: #2C3E50;
+  --bg-gradient-end: #1A2530;
+}
+
+.pharaohs-book-container {
+  background-color: var(--dark-bg);
+  background-image: url('/attached_assets/freepik__background__73483.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-blend-mode: overlay;
+  min-height: 100vh;
+  color: #fff;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* شاشة البكرات */
+.reels-container {
+  width: 100%;
+  max-width: 600px;
+  background: linear-gradient(145deg, var(--bg-gradient-start), var(--bg-gradient-end));
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+  position: relative;
+  overflow: hidden;
+}
+
+.reels-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('/attached_assets/freepik__background__16089.png');
+  background-size: cover;
+  opacity: 0.05;
+  pointer-events: none;
+}
+
+.reels-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+  padding: 8px;
+  border-radius: 4px;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.reel {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.symbol {
+  aspect-ratio: 1/1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #2C3E50;
+  border-radius: 4px;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  font-size: 0.8rem;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s ease-in-out;
+}
+
+.symbol.spinning {
+  animation: spinSymbol 0.5s ease-in-out;
+}
+
+.symbol-icon {
+  width: 80%;
+  height: 80%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.special-symbol {
+  border: 2px solid var(--primary-gold);
+  box-shadow: 0 0 8px var(--primary-gold);
+}
+
+.winning-symbol {
+  border: 2px solid var(--light-gold);
+  box-shadow: 0 0 15px var(--light-gold);
+  animation: glowEffect 1.5s infinite;
+  z-index: 2;
+  position: relative;
+  transform: scale(1.05);
+}
+
+/* أزرار التحكم */
+.controls-panel {
+  background: linear-gradient(145deg, #1A2530, #0A1A1A);
+  border: 2px solid var(--primary-gold);
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.spin-button {
+  background: linear-gradient(145deg, var(--primary-gold), var(--dark-gold));
+  color: #000;
+  font-weight: bold;
+  padding: 10px 24px;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: all 0.3s;
+  border: none;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.spin-button:hover:not(:disabled) {
+  background: linear-gradient(145deg, var(--light-gold), var(--primary-gold));
+  transform: translateY(-2px);
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.4);
+}
+
+.spin-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-bet-change {
+  padding: 4px 10px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-bet-change:hover:not(:disabled) {
+  transform: scale(1.05);
+}
+
+.btn-bet-change:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.bet-amount {
+  padding: 4px 16px;
+  font-weight: bold;
+  background: linear-gradient(to bottom, #2C3E50, #1A2530);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  min-width: 50px;
+  text-align: center;
+}
+
+.auto-play-button {
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.auto-play-button:hover:not(:disabled) {
+  transform: scale(1.05);
+}
+
+.auto-play-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* دورات مجانية ورسائل */
+.free-spins-counter {
+  background: linear-gradient(145deg, var(--primary-gold), var(--dark-gold));
+  color: #000;
+  padding: 6px 16px;
+  border-radius: 30px;
+  font-weight: bold;
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+  animation: pulse 1.5s infinite;
+}
+
+.message-container {
+  width: 100%;
+  text-align: center;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.message {
+  font-weight: bold;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  animation: messagePopIn 0.3s ease-out;
+}
+
+/* جدول المكافآت */
+.paytable {
+  font-size: 0.8rem;
+  max-width: 600px;
+  width: 100%;
+  background-color: rgba(26, 37, 48, 0.8);
+  border: 1px solid var(--primary-gold);
+  border-radius: 4px;
+}
+
+/* التأثيرات المتحركة */
+@keyframes spinSymbol {
+  0% { transform: translateY(-100%); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+@keyframes messagePopIn {
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes glowEffect {
+  0% { box-shadow: 0 0 5px var(--primary-gold); }
+  50% { box-shadow: 0 0 20px var(--primary-gold); }
+  100% { box-shadow: 0 0 5px var(--primary-gold); }
+}
+
+/* تخصيص الرموز */
+.pharaoh { color: var(--primary-gold); }
+.book { color: var(--light-gold); }
+.anubis { color: #8B4513; }
+.eye { color: #4682B4; }
+.scarab { color: #228B22; }
+.a { color: #FF6347; }
+.k { color: #9370DB; }
+.q { color: #20B2AA; }
+.j { color: #FF8C00; }
+[class="10"] { color: #CD5C5C; }
+
+/* تعديلات للشاشات الصغيرة */
+@media (max-width: 640px) {
+  .reels-grid {
+    gap: 2px;
+    padding: 4px;
+  }
+  
+  .symbol {
+    font-size: 0.6rem;
+  }
+  
+  .controls-panel {
+    padding: 10px;
+  }
+  
+  .bet-controls {
+    scale: 0.9;
+  }
+  
+  .spin-button {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+  }
+  
+  .paytable {
+    font-size: 0.7rem;
+  }
+}

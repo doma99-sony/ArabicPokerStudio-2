@@ -115,6 +115,44 @@ export default function PokerMasrLobby() {
                   setTables(data.tables);
                 }
               },
+              [SocketMessageType.TABLE_CREATED]: (data: { tableInfo: PokerTable, roomId: number }) => {
+                // إضافة الطاولة الجديدة إلى قائمة الطاولات وتحديث الغرفة
+                if (data.tableInfo && data.roomId) {
+                  toast({
+                    title: 'تم إنشاء الطاولة',
+                    description: `تم إنشاء الطاولة ${data.tableInfo.name} بنجاح!`,
+                  });
+                  
+                  // تحديث قائمة الطاولات
+                  const roomIndex = rooms.findIndex(r => r.id === data.roomId);
+                  if (roomIndex >= 0) {
+                    // نسخة جديدة من الغرف لتحديث واجهة المستخدم
+                    const updatedRooms = [...rooms];
+                    
+                    // إذا كانت الطاولات موجودة بالفعل، أضف الطاولة الجديدة إليها
+                    if (updatedRooms[roomIndex].tables) {
+                      updatedRooms[roomIndex].tables = [
+                        ...updatedRooms[roomIndex].tables,
+                        data.tableInfo
+                      ];
+                    } else {
+                      // إنشاء مصفوفة جديدة إذا لم تكن موجودة
+                      updatedRooms[roomIndex].tables = [data.tableInfo];
+                    }
+                    
+                    // زيادة عدد الطاولات في الغرفة
+                    updatedRooms[roomIndex].tablesCount = (updatedRooms[roomIndex].tablesCount || 0) + 1;
+                    
+                    // تحديث الغرف
+                    setRooms(updatedRooms);
+                    
+                    // إذا كانت هذه هي الغرفة المختارة حاليًا، قم بتحديث قائمة الطاولات المعروضة
+                    if (selectedRoom && selectedRoom.id === data.roomId) {
+                      setTables([...tables, data.tableInfo]);
+                    }
+                  }
+                }
+              },
               [SocketMessageType.ERROR]: (data: { message: string }) => {
                 setError(data.message);
                 setLoading(false);
@@ -149,6 +187,7 @@ export default function PokerMasrLobby() {
       if (socketManager) {
         socketManager.unregisterHandler(SocketMessageType.ROOMS_LIST);
         socketManager.unregisterHandler(SocketMessageType.TABLES_LIST);
+        socketManager.unregisterHandler(SocketMessageType.TABLE_CREATED);
         socketManager.unregisterHandler(SocketMessageType.ERROR);
       }
     };
@@ -219,6 +258,36 @@ export default function PokerMasrLobby() {
   const handleJoinTable = (tableId: number) => {
     // التوجيه إلى صفحة تكساس هولدم مع معرف الطاولة كباراميتر
     navigate(`/poker-lobby/poker-masr/texas-holdem?table=${tableId}`);
+  };
+
+  // معالجة إنشاء طاولة جديدة
+  const handleCreateTable = () => {
+    if (!selectedRoom || !socketManager) {
+      toast({
+        title: 'خطأ',
+        description: 'لا يمكن إنشاء طاولة. يرجى التأكد من اختيار غرفة والاتصال بالخادم.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    const roomId = selectedRoom.id;
+    const defaultName = `طاولة ${selectedRoom.name} الجديدة`;
+    const tableName = prompt('أدخل اسم الطاولة الجديدة:', defaultName);
+    
+    if (!tableName) return; // إلغاء الإنشاء إذا ضغط إلغاء
+
+    // إرسال طلب إنشاء طاولة إلى الخادم
+    socketManager.sendMessage(SocketMessageType.CREATE_TABLE, {
+      roomId,
+      name: tableName,
+      maxPlayers: selectedRoom.maxPlayersPerTable
+    });
+
+    toast({
+      title: 'جاري إنشاء الطاولة',
+      description: 'يتم الآن إنشاء طاولة جديدة. سيتم إظهارها في القائمة قريباً.',
+    });
   };
   
   // تحديث قائمة الغرف من السيرفر
@@ -460,16 +529,26 @@ export default function PokerMasrLobby() {
                       </h3>
                       <p className="text-white/70 text-sm">{selectedRoom.description}</p>
                     </div>
-                    <div className="flex space-x-4 rtl:space-x-reverse text-sm text-white/80">
-                      <div>
-                        <span className="text-[#D4AF37]">الحد الأدنى:</span> {selectedRoom.minBuyIn}
+                    <div className="flex flex-col items-end space-y-2">
+                      <div className="flex space-x-4 rtl:space-x-reverse text-sm text-white/80">
+                        <div>
+                          <span className="text-[#D4AF37]">الحد الأدنى:</span> {selectedRoom.minBuyIn}
+                        </div>
+                        <div>
+                          <span className="text-[#D4AF37]">الحد الأقصى:</span> {selectedRoom.maxBuyIn}
+                        </div>
+                        <div>
+                          <span className="text-[#D4AF37]">البلايند:</span> {selectedRoom.blinds.small}/{selectedRoom.blinds.big}
+                        </div>
                       </div>
-                      <div>
-                        <span className="text-[#D4AF37]">الحد الأقصى:</span> {selectedRoom.maxBuyIn}
-                      </div>
-                      <div>
-                        <span className="text-[#D4AF37]">البلايند:</span> {selectedRoom.blinds.small}/{selectedRoom.blinds.big}
-                      </div>
+                      <Button
+                        onClick={handleCreateTable}
+                        className="bg-[#079458] hover:bg-[#06c166] text-white border-none"
+                        size="sm"
+                      >
+                        <Table className="mr-2 h-4 w-4" />
+                        إنشاء طاولة جديدة
+                      </Button>
                     </div>
                   </div>
                   

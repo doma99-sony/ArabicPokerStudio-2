@@ -1,0 +1,12 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <rect width="100%" height="100%" fill="#1A2530" />
+  <g fill="#FFD700">
+    <path d="M60,40 L140,40 L140,160 L60,160 Z" />
+    <path d="M65,45 L100,85 L135,45 Z" fill="#B22222" />
+    <path d="M65,55 L135,55 L135,155 L65,155 Z" fill="#8B4513" />
+    <path d="M75,70 L125,70 L125,80 L75,80 Z" fill="#FFD700" />
+    <path d="M75,90 L125,90 L125,100 L75,100 Z" fill="#FFD700" />
+    <path d="M75,110 L125,110 L125,120 L75,120 Z" fill="#FFD700" />
+    <path d="M75,130 L125,130 L125,140 L75,140 Z" fill="#FFD700" />
+  </g>
+</svg>

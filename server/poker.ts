@@ -714,11 +714,19 @@ export function setupPokerGame(app: Express, httpServer: Server) {
             return;
           }
           
-          // إرسال معلومات الطاولة المنشأة حديثًا
+          // إرسال معلومات الطاولة المنشأة حديثًا إلى المستخدم الذي أنشأها
           ws.send(JSON.stringify({
             type: PokerSocketMessageType.TABLE_CREATED,
-            tableInfo: getTableInfo(table)
+            tableInfo: getTableInfo(table),
+            roomId: Number(roomId)
           }));
+          
+          // بث معلومات الطاولة الجديدة لجميع المستخدمين المتصلين بالغرفة
+          broadcast({
+            type: PokerSocketMessageType.TABLE_CREATED,
+            tableInfo: getTableInfo(table),
+            roomId: Number(roomId)
+          }, userId); // استثناء المستخدم الذي أنشأ الطاولة لأنه تلقى الرسالة بالفعل
         } else if (data.type === "auth") {
           // مصادقة المستخدم
           const user = await storage.getUser(data.userId);

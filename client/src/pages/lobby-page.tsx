@@ -476,6 +476,18 @@ export default function LobbyPage() {
                       maxBet: 50000,
                       isNew: true,
                       onClick: () => navigate("/fishing-slots")
+                    },
+                    {
+                      id: "pharaohs-book",
+                      title: "كتاب الفرعون",
+                      image: "/attached_assets/freepik__background__73483.png",
+                      playerCount: 275,
+                      tableCount: 0,
+                      minBet: 5,
+                      maxBet: 50000,
+                      isNew: true,
+                      isHot: true,
+                      onClick: () => navigate("/slots/pharaohs-book")
                     }
                   ]}
                 />
