@@ -12,6 +12,18 @@
   --hieroglyph-color: rgba(212, 175, 55, 0.1);
   --sand-color-1: #C2B280;
   --sand-color-2: #9C8D68;
+  
+  /* ألوان الرموز الخاصة */
+  --pharaoh-color: #D4AF37;
+  --book-color: #FFD700;
+  --anubis-color: #8B4513;
+  --eye-color: #4682B4;
+  --scarab-color: #228B22;
+  --a-color: #FF6347;
+  --k-color: #9370DB;
+  --q-color: #20B2AA;
+  --j-color: #FF8C00;
+  --ten-color: #CD5C5C;
 }
 
 /* تأثيرات متحركة للخلفية */
@@ -311,6 +323,20 @@
   transition: all 0.3s ease;
 }
 
+/* تنسيقات خاصة بالـ SVG المضمنة */
+.svg-embed {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+
+.svg-embed svg {
+  width: 95%;
+  height: 95%;
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.5));
+}
+
 /* تأثيرات إضافية لصور SVG */
 .symbol-pharaoh-svg {
   filter: drop-shadow(0 0 3px rgba(212, 175, 55, 0.7));
@@ -320,26 +346,80 @@
   filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.8));
 }
 
-/* مساحة لعرض صور SVG بطريقة صحيحة */
-object[type="image/svg+xml"] {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* إظهار الرمز البديل عند فشل تحميل الصورة */
-.fallback-active .fallback-icon {
-  display: flex !important;
-}
-
 /* تنسيقات مخصصة لرموز معينة */
 .symbol-anubis .symbol-svg,
 .symbol-scarab .symbol-svg,
 .symbol-eye .symbol-svg {
   width: 85%;
   height: 85%;
+}
+
+/* تنسيقات للصورة البديلة */
+.image-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* الرمز البديل النصي */
+.fallback-symbol {
+  font-size: 2rem;
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.5), 0 0 10px rgba(212, 175, 55, 0.7);
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+}
+
+/* تنسيقات ألوان مخصصة لكل رمز */
+.symbol-pharaoh svg g {
+  filter: drop-shadow(0 0 3px var(--pharaoh-color, rgba(212, 175, 55, 0.7)));
+}
+
+.symbol-book svg g {
+  filter: drop-shadow(0 0 3px var(--book-color, rgba(255, 215, 0, 0.8)));
+}
+
+.symbol-anubis svg g {
+  filter: drop-shadow(0 0 3px var(--anubis-color, rgba(139, 69, 19, 0.7)));
+}
+
+.symbol-eye svg g {
+  filter: drop-shadow(0 0 3px var(--eye-color, rgba(70, 130, 180, 0.7)));
+}
+
+.symbol-scarab svg g {
+  filter: drop-shadow(0 0 3px var(--scarab-color, rgba(34, 139, 34, 0.7)));
+}
+
+.symbol-a svg g {
+  filter: drop-shadow(0 0 3px var(--a-color, rgba(255, 99, 71, 0.7)));
+}
+
+.symbol-k svg g {
+  filter: drop-shadow(0 0 3px var(--k-color, rgba(147, 112, 219, 0.7)));
+}
+
+.symbol-q svg g {
+  filter: drop-shadow(0 0 3px var(--q-color, rgba(32, 178, 170, 0.7)));
+}
+
+.symbol-j svg g {
+  filter: drop-shadow(0 0 3px var(--j-color, rgba(255, 140, 0, 0.7)));
+}
+
+.symbol-10 svg g {
+  filter: drop-shadow(0 0 3px var(--ten-color, rgba(205, 92, 92, 0.7)));
+}
+
+/* تأثيرات الرموز الفائزة */
+.winning-symbol .svg-embed svg {
+  transform: scale(1.1);
+  filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.8));
+}
+
+/* تأثيرات الرموز الخاصة */
+.special-symbol .svg-embed svg {
+  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.9));
 }
 
 .special-symbol {
@@ -765,16 +845,16 @@ object[type="image/svg+xml"] {
 }
 
 /* تخصيص الرموز */
-.pharaoh { color: var(--primary-gold); }
-.book { color: var(--light-gold); }
-.anubis { color: #8B4513; }
-.eye { color: #4682B4; }
-.scarab { color: #228B22; }
-.a { color: #FF6347; }
-.k { color: #9370DB; }
-.q { color: #20B2AA; }
-.j { color: #FF8C00; }
-[class="10"] { color: #CD5C5C; }
+.pharaoh { color: var(--pharaoh-color, #D4AF37); }
+.book { color: var(--book-color, #FFD700); }
+.anubis { color: var(--anubis-color, #8B4513); }
+.eye { color: var(--eye-color, #4682B4); }
+.scarab { color: var(--scarab-color, #228B22); }
+.a { color: var(--a-color, #FF6347); }
+.k { color: var(--k-color, #9370DB); }
+.q { color: var(--q-color, #20B2AA); }
+.j { color: var(--j-color, #FF8C00); }
+[class="10"] { color: var(--ten-color, #CD5C5C); }
 
 /* تعديلات للشاشات الصغيرة */
 @media (max-width: 640px) {
