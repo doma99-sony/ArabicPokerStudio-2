@@ -10,12 +10,29 @@ import { PlayerAction } from "../client/src/pages/poker-lobby/poker-masr/logic/p
 
 // أنواع رسائل WebSocket للبوكر
 export enum PokerSocketMessageType {
+  // إدارة الغرف والطاولات
+  GET_ROOMS = 'get_rooms',                // طلب قائمة الغرف
+  ROOMS_LIST = 'rooms_list',              // قائمة الغرف
+  GET_TABLES = 'get_tables',              // طلب قائمة الطاولات في غرفة معينة
+  TABLES_LIST = 'tables_list',            // قائمة الطاولات
+  CREATE_TABLE = 'create_table',          // إنشاء طاولة جديدة
+  TABLE_CREATED = 'table_created',        // تم إنشاء طاولة
+  TABLE_UPDATE = 'table_update',          // تحديث بيانات طاولة
+  JOIN_ROOM = 'join_room',                // الانضمام لغرفة
+  LEAVE_ROOM = 'leave_room',              // مغادرة الغرفة
+  ROOM_UPDATE = 'room_update',            // تحديث بيانات الغرفة
+  
+  // إدارة دورة اللعب
   JOIN_TABLE = 'join_table',              // الانضمام لطاولة
   LEAVE_TABLE = 'leave_table',            // مغادرة الطاولة
   GAME_STATE = 'game_state',              // تحديث حالة اللعبة
   PLAYER_ACTION = 'player_action',        // إجراء اللاعب
   ACTION_RESULT = 'action_result',        // نتيجة الإجراء
+  START_ROUND = 'start_round',            // بدء جولة جديدة
   ROUND_COMPLETE = 'round_complete',      // انتهاء الجولة
+  REVEAL_CARDS = 'reveal_cards',          // كشف الأوراق
+  
+  // الاتصال والمراسلة
   CHAT_MESSAGE = 'chat_message',          // رسالة دردشة
   PLAYER_JOINED = 'player_joined',        // انضم لاعب
   PLAYER_LEFT = 'player_left',            // غادر لاعب
@@ -34,22 +51,82 @@ interface PokerSocketMessage {
   timestamp: number;                     // وقت الرسالة
 }
 
-// متغيرات عامة للاستخدام في ملفات أخرى
-export const pokerModule = {
-  broadcastToTable: null as any,
-  userTables: new Map<number, number>(), // معرف المستخدم -> معرف الطاولة
-  clients: new Map<number, any>(),       // معرف المستخدم -> معلومات العميل
-  tables: new Map<number, PokerTable>()   // معرف الطاولة -> معلومات الطاولة
-};
+// واجهة غرفة البوكر
+interface PokerRoom {
+  id: number;                            // معرف الغرفة
+  name: string;                          // اسم الغرفة
+  description: string;                   // وصف الغرفة
+  minBuyIn: number;                      // الحد الأدنى للدخول
+  maxBuyIn: number;                      // الحد الأقصى للدخول
+  smallBlind: number;                    // قيمة البلايند الصغير
+  bigBlind: number;                      // قيمة البلايند الكبير
+  isVIP: boolean;                        // هل غرفة VIP؟
+  maxPlayers: number;                    // أقصى عدد لاعبين في الطاولة
+  tables: Map<number, PokerTable>;       // طاولات هذه الغرفة
+  createdAt: Date;                       // وقت إنشاء الغرفة
+}
 
 // واجهة طاولة البوكر
 interface PokerTable {
   id: number;                            // معرف الطاولة
+  roomId: number;                        // معرف الغرفة التي تنتمي إليها
   name: string;                          // اسم الطاولة
   gameManager: GameManager;              // مدير اللعبة
+  status: TableStatus;                   // حالة الطاولة
   players: Map<number, ExtendedWebSocket>;  // الاتصالات المرتبطة بالطاولة
+  maxPlayers: number;                    // أقصى عدد لاعبين في الطاولة
   createdAt: Date;                       // وقت إنشاء الطاولة
 }
+
+// حالات الطاولة
+enum TableStatus {
+  WAITING = 'waiting',                   // انتظار اللاعبين
+  STARTING = 'starting',                 // بدء الجولة
+  ACTIVE = 'active',                     // جولة نشطة
+  SHOWDOWN = 'showdown',                 // كشف الأوراق
+  PAUSED = 'paused'                      // متوقفة مؤقتًا
+}
+
+// استخراج بيانات الطاولة للعميل
+interface TableInfo {
+  id: number;                            // معرف الطاولة
+  roomId: number;                        // معرف الغرفة
+  name: string;                          // اسم الطاولة
+  status: TableStatus;                   // حالة الطاولة
+  playersCount: number;                  // عدد اللاعبين الحالي
+  maxPlayers: number;                    // أقصى عدد لاعبين
+  minBuyIn: number;                      // الحد الأدنى للدخول
+  maxBuyIn: number;                      // الحد الأقصى للدخول
+  blinds: { small: number, big: number }; // قيم البلايند
+  isRoundActive: boolean;                // هل الجولة نشطة؟
+  createdAt: Date;                       // وقت الإنشاء
+}
+
+// استخراج بيانات الغرفة للعميل
+interface RoomInfo {
+  id: number;                            // معرف الغرفة
+  name: string;                          // اسم الغرفة
+  description: string;                   // وصف الغرفة
+  minBuyIn: number;                      // الحد الأدنى للدخول
+  maxBuyIn: number;                      // الحد الأقصى للدخول
+  blinds: { small: number, big: number }; // قيم البلايند
+  isVIP: boolean;                        // هل غرفة VIP؟
+  tablesCount: number;                   // عدد الطاولات
+  playersCount: number;                  // إجمالي عدد اللاعبين
+  maxPlayersPerTable: number;            // أقصى عدد لاعبين في الطاولة
+  createdAt: Date;                       // وقت الإنشاء
+}
+
+// متغيرات عامة للاستخدام في ملفات أخرى
+export const pokerModule = {
+  broadcastToTable: null as any,
+  broadcastToRoom: null as any,
+  userTables: new Map<number, number>(), // معرف المستخدم -> معرف الطاولة
+  userRooms: new Map<number, number>(),  // معرف المستخدم -> معرف الغرفة
+  clients: new Map<number, any>(),       // معرف المستخدم -> معلومات العميل
+  tables: new Map<number, PokerTable>(),  // معرف الطاولة -> معلومات الطاولة
+  rooms: new Map<number, PokerRoom>()     // معرف الغرفة -> معلومات الغرفة
+};
 
 // واجهة اتصال WebSocket الممتد للبوكر
 interface ExtendedWebSocket extends WebSocket {
@@ -82,32 +159,94 @@ export function setupPokerGame(app: Express, httpServer: Server) {
     joinedAt: number;
   }
   
-  // إنشاء طاولة بوكر جديدة
-  function createPokerTable(
+  // إنشاء غرفة بوكر جديدة
+  function createPokerRoom(
     id: number,
     name: string,
+    description: string,
     blindAmount: { small: number, big: number },
     minBuyIn: number,
-    maxBuyIn: number
-  ): PokerTable {
-    console.log(`إنشاء طاولة بوكر: ${name} مع blindAmount=${JSON.stringify(blindAmount)}, minBuyIn=${minBuyIn}, maxBuyIn=${maxBuyIn}`);
+    maxBuyIn: number,
+    isVIP: boolean = false,
+    maxPlayers: number = 6
+  ): PokerRoom {
+    console.log(`إنشاء غرفة بوكر: ${name} مع blindAmount=${JSON.stringify(blindAmount)}, minBuyIn=${minBuyIn}, maxBuyIn=${maxBuyIn}`);
     
     try {
-      const gameManager = new GameManager(blindAmount, minBuyIn, maxBuyIn);
+      const room: PokerRoom = {
+        id,
+        name,
+        description,
+        minBuyIn,
+        maxBuyIn,
+        smallBlind: blindAmount.small,
+        bigBlind: blindAmount.big,
+        isVIP,
+        maxPlayers,
+        tables: new Map<number, PokerTable>(),
+        createdAt: new Date()
+      };
+      
+      // تخزين الغرفة في المتغير العام
+      pokerModule.rooms.set(id, room);
+      
+      console.log(`تم إنشاء غرفة بوكر جديدة: ${name} (ID: ${id})`);
+      
+      return room;
+    } catch (error) {
+      console.error(`خطأ في إنشاء غرفة البوكر: ${name}`, error);
+      throw error;
+    }
+  }
+  
+  // إنشاء طاولة بوكر جديدة ضمن غرفة
+  function createPokerTable(
+    id: number,
+    roomId: number,
+    name: string,
+    maxPlayers: number = 6
+  ): PokerTable | null {
+    // التحقق من وجود الغرفة
+    const room = pokerModule.rooms.get(roomId);
+    if (!room) {
+      console.error(`محاولة إنشاء طاولة في غرفة غير موجودة: ${roomId}`);
+      return null;
+    }
+    
+    console.log(`إنشاء طاولة بوكر: ${name} في الغرفة ${room.name}`);
+    
+    try {
+      const blindAmount = { small: room.smallBlind, big: room.bigBlind };
+      const gameManager = new GameManager(blindAmount, room.minBuyIn, room.maxBuyIn);
       console.log(`تم إنشاء مدير اللعبة بنجاح للطاولة: ${name}`);
       
       const table: PokerTable = {
         id,
+        roomId,
         name,
         gameManager,
+        status: TableStatus.WAITING,
         players: new Map(),
+        maxPlayers,
         createdAt: new Date()
       };
       
       // تخزين الطاولة في المتغير العام
       pokerModule.tables.set(id, table);
       
-      console.log(`تم إنشاء طاولة بوكر جديدة: ${name} (ID: ${id})`);
+      // إضافة الطاولة إلى الغرفة
+      room.tables.set(id, table);
+      
+      console.log(`تم إنشاء طاولة بوكر جديدة: ${name} (ID: ${id}) في الغرفة ${room.name}`);
+      
+      // إرسال تحديث بإنشاء الطاولة الجديدة
+      const tableInfo = getTableInfo(table);
+      if (broadcastToRoom) {
+        broadcastToRoom(roomId, {
+          type: PokerSocketMessageType.TABLE_CREATED,
+          tableInfo
+        });
+      }
       
       return table;
     } catch (error) {
@@ -116,16 +255,98 @@ export function setupPokerGame(app: Express, httpServer: Server) {
     }
   }
   
-  // إنشاء طاولات افتراضية للبوكر
-  function createDefaultPokerTables() {
-    // طاولة تكساس هولدم عادية
-    createPokerTable(1, 'تكساس هولدم (5/10)', { small: 5, big: 10 }, 200, 2000);
+  // استخراج معلومات الطاولة للعميل
+  function getTableInfo(table: PokerTable): TableInfo {
+    const gameState = table.gameManager.getState ? table.gameManager.getState() : { players: [], currentRound: { isActive: false } };
     
-    // طاولة تكساس هولدم VIP
-    createPokerTable(2, 'تكساس هولدم VIP (25/50)', { small: 25, big: 50 }, 1000, 10000);
+    return {
+      id: table.id,
+      roomId: table.roomId,
+      name: table.name,
+      status: table.status,
+      playersCount: table.players ? table.players.size : 0,
+      maxPlayers: table.maxPlayers,
+      minBuyIn: table.gameManager.minBuyIn || 0,
+      maxBuyIn: table.gameManager.maxBuyIn || 0,
+      blinds: { 
+        small: table.gameManager.blinds?.small || 0, 
+        big: table.gameManager.blinds?.big || 0 
+      },
+      isRoundActive: gameState.currentRound?.isActive || false,
+      createdAt: table.createdAt
+    };
+  }
+  
+  // استخراج معلومات الغرفة للعميل
+  function getRoomInfo(room: PokerRoom): RoomInfo {
+    let playersCount = 0;
+    room.tables.forEach(table => {
+      playersCount += table.players.size;
+    });
     
-    // طاولة تكساس هولدم بوت كبير
-    createPokerTable(3, 'تكساس هولدم (10/20) - بوت كبير', { small: 10, big: 20 }, 400, 4000);
+    return {
+      id: room.id,
+      name: room.name,
+      description: room.description,
+      minBuyIn: room.minBuyIn,
+      maxBuyIn: room.maxBuyIn,
+      blinds: { small: room.smallBlind, big: room.bigBlind },
+      isVIP: room.isVIP,
+      tablesCount: room.tables.size,
+      playersCount: playersCount,
+      maxPlayersPerTable: room.maxPlayers,
+      createdAt: room.createdAt
+    };
+  }
+  
+  // إنشاء غرف وطاولات افتراضية للبوكر
+  function createDefaultPokerRoomsAndTables() {
+    // غرفة المبتدئين
+    const beginnerRoom = createPokerRoom(
+      1, 
+      'غرفة المبتدئين', 
+      'غرفة مناسبة للاعبين الجدد في لعبة البوكر',
+      { small: 5, big: 10 }, 
+      200, 
+      2000, 
+      false, 
+      6
+    );
+    
+    // إنشاء طاولتين في غرفة المبتدئين
+    createPokerTable(101, 1, 'طاولة المبتدئين 1', 6);
+    createPokerTable(102, 1, 'طاولة المبتدئين 2', 4);
+    
+    // غرفة المحترفين
+    const proRoom = createPokerRoom(
+      2, 
+      'غرفة المحترفين', 
+      'غرفة للاعبين ذوي الخبرة مع رهانات أعلى',
+      { small: 25, big: 50 }, 
+      1000, 
+      10000, 
+      false, 
+      6
+    );
+    
+    // إنشاء طاولتين في غرفة المحترفين
+    createPokerTable(201, 2, 'طاولة المحترفين 1', 6);
+    createPokerTable(202, 2, 'طاولة المحترفين 2', 4);
+    
+    // غرفة VIP
+    const vipRoom = createPokerRoom(
+      3, 
+      'غرفة VIP', 
+      'غرفة حصرية مع رهانات عالية',
+      { small: 100, big: 200 }, 
+      5000, 
+      50000, 
+      true, 
+      4
+    );
+    
+    // إنشاء طاولة في غرفة VIP
+    createPokerTable(301, 3, 'طاولة VIP', 4);
   }
   
   // سيتم إنشاء طاولات البوكر الافتراضية من خلال دالة setupPokerGame
@@ -214,8 +435,8 @@ export function setupPokerGame(app: Express, httpServer: Server) {
     });
   }, PING_INTERVAL);
 
-  // إنشاء طاولات البوكر الافتراضية
-  createDefaultPokerTables();
+  // إنشاء غرف وطاولات البوكر الافتراضية
+  createDefaultPokerRoomsAndTables();
 
   // إرسال رسالة لجميع المستخدمين في طاولة معينة
   function broadcastToTable(tableId: number, message: any, excludeUserId?: number) {
@@ -241,9 +462,91 @@ export function setupPokerGame(app: Express, httpServer: Server) {
     }
   }
   
+  // إرسال رسالة لجميع المستخدمين في غرفة معينة
+  function broadcastToRoom(roomId: number, message: any, excludeUserId?: number) {
+    if (roomId === undefined || isNaN(roomId)) {
+      console.warn("محاولة بث رسالة لغرفة غير صالحة:", roomId, message);
+      return;
+    }
+    
+    const room = pokerModule.rooms.get(roomId);
+    if (!room) {
+      console.warn("محاولة بث رسالة لغرفة غير موجودة:", roomId);
+      return;
+    }
+    
+    // الحصول على جميع اللاعبين في جميع طاولات الغرفة
+    const players: number[] = [];
+    const userRooms = pokerModule.userRooms;
+    
+    // جمع جميع اللاعبين الذين انضموا للغرفة
+    userRooms.forEach((userRoomId, userId) => {
+      if (userRoomId === roomId) {
+        players.push(userId);
+      }
+    });
+    
+    // أيضاً جمع اللاعبين الموجودين في طاولات هذه الغرفة
+    room.tables.forEach((table, tableId) => {
+      const tablePlayers = getPlayersAtTable(tableId);
+      for (const playerId of tablePlayers) {
+        if (!players.includes(playerId)) {
+          players.push(playerId);
+        }
+      }
+    });
+    
+    const serializedMessage = JSON.stringify(message);
+    
+    for (const playerId of players) {
+      if (excludeUserId !== undefined && playerId === excludeUserId) continue;
+      
+      const clientInfo = clients.get(playerId);
+      if (clientInfo && clientInfo.ws.readyState === WebSocket.OPEN) {
+        try {
+          clientInfo.ws.send(serializedMessage);
+        } catch (err) {
+          console.error(`خطأ أثناء البث للمستخدم ${playerId} في الغرفة ${roomId}:`, err);
+        }
+      }
+    }
+  }
+  
+  // الحصول على جميع اللاعبين في غرفة معينة
+  function getPlayersInRoom(roomId: number): number[] {
+    const players: number[] = [];
+    const userRooms = pokerModule.userRooms;
+    
+    if (isNaN(roomId)) return players;
+    
+    // إضافة المستخدمين الذين انضموا للغرفة مباشرة
+    userRooms.forEach((userRoomId, userId) => {
+      if (userRoomId === roomId) {
+        players.push(userId);
+      }
+    });
+    
+    // إضافة المستخدمين في طاولات الغرفة
+    const room = pokerModule.rooms.get(roomId);
+    if (room) {
+      room.tables.forEach((_, tableId) => {
+        const tablePlayers = getPlayersAtTable(tableId);
+        for (const playerId of tablePlayers) {
+          if (!players.includes(playerId)) {
+            players.push(playerId);
+          }
+        }
+      });
+    }
+    
+    return players;
+  }
+  
   // تصدير الدوال والمتغيرات للاستخدام في ملفات أخرى
   pokerModule.broadcastToTable = broadcastToTable;
+  pokerModule.broadcastToRoom = broadcastToRoom;
   pokerModule.userTables = userTables;
+  pokerModule.userRooms = new Map<number, number>();
   pokerModule.clients = clients;
   
   // الحصول على جميع اللاعبين في طاولة معينة
@@ -325,6 +628,97 @@ export function setupPokerGame(app: Express, httpServer: Server) {
         
         if (data.type === "pong" || data.type === "client_ping") {
           heartbeat();
+        } else if (data.type === PokerSocketMessageType.GET_ROOMS) {
+          // طلب قائمة الغرف المتاحة
+          const rooms: RoomInfo[] = [];
+          
+          pokerModule.rooms.forEach(room => {
+            rooms.push(getRoomInfo(room));
+          });
+          
+          ws.send(JSON.stringify({
+            type: PokerSocketMessageType.ROOMS_LIST,
+            rooms: rooms
+          }));
+        } else if (data.type === PokerSocketMessageType.GET_TABLES) {
+          // طلب قائمة الطاولات في غرفة معينة
+          const roomId = data.roomId;
+          
+          if (!roomId || isNaN(Number(roomId))) {
+            ws.send(JSON.stringify({ 
+              type: "error", 
+              message: "معرف الغرفة غير صالح" 
+            }));
+            return;
+          }
+          
+          const room = pokerModule.rooms.get(Number(roomId));
+          if (!room) {
+            ws.send(JSON.stringify({ 
+              type: "error", 
+              message: "الغرفة غير موجودة" 
+            }));
+            return;
+          }
+          
+          const tables: TableInfo[] = [];
+          room.tables.forEach(table => {
+            tables.push(getTableInfo(table));
+          });
+          
+          ws.send(JSON.stringify({
+            type: PokerSocketMessageType.TABLES_LIST,
+            roomId: roomId,
+            tables: tables
+          }));
+        } else if (data.type === PokerSocketMessageType.CREATE_TABLE) {
+          // إنشاء طاولة جديدة في غرفة
+          if (!userId) {
+            ws.send(JSON.stringify({ type: "error", message: "مستخدم غير مصرح به" }));
+            return;
+          }
+          
+          const roomId = data.roomId;
+          const tableName = data.tableName || `طاولة ${userId}_${Date.now()}`;
+          const maxPlayers = data.maxPlayers || 6;
+          
+          if (!roomId || isNaN(Number(roomId))) {
+            ws.send(JSON.stringify({ 
+              type: "error", 
+              message: "معرف الغرفة غير صالح" 
+            }));
+            return;
+          }
+          
+          // التحقق من وجود الغرفة
+          const room = pokerModule.rooms.get(Number(roomId));
+          if (!room) {
+            ws.send(JSON.stringify({ 
+              type: "error", 
+              message: "الغرفة غير موجودة" 
+            }));
+            return;
+          }
+          
+          // إنشاء معرف فريد للطاولة
+          const tableId = Date.now();
+          
+          // إنشاء الطاولة
+          const table = createPokerTable(tableId, Number(roomId), tableName, maxPlayers);
+          
+          if (!table) {
+            ws.send(JSON.stringify({ 
+              type: "error", 
+              message: "فشل إنشاء الطاولة" 
+            }));
+            return;
+          }
+          
+          // إرسال معلومات الطاولة المنشأة حديثًا
+          ws.send(JSON.stringify({
+            type: PokerSocketMessageType.TABLE_CREATED,
+            tableInfo: getTableInfo(table)
+          }));
         } else if (data.type === "auth") {
           // مصادقة المستخدم
           const user = await storage.getUser(data.userId);
@@ -430,6 +824,180 @@ export function setupPokerGame(app: Express, httpServer: Server) {
               message: "الرسالة غير صالحة" 
             }));
           }
+        } else if (data.type === PokerSocketMessageType.JOIN_TABLE) {
+          if (!userId) {
+            ws.send(JSON.stringify({ type: "error", message: "مستخدم غير مصرح به" }));
+            return;
+          }
+          
+          const tableId = data.tableId;
+          const safeTableId = Number(tableId);
+          
+          if (!tableId || isNaN(safeTableId)) {
+            ws.send(JSON.stringify({ type: "error", message: "معرف الطاولة غير صالح" }));
+            return;
+          }
+          
+          // التحقق من وجود الطاولة
+          const table = pokerModule.tables.get(safeTableId);
+          if (!table) {
+            ws.send(JSON.stringify({ type: "error", message: "الطاولة غير موجودة" }));
+            return;
+          }
+          
+          // التحقق من عدد اللاعبين في الطاولة
+          const currentPlayers = getPlayersAtTable(safeTableId);
+          if (currentPlayers.length >= table.maxPlayers) {
+            ws.send(JSON.stringify({ type: "error", message: "الطاولة ممتلئة" }));
+            return;
+          }
+          
+          // إضافة اللاعب للطاولة
+          userTables.set(userId, safeTableId);
+          
+          // إضافة اللاعب أيضًا للغرفة التي تحتوي على الطاولة
+          pokerModule.userRooms.set(userId, table.roomId);
+          
+          if (clients.has(userId)) {
+            const clientInfo = clients.get(userId);
+            if (clientInfo) {
+              clientInfo.tableId = safeTableId;
+            }
+          }
+          
+          // إذا كان WebSocket مفتوحًا، أضف اللاعب إلى الطاولة
+          if (ws.readyState === WebSocket.OPEN) {
+            table.players.set(userId, ws as ExtendedWebSocket);
+          }
+          
+          // تحديث حالة الطاولة
+          if (table.status === TableStatus.WAITING && currentPlayers.length + 1 >= 2) {
+            table.status = TableStatus.STARTING;
+          }
+          
+          // بث تحديث بانضمام لاعب جديد
+          broadcastToTable(safeTableId, {
+            type: PokerSocketMessageType.PLAYER_JOINED,
+            userId: userId,
+            tableId: safeTableId,
+            playerCount: currentPlayers.length + 1
+          }, userId);
+          
+          // أرسل تحديث حالة اللعبة للاعب الجديد
+          const gameState = table.gameManager.getState ? table.gameManager.getState() : await storage.getGameState(tableId, userId);
+          ws.send(JSON.stringify({ 
+            type: PokerSocketMessageType.GAME_STATE, 
+            gameState 
+          }));
+          
+          // أرسل أيضًا تحديث حالة الطاولة
+          broadcastToTable(safeTableId, {
+            type: PokerSocketMessageType.TABLE_UPDATE,
+            tableInfo: getTableInfo(table)
+          });
+        } else if (data.type === PokerSocketMessageType.START_ROUND) {
+          if (!userId) {
+            ws.send(JSON.stringify({ type: "error", message: "مستخدم غير مصرح به" }));
+            return;
+          }
+          
+          const tableId = userTables.get(userId);
+          if (!tableId) {
+            ws.send(JSON.stringify({ type: "error", message: "أنت لست في طاولة" }));
+            return;
+          }
+          
+          // التحقق من وجود الطاولة
+          const table = pokerModule.tables.get(tableId);
+          if (!table) {
+            ws.send(JSON.stringify({ type: "error", message: "الطاولة غير موجودة" }));
+            return;
+          }
+          
+          // التحقق من عدد اللاعبين (يجب أن يكون هناك على الأقل لاعبين)
+          const players = getPlayersAtTable(tableId);
+          if (players.length < 2) {
+            ws.send(JSON.stringify({ 
+              type: "error", 
+              message: "يجب أن يكون هناك على الأقل لاعبين لبدء جولة" 
+            }));
+            return;
+          }
+          
+          // بدء جولة جديدة
+          try {
+            const result = table.gameManager.startNewRound ? table.gameManager.startNewRound() : { success: true };
+            
+            if (!result.success) {
+              ws.send(JSON.stringify({ 
+                type: "error", 
+                message: result.message || "فشل بدء الجولة" 
+              }));
+              return;
+            }
+            
+            table.status = TableStatus.ACTIVE;
+            
+            // إرسال حالة اللعبة المحدثة
+            const gameState = table.gameManager.getState ? table.gameManager.getState() : await storage.getGameState(tableId, userId);
+            broadcastToTable(tableId, {
+              type: PokerSocketMessageType.GAME_STATE,
+              gameState
+            });
+            
+            // أرسل أيضًا تحديث حالة الطاولة
+            broadcastToTable(tableId, {
+              type: PokerSocketMessageType.TABLE_UPDATE,
+              tableInfo: getTableInfo(table)
+            });
+          } catch (error) {
+            console.error(`خطأ في بدء جولة جديدة في الطاولة ${tableId}:`, error);
+            ws.send(JSON.stringify({ 
+              type: "error", 
+              message: "حدث خطأ أثناء بدء الجولة" 
+            }));
+          }
+        } else if (data.type === PokerSocketMessageType.REVEAL_CARDS) {
+          if (!userId) {
+            ws.send(JSON.stringify({ type: "error", message: "مستخدم غير مصرح به" }));
+            return;
+          }
+          
+          const tableId = userTables.get(userId);
+          if (!tableId) {
+            ws.send(JSON.stringify({ type: "error", message: "أنت لست في طاولة" }));
+            return;
+          }
+          
+          // التحقق من وجود الطاولة
+          const table = pokerModule.tables.get(tableId);
+          if (!table) {
+            ws.send(JSON.stringify({ type: "error", message: "الطاولة غير موجودة" }));
+            return;
+          }
+          
+          // كشف الأوراق (عرض الورقة للاعبين في طور الـ showdown)
+          try {
+            table.status = TableStatus.SHOWDOWN;
+            
+            const gameState = table.gameManager.getState ? table.gameManager.getState() : await storage.getGameState(tableId, userId);
+            broadcastToTable(tableId, {
+              type: PokerSocketMessageType.REVEAL_CARDS,
+              gameState
+            });
+            
+            // أرسل أيضًا تحديث حالة الطاولة
+            broadcastToTable(tableId, {
+              type: PokerSocketMessageType.TABLE_UPDATE,
+              tableInfo: getTableInfo(table)
+            });
+          } catch (error) {
+            console.error(`خطأ في كشف الأوراق في الطاولة ${tableId}:`, error);
+            ws.send(JSON.stringify({ 
+              type: "error", 
+              message: "حدث خطأ أثناء كشف الأوراق" 
+            }));
+          }
         } else if (data.type === "join_table") {
           if (!userId) {
             ws.send(JSON.stringify({ type: "error", message: "مستخدم غير مصرح به" }));
@@ -459,6 +1027,110 @@ export function setupPokerGame(app: Express, httpServer: Server) {
           ws.send(JSON.stringify({ 
             type: "game_state", 
             gameState 
+          }));
+        } else if (data.type === PokerSocketMessageType.JOIN_ROOM) {
+          if (!userId) {
+            ws.send(JSON.stringify({ type: "error", message: "مستخدم غير مصرح به" }));
+            return;
+          }
+          
+          const roomId = data.roomId;
+          const safeRoomId = Number(roomId);
+          
+          if (!roomId || isNaN(safeRoomId)) {
+            ws.send(JSON.stringify({ type: "error", message: "معرف الغرفة غير صالح" }));
+            return;
+          }
+          
+          // التحقق من وجود الغرفة
+          const room = pokerModule.rooms.get(safeRoomId);
+          if (!room) {
+            ws.send(JSON.stringify({ type: "error", message: "الغرفة غير موجودة" }));
+            return;
+          }
+          
+          // إضافة المستخدم للغرفة
+          pokerModule.userRooms.set(userId, safeRoomId);
+          
+          // إرسال معلومات الغرفة للمستخدم
+          ws.send(JSON.stringify({
+            type: PokerSocketMessageType.ROOM_UPDATE,
+            roomInfo: getRoomInfo(room)
+          }));
+          
+          // إرسال قائمة الطاولات في الغرفة
+          const tables: TableInfo[] = [];
+          room.tables.forEach(table => {
+            tables.push(getTableInfo(table));
+          });
+          
+          ws.send(JSON.stringify({
+            type: PokerSocketMessageType.TABLES_LIST,
+            roomId: safeRoomId,
+            tables: tables
+          }));
+          
+          console.log(`المستخدم ${userId} انضم للغرفة ${safeRoomId}`);
+        } else if (data.type === PokerSocketMessageType.LEAVE_ROOM) {
+          if (!userId) {
+            ws.send(JSON.stringify({ type: "error", message: "مستخدم غير مصرح به" }));
+            return;
+          }
+          
+          const roomId = pokerModule.userRooms.get(userId);
+          if (roomId) {
+            // إزالة المستخدم من الغرفة
+            pokerModule.userRooms.delete(userId);
+            
+            // إذا كان المستخدم في طاولة ضمن الغرفة، نزيله من الطاولة أيضًا
+            const tableId = userTables.get(userId);
+            const table = tableId ? pokerModule.tables.get(tableId) : null;
+            
+            if (table && table.roomId === roomId) {
+              userTables.delete(userId);
+              
+              if (clients.has(userId)) {
+                const clientInfo = clients.get(userId);
+                if (clientInfo) {
+                  clientInfo.tableId = undefined;
+                }
+              }
+              
+              if (table.players.has(userId)) {
+                table.players.delete(userId);
+              }
+              
+              // بث تحديث بمغادرة لاعب للطاولة
+              broadcastToTable(tableId, {
+                type: PokerSocketMessageType.PLAYER_LEFT,
+                userId: userId,
+                tableId: tableId
+              }, userId);
+              
+              // تحديث حالة الطاولة
+              if (table.status !== TableStatus.WAITING && table.players.size < 2) {
+                table.status = TableStatus.WAITING;
+                
+                // بث تحديث لحالة الطاولة
+                broadcastToTable(tableId, {
+                  type: PokerSocketMessageType.TABLE_UPDATE,
+                  tableInfo: getTableInfo(table)
+                });
+              }
+            }
+            
+            console.log(`المستخدم ${userId} غادر الغرفة ${roomId}`);
+          }
+          
+          // إعادة إرسال قائمة الغرف
+          const rooms: RoomInfo[] = [];
+          pokerModule.rooms.forEach(room => {
+            rooms.push(getRoomInfo(room));
+          });
+          
+          ws.send(JSON.stringify({
+            type: PokerSocketMessageType.ROOMS_LIST,
+            rooms: rooms
           }));
         } else if (data.type === "leave_table") {
           if (!userId) {
