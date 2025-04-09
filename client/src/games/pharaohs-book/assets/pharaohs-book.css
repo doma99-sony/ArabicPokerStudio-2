@@ -302,6 +302,46 @@
   transition: transform 0.3s ease;
 }
 
+/* تنسيقات عرض صور SVG */
+.symbol-svg {
+  width: 90%;
+  height: 90%;
+  object-fit: contain; /* حفظ نسب العرض للصورة */
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.3));
+  transition: all 0.3s ease;
+}
+
+/* تأثيرات إضافية لصور SVG */
+.symbol-pharaoh-svg {
+  filter: drop-shadow(0 0 3px rgba(212, 175, 55, 0.7));
+}
+
+.symbol-book-svg {
+  filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.8));
+}
+
+/* مساحة لعرض صور SVG بطريقة صحيحة */
+object[type="image/svg+xml"] {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* إظهار الرمز البديل عند فشل تحميل الصورة */
+.fallback-active .fallback-icon {
+  display: flex !important;
+}
+
+/* تنسيقات مخصصة لرموز معينة */
+.symbol-anubis .symbol-svg,
+.symbol-scarab .symbol-svg,
+.symbol-eye .symbol-svg {
+  width: 85%;
+  height: 85%;
+}
+
 .special-symbol {
   border: 2px solid var(--primary-gold);
   box-shadow: 0 0 15px var(--primary-gold), inset 0 0 10px var(--primary-gold);

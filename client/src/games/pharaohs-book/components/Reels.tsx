@@ -124,59 +124,73 @@ export default function Reels({ reels, spinning, specialSymbol, winningLines = [
 
   // دالة مساعدة لعرض الرمز
   const renderSymbol = (symbol: string) => {
-    // استخدام الصور لجميع الرموز
+    // استخدام الصور SVG لجميع الرموز
     try {
-      // استخدام مرجع مباشر للرمز المطلوب
+      // استخدام مرجع مباشر للصورة SVG المطلوبة
       const symbolPath = `/images/pharaohs-book/${symbol}.svg`;
       
-      // بديل آمن وأكثر مباشرة 
+      // تحديد أسماء العرض بالعربية للرموز (للوصف النصي)
+      const symbolNames: Record<string, string> = {
+        'pharaoh': 'الفرعون',
+        'book': 'كتاب الفرعون',
+        'anubis': 'أنوبيس',
+        'eye': 'عين حورس',
+        'scarab': 'الجعران المقدس',
+        'a': 'حرف A',
+        'k': 'حرف K',
+        'q': 'حرف Q',
+        'j': 'حرف J',
+        '10': 'رقم 10'
+      };
+      
+      // الاسم المعروض للرمز
+      const symbolDisplayName = symbolNames[symbol] || symbol;
+      
+      // إنشاء عنصر العرض مع فئات CSS مخصصة لكل رمز
       return (
-        <div className="symbol-inner-container">
-          {/* محاولة عرض الصورة أولاً */}
-          <img 
-            src={symbolPath} 
-            alt={symbol} 
-            className="w-full h-full object-contain"
-            loading="eager"
-            style={{ display: 'block' }}
-            onError={(e) => {
-              // إخفاء الصورة الفاشلة
-              const imgEl = e.currentTarget;
-              imgEl.style.display = 'none';
-              
-              // البحث عن العنصر الأب
-              const parentEl = imgEl.parentElement;
-              if (parentEl) {
-                // إنشاء عنصر الرمز البديل مباشرة إذا لم يكن موجوداً
-                let fallbackEl = parentEl.querySelector('.fallback-icon') as HTMLElement | null;
-                
-                if (!fallbackEl) {
-                  fallbackEl = document.createElement('div');
-                  fallbackEl.className = 'fallback-icon w-full h-full flex items-center justify-center text-3xl';
-                  fallbackEl.textContent = getFallbackIcon(symbol);
-                  parentEl.appendChild(fallbackEl);
-                }
-                
-                // إظهار الرمز البديل
-                if (fallbackEl) {
-                  fallbackEl.style.display = 'flex';
-                }
-              }
-            }}
-          />
-          
-          {/* عنصر الرمز البديل محجوب افتراضياً */}
-          <div 
-            className="fallback-icon w-full h-full flex items-center justify-center text-3xl" 
-            style={{ display: 'none' }}
+        <div className={`symbol-inner-container symbol-${symbol}`}>
+          {/* عرض الصورة SVG */}
+          <object 
+            type="image/svg+xml"
+            data={symbolPath}
+            className={`w-full h-full object-contain symbol-svg symbol-${symbol}-svg`}
+            aria-label={symbolDisplayName}
           >
-            {getFallbackIcon(symbol)}
-          </div>
+            {/* البديل في حالة فشل تحميل الصورة SVG */}
+            <img 
+              src={symbolPath} 
+              alt={symbolDisplayName}
+              className="w-full h-full object-contain"
+              loading="eager"
+              onError={(e) => {
+                // في حالة فشل تحميل الصورة، إظهار الرمز النصي البديل
+                const imgEl = e.currentTarget;
+                imgEl.style.display = 'none';
+                
+                // البحث عن العنصر الأب
+                const parentEl = imgEl.parentElement;
+                if (parentEl) {
+                  // إضافة فئة لإظهار الرمز البديل
+                  parentEl.classList.add('fallback-active');
+                }
+              }}
+            />
+            
+            {/* عنصر الرمز النصي البديل */}
+            <div className="fallback-icon w-full h-full flex items-center justify-center text-3xl">
+              {getFallbackIcon(symbol)}
+            </div>
+          </object>
         </div>
       );
     } catch (error) {
+      console.error(`فشل في تحميل صورة الرمز: ${symbol}`, error);
       // في حالة حدوث خطأ استخدم الرموز النصية
-      return <div className="fallback-icon flex items-center justify-center text-3xl">{getFallbackIcon(symbol)}</div>;
+      return (
+        <div className="fallback-icon flex items-center justify-center text-3xl symbol-fallback">
+          {getFallbackIcon(symbol)}
+        </div>
+      );
     }
   };
 
