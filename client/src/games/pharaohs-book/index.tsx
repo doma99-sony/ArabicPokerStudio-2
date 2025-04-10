@@ -33,6 +33,10 @@ export default function PharaohsBook() {
   const [winningLines, setWinningLines] = useState<number[][]>([]);
   const [backgroundMusic, setBackgroundMusic] = useState<HTMLAudioElement | null>(null);
   const [isMuted, setIsMuted] = useState(false);
+  
+  // إضافة حالات جديدة للشاشة الانتقالية للفات المجانية
+  const [freeSpinsTransitionVisible, setFreeSpinsTransitionVisible] = useState<boolean>(false);
+  const [pendingFreeSpins, setPendingFreeSpins] = useState<number>(0);
 
   // رموز اللعبة
   const symbols = [
@@ -256,6 +260,25 @@ export default function PharaohsBook() {
   const WIN_RATE = 0.35; // نسبة الفوز 35%
 
   // دالة للدوران
+  // دالة بدء اللفات المجانية
+  const startFreeSpins = () => {
+    // إخفاء شاشة الانتقال
+    setFreeSpinsTransitionVisible(false);
+    
+    // تفعيل اللفات المجانية
+    setFreeSpins(pendingFreeSpins);
+    setFreeSpinsTotal(pendingFreeSpins);
+    
+    // إعادة تعيين مكاسب اللفات المجانية
+    setFreeSpinsWinnings(0);
+    
+    // تنظيف
+    setPendingFreeSpins(0);
+    
+    // تشغيل صوت اللفات المجانية مرة أخرى
+    playSound('freespin');
+  };
+
   const spin = async () => {
     if (spinning) return;
     
@@ -377,13 +400,20 @@ export default function PharaohsBook() {
 
       // التحقق من رموز الكتاب (سكاتر)
       const bookSymbols = countSymbol(newReels, 'book');
-      if (bookSymbols >= 3) {
+      if (bookSymbols >= 3 && freeSpins === 0) { // منع إضافة لفات مجانية داخل اللفات المجانية
         // تفعيل الدورات المجانية
         const freespinsCount = 10;
-        setFreeSpins(prev => prev + freespinsCount);
-        setFreeSpinsTotal(freespinsCount); // تعيين إجمالي اللفات المجانية
-        setFreeSpinsWinnings(0); // إعادة تعيين مكاسب اللفات المجانية
+        
+        // إظهار شاشة الانتقال للفات المجانية بدلاً من البدء مباشرة
+        setFreeSpinsTransitionVisible(true);
+        
+        // تخزين عدد اللفات المجانية مؤقتاً
+        setPendingFreeSpins(freespinsCount);
+        
+        // عرض رسالة للمستخدم
         setMessage(`حصلت على ${freespinsCount} دورات مجانية!`);
+        
+        // تشغيل صوت اللفات المجانية
         playSound('freespin');
         
         // اختيار رمز خاص عشوائي للدورات المجانية
@@ -693,9 +723,38 @@ export default function PharaohsBook() {
           winningLines={winningLines}
         />
 
+        {/* شاشة الانتقال للفات المجانية */}
+        {freeSpinsTransitionVisible && (
+          <div className="free-spins-transition-screen absolute inset-0 bg-black/80 z-40 flex flex-col items-center justify-center">
+            <div className="transition-container p-8 rounded-xl bg-gradient-to-br from-[#8B4513] to-[#B8860B] border-4 border-[#FFD700] shadow-2xl transform scale-110 animate-bounce-slow">
+              <div className="text-center">
+                <h2 className="text-4xl font-bold text-[#FFD700] mb-6 drop-shadow-lg">لقد حصلت على</h2>
+                <div className="text-6xl font-bold text-white mb-8 drop-shadow-md">
+                  {pendingFreeSpins} 
+                  <span className="text-5xl"> دورات مجانية! </span>
+                </div>
+                
+                <div className="mb-8 flex justify-center">
+                  <div className="book-animation w-32 h-32">
+                    {/* كتاب متحرك هنا */}
+                    <div className="glow-effect"></div>
+                  </div>
+                </div>
+                
+                <button 
+                  onClick={startFreeSpins}
+                  className="start-excitement-btn px-8 py-4 text-2xl font-bold text-black bg-gradient-to-r from-[#FFD700] to-[#D4AF37] rounded-full hover:from-[#D4AF37] hover:to-[#FFD700] transition-all duration-300 shadow-lg transform hover:scale-105 active:scale-95"
+                >
+                  ابدأ الحماس!
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        
         {/* الدورات المجانية - معلومات ثابتة في واجهة اللعبة */}
         {freeSpins > 0 && (
-          <div className="free-spins-banner absolute top-24 left-0 right-0 z-20 flex flex-col items-center">
+          <div className="free-spins-banner absolute bottom-20 left-0 right-0 z-20 flex flex-col items-center">
             <div className="free-spins-counter bg-gradient-to-r from-[#B8860B] to-[#FFD700] text-black py-2 px-6 rounded-full mb-2 text-xl font-bold shadow-lg animate-pulse">
               <span>دورات مجانية متبقية: {freeSpins}</span>
             </div>
