@@ -92,6 +92,7 @@ function Router() {
       <ProtectedRoute path="/slots/pharaohs-book" component={PharaohsBook} />
       <ProtectedRoute path="/slots/rise-of-olympus" component={RiseOfOlympus} />
       <ProtectedRoute path="/egyptian-components-showcase" component={EgyptianComponentsShowcasePage} />
+      <ProtectedRoute path="/queen-of-egypt-3d-showcase" component={dynamic(() => import("@/pages/queen-of-egypt-3d-showcase"))} />
       <ProtectedRoute path="/notifications" component={NotificationsPage} />
       <ProtectedRoute path="/notifications/:messageId" component={NotificationsPage} />
       <ProtectedRoute path="/inventory" component={InventoryPage} />

@@ -112,7 +112,6 @@ function AnimatedTitle({ visible }: AnimatedTitleProps) {
         color="#D4AF37"
         fontSize={1.5}
         lineHeight={1}
-        font="/fonts/Cinzel-Bold.ttf"
         textAlign="center"
         anchorX="center"
         anchorY="middle"
@@ -126,7 +125,6 @@ function AnimatedTitle({ visible }: AnimatedTitleProps) {
         color="#D4AF37"
         fontSize={0.8}
         lineHeight={1}
-        font="/fonts/Cinzel-Regular.ttf"
         textAlign="center"
         anchorX="center"
         anchorY="middle"

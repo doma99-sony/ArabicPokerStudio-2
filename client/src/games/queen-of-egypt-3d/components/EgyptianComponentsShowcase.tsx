@@ -1,289 +1,303 @@
-import React, { useState } from 'react';
-import ScrollBackground from './ScrollBackground';
-import AnimatedCoinCounter, { WinType } from './AnimatedCoinCounter';
-import EgyptianFrame from './EgyptianFrame';
-import EgyptianButton from './EgyptianButton';
-import EgyptianIconsGallery from './EgyptianIconsGallery';
-import EgyptianScorePanel from './EgyptianScorePanel';
+import React, { useState, useRef, useEffect, Suspense } from 'react';
+import { Canvas } from '@react-three/fiber';
+import { Environment } from '@react-three/drei';
+import CinematicIntro from './CinematicIntro';
+import AnimatedCoinCounter from './AnimatedCoinCounter';
 
 /**
- * مكون لعرض جميع المكونات المصرية في مكان واحد
- * يُستخدم للتطوير والعرض التقديمي
+ * معرض مكونات ملكة مصر ثلاثية الأبعاد
+ * يعرض جميع المكونات المصرية بطريقة تفاعلية
  */
-const EgyptianComponentsShowcase: React.FC = () => {
-  // حالة البيانات التجريبية
-  const [balance, setBalance] = useState<number>(1000);
-  const [bet, setBet] = useState<number>(10);
-  const [win, setWin] = useState<number>(0);
-  const [freeSpin, setFreeSpin] = useState<number>(0);
-  const [selectedIcon, setSelectedIcon] = useState<string>('');
-  const [isBackgroundRevealed, setIsBackgroundRevealed] = useState<boolean>(true);
-  const [lastWinType, setLastWinType] = useState<WinType | null>(null);
+export default function EgyptianComponentsShowcase() {
+  const [activeSection, setActiveSection] = useState<string>('intro');
+  const [coinValue, setCoinValue] = useState<number>(1000);
+  const [introComplete, setIntroComplete] = useState<boolean>(false);
   
-  // محاكاة الفوز
-  const simulateWin = (winType: WinType) => {
-    let winAmount = 0;
-    
-    switch (winType) {
-      case WinType.SMALL_WIN:
-        winAmount = bet * 5;
-        break;
-      case WinType.MEDIUM_WIN:
-        winAmount = bet * 10;
-        break;
-      case WinType.BIG_WIN:
-        winAmount = bet * 25;
-        break;
-      case WinType.MEGA_WIN:
-        winAmount = bet * 50;
-        break;
-      case WinType.SUPER_MEGA_WIN:
-        winAmount = bet * 100;
-        break;
-      case WinType.JACKPOT:
-        winAmount = bet * 500;
-        break;
-    }
-    
-    setWin(winAmount);
-    setLastWinType(winType);
-    setBalance(prev => prev + winAmount);
+  const containerRef = useRef<HTMLDivElement>(null);
+  
+  // دالة لتغيير القسم النشط
+  const handleSectionChange = (section: string) => {
+    setActiveSection(section);
   };
   
-  // محاكاة ضبط الرهان
-  const handleBetChange = (newBet: number) => {
-    setBet(newBet);
+  // دالة لإطلاق تغيير قيمة العملات
+  const handleTriggerCoinAnimation = () => {
+    setCoinValue(prevValue => prevValue + Math.floor(Math.random() * 1000) + 100);
   };
-  
-  // محاكاة ضبط الرهان الأقصى
-  const handleMaxBet = () => {
-    setBet(100);
-  };
-  
-  // محاكاة تحويل خلفية البردية
-  const toggleBackground = () => {
-    setIsBackgroundRevealed(!isBackgroundRevealed);
-  };
-  
-  // محاكاة إضافة دورات مجانية
-  const addFreeSpin = () => {
-    setFreeSpin(prev => prev + 5);
-  };
-  
-  // محاكاة استخدام دورة مجانية
-  const useFreeSpin = () => {
-    if (freeSpin > 0) {
-      setFreeSpin(prev => prev - 1);
-    }
-  };
-  
+
   return (
-    <ScrollBackground 
-      isRevealed={isBackgroundRevealed}
-      layerImage1="/images/egypt-hieroglyphs-layer.png"
-      layerImage2="/images/egypt-symbols-layer.png"
-    >
-      <div className="w-full min-h-screen py-16 px-4 sm:px-6 text-white">
-        <EgyptianFrame variant="gold" className="max-w-4xl mx-auto mb-8">
-          <div className="p-4 text-center">
-            <h1 className="text-3xl font-bold text-yellow-300 mb-2">معرض المكونات المصرية</h1>
-            <p className="text-yellow-100">مجموعة من المكونات بتصميم مصري قديم للاستخدام في لعبة ملكة مصر</p>
-          </div>
-        </EgyptianFrame>
-        
-        {/* قسم الإطارات */}
-        <div className="max-w-4xl mx-auto mb-12">
-          <h2 className="text-xl font-bold text-yellow-300 mb-4">الإطارات المصرية</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            <EgyptianFrame variant="primary">
-              <div className="p-4 text-center">
-                <h3 className="text-lg font-medium text-yellow-200">إطار أساسي</h3>
-                <p className="text-sm text-yellow-100 mt-2">
-                  يمكن استخدامه للعناوين والمحتوى العام
-                </p>
-              </div>
-            </EgyptianFrame>
-            
-            <EgyptianFrame variant="secondary">
-              <div className="p-4 text-center">
-                <h3 className="text-lg font-medium text-yellow-200">إطار ثانوي</h3>
-                <p className="text-sm text-yellow-100 mt-2">
-                  مناسب للمحتوى الإضافي والإحصائيات
-                </p>
-              </div>
-            </EgyptianFrame>
-            
-            <EgyptianFrame variant="gold" animated>
-              <div className="p-4 text-center">
-                <h3 className="text-lg font-medium text-yellow-200">إطار ذهبي متحرك</h3>
-                <p className="text-sm text-yellow-100 mt-2">
-                  لعرض المكافآت والعناصر المهمة
-                </p>
-              </div>
-            </EgyptianFrame>
-            
-            <EgyptianFrame variant="royal">
-              <div className="p-4 text-center">
-                <h3 className="text-lg font-medium text-yellow-200">إطار ملكي</h3>
-                <p className="text-sm text-yellow-100 mt-2">
-                  مناسب للعناصر الملكية والنادرة
-                </p>
-              </div>
-            </EgyptianFrame>
-            
-            <EgyptianFrame variant="stone">
-              <div className="p-4 text-center">
-                <h3 className="text-lg font-medium text-yellow-200">إطار حجري</h3>
-                <p className="text-sm text-yellow-100 mt-2">
-                  يُستخدم للمعلومات والتعليمات
-                </p>
-              </div>
-            </EgyptianFrame>
-            
-            <EgyptianFrame variant="primary" size="small">
-              <div className="p-2 text-center">
-                <h3 className="text-sm font-medium text-yellow-200">إطار صغير</h3>
-                <p className="text-xs text-yellow-100 mt-1">
-                  مناسب للتلميحات والرسائل الصغيرة
-                </p>
-              </div>
-            </EgyptianFrame>
-          </div>
-        </div>
-        
-        {/* قسم الأزرار */}
-        <div className="max-w-4xl mx-auto mb-12">
-          <h2 className="text-xl font-bold text-yellow-300 mb-4">الأزرار المصرية</h2>
-          <EgyptianFrame>
-            <div className="p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-              <EgyptianButton variant="primary">زر أساسي</EgyptianButton>
-              <EgyptianButton variant="secondary">زر ثانوي</EgyptianButton>
-              <EgyptianButton variant="gold" glowing>زر ذهبي</EgyptianButton>
-              <EgyptianButton variant="royal">زر ملكي</EgyptianButton>
-              <EgyptianButton variant="danger">زر خطر</EgyptianButton>
-              <EgyptianButton variant="primary" size="small">زر صغير</EgyptianButton>
-              <EgyptianButton variant="gold" size="large">زر كبير</EgyptianButton>
-              <EgyptianButton variant="primary" disabled>زر معطل</EgyptianButton>
-              <EgyptianButton variant="secondary" icon="Ankh">مع أيقونة</EgyptianButton>
-              <EgyptianButton variant="gold" icon="Jackpot" iconPosition="right">أيقونة يمين</EgyptianButton>
-              <EgyptianButton variant="royal" icon="ScarabBeetle" fullWidth>عرض كامل</EgyptianButton>
+    <div className="w-full min-h-screen bg-[#121212] text-white p-4">
+      <h1 className="text-3xl font-bold text-amber-400 text-center my-8">معرض مكونات ملكة مصر ثلاثية الأبعاد</h1>
+      
+      {/* شريط التنقل بين الأقسام */}
+      <div className="flex flex-wrap justify-center gap-4 mb-8">
+        <button 
+          onClick={() => handleSectionChange('intro')}
+          className={`px-4 py-2 rounded-md ${activeSection === 'intro' ? 'bg-amber-600 text-white' : 'bg-gray-800 text-amber-400'}`}
+        >
+          المقدمة السينمائية
+        </button>
+        <button 
+          onClick={() => handleSectionChange('coins')}
+          className={`px-4 py-2 rounded-md ${activeSection === 'coins' ? 'bg-amber-600 text-white' : 'bg-gray-800 text-amber-400'}`}
+        >
+          عداد العملات المتحرك
+        </button>
+        <button 
+          onClick={() => handleSectionChange('icons')}
+          className={`px-4 py-2 rounded-md ${activeSection === 'icons' ? 'bg-amber-600 text-white' : 'bg-gray-800 text-amber-400'}`}
+        >
+          الأيقونات المصرية
+        </button>
+        <button 
+          onClick={() => handleSectionChange('frames')}
+          className={`px-4 py-2 rounded-md ${activeSection === 'frames' ? 'bg-amber-600 text-white' : 'bg-gray-800 text-amber-400'}`}
+        >
+          الإطارات المصرية
+        </button>
+      </div>
+      
+      {/* قسم المقدمة السينمائية */}
+      {activeSection === 'intro' && (
+        <div className="showcase-section w-full h-[600px] overflow-hidden rounded-xl relative" ref={containerRef}>
+          {!introComplete ? (
+            <CinematicIntro 
+              onComplete={() => setIntroComplete(true)} 
+              skipEnabled={true}
+              duration={10}
+            />
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full bg-black">
+              <h2 className="text-2xl font-bold text-amber-400 mb-4">اكتملت المقدمة السينمائية</h2>
+              <button 
+                onClick={() => setIntroComplete(false)}
+                className="px-4 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700"
+              >
+                مشاهدة المقدمة مرة أخرى
+              </button>
             </div>
-          </EgyptianFrame>
+          )}
         </div>
-        
-        {/* قسم الأيقونات */}
-        <div className="max-w-4xl mx-auto mb-12">
-          <h2 className="text-xl font-bold text-yellow-300 mb-4">الأيقونات المصرية</h2>
-          <EgyptianFrame>
-            <div className="p-4">
-              <EgyptianIconsGallery 
-                onSelectIcon={setSelectedIcon}
-                highlightedIcon={selectedIcon}
-                size="medium"
+      )}
+      
+      {/* قسم عداد العملات المتحرك */}
+      {activeSection === 'coins' && (
+        <div className="showcase-section p-8 bg-gradient-to-b from-gray-900 to-black rounded-xl">
+          <h2 className="text-2xl font-bold text-amber-400 mb-6 text-center">عداد العملات المتحرك</h2>
+          
+          <div className="flex flex-col items-center mb-8">
+            <div className="bg-black/50 p-6 rounded-lg mb-4 w-64">
+              <AnimatedCoinCounter 
+                initialValue={coinValue - 500}
+                targetValue={coinValue}
+                size="large"
+                duration={2}
               />
             </div>
-          </EgyptianFrame>
+            
+            <button 
+              onClick={handleTriggerCoinAnimation}
+              className="px-4 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700"
+            >
+              إضافة عملات عشوائية
+            </button>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="p-4 bg-gray-800 rounded-lg">
+              <h3 className="text-xl font-bold text-amber-400 mb-3">عداد صغير</h3>
+              <div className="bg-black/30 p-3 rounded-lg">
+                <AnimatedCoinCounter 
+                  initialValue={100}
+                  targetValue={1000}
+                  size="small"
+                  duration={3}
+                />
+              </div>
+            </div>
+            
+            <div className="p-4 bg-gray-800 rounded-lg">
+              <h3 className="text-xl font-bold text-amber-400 mb-3">عداد متوسط</h3>
+              <div className="bg-black/30 p-3 rounded-lg">
+                <AnimatedCoinCounter 
+                  initialValue={5000}
+                  targetValue={10000}
+                  size="medium"
+                  duration={3}
+                />
+              </div>
+            </div>
+            
+            <div className="p-4 bg-gray-800 rounded-lg">
+              <h3 className="text-xl font-bold text-amber-400 mb-3">عداد كبير</h3>
+              <div className="bg-black/30 p-3 rounded-lg">
+                <AnimatedCoinCounter 
+                  initialValue={20000}
+                  targetValue={100000}
+                  size="large"
+                  duration={3}
+                />
+              </div>
+            </div>
+          </div>
         </div>
-        
-        {/* قسم عداد العملات المتحرك */}
-        <div className="max-w-4xl mx-auto mb-12">
-          <h2 className="text-xl font-bold text-yellow-300 mb-4">عداد العملات المتحرك</h2>
-          <EgyptianFrame>
-            <div className="p-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <AnimatedCoinCounter 
-                    initialValue={0} 
-                    targetValue={win} 
-                    size="large"
-                    winType={lastWinType}
+      )}
+      
+      {/* قسم الأيقونات المصرية */}
+      {activeSection === 'icons' && (
+        <div className="showcase-section p-8 bg-gradient-to-b from-gray-900 to-black rounded-xl">
+          <h2 className="text-2xl font-bold text-amber-400 mb-6 text-center">الأيقونات المصرية</h2>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {/* أيقونة التاج المصري */}
+            <div className="flex flex-col items-center p-4 bg-black/40 rounded-lg">
+              <div className="w-20 h-20 bg-amber-600/20 rounded-full flex items-center justify-center mb-2">
+                <svg className="w-12 h-12" viewBox="0 0 100 100">
+                  <path
+                    d="M50,20 L70,40 L90,25 L80,65 L20,65 L10,25 L30,40 Z"
+                    fill="#FFD700"
+                    stroke="#FFF"
+                    strokeWidth="1"
                   />
-                </div>
-                <div className="space-y-2">
-                  <EgyptianButton variant="primary" onClick={() => simulateWin(WinType.SMALL_WIN)}>
-                    فوز صغير (x5)
-                  </EgyptianButton>
-                  <EgyptianButton variant="primary" onClick={() => simulateWin(WinType.MEDIUM_WIN)}>
-                    فوز متوسط (x10)
-                  </EgyptianButton>
-                  <EgyptianButton variant="secondary" onClick={() => simulateWin(WinType.BIG_WIN)}>
-                    فوز كبير (x25)
-                  </EgyptianButton>
-                  <EgyptianButton variant="gold" onClick={() => simulateWin(WinType.MEGA_WIN)}>
-                    فوز ضخم (x50)
-                  </EgyptianButton>
-                  <EgyptianButton variant="royal" onClick={() => simulateWin(WinType.SUPER_MEGA_WIN)}>
-                    فوز خارق (x100)
-                  </EgyptianButton>
-                  <EgyptianButton variant="royal" glowing onClick={() => simulateWin(WinType.JACKPOT)}>
-                    جاكبوت (x500)
-                  </EgyptianButton>
-                </div>
+                </svg>
               </div>
+              <p className="text-amber-400 text-center">تاج الملكة</p>
             </div>
-          </EgyptianFrame>
+            
+            {/* أيقونة القط المصري */}
+            <div className="flex flex-col items-center p-4 bg-black/40 rounded-lg">
+              <div className="w-20 h-20 bg-indigo-600/20 rounded-full flex items-center justify-center mb-2">
+                <svg className="w-12 h-12" viewBox="0 0 100 100">
+                  <path
+                    d="M30,75 L30,40 L70,40 L70,75 C60,85 40,85 30,75 Z"
+                    fill="#8B5CF6"
+                    stroke="#FFF"
+                    strokeWidth="1"
+                  />
+                  <circle cx="40" cy="55" r="5" fill="#FFF" />
+                  <circle cx="60" cy="55" r="5" fill="#FFF" />
+                  <path
+                    d="M30,40 L20,20 L35,35 M70,40 L80,20 L65,35"
+                    fill="none"
+                    stroke="#8B5CF6"
+                    strokeWidth="3"
+                  />
+                </svg>
+              </div>
+              <p className="text-amber-400 text-center">القط المصري</p>
+            </div>
+            
+            {/* أيقونة صقر حورس */}
+            <div className="flex flex-col items-center p-4 bg-black/40 rounded-lg">
+              <div className="w-20 h-20 bg-amber-500/20 rounded-full flex items-center justify-center mb-2">
+                <svg className="w-12 h-12" viewBox="0 0 100 100">
+                  <path
+                    d="M50,20 C65,20 75,35 75,55 L60,70 L40,70 L25,55 C25,35 35,20 50,20 Z"
+                    fill="#F59E0B"
+                    stroke="#FFF"
+                    strokeWidth="1"
+                  />
+                  <circle cx="40" cy="45" r="5" fill="#FFF" />
+                  <circle cx="60" cy="45" r="5" fill="#FFF" />
+                  <path
+                    d="M45,60 L55,60"
+                    stroke="#FFF"
+                    strokeWidth="2"
+                  />
+                </svg>
+              </div>
+              <p className="text-amber-400 text-center">صقر حورس</p>
+            </div>
+            
+            {/* أيقونة الكوبرا */}
+            <div className="flex flex-col items-center p-4 bg-black/40 rounded-lg">
+              <div className="w-20 h-20 bg-emerald-600/20 rounded-full flex items-center justify-center mb-2">
+                <svg className="w-12 h-12" viewBox="0 0 100 100">
+                  <path
+                    d="M50,80 C50,80 70,60 70,40 C70,25 60,20 50,20 C40,20 30,25 30,40 C30,60 50,80 50,80 Z"
+                    fill="#059669"
+                    stroke="#FFF"
+                    strokeWidth="1"
+                  />
+                  <circle cx="40" cy="35" r="3" fill="#FFF" />
+                  <circle cx="60" cy="35" r="3" fill="#FFF" />
+                  <path
+                    d="M40,50 L60,50"
+                    stroke="#FFF"
+                    strokeWidth="2"
+                  />
+                </svg>
+              </div>
+              <p className="text-amber-400 text-center">الكوبرا</p>
+            </div>
+          </div>
         </div>
-        
-        {/* قسم لوحة النتائج */}
-        <div className="max-w-4xl mx-auto mb-12">
-          <h2 className="text-xl font-bold text-yellow-300 mb-4">لوحة النتائج</h2>
-          <EgyptianFrame>
-            <div className="p-4">
-              <EgyptianScorePanel 
-                balance={balance}
-                bet={bet}
-                win={win}
-                onBetChange={handleBetChange}
-                onMaxBet={handleMaxBet}
-                showJackpot
-                showFreeSpin
-                jackpot={50000}
-                freeSpin={freeSpin}
-                lastWinType={lastWinType}
-              />
+      )}
+      
+      {/* قسم الإطارات المصرية */}
+      {activeSection === 'frames' && (
+        <div className="showcase-section p-8 bg-gradient-to-b from-gray-900 to-black rounded-xl">
+          <h2 className="text-2xl font-bold text-amber-400 mb-6 text-center">الإطارات المصرية</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* إطار مصري ذهبي */}
+            <div className="p-8 border-4 border-amber-600 relative bg-black/40">
+              <div className="absolute top-0 left-0 w-12 h-12 border-t-4 border-l-4 border-amber-500 transform -translate-x-4 -translate-y-4"></div>
+              <div className="absolute top-0 right-0 w-12 h-12 border-t-4 border-r-4 border-amber-500 transform translate-x-4 -translate-y-4"></div>
+              <div className="absolute bottom-0 left-0 w-12 h-12 border-b-4 border-l-4 border-amber-500 transform -translate-x-4 translate-y-4"></div>
+              <div className="absolute bottom-0 right-0 w-12 h-12 border-b-4 border-r-4 border-amber-500 transform translate-x-4 translate-y-4"></div>
               
-              <div className="mt-4 grid grid-cols-2 gap-4">
-                <EgyptianButton variant="gold" onClick={addFreeSpin}>
-                  أضف دورات مجانية +5
-                </EgyptianButton>
-                <EgyptianButton variant="secondary" onClick={useFreeSpin} disabled={freeSpin <= 0}>
-                  استخدم دورة مجانية
-                </EgyptianButton>
-              </div>
-            </div>
-          </EgyptianFrame>
-        </div>
-        
-        {/* قسم خلفية البردية */}
-        <div className="max-w-4xl mx-auto mb-12">
-          <h2 className="text-xl font-bold text-yellow-300 mb-4">خلفية البردية</h2>
-          <EgyptianFrame>
-            <div className="p-4">
-              <div className="text-center mb-4">
-                <p className="text-yellow-100 mb-2">
-                  يمكن التبديل بين حالة الطي والفتح للبردية المصرية
-                </p>
-                <EgyptianButton variant="primary" onClick={toggleBackground}>
-                  {isBackgroundRevealed ? 'طي البردية' : 'فتح البردية'}
-                </EgyptianButton>
-              </div>
-            </div>
-          </EgyptianFrame>
-        </div>
-        
-        {/* تذييل الصفحة */}
-        <div className="max-w-4xl mx-auto text-center">
-          <EgyptianFrame variant="primary" size="small">
-            <div className="p-2">
-              <p className="text-sm text-yellow-200">
-                تم تطوير المكونات المصرية لاستخدامها في لعبة ملكة مصر ثلاثية الأبعاد
+              <h3 className="text-xl font-bold text-amber-400 mb-3 text-center">إطار مصري ذهبي</h3>
+              <p className="text-gray-300">
+                إطار مستوحى من الزخارف المصرية القديمة، مُزين بحواف ذهبية وزوايا مميزة تعكس الفخامة والأصالة المصرية.
               </p>
             </div>
-          </EgyptianFrame>
+            
+            {/* إطار مصري فرعوني */}
+            <div className="p-8 bg-black/40 relative">
+              <div className="absolute inset-0 border-8 border-double border-amber-700 m-2"></div>
+              <div className="absolute top-2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-12 h-6 bg-amber-700 rounded-full flex items-center justify-center">
+                <div className="w-10 h-4 bg-amber-500 rounded-full"></div>
+              </div>
+              
+              <h3 className="text-xl font-bold text-amber-400 mb-3 text-center mt-4">إطار فرعوني</h3>
+              <p className="text-gray-300">
+                إطار بطراز فرعوني مميز يحاكي النقوش القديمة على جدران المعابد، مع تفاصيل دقيقة تضفي الطابع التاريخي.
+              </p>
+            </div>
+            
+            {/* إطار مصري للنقوش */}
+            <div className="p-8 bg-amber-900/40 relative">
+              <div className="absolute inset-0 bg-[url('/patterns/hieroglyphs.png')] opacity-10"></div>
+              <div className="absolute inset-x-0 top-0 h-2 bg-gradient-to-r from-amber-900 via-amber-500 to-amber-900"></div>
+              <div className="absolute inset-x-0 bottom-0 h-2 bg-gradient-to-r from-amber-900 via-amber-500 to-amber-900"></div>
+              <div className="absolute inset-y-0 left-0 w-2 bg-gradient-to-b from-amber-900 via-amber-500 to-amber-900"></div>
+              <div className="absolute inset-y-0 right-0 w-2 bg-gradient-to-b from-amber-900 via-amber-500 to-amber-900"></div>
+              
+              <h3 className="text-xl font-bold text-amber-400 mb-3 text-center">إطار النقوش الهيروغليفية</h3>
+              <p className="text-gray-300">
+                إطار مزين بنقوش هيروغليفية تحكي القصص القديمة، مرصع بأحجار كريمة وعناصر ذهبية تعكس ثقافة الفراعنة.
+              </p>
+            </div>
+            
+            {/* إطار مصري بسيط */}
+            <div className="p-8 bg-gradient-to-r from-amber-900/30 to-amber-700/30 border-l-4 border-amber-500">
+              <h3 className="text-xl font-bold text-amber-400 mb-3">إطار الأهرامات</h3>
+              <p className="text-gray-300">
+                إطار بسيط وأنيق يستوحي تصميمه من شكل الأهرامات المصرية الشامخة، ويتميز بخطوط بسيطة ولون ذهبي دافئ.
+              </p>
+              
+              <div className="mt-4 flex justify-end">
+                <div className="w-8 h-8">
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12,2 L2,20 L22,20 Z" fill="#D4AF37" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </ScrollBackground>
+      )}
+    </div>
   );
-};
-
-export default EgyptianComponentsShowcase;
+}
