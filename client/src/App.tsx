@@ -25,7 +25,7 @@ import OffersPage from "@/pages/offers-page";
 import ArabicRocketPage from "@/pages/arabic-rocket-page";
 import ArabPokerPage from "@/pages/arab-poker-page";
 import ArabPokerGamePage from "@/pages/arab-poker-game-page";
-import EgyptQueenPage from "@/pages/egypt-queen-page";
+import QueenOfEgypt3DPage from "@/pages/queen-of-egypt-3d-page";
 import EgyptRocketPage from "@/pages/egypt-rocket-page";
 import FishingSlotsPage from "@/pages/fishing-slots";
 import PharaohsBook from "@/games/pharaohs-book/index";
@@ -81,7 +81,7 @@ function Router() {
       <ProtectedRoute path="/rankings" component={RankingsPage} />
       <ProtectedRoute path="/domino" component={DominoPage} />
       <ProtectedRoute path="/arabic-rocket" component={ArabicRocketPage} />
-      <ProtectedRoute path="/egypt-queen" component={EgyptQueenPage} />
+      <ProtectedRoute path="/queen-of-egypt-3d" component={QueenOfEgypt3DPage} />
       <ProtectedRoute path="/egypt-rocket" component={EgyptRocketPage} />
       <ProtectedRoute path="/fishing-slots" component={FishingSlotsPage} />
       <ProtectedRoute path="/poker-lobby/poker-masr" component={PokerMasrLobby} />

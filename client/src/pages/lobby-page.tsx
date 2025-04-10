@@ -102,8 +102,7 @@ export default function LobbyPage() {
       navigate("/arabic-rocket");
     } else if (gameType === "zeus_king") {
       navigate("/zeus-king");
-    } else if (gameType === "egypt_queen") {
-      navigate("/egypt-queen");
+
     } else if (gameType === "egypt_rocket") {
       navigate("/egypt-rocket");
     } else if (gameType === "arab_poker") {
@@ -401,17 +400,7 @@ export default function LobbyPage() {
                       isNew: true,
                       onClick: () => navigate("/arab-poker")
                     },
-                    {
-                      id: "egypt-queen",
-                      title: "ملكة مصر",
-                      image: "/images/egypt-queen-bg.jpg",
-                      playerCount: 845,
-                      tableCount: 37,
-                      minBet: 100,
-                      maxBet: 250000,
-                      isHot: true,
-                      onClick: () => navigate("/egypt-queen")
-                    },
+
                     {
                       id: "zeus-king",
                       title: "زيوس كينغ",
@@ -488,6 +477,18 @@ export default function LobbyPage() {
                       isNew: true,
                       isHot: true,
                       onClick: () => navigate("/slots/pharaohs-book")
+                    },
+                    {
+                      id: "queen-of-egypt-3d",
+                      title: "ملكة مصر 3D",
+                      image: "/games/queen-of-egypt-3d/assets/logo.svg",
+                      playerCount: 348,
+                      tableCount: 0,
+                      minBet: 10,
+                      maxBet: 100000,
+                      isNew: true,
+                      isHot: true,
+                      onClick: () => navigate("/queen-of-egypt-3d")
                     }
                   ]}
                 />
