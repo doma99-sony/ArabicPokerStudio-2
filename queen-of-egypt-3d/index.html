@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ملكة مصر 3D | سلوتس ثلاثية الأبعاد</title>
+    <meta name="description" content="لعبة سلوتس ملكة مصر ثلاثية الأبعاد مع رموز مصرية قديمة وتأثيرات مذهلة">
+    <link rel="stylesheet" href="src/css/style.css">
+    <!-- ربط Google Fonts (الخطوط العربية) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- شاشة التحميل -->
+    <div id="loading-screen">
+        <div class="loading-container">
+            <div class="crown-loader"></div>
+            <h2>جاري تحميل عالم ملكة مصر...</h2>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+            <p class="loading-text">0%</p>
+        </div>
+    </div>
+
+    <!-- المشهد السينمائي الافتتاحي -->
+    <div id="intro-cinematic" class="hidden">
+        <div class="cinematic-content">
+            <h1 class="cinematic-title">ملكة مصر</h1>
+            <div class="cinematic-scene">
+                <!-- مشهد متحرك سيتم التحكم به عبر Three.js -->
+            </div>
+            <button id="skip-intro" class="gold-button">تخطي المقدمة</button>
+        </div>
+    </div>
+
+    <!-- الواجهة الرئيسية للعبة -->
+    <div id="game-container" class="hidden">
+        <!-- حاوية Three.js للمشهد ثلاثي الأبعاد -->
+        <canvas id="game-canvas"></canvas>
+
+        <!-- واجهة المستخدم (UI) -->
+        <div id="game-ui">
+            <!-- شريط العنوان -->
+            <header class="game-header">
+                <button id="back-button" class="ui-button">
+                    <span class="back-icon">←</span>
+                </button>
+                <h1 class="game-title">ملكة مصر</h1>
+                <div class="player-balance">
+                    <span id="balance-amount">1,000,000</span>
+                    <span class="coin-icon">🪙</span>
+                </div>
+            </header>
+
+            <!-- لوحة التحكم -->
+            <div class="control-panel">
+                <div class="bet-controls">
+                    <button id="decrease-bet" class="control-button">-</button>
+                    <div class="bet-display">
+                        <span>الرهان:</span>
+                        <span id="bet-amount">10,000</span>
+                    </div>
+                    <button id="increase-bet" class="control-button">+</button>
+                </div>
+                <button id="spin-button" class="spin-button">لف!</button>
+                <button id="auto-spin" class="control-button">لف تلقائي</button>
+                <button id="mute-button" class="control-button">
+                    <span class="sound-icon">🔊</span>
+                </button>
+            </div>
+
+            <!-- معلومات اللفات المجانية (تظهر عند تفعيلها) -->
+            <div id="free-spins-info" class="hidden">
+                <div class="free-spins-counter">
+                    <span>لفات مجانية:</span>
+                    <span id="free-spins-count">0</span>
+                </div>
+                <div class="free-spins-winnings">
+                    <span>المكاسب:</span>
+                    <span id="free-spins-winnings">0</span>
+                </div>
+            </div>
+
+            <!-- شاشة الانتقال للفات المجانية -->
+            <div id="free-spins-transition" class="fullscreen-overlay hidden">
+                <div class="transition-content">
+                    <h2>لقد حصلت على</h2>
+                    <div class="free-spins-number">
+                        <span id="pending-free-spins">10</span>
+                        <span>لفات مجانية!</span>
+                    </div>
+                    <div class="special-symbol-display">
+                        <span>الرمز الخاص:</span>
+                        <div id="special-symbol" class="symbol-3d"></div>
+                    </div>
+                    <button id="start-free-spins" class="gold-button pulse">ابدأ الحماس!</button>
+                </div>
+            </div>
+
+            <!-- شاشة نتيجة اللفات المجانية -->
+            <div id="free-spins-results" class="fullscreen-overlay hidden">
+                <div class="results-content">
+                    <h2 id="win-type-text">ربح رائع!</h2>
+                    <div class="winnings-display">
+                        <span>إجمالي المكاسب:</span>
+                        <span id="total-free-spins-winnings">0</span>
+                    </div>
+                    <button id="continue-after-free-spins" class="gold-button">استمر</button>
+                </div>
+            </div>
+
+            <!-- شاشة الفوز الكبير -->
+            <div id="big-win-screen" class="fullscreen-overlay hidden">
+                <div class="big-win-content">
+                    <h2 id="big-win-text">فوز كبير!</h2>
+                    <div class="big-win-amount" id="big-win-amount">0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- جدول المكافآت -->
+    <div id="paytable-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2>جدول المكافآت</h2>
+            <div class="paytable-grid">
+                <!-- سيتم ملؤها بواسطة JavaScript -->
+            </div>
+            <button id="close-paytable" class="gold-button">إغلاق</button>
+        </div>
+    </div>
+
+    <!-- المكتبات الخارجية -->
+    <script src="node_modules/three/build/three.min.js"></script>
+    <script src="node_modules/gsap/dist/gsap.min.js"></script>
+
+    <!-- مكتبات وإضافات Three.js -->
+    <script src="node_modules/three/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="node_modules/three/examples/js/controls/OrbitControls.js"></script>
+
+    <!-- ملفات JavaScript الخاصة بنا -->
+    <script src="src/js/utils.js"></script>
+    <script src="src/js/audio-manager.js"></script>
+    <script src="src/js/3d-scene.js"></script>
+    <script src="src/js/slot-game.js"></script>
+    <script src="src/js/ui-manager.js"></script>
+    <script src="src/js/intro-cinematic.js"></script>
+    <script src="src/js/main.js"></script>
+</body>
+</html>
