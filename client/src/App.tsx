@@ -34,6 +34,7 @@ import PokerMasrLobby from "@/pages/poker-lobby/poker-masr";
 import TexasHoldemPoker from "@/pages/poker-lobby/poker-masr/texas-holdem";
 import MeccaPoker from "@/pages/poker-lobby/poker-masr/mecca-poker";
 import TurkishClassicPoker from "@/pages/poker-lobby/poker-masr/turkish-classic";
+import EgyptianComponentsShowcasePage from "@/pages/egyptian-components-showcase-page";
 import { ProtectedRoute } from "./lib/protected-route";
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
@@ -90,6 +91,7 @@ function Router() {
       <ProtectedRoute path="/poker-lobby/poker-masr/turkish-classic" component={TurkishClassicPoker} />
       <ProtectedRoute path="/slots/pharaohs-book" component={PharaohsBook} />
       <ProtectedRoute path="/slots/rise-of-olympus" component={RiseOfOlympus} />
+      <ProtectedRoute path="/egyptian-components-showcase" component={EgyptianComponentsShowcasePage} />
       <ProtectedRoute path="/notifications" component={NotificationsPage} />
       <ProtectedRoute path="/notifications/:messageId" component={NotificationsPage} />
       <ProtectedRoute path="/inventory" component={InventoryPage} />
