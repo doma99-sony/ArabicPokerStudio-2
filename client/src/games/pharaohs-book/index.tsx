@@ -5,6 +5,7 @@ import { Loader2 } from 'lucide-react';
 import Reels from './components/Reels';
 import ControlPanel from './components/ControlPanel';
 import PayTable from './components/PayTable';
+import audioGenerator from './components/audio-generator';
 import './assets/pharaohs-book.css';
 
 /**
@@ -93,20 +94,16 @@ export default function PharaohsBook() {
       };
     });
 
-    // إعداد موسيقى الخلفية
-    const bgMusic = new Audio('/sounds/pharaohs-book/background.mp3');
-    bgMusic.loop = true;
-    bgMusic.volume = 0.3;
+    // تفعيل مولد الصوت
+    audioGenerator.initialize();
     
-    // محاولة تشغيل الموسيقى (ستعمل فقط بعد تفاعل المستخدم مع الصفحة)
-    const musicPromise = bgMusic.play();
-    if (musicPromise !== undefined) {
-      musicPromise.catch(error => {
-        console.log('لا يمكن تشغيل الموسيقى تلقائياً، يحتاج تفاعل المستخدم أولاً');
-      });
-    }
+    // نظراً لأن ملفات الصوت غير متوفرة، سنستخدم مولد الصوت فقط
+    // ونسجل في متغير الحالة أن لدينا تحكم للصوت دون استخدام ملف صوتي فعلي
     
-    setBackgroundMusic(bgMusic);
+    // إعداد تسجيل الموسيقى كحالة لإدارة تفعيل/إيقاف الصوت
+    setBackgroundMusic(null);
+    
+    console.log('تم تهيئة نظام الصوت باستخدام مولد الصوت WebAudio API');
     
     // استخدام زمن قصير للتحميل في حالة عدم توفر الصور
     setTimeout(() => {
@@ -114,15 +111,14 @@ export default function PharaohsBook() {
     }, 1000);
 
     return () => {
-      // إيقاف اللعب التلقائي والموسيقى عند مغادرة الصفحة
+      // إيقاف اللعب التلقائي عند مغادرة الصفحة
       if (autoPlay) {
         setAutoPlay(false);
       }
       
-      if (backgroundMusic) {
-        backgroundMusic.pause();
-        backgroundMusic.currentTime = 0;
-      }
+      // حتى مع عدم وجود خلفية صوتية، نقوم بتعيين حالة كتم الصوت 
+      // لضمان عدم انتقال الإعدادات للصفحات الأخرى
+      setIsMuted(true);
     };
   }, [user]);
 
@@ -168,59 +164,51 @@ export default function PharaohsBook() {
     setIsMuted(prevMuted => {
       const newMutedState = !prevMuted;
       
-      // تطبيق حالة كتم الصوت على موسيقى الخلفية
-      if (backgroundMusic) {
-        if (newMutedState) {
-          backgroundMusic.pause();
-        } else {
-          // محاولة إعادة تشغيل الموسيقى
-          const playPromise = backgroundMusic.play();
-          if (playPromise !== undefined) {
-            playPromise.catch(error => {
-              console.log('فشل إعادة تشغيل الموسيقى، يحتاج تفاعل المستخدم أولاً');
-            });
-          }
-        }
+      // تطبيق حالة كتم الصوت على مولد الصوت
+      if (newMutedState) {
+        // كتم الصوت
+        audioGenerator.setMasterVolume(0);
+      } else {
+        // إعادة تفعيل الصوت
+        audioGenerator.setMasterVolume(0.4);
+        
+        // تفعيل سياق الصوت
+        audioGenerator.activate();
       }
       
       return newMutedState;
     });
   };
 
-  // تشغيل الأصوات
+  // تشغيل الأصوات باستخدام مولد الصوت
   const playSound = (soundName: string) => {
     // لا تشغل الأصوات إذا كان وضع كتم الصوت مفعلاً
     if (isMuted) return;
     
     try {
-      // استخدام القيمة الافتراضية في حالة عدم وجود الملف الصوتي
-      // هذا يعمل على تجنب الأخطاء في حالة عدم وجود ملفات صوتية
-      const sound = new Audio();
+      // تفعيل سياق الصوت (يحتاج تفاعل المستخدم في بعض المتصفحات)
+      audioGenerator.activate();
       
-      // محاولة تحميل الصوت، إذا فشل سيتم تجاهله بصمت
-      sound.src = `/sounds/pharaohs-book/${soundName}.mp3`;
-      
-      // تعيين مستوى الصوت
-      sound.volume = 0.5;
-      
-      const playPromise = sound.play();
-      
-      // التعامل مع الوعد المرتجع من play()
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            // تم تشغيل الصوت بنجاح
-            console.log(`تم تشغيل صوت ${soundName} بنجاح`);
-          })
-          .catch(error => {
-            // تم رفض الوعد، تجاهل الخطأ
-            // هذا طبيعي في بعض المتصفحات التي تتطلب تفاعل المستخدم قبل تشغيل الصوت
-            console.log(`تم تجاهل خطأ تشغيل الصوت ${soundName}:`, error.name);
-          });
+      // تشغيل الصوت المناسب حسب النوع
+      switch (soundName) {
+        case 'spin':
+          audioGenerator.generateSpinSound();
+          break;
+        case 'win':
+          audioGenerator.generateWinSound(false);
+          break;
+        case 'bigwin':
+          audioGenerator.generateWinSound(true);
+          break;
+        case 'freespin':
+          audioGenerator.generateFreespinSound();
+          break;
+        default:
+          console.log(`نوع الصوت غير معروف: ${soundName}`);
       }
     } catch (e) {
-      // تجاهل أي أخطاء أخرى
-      console.log('تم تجاهل خطأ في إنشاء الصوت:', e);
+      // تجاهل أي أخطاء
+      console.log(`تم تجاهل خطأ تشغيل الصوت ${soundName}:`, e);
     }
   };
 
