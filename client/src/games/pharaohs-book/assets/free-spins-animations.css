@@ -1,0 +1,136 @@
+/* أنيميشن وتأثيرات للفات المجانية */
+
+/* تأثير النطاط (bounce) للنتيجة النهائية */
+@keyframes bounceOnce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  40% {
+    transform: translateY(-30px) scale(1.05);
+  }
+  60% {
+    transform: translateY(-15px) scale(1.03);
+  }
+}
+
+.animate-bounce-once {
+  animation: bounceOnce 3s ease-in-out;
+}
+
+/* تأثير وهج الذهب للفوز */
+@keyframes goldGlow {
+  0%, 100% {
+    box-shadow: 0 0 15px 5px rgba(212, 175, 55, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 25px 10px rgba(255, 215, 0, 0.8);
+  }
+}
+
+/* تأثير تلألؤ النص للفائز */
+@keyframes textShimmer {
+  0% {
+    background-position: -100% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* تأثير "عرباوي وين" المتميز */
+@keyframes arabicWin {
+  0%, 100% {
+    transform: scale(1);
+    filter: hue-rotate(0deg);
+  }
+  25% {
+    transform: scale(1.05) rotate(-2deg);
+    filter: hue-rotate(30deg);
+  }
+  50% {
+    transform: scale(1) rotate(0deg);
+    filter: hue-rotate(60deg);
+  }
+  75% {
+    transform: scale(1.05) rotate(2deg);
+    filter: hue-rotate(30deg);
+  }
+}
+
+/* حاوية نتيجة اللفات المجانية */
+.freespins-result-container {
+  background-color: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(5px);
+}
+
+/* مربع نتيجة اللفات المجانية */
+.freespins-result-box {
+  box-shadow: 0 0 25px 10px rgba(212, 175, 55, 0.5);
+  min-width: 280px;
+  max-width: 90%;
+  animation: goldGlow 2s infinite alternate;
+}
+
+/* تأثيرات خاصة لأنواع الفوز المختلفة */
+.freespins-result-box.arabic-win {
+  animation: goldGlow 1.5s infinite alternate, arabicWin 8s infinite;
+}
+
+.freespins-result-box.super-win {
+  animation: goldGlow 1s infinite alternate;
+  background-image: linear-gradient(135deg, rgba(123, 104, 238, 0.8) 0%, rgba(75, 0, 130, 0.9) 100%);
+}
+
+.freespins-result-box.big-win {
+  animation: goldGlow 1.2s infinite alternate;
+  background-image: linear-gradient(135deg, rgba(178, 34, 34, 0.8) 0%, rgba(139, 0, 0, 0.9) 100%);
+}
+
+/* عداد اللفات المجانية */
+.free-spins-counter {
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+}
+
+/* عداد إجمالي المكاسب من اللفات المجانية */
+.free-spins-winnings {
+  animation: slideInRight 0.5s ease-out;
+}
+
+@keyframes slideInRight {
+  0% {
+    transform: translateX(50px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* تأثير اللمعان للنصوص */
+.shimmering-text {
+  background: linear-gradient(
+    90deg,
+    #fff 0%,
+    #fff8c0 20%,
+    #ffe600 50%,
+    #fff8c0 80%,
+    #fff 100%
+  );
+  background-size: 200% auto;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: textShimmer 3s linear infinite;
+}

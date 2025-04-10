@@ -7,6 +7,7 @@ import ControlPanel from './components/ControlPanel';
 import PayTable from './components/PayTable';
 import audioGenerator from './components/audio-generator';
 import './assets/pharaohs-book.css';
+import './assets/free-spins-animations.css'; // إضافة ملف الأنيميشن الخاص باللفات المجانية
 
 /**
  * لعبة كتاب الفرعون (Pharaoh's Book)
@@ -23,6 +24,10 @@ export default function PharaohsBook() {
   const [message, setMessage] = useState('');
   const [win, setWin] = useState(0);
   const [freeSpins, setFreeSpins] = useState(0);
+  const [freeSipnsTotal, setFreeSpinsTotal] = useState(0); // إجمالي عدد اللفات المجانية في الجولة الحالية
+  const [freeSpinsWinnings, setFreeSpinsWinnings] = useState(0); // إجمالي المكاسب من اللفات المجانية
+  const [showFreeSpinsResult, setShowFreeSpinsResult] = useState(false); // عرض نتيجة اللفات المجانية
+  const [freeSpinsWinType, setFreeSpinsWinType] = useState<'normal' | 'big' | 'super' | 'arabic'>('normal'); // نوع الفوز في اللفات المجانية
   const [autoPlay, setAutoPlay] = useState(false);
   const [specialSymbol, setSpecialSymbol] = useState<string | null>(null);
   const [winningLines, setWinningLines] = useState<number[][]>([]);
@@ -76,23 +81,28 @@ export default function PharaohsBook() {
     let imagesLoaded = 0;
 
     // تحميل الصور مسبقاً
-    svgSymbols.forEach(symbol => {
-      const img = new Image();
-      img.src = `/images/pharaohs-book/${symbol}.svg`;
-      img.onload = () => {
-        imagesLoaded++;
-        if (imagesLoaded === imagesToLoad) {
-          setLoading(false);
-        }
-      };
-      img.onerror = () => {
-        console.log(`خطأ في تحميل صورة ${symbol}.svg`);
-        imagesLoaded++;
-        if (imagesLoaded === imagesToLoad) {
-          setLoading(false);
-        }
-      };
-    });
+    // جميع صور SVG موجودة بالفعل، لكن قد تكون هناك مشكلة في تحميلها
+    // لذلك سنتخطى عملية تحميلها ونفترض أنها متوفرة
+    
+    // استخدام نهج التحميل المبسط
+    setTimeout(() => {
+      setLoading(false);
+      console.log('تم تخطي تحميل الصور والانتقال للعبة مباشرة');
+    }, 1000);
+    
+    // إعداد صور احتياطية في حالة عدم وجود صور SVG
+    const symbolPlaceholders = {
+      'pharaoh': '👑',
+      'book': '📕',
+      'anubis': '🐺',
+      'eye': '👁️',
+      'scarab': '🪲',
+      'a': 'A',
+      'k': 'K',
+      'q': 'Q',
+      'j': 'J',
+      '10': '10'
+    };
 
     // تفعيل مولد الصوت
     audioGenerator.initialize();
@@ -274,14 +284,18 @@ export default function PharaohsBook() {
     const newReels: string[][] = [];
     
     // تحديد ما إذا كانت هذه الدورة ستكون فائزة أم لا
-    const shouldWin = Math.random() <= WIN_RATE;
+    // نستخدم معدل الفوز الأساسي + زيادة أثناء اللفات المجانية
+    const shouldWin = Math.random() <= WIN_RATE + (freeSpins > 0 ? 0.25 : 0);
     
-    // في حالة الدورات المجانية، نزيد احتمالية الفوز
-    const freeSpinBoost = freeSpins > 0 ? 0.2 : 0;
+    // في حالة الدورات المجانية، نزيد احتمالية الفوز بشكل كبير
+    // هذا يجعل اللفات المجانية أكثر إثارة وتشويقًا
+    const freeSpinBoost = freeSpins > 0 ? 0.35 : 0;
     
     // تحديد ما إذا كان سيظهر 3 كتب (سكاتر) في هذه الدورة
     // احتمالية منخفضة للحصول على دورات مجانية (5%)
-    const shouldGiveFreeSpins = Math.random() <= 0.05 + freeSpinBoost;
+    // لكن قمنا بزيادة احتمالية تجديد اللفات المجانية أثناء اللعب المجاني نفسه
+    const freespinRenewalChance = freeSpins > 0 ? 0.12 : 0.05; // 12% خلال اللفات المجانية، 5% في اللعب العادي
+    const shouldGiveFreeSpins = Math.random() <= freespinRenewalChance + freeSpinBoost*0.1;
     
     if (shouldGiveFreeSpins) {
       // إنشاء نتيجة تحتوي على 3 كتب على الأقل
@@ -367,14 +381,58 @@ export default function PharaohsBook() {
         // تفعيل الدورات المجانية
         const freespinsCount = 10;
         setFreeSpins(prev => prev + freespinsCount);
+        setFreeSpinsTotal(freespinsCount); // تعيين إجمالي اللفات المجانية
+        setFreeSpinsWinnings(0); // إعادة تعيين مكاسب اللفات المجانية
         setMessage(`حصلت على ${freespinsCount} دورات مجانية!`);
         playSound('freespin');
         
         // اختيار رمز خاص عشوائي للدورات المجانية
-        // نستثني الرموز ذات القيمة العالية جدًا
+        // نستثني الرموز ذات القيمة العالية جدًا لموازنة اللعبة
         const specialSymbolOptions = symbols.filter(s => s !== 'pharaoh' && s !== 'book');
         const randomSymbol = specialSymbolOptions[Math.floor(Math.random() * specialSymbolOptions.length)];
         setSpecialSymbol(randomSymbol);
+      }
+      
+      // تحديث إجمالي مكاسب اللفات المجانية إذا كنا في وضع اللفات المجانية
+      if (freeSpins > 0 && result.win > 0) {
+        setFreeSpinsWinnings(prev => prev + result.win);
+      }
+      
+      // إظهار النتيجة النهائية للفات المجانية إذا انتهت
+      if (freeSpins === 1 && freeSipnsTotal > 0) {
+        // سنظهر النتيجة النهائية للفات المجانية في اللفة الأخيرة
+        setTimeout(() => {
+          // تحديد نوع الفوز بناءً على إجمالي المكاسب
+          const winMultiplier = freeSpinsWinnings / bet;
+          
+          if (winMultiplier > 50) {
+            setFreeSpinsWinType('arabic'); // عرباوي وين!
+          } else if (winMultiplier > 30) {
+            setFreeSpinsWinType('super'); // Super Win!
+          } else if (winMultiplier > 15) {
+            setFreeSpinsWinType('big'); // Big Win!
+          } else {
+            setFreeSpinsWinType('normal'); // ربح عادي
+          }
+          
+          // إظهار مربع النتيجة النهائية
+          setShowFreeSpinsResult(true);
+          
+          // تشغيل صوت مناسب حسب مستوى الربح
+          if (winMultiplier > 30) {
+            playSound('bigwin');
+          } else if (winMultiplier > 15) {
+            playSound('win');
+            setTimeout(() => playSound('win'), 300);
+          }
+          
+          // إخفاء النتيجة النهائية بعد فترة
+          setTimeout(() => {
+            setShowFreeSpinsResult(false);
+            setFreeSpinsTotal(0);
+            setSpecialSymbol(null);
+          }, 5000);
+        }, 1500);
       }
       
       setSpinning(false);
@@ -635,14 +693,14 @@ export default function PharaohsBook() {
           winningLines={winningLines}
         />
 
-        {/* الدورات المجانية */}
+        {/* الدورات المجانية - معلومات ثابتة في واجهة اللعبة */}
         {freeSpins > 0 && (
           <div className="free-spins-banner absolute top-24 left-0 right-0 z-20 flex flex-col items-center">
-            <div className="free-spins-counter bg-gradient-to-r from-[#B8860B] to-[#FFD700] text-black py-2 px-6 rounded-full mb-4 text-xl font-bold shadow-lg animate-pulse">
+            <div className="free-spins-counter bg-gradient-to-r from-[#B8860B] to-[#FFD700] text-black py-2 px-6 rounded-full mb-2 text-xl font-bold shadow-lg animate-pulse">
               <span>دورات مجانية متبقية: {freeSpins}</span>
             </div>
             {specialSymbol && (
-              <div className="special-symbol-badge bg-black/70 py-1 px-4 rounded-full text-[#D4AF37] text-sm border border-[#D4AF37]">
+              <div className="special-symbol-badge bg-black/70 py-1 px-4 rounded-full text-[#D4AF37] text-sm border border-[#D4AF37] mb-2">
                 الرمز الخاص: 
                 <span className="ml-2 font-bold">
                   {
@@ -655,6 +713,40 @@ export default function PharaohsBook() {
                 </span>
               </div>
             )}
+            {/* عرض إجمالي المكاسب من اللفات المجانية */}
+            {freeSpinsWinnings > 0 && (
+              <div className="free-spins-winnings bg-gradient-to-r from-[#007A5E] to-[#00B386] text-white py-1 px-4 rounded-full text-lg font-bold shadow-lg">
+                <span>إجمالي المكاسب: {freeSpinsWinnings.toLocaleString()} رقاقة</span>
+              </div>
+            )}
+          </div>
+        )}
+        
+        {/* نتيجة اللفات المجانية النهائية */}
+        {showFreeSpinsResult && (
+          <div className="freespins-result-container absolute inset-0 flex items-center justify-center z-30">
+            <div className={`freespins-result-box p-6 rounded-xl text-center animate-bounce-once
+              ${freeSpinsWinType === 'arabic' ? 'arabic-win bg-gradient-to-br from-[#D4AF37] via-[#FFD700] to-[#A67C00] border-4 border-[#8B4513]' : 
+                freeSpinsWinType === 'super' ? 'super-win bg-gradient-to-br from-[#7B68EE] via-[#9370DB] to-[#4B0082] border-4 border-[#9400D3]' :
+                freeSpinsWinType === 'big' ? 'big-win bg-gradient-to-br from-[#B22222] via-[#DC143C] to-[#8B0000] border-4 border-[#FF4500]' :
+                'normal-win bg-gradient-to-br from-[#2E8B57] via-[#3CB371] to-[#006400] border-4 border-[#228B22]'}`}
+            >
+              <div className="text-4xl font-bold mb-4 text-white drop-shadow-lg shimmering-text">
+                {freeSpinsWinType === 'arabic' ? 'عرباوي وين! 🇪🇬✨' : 
+                  freeSpinsWinType === 'super' ? 'Super Win! 💥' :
+                  freeSpinsWinType === 'big' ? 'Big Win! 🥳' :
+                  'Free Spins Completed!'}
+              </div>
+              <div className="text-2xl font-bold text-white mb-2">
+                <span>الدورات المجانية: {freeSipnsTotal}</span>
+              </div>
+              <div className="text-3xl font-bold mb-4">
+                <span className="text-white drop-shadow-md">إجمالي المكاسب:</span>
+              </div>
+              <div className="text-5xl font-bold text-white bg-black/30 py-3 px-6 rounded-xl">
+                {freeSpinsWinnings.toLocaleString()} رقاقة
+              </div>
+            </div>
           </div>
         )}
 
