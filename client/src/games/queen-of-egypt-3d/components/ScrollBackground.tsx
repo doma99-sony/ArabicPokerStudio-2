@@ -1,105 +1,166 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { gsap } from 'gsap';
 
 interface ScrollBackgroundProps {
   children: React.ReactNode;
-  isRevealed?: boolean;
-  layerImage1?: string;
-  layerImage2?: string;
+  isRevealed?: boolean;  // للتحكم في ظهور المحتوى
+  direction?: 'horizontal' | 'vertical';  // اتجاه فتح البردية
+  revealDuration?: number;  // مدة انيميشن الكشف
+  scrollTexture?: string;  // مسار نسيج البردية
 }
 
 /**
- * مكون خلفية متحركة على شكل بردية مصرية
- * تنفتح وتنطوي عند التفاعل معها مع تأثيرات بصرية
+ * مكون خلفية البردية المتحركة
+ * يقوم بإظهار المحتوى كأنه على بردية مصرية قديمة تتكشف
  */
-const ScrollBackground: React.FC<ScrollBackgroundProps> = ({
+export default function ScrollBackground({
   children,
   isRevealed = true,
-  layerImage1,
-  layerImage2
-}) => {
-  // إنشاء خلفيات SVG على الطاير بدلاً من استخدام صور خارجية
-  const hieroglyphsSvgBackground = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 800 800">
-      <defs>
-        <pattern id="hieroglyphs" patternUnits="userSpaceOnUse" width="100" height="100">
-          <path d="M20,20 L40,20 L40,40 L20,40 Z" fill="none" stroke="rgba(255,215,0,0.3)" stroke-width="1" />
-          <path d="M60,20 Q70,10 80,20 Q90,30 80,40 Q70,50 60,40 Q50,30 60,20 Z" fill="none" stroke="rgba(255,215,0,0.2)" stroke-width="1" />
-          <path d="M10,60 L30,60 M20,50 L20,70" stroke="rgba(255,215,0,0.3)" stroke-width="1" />
-          <path d="M50,80 L70,60 M50,60 L70,80" stroke="rgba(255,215,0,0.25)" stroke-width="1" />
-          <circle cx="80" cy="70" r="10" fill="none" stroke="rgba(255,215,0,0.2)" stroke-width="1" />
-          <path d="M15,80 L35,80 L25,60 Z" fill="none" stroke="rgba(255,215,0,0.3)" stroke-width="1" />
-        </pattern>
-      </defs>
-      <rect width="100%" height="100%" fill="url(#hieroglyphs)" />
-    </svg>
-  `;
-
-  const symbolsSvgBackground = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 800 800">
-      <defs>
-        <pattern id="egyptSymbols" patternUnits="userSpaceOnUse" width="100" height="100">
-          <path d="M50,20 L60,10 L70,20 L60,30 Z" fill="none" stroke="rgba(255,215,0,0.25)" stroke-width="1" />
-          <circle cx="20" cy="20" r="8" fill="none" stroke="rgba(255,215,0,0.2)" stroke-width="1" />
-          <path d="M80,10 L80,30 M70,20 L90,20" stroke="rgba(255,215,0,0.2)" stroke-width="1" />
-          <path d="M20,50 L30,60 L20,70 L10,60 Z" fill="none" stroke="rgba(255,215,0,0.3)" stroke-width="1" />
-          <path d="M50,50 C55,45 65,45 70,50 C75,55 75,65 70,70 C65,75 55,75 50,70 C45,65 45,55 50,50 Z" fill="none" stroke="rgba(255,215,0,0.25)" stroke-width="1" />
-          <path d="M85,85 L75,75 M85,75 L75,85" stroke="rgba(255,215,0,0.2)" stroke-width="1" />
-        </pattern>
-      </defs>
-      <rect width="100%" height="100%" fill="url(#egyptSymbols)" />
-    </svg>
-  `;
-
-  // تحويل SVG إلى Data URL
-  const svgToDataUrl = (svg: string) => {
-    return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
-  };
-
-  // استخدام الصور المقدمة أو إنشاء SVG
-  const layer1Background = layerImage1 || svgToDataUrl(hieroglyphsSvgBackground);
-  const layer2Background = layerImage2 || svgToDataUrl(symbolsSvgBackground);
-
+  direction = 'vertical',
+  revealDuration = 1.2,
+  scrollTexture
+}: ScrollBackgroundProps) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [initialHeight, setInitialHeight] = useState<number>(0);
+  const [isAnimationComplete, setIsAnimationComplete] = useState<boolean>(false);
+  
+  // إعداد تأثير البردية عند التحميل
+  useEffect(() => {
+    if (scrollRef.current && contentRef.current) {
+      // حفظ الارتفاع الأصلي للمحتوى
+      const contentHeight = contentRef.current.scrollHeight;
+      setInitialHeight(contentHeight);
+      
+      // إعادة ضبط الحالة لإمكانية تكرار الانيميشن
+      if (!isRevealed) {
+        setIsAnimationComplete(false);
+        
+        // إخفاء المحتوى (البردية مطوية)
+        if (direction === 'vertical') {
+          gsap.set(scrollRef.current, { height: 0 });
+        } else {
+          gsap.set(scrollRef.current, { width: 0 });
+        }
+      } else {
+        // إظهار المحتوى مباشرة إذا كان isRevealed صحيحًا
+        if (direction === 'vertical') {
+          gsap.set(scrollRef.current, { height: 'auto' });
+        } else {
+          gsap.set(scrollRef.current, { width: '100%' });
+        }
+        setIsAnimationComplete(true);
+      }
+    }
+  }, [direction]);
+  
+  // تنفيذ انيميشن فتح/طي البردية عند تغيير isRevealed
+  useEffect(() => {
+    if (scrollRef.current) {
+      if (isRevealed) {
+        // انيميشن فتح البردية
+        const unrollAnimation = direction === 'vertical'
+          ? { height: 'auto', ease: 'power2.out' }
+          : { width: '100%', ease: 'power2.out' };
+        
+        gsap.to(scrollRef.current, {
+          ...unrollAnimation,
+          duration: revealDuration,
+          onComplete: () => setIsAnimationComplete(true)
+        });
+        
+        // تأثير ظهور تدريجي للمحتوى بعد فتح البردية
+        gsap.to(contentRef.current, {
+          opacity: 1,
+          duration: revealDuration * 0.7,
+          delay: revealDuration * 0.3
+        });
+      } else {
+        // انيميشن طي البردية
+        const rollAnimation = direction === 'vertical'
+          ? { height: 0, ease: 'power2.in' }
+          : { width: 0, ease: 'power2.in' };
+        
+        // إخفاء المحتوى أولاً
+        gsap.to(contentRef.current, {
+          opacity: 0,
+          duration: revealDuration * 0.3,
+          onComplete: () => {
+            // ثم طي البردية
+            gsap.to(scrollRef.current, {
+              ...rollAnimation,
+              duration: revealDuration * 0.7,
+              onComplete: () => setIsAnimationComplete(false)
+            });
+          }
+        });
+      }
+    }
+  }, [isRevealed, direction, revealDuration]);
+  
+  // تحديد أنماط الاتجاه بناءً على اتجاه فتح البردية
+  const scrollDirectionStyles = direction === 'vertical'
+    ? 'flex-col overflow-hidden'
+    : 'flex-row overflow-hidden w-0';
+  
+  // تحديد نسيج البردية النهائي (استخدام نسيج افتراضي إذا لم يتم توفير أي شيء)
+  const finalScrollTexture = scrollTexture || 'radial-gradient(circle, rgba(219,177,131,1) 0%, rgba(200,155,100,1) 100%)';
+  
   return (
-    <div className="scroll-background w-full min-h-screen relative overflow-hidden">
-      {/* الخلفية الأساسية */}
-      <div className="absolute inset-0 bg-gradient-to-b from-amber-900 via-amber-800 to-amber-900"></div>
+    <div className={`scroll-background-container relative w-full h-full flex ${scrollDirectionStyles}`} ref={scrollRef}>
+      {/* تأثيرات حواف البردية */}
+      {direction === 'vertical' && (
+        <>
+          <div className="scroll-edge-top h-8 w-full bg-gradient-to-b from-amber-900/50 to-transparent sticky top-0 z-10"></div>
+          <div className="scroll-edge-bottom h-8 w-full bg-gradient-to-t from-amber-900/50 to-transparent sticky bottom-0 z-10"></div>
+        </>
+      )}
       
-      {/* طبقات البردية */}
-      <div className={`absolute inset-0 transition-all duration-1000 ease-in-out ${isRevealed ? 'opacity-50' : 'opacity-0'}`}
+      {direction === 'horizontal' && (
+        <>
+          <div className="scroll-edge-left w-8 h-full bg-gradient-to-r from-amber-900/50 to-transparent sticky left-0 z-10"></div>
+          <div className="scroll-edge-right w-8 h-full bg-gradient-to-l from-amber-900/50 to-transparent sticky right-0 z-10"></div>
+        </>
+      )}
+      
+      {/* حاوية المحتوى مع نسيج البردية */}
+      <div
+        className="scroll-content relative w-full flex-grow p-4 md:p-8"
         style={{
-          backgroundImage: `url("${layer1Background}")`,
-          backgroundSize: '800px 800px',
-          backgroundPosition: 'center',
-          backgroundBlendMode: 'overlay',
-          transform: isRevealed ? 'translateX(0)' : 'translateX(-100%)'
+          background: finalScrollTexture,
+          backgroundSize: 'cover',
+          backgroundRepeat: 'repeat',
+          opacity: isAnimationComplete ? 1 : 0
         }}
-      ></div>
-      
-      <div className={`absolute inset-0 transition-all duration-1000 ease-in-out delay-100 ${isRevealed ? 'opacity-30' : 'opacity-0'}`}
-        style={{
-          backgroundImage: `url("${layer2Background}")`,
-          backgroundSize: '800px 800px',
-          backgroundPosition: 'center',
-          backgroundBlendMode: 'color-burn',
-          transform: isRevealed ? 'translateX(0)' : 'translateX(100%)'
-        }}
-      ></div>
-      
-      {/* زخارف إضافية */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(255,215,0,0.1),_transparent_70%)]"></div>
-      
-      {/* الحدود المزخرفة */}
-      <div className="absolute top-0 left-0 right-0 h-6 bg-gradient-to-b from-amber-700 to-transparent"></div>
-      <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-amber-700 to-transparent"></div>
-      <div className="absolute top-0 bottom-0 left-0 w-6 bg-gradient-to-r from-amber-700 to-transparent"></div>
-      <div className="absolute top-0 bottom-0 right-0 w-6 bg-gradient-to-l from-amber-700 to-transparent"></div>
-      
-      {/* المحتوى */}
-      <div className="relative z-10">
-        {children}
+        ref={contentRef}
+      >
+        {/* زخارف البردية */}
+        <div className="scroll-decorations absolute inset-0 pointer-events-none">
+          {/* خطوط أفقية على البردية لتحاكي الطيات */}
+          <div className="h-full w-full flex flex-col justify-between">
+            {Array.from({ length: 8 }).map((_, index) => (
+              <div 
+                key={`line-${index}`}
+                className="w-full h-px bg-amber-900/10"
+                style={{ marginTop: index === 0 ? '0' : 'auto' }}
+              ></div>
+            ))}
+          </div>
+          
+          {/* نقوش هيروغليفية باهتة */}
+          <div className="hieroglyphs absolute inset-0 opacity-5">
+            <div className="absolute top-4 left-4 text-amber-900 text-3xl">𓂀</div>
+            <div className="absolute top-4 right-4 text-amber-900 text-3xl">𓃀</div>
+            <div className="absolute bottom-4 left-4 text-amber-900 text-3xl">𓅓</div>
+            <div className="absolute bottom-4 right-4 text-amber-900 text-3xl">𓆣</div>
+          </div>
+        </div>
+        
+        {/* المحتوى الفعلي */}
+        <div className="relative z-10">
+          {children}
+        </div>
       </div>
     </div>
   );
-};
-
-export default ScrollBackground;
+}

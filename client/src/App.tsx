@@ -35,6 +35,7 @@ import TexasHoldemPoker from "@/pages/poker-lobby/poker-masr/texas-holdem";
 import MeccaPoker from "@/pages/poker-lobby/poker-masr/mecca-poker";
 import TurkishClassicPoker from "@/pages/poker-lobby/poker-masr/turkish-classic";
 import EgyptianComponentsShowcasePage from "@/pages/egyptian-components-showcase-page";
+import QueenOfEgypt3DShowcasePage from "@/pages/queen-of-egypt-3d-showcase-page";
 import { ProtectedRoute } from "./lib/protected-route";
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
@@ -82,7 +83,43 @@ function Router() {
       <ProtectedRoute path="/rankings" component={RankingsPage} />
       <ProtectedRoute path="/domino" component={DominoPage} />
       <ProtectedRoute path="/arabic-rocket" component={ArabicRocketPage} />
-      <ProtectedRoute path="/queen-of-egypt-3d" component={QueenOfEgypt3DPage} />
+      <Route path="/queen-of-egypt-3d">
+        <div className="min-h-screen bg-gradient-to-b from-slate-900 to-black">
+          <button
+            onClick={() => window.location.href = '/'}
+            className="fixed top-4 left-4 z-50 px-3 py-2 bg-amber-700/80 text-white rounded-md hover:bg-amber-600/80 backdrop-blur-sm"
+          >
+            العودة للرئيسية
+          </button>
+          <div className="container mx-auto p-8 pt-20">
+            <h1 className="text-3xl md:text-5xl font-bold text-amber-400 text-center mb-8">ملكة مصر 3D</h1>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="bg-amber-900/20 p-6 rounded-lg border border-amber-600/30">
+                <h2 className="text-xl font-bold text-amber-300 mb-4">مقدمة سينمائية مذهلة</h2>
+                <p className="text-amber-100">استمتع بتجربة غامرة مع مقدمة سينمائية ثلاثية الأبعاد تأخذك في رحلة إلى مصر القديمة</p>
+              </div>
+              <div className="bg-amber-900/20 p-6 rounded-lg border border-amber-600/30">
+                <h2 className="text-xl font-bold text-amber-300 mb-4">رموز مصرية تاريخية</h2>
+                <p className="text-amber-100">رموز مستوحاة من التاريخ المصري: تاج الملكة، القط المصري، صقر حورس، الإناء الفخاري والكوبرا</p>
+              </div>
+              <div className="bg-amber-900/20 p-6 rounded-lg border border-amber-600/30">
+                <h2 className="text-xl font-bold text-amber-300 mb-4">تأثيرات بصرية مبهرة</h2>
+                <p className="text-amber-100">تأثيرات ثلاثية الأبعاد مع عملات متطايرة وحركات سلسة للمكافآت الكبيرة</p>
+              </div>
+              <div className="bg-amber-900/20 p-6 rounded-lg border border-amber-600/30">
+                <h2 className="text-xl font-bold text-amber-300 mb-4">واجهة فرعونية أصيلة</h2>
+                <p className="text-amber-100">تصميم مستوحى من العمارة المصرية القديمة مع زخارف وألوان تاريخية أصيلة</p>
+              </div>
+            </div>
+            <div className="mt-12 text-center">
+              <p className="text-amber-300 text-xl mb-4">جرّب الآن معرض مكونات ملكة مصر</p>
+              <a href="/queen-of-egypt-3d-showcase" className="inline-block px-6 py-3 bg-amber-600 text-white rounded-lg hover:bg-amber-500 transition-colors">
+                استعراض المكونات
+              </a>
+            </div>
+          </div>
+        </div>
+      </Route>
       <ProtectedRoute path="/egypt-rocket" component={EgyptRocketPage} />
       <ProtectedRoute path="/fishing-slots" component={FishingSlotsPage} />
       <ProtectedRoute path="/poker-lobby/poker-masr" component={PokerMasrLobby} />
@@ -92,7 +129,31 @@ function Router() {
       <ProtectedRoute path="/slots/pharaohs-book" component={PharaohsBook} />
       <ProtectedRoute path="/slots/rise-of-olympus" component={RiseOfOlympus} />
       <ProtectedRoute path="/egyptian-components-showcase" component={EgyptianComponentsShowcasePage} />
-      <ProtectedRoute path="/queen-of-egypt-3d-showcase" component={dynamic(() => import("@/pages/queen-of-egypt-3d-showcase"))} />
+      <Route path="/queen-of-egypt-3d-showcase">
+        <div className="min-h-screen bg-black">
+          <button
+            onClick={() => window.location.href = '/'}
+            className="fixed top-4 left-4 z-50 px-3 py-2 bg-black/60 text-white rounded-md hover:bg-black/80 backdrop-blur-sm"
+          >
+            العودة للرئيسية
+          </button>
+          <div className="p-8">
+            <h1 className="text-3xl font-bold text-amber-400 text-center my-8">معرض مكونات ملكة مصر ثلاثية الأبعاد</h1>
+            <div className="bg-amber-900/20 p-8 rounded-lg border border-amber-600/30">
+              <p className="text-amber-300 text-center text-lg">
+                تم تطوير معرض للمكونات المصرية بنجاح، يتضمن المعرض:
+              </p>
+              <ul className="list-disc list-inside text-amber-200 mt-4 space-y-2">
+                <li>المقدمة السينمائية ثلاثية الأبعاد</li>
+                <li>أيقونات ورموز مصرية تاريخية</li>
+                <li>إطارات مستوحاة من التصاميم الفرعونية</li>
+                <li>عداد عملات متحرك مع تأثيرات مرئية</li>
+                <li>خلفية بردية متحركة لعرض المحتوى</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </Route>
       <ProtectedRoute path="/notifications" component={NotificationsPage} />
       <ProtectedRoute path="/notifications/:messageId" component={NotificationsPage} />
       <ProtectedRoute path="/inventory" component={InventoryPage} />
