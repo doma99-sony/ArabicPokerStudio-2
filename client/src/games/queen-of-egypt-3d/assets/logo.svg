@@ -3,17 +3,17 @@
   <!-- Gradient Background -->
   <defs>
     <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#1A0F39" />
-      <stop offset="100%" stop-color="#3D2773" />
+      <stop offset="0%" stopColor="#1A0F39" />
+      <stop offset="100%" stopColor="#3D2773" />
     </linearGradient>
     <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#D4AF37" />
-      <stop offset="50%" stop-color="#FFD700" />
-      <stop offset="100%" stop-color="#D4AF37" />
+      <stop offset="0%" stopColor="#D4AF37" />
+      <stop offset="50%" stopColor="#FFD700" />
+      <stop offset="100%" stopColor="#D4AF37" />
     </linearGradient>
     <linearGradient id="glowGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FFD700" stop-opacity="0.6" />
-      <stop offset="100%" stop-color="#FFD700" stop-opacity="0" />
+      <stop offset="0%" stopColor="#FFD700" stopOpacity="0.6" />
+      <stop offset="100%" stopColor="#FFD700" stopOpacity="0" />
     </linearGradient>
     <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
       <feGaussianBlur stdDeviation="4" result="blur" />
@@ -42,7 +42,7 @@
   
   <!-- Queen Crown (Main Element) -->
   <g filter="url(#glow)">
-    <path d="M100,45 L120,65 L140,50 L130,90 L70,90 L60,50 L80,65 Z" fill="url(#goldGradient)" stroke="#B8860B" stroke-width="2" />
+    <path d="M100,45 L120,65 L140,50 L130,90 L70,90 L60,50 L80,65 Z" fill="url(#goldGradient)" stroke="#B8860B" strokeWidth="2" />
     <circle cx="100" cy="45" r="5" fill="#FFD700" />
     <circle cx="80" cy="65" r="4" fill="#FFD700" />
     <circle cx="120" cy="65" r="4" fill="#FFD700" />
@@ -51,27 +51,27 @@
   </g>
   
   <!-- "3D" Highlight -->
-  <g font-family="Arial, sans-serif" font-weight="bold">
-    <text x="135" y="120" font-size="24" fill="#FFD700" filter="url(#glow)">3D</text>
+  <g fontFamily="Arial, sans-serif" fontWeight="bold">
+    <text x="135" y="120" fontSize="24" fill="#FFD700" filter="url(#glow)">3D</text>
   </g>
   
   <!-- Title -->
-  <g font-family="Arial, sans-serif" text-anchor="middle">
-    <text x="100" y="120" font-size="20" fill="#D4AF37" font-weight="bold">ملكة مصر</text>
-    <text x="100" y="145" font-size="12" fill="#FFD700">Queen of Egypt</text>
+  <g fontFamily="Arial, sans-serif" textAnchor="middle">
+    <text x="100" y="120" fontSize="20" fill="#D4AF37" fontWeight="bold">ملكة مصر</text>
+    <text x="100" y="145" fontSize="12" fill="#FFD700">Queen of Egypt</text>
   </g>
   
   <!-- Slot Machine Elements -->
-  <g stroke="#D4AF37" stroke-width="2" fill="none">
+  <g stroke="#D4AF37" strokeWidth="2" fill="none">
     <rect x="60" y="155" width="80" height="30" rx="5" ry="5" />
     <line x1="80" y1="155" x2="80" y2="185" />
     <line x1="100" y1="155" x2="100" y2="185" />
     <line x1="120" y1="155" x2="120" y2="185" />
     
     <!-- Slot Symbols -->
-    <text x="70" y="175" font-size="15" fill="#FFD700" text-anchor="middle">👑</text>
-    <text x="90" y="175" font-size="15" fill="#FFD700" text-anchor="middle">🐱</text>
-    <text x="110" y="175" font-size="15" fill="#FFD700" text-anchor="middle">🏺</text>
-    <text x="130" y="175" font-size="15" fill="#FFD700" text-anchor="middle">🐍</text>
+    <text x="70" y="175" fontSize="15" fill="#FFD700" textAnchor="middle">👑</text>
+    <text x="90" y="175" fontSize="15" fill="#FFD700" textAnchor="middle">🐱</text>
+    <text x="110" y="175" fontSize="15" fill="#FFD700" textAnchor="middle">🏺</text>
+    <text x="130" y="175" fontSize="15" fill="#FFD700" textAnchor="middle">🐍</text>
   </g>
 </svg>
