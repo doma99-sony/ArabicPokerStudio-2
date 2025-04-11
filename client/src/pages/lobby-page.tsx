@@ -372,15 +372,15 @@ export default function LobbyPage() {
             className="fixed z-20 transition-all duration-300 shadow-xl"
             id="chat-container"
             style={{ 
-              bottom: '20px',
-              right: '20px',
-              width: '400px',
-              height: '500px',
+              bottom: '100px',
+              left: '50%',
+              transform: isChatHidden ? 'translateX(-50%) translateY(50px) scale(0.9)' : 'translateX(-50%) translateY(0) scale(1)',
+              width: '560px',
+              height: '450px',
               opacity: isChatHidden ? 0 : 1,
               visibility: isChatHidden ? 'hidden' : 'visible',
               borderRadius: '15px',
-              overflow: 'hidden',
-              transform: isChatHidden ? 'translateY(50px) scale(0.9)' : 'translateY(0) scale(1)'
+              overflow: 'hidden'
             }}
           >
             <NewChatBox onClose={toggleChat} />
@@ -396,17 +396,18 @@ export default function LobbyPage() {
               onClick={toggleChat}
               aria-label="فتح غرفة الدردشة"
               style={{
-                backgroundColor: '#25D366',
+                backgroundColor: '#FDA82A',
                 borderRadius: '50%',
-                width: '50px',
-                height: '50px',
-                border: '2px solid #128C7E',
+                width: '55px',
+                height: '55px',
+                border: '2px solid #B27324',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 boxShadow: '0 3px 10px rgba(0,0,0,0.3)',
-                bottom: '20px',
-                right: '20px'
+                bottom: '100px',
+                left: '50%',
+                transform: 'translateX(-50%)'
               }}
             >
               <div 
@@ -414,10 +415,10 @@ export default function LobbyPage() {
                   display: 'flex',
                   alignItems: 'center', 
                   justifyContent: 'center',
-                  color: 'white'
+                  color: '#8B4513'
                 }}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4c0-1.1.9-2 2-2h8a2 2 0 0 1 2 2v5Z" />
                   <path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1" />
                 </svg>
