@@ -536,40 +536,88 @@ export default function LobbyPage() {
                     <h2 className="text-white text-xl font-bold">الصفحة الرئيسية</h2>
                   </div>
                   
-                  {/* قسم الإعلان عن المحتويات */}
+
+                  
+                  {/* إضافة قائمة أفضل اللاعبين داخل الصفحة الرئيسية */}
                   <div className="bg-gradient-to-r from-[#0A3A2A]/80 via-black/80 to-[#0A3A2A]/80 rounded-xl border border-[#D4AF37] p-4 shadow-lg backdrop-blur-sm">
-                    <div className="flex items-center mb-4">
-                      <div className="relative">
-                        <GameIconSet.Pyramid className="h-7 w-7 text-[#D4AF37] animate-pulse-slow" />
-                        <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full"></div>
+                    <div className="flex items-center justify-between w-full border-b border-[#D4AF37]/30 pb-2 mb-4">
+                      <div className="flex items-center">
+                        <Trophy className="h-5 w-5 text-[#D4AF37] mr-2" />
+                        <h3 className="text-[#D4AF37] font-bold text-lg">قائمة أفضل اللاعبين</h3>
                       </div>
-                      <span className="text-white text-lg mr-2 font-bold">أهلاً بك في بوكر تكساس عرباوي</span>
+                      <div className="bg-[#0A3A2A] text-xs text-white px-2 py-0.5 rounded-full border border-[#D4AF37]/50">
+                        TOP 3
+                      </div>
                     </div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="bg-black/40 border border-[#D4AF37]/30 rounded-lg p-3 hover:bg-black/60 transition-all">
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-[#D4AF37]">
-                            <ShoppingCart className="h-8 w-8 text-[#D4AF37] m-2" />
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+                      {topPlayers.map((player, index) => (
+                        <div 
+                          key={player.id} 
+                          className={`flex items-center w-full justify-between p-3 rounded-lg ${
+                            index === 0 
+                              ? 'bg-gradient-to-r from-yellow-500/20 to-transparent border border-yellow-500/30' 
+                              : index === 1 
+                                ? 'bg-gradient-to-r from-gray-400/20 to-transparent border border-gray-400/30' 
+                                : 'bg-gradient-to-r from-yellow-700/20 to-transparent border border-yellow-700/30'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className={`flex items-center justify-center w-8 h-8 rounded-full font-bold text-xs ${
+                              index === 0 ? 'bg-yellow-500 text-black' : index === 1 ? 'bg-gray-400 text-black' : 'bg-yellow-700 text-white'
+                            }`}>
+                              {index + 1}
+                            </div>
+                            <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-[#D4AF37]/50">
+                              <img src={player.avatar || "/assets/poker-icon-gold.png"} alt={player.username} className="w-full h-full object-cover" />
+                            </div>
+                            <div className="text-right">
+                              <p className="text-white text-sm font-medium truncate max-w-[120px]">{player.username}</p>
+                            </div>
                           </div>
-                          <div className="text-right flex-1">
-                            <p className="text-lg font-bold text-white">تسوق الآن</p>
-                            <p className="text-sm text-gray-300">احصل على عروض حصرية وشحن رصيدك</p>
+                          
+                          <div className="flex items-center bg-black/40 px-3 py-1.5 rounded-lg border border-[#D4AF37]/30">
+                            <Coins className="h-4 w-4 text-[#D4AF37] ml-1" />
+                            <span className="text-[#D4AF37] text-sm font-bold">{formatChips(player.chips)}</span>
                           </div>
                         </div>
-                      </div>
+                      ))}
                       
-                      <div className="bg-black/40 border border-[#D4AF37]/30 rounded-lg p-3 hover:bg-black/60 transition-all">
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-[#D4AF37]">
-                            <Crown className="h-8 w-8 text-[#D4AF37] m-2" />
-                          </div>
-                          <div className="text-right flex-1">
-                            <p className="text-lg font-bold text-white">كن VIP</p>
-                            <p className="text-sm text-gray-300">احصل على مميزات حصرية وهدايا يومية</p>
-                          </div>
+                      {topPlayers.length === 0 && (
+                        <div className="col-span-3 text-center py-6">
+                          <div className="text-gray-400 animate-pulse text-sm">جاري تحميل البيانات...</div>
                         </div>
-                      </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex flex-col sm:flex-row w-full gap-2 mt-4 justify-center">
+                      <button 
+                        onClick={() => navigate('/rankings')}
+                        className="bg-gradient-to-r from-[#D4AF37]/80 to-[#8B6914]/80 hover:from-[#D4AF37] hover:to-[#8B6914] text-white font-medium py-2 px-4 rounded-md text-sm transition-all duration-300 border border-[#D4AF37]/50 flex items-center justify-center gap-1"
+                      >
+                        <Trophy className="h-4 w-4" />
+                        عرض قائمة أفضل 100 لاعب
+                      </button>
+                      
+                      <button 
+                        onClick={() => {
+                          localStorage.setItem('rankingsLocked', 'true');
+                          toast({
+                            title: "تم قفل صفحة الترتيب",
+                            description: "لن يتم تحديث الترتيب إلا عند فتح القفل",
+                            variant: "default",
+                          });
+                        }}
+                        className="bg-gradient-to-r from-[#0A3A2A] to-[#062922] hover:from-[#0A3A2A]/90 hover:to-[#062922]/90 text-[#D4AF37] font-medium py-2 px-4 rounded-md text-sm transition-all duration-300 border border-[#D4AF37]/50 flex items-center justify-center gap-1"
+                      >
+                        <LockIcon className="h-4 w-4" />
+                        قفل صفحة الترتيب
+                      </button>
+                    </div>
+                    
+                    <div className="flex items-center text-center w-full justify-center border-t border-[#D4AF37]/20 pt-2 mt-2">
+                      <span className="text-gray-400 text-xs ml-1">آخر تحديث:</span>
+                      <span className="text-gray-400 text-xs" dir="ltr">{lastUpdated.toLocaleTimeString()}</span>
                     </div>
                   </div>
                 </div>
