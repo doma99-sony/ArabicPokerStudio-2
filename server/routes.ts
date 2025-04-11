@@ -416,9 +416,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "اسم المستخدم يجب أن يكون 3 أحرف على الأقل" });
       }
 
-      await storage.updateUsername(req.user.id, username);
-      res.json({ success: true });
+      // استخدام نفس نمط تحديث الصورة - استخدام وظيفة تحديث المستخدم الشاملة
+      const updatedUser = await storage.updateUser(req.user.id, { username });
+      
+      // تحديث الجلسة
+      if (req.user) {
+        req.user.username = username;
+      }
+      
+      // محاولة إرسال تحديث فوري للمستخدم
+      try {
+        await sendRealtimeUpdate(req.user.id, { user: updatedUser });
+      } catch (wsError) {
+        console.warn(`فشل في إرسال تحديث فوري لتغيير اسم المستخدم ${req.user.id}:`, wsError);
+      }
+      
+      res.json({ success: true, username });
     } catch (error) {
+      console.error("خطأ في تحديث بيانات المستخدم:", error);
       res.status(500).json({ message: "حدث خطأ أثناء تحديث اسم المستخدم" });
     }
   });

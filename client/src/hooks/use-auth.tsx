@@ -48,10 +48,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     retry: false,
   });
   
-  // دالة للانتقال إلى صفحة الملف الشخصي
-  const goToProfile = () => {
-    // إعادة تحميل الصفحة عند الانتقال للملف الشخصي لضمان تحديث الجلسة بشكل كامل
-    window.location.href = '/profile';
+  // دالة للانتقال إلى صفحة اللوبي الرئيسية
+  const goToLobby = () => {
+    // إعادة تحميل الصفحة عند الانتقال للوبي الرئيسي لضمان تحديث الجلسة بشكل كامل
+    window.location.href = '/';
   };
 
   const loginMutation = useMutation({
@@ -65,9 +65,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "تم تسجيل الدخول بنجاح",
         description: `مرحباً، ${user.username}!`,
       });
-      // توجيه المستخدم إلى صفحة الملف الشخصي بعد تسجيل الدخول
+      // توجيه المستخدم إلى صفحة اللوبي الرئيسية بعد تسجيل الدخول
       setTimeout(() => {
-        goToProfile();
+        goToLobby();
       }, 500);
     },
     onError: (error: Error) => {
@@ -90,9 +90,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "تم إنشاء الحساب بنجاح",
         description: `مرحباً، ${user.username}!`,
       });
-      // توجيه المستخدم إلى صفحة الملف الشخصي بعد تسجيل الدخول
+      // توجيه المستخدم إلى صفحة اللوبي الرئيسية بعد تسجيل الدخول
       setTimeout(() => {
-        goToProfile();
+        goToLobby();
       }, 500);
     },
     onError: (error: Error) => {
@@ -116,9 +116,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "تم تسجيل الدخول كضيف",
         description: `مرحباً، ${user.username}!`,
       });
-      // توجيه المستخدم إلى صفحة الملف الشخصي بعد تسجيل الدخول
+      // توجيه المستخدم إلى صفحة اللوبي الرئيسية بعد تسجيل الدخول
       setTimeout(() => {
-        goToProfile();
+        goToLobby();
       }, 500);
     },
     onError: (error: Error) => {
@@ -142,9 +142,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "تم تسجيل الدخول بواسطة فيسبوك",
         description: `مرحباً، ${user.username}!`,
       });
-      // توجيه المستخدم إلى صفحة الملف الشخصي بعد تسجيل الدخول
+      // توجيه المستخدم إلى صفحة اللوبي الرئيسية بعد تسجيل الدخول
       setTimeout(() => {
-        goToProfile();
+        goToLobby();
       }, 500);
     },
     onError: (error: Error) => {
@@ -312,7 +312,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loginFacebookMutation,
         logoutMutation,
         registerMutation,
-        goToProfile,
+        goToProfile: goToLobby, // تم تغيير السلوك لتوجيه المستخدم إلى اللوبي بدلاً من الملف الشخصي
       }}
     >
       {children}

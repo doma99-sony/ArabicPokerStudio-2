@@ -5,12 +5,13 @@ import { useWebSocket } from "@/hooks/use-websocket-simplified";
 import { useGlobalWebSocket } from "@/hooks/use-global-websocket";
 import { GameType } from "@shared/types";
 import { ChatBox } from "@/components/lobby/chat-box";
+import { HomeLobby } from "@/components/lobby/home-lobby";
 import { Button } from "@/components/ui/button";
 import { OnlineUsersCounter } from "@/components/ui/online-users-badge";
 import { ResetChipsButton } from "@/components/reset-chips-button";
 import { RemoveVirtualPlayersButton } from "@/components/remove-virtual-players-button";
 import { NotificationsButton, GameInstructionsButton } from "@/components/ui/notifications-system";
-import { LogOut, User, ChevronRight, Loader2, ChevronLeft, ChevronUp, Bell, ShoppingBag, ShoppingCart, Download, Smartphone, ExternalLink, Coins, Trophy, Crown, List } from "lucide-react";
+import { LogOut, User, ChevronRight, Loader2, ChevronLeft, ChevronUp, Bell, ShoppingBag, ShoppingCart, Download, Smartphone, ExternalLink, Coins, Trophy, Crown, List, Home } from "lucide-react";
 import { GameIconSet } from "@/games/queen-of-egypt-3d/assets/egyptian-icons";
 import { formatChips } from "@/lib/utils";
 import { HeavySnowEffect, GoldDustEffect } from "@/components/effects/snow-effect";
@@ -19,7 +20,7 @@ import { HeavyPokerCardsEffect, SuitSymbolsEffect } from "@/components/effects/p
 export default function LobbyPage() {
   const [location, navigate] = useLocation();
   const { user, logoutMutation } = useAuth();
-  const [activeGameCategory, setActiveGameCategory] = useState<GameType>("poker");
+  const [activeGameCategory, setActiveGameCategory] = useState<GameType | "home">("home");
   const [isChatHidden, setIsChatHidden] = useState(false);
   const [videoMuted, setVideoMuted] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -350,6 +351,12 @@ export default function LobbyPage() {
               <div className="relative bg-gradient-to-r from-[#0A3A2A]/80 via-black/80 to-[#0A3A2A]/80 rounded-xl border border-[#D4AF37]/30 shadow-lg p-3 backdrop-blur-sm">
                 <div className="flex justify-center space-x-2 rtl:space-x-reverse overflow-x-auto scrollbar-hide">
                   <GameCategoryButton
+                    active={activeGameCategory === "home"}
+                    onClick={() => setActiveGameCategory("home")}
+                    icon="🏠"
+                    label="البيت"
+                  />
+                  <GameCategoryButton
                     active={activeGameCategory === "poker"}
                     onClick={() => setActiveGameCategory("poker" as GameType)}
                     icon="♠"
@@ -385,6 +392,12 @@ export default function LobbyPage() {
             
             {/* Game cards section */}
             <div className="space-y-8">
+              {activeGameCategory === "home" && (
+                <div className="container mx-auto">
+                  <HomeLobby />
+                </div>
+              )}
+              
               {activeGameCategory === "poker" && (
                 <GameSection 
                   title="ألعاب البوكر" 
