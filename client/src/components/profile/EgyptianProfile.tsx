@@ -176,227 +176,196 @@ const EgyptianProfile: React.FC<EgyptianProfileProps> = ({
   
   return (
     <div className="egyptian-profile-container w-full max-w-3xl mx-auto p-4 sm:p-6 rounded-lg relative overflow-hidden" dir="rtl">
-      {/* خلفية وعنوان */}
-      <div className="absolute inset-0 bg-gradient-to-b from-amber-800 to-amber-700/90 rounded-lg z-0">
-        <div className="w-full h-full" style={{ 
-          backgroundImage: "url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCI+CjxwYXRoIGQ9Ik0zMCA1IEw1NSA0NSBMNSBA0NSBaIiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmQ3MDMiIHN0cm9rZS13aWR0aD0iMSIgc3Ryb2tlLW9wYWNpdHk9IjAuMiIvPgo8L3N2Zz4=')",
-          backgroundSize: "80px 80px",
-          opacity: 0.2
-        }}></div>
-      </div>
+      {/* خلفية بنمط مصري */}
+      <div 
+        className="absolute inset-0 bg-gradient-to-b from-black to-purple-950 opacity-90 rounded-lg z-0"
+        style={{
+          backgroundImage: "url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCI+CjxwYXRoIGQ9Ik0zMCA1IEw1NSA0NSBMNSBA0NSBaIiBmaWxsPSJub25lIiBzdHJva2U9IiNhMTZiMjkiIHN0cm9rZS13aWR0aD0iMSIgc3Ryb2tlLW9wYWNpdHk9IjAuMSIvPgo8L3N2Zz4=')",
+          backgroundSize: "60px 60px"
+        }}
+      />
       
-      {/* شريط العنوان */}
-      <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-r from-amber-700/80 via-amber-600/90 to-amber-700/80 z-10 rounded-t-lg flex items-center justify-center">
-        <h2 className="text-amber-100 font-bold text-lg">بيانات اللاعب</h2>
-        {editable && (
-          <button className="absolute left-2 text-amber-100 hover:text-white">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        )}
-      </div>
+      {/* إطار مزخرف */}
+      <div className="absolute inset-0 z-0 rounded-lg border-4 border-amber-600/50"></div>
+      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-amber-800/0 via-amber-400 to-amber-800/0"></div>
+      <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-amber-800/0 via-amber-400 to-amber-800/0"></div>
+      <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-amber-800/0 via-amber-400 to-amber-800/0"></div>
+      <div className="absolute inset-y-0 right-0 w-1 bg-gradient-to-b from-amber-800/0 via-amber-400 to-amber-800/0"></div>
       
       {/* محتوى الملف الشخصي */}
-      <div className="relative z-10 flex flex-col pt-14 pb-3 px-4 bg-gradient-to-b from-amber-50/90 to-amber-100/90 rounded-lg rounded-t-none shadow-inner">
-        <div className="flex flex-col sm:flex-row gap-6">
-          {/* القسم الأيمن - البادجات والصورة */}
-          <div className="flex flex-col items-center gap-3">
-            {/* البادجات - قسم العلوي */}
-            <div className="flex gap-4 justify-center">
-              {/* بادج الرانك */}
-              <div className="flex flex-col items-center">
-                <div className={`w-16 h-16 rounded-lg flex items-center justify-center bg-gradient-to-br border-2 border-amber-300 shadow-md overflow-hidden ${getBadgeColor(BadgeType.BASIC)}`}>
-                  {getHighestBadge() === BadgeType.ROYAL ? (
-                    <div className="text-center">
-                      <div className="text-amber-100 text-xl">👑</div>
-                      <div className="text-amber-100 text-xs mt-1">ملكي</div>
-                    </div>
-                  ) : getHighestBadge() === BadgeType.GOLD ? (
-                    <div className="text-center">
-                      <div className="text-amber-100 text-xl">⭐</div>
-                      <div className="text-amber-100 text-xs mt-1">ذهبي</div>
-                    </div>
-                  ) : (
-                    <div className="text-center">
-                      <div className="text-amber-100 text-xl">★</div>
-                      <div className="text-amber-100 text-xs mt-1">أساسي</div>
-                    </div>
-                  )}
+      <div className="relative z-10 flex flex-col sm:flex-row gap-4 sm:gap-6 text-amber-100">
+        {/* القسم اليميني - الصورة والبادجات */}
+        <div className="flex-shrink-0 flex flex-col items-center mx-auto sm:mx-0">
+          {/* صورة المستخدم */}
+          <div className="relative">
+            <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-36 md:h-36 rounded-full border-4 border-amber-600 overflow-hidden bg-black/60">
+              {currentUser.avatar ? (
+                <img 
+                  src={currentUser.avatar} 
+                  alt={currentUser.username} 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-b from-amber-800 to-amber-950">
+                  <span className="text-3xl sm:text-4xl font-bold text-amber-300">
+                    {currentUser.username.charAt(0)}
+                  </span>
                 </div>
-                <div className="text-amber-700 text-xs mt-1 text-center font-bold">RANK</div>
-              </div>
-              
-              {/* بادج وكيل الشحن / تاجر العملات */}
-              <div className="flex flex-col items-center">
-                <div className={`w-16 h-16 rounded-lg flex items-center justify-center bg-gradient-to-br border-2 shadow-md ${currentUser.agentBadgeUnlocked ? 'from-blue-600 to-cyan-500 border-blue-300' : 'from-gray-500 to-gray-600 border-gray-400'}`}>
-                  {currentUser.agentBadgeUnlocked ? (
-                    <div className="text-center">
-                      <div className="text-white text-xl">💎</div>
-                      <div className="text-white text-xs mt-1">وكيل</div>
-                    </div>
-                  ) : (
-                    <div className="text-center">
-                      <div className="text-gray-200 text-xl">🔒</div>
-                      <div className="text-gray-200 text-xs mt-1">مقفل</div>
-                    </div>
-                  )}
-                </div>
-                <div className="text-amber-700 text-xs mt-1 text-center font-bold">VIP</div>
-              </div>
-            </div>
-            
-            {/* صورة المستخدم */}
-            <div className="relative mt-2">
-              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-amber-600 overflow-hidden bg-amber-800/40 mt-2">
-                {currentUser.avatar ? (
-                  <img 
-                    src={currentUser.avatar} 
-                    alt={currentUser.username} 
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <span className="text-3xl sm:text-4xl font-bold text-amber-100">
-                      {currentUser.username.charAt(0)}
-                    </span>
-                  </div>
-                )}
-              </div>
-              
-              {/* زر تعديل */}
-              {editable && (
-                <button className="absolute bottom-0 left-0 w-8 h-8 bg-amber-600 rounded-full flex items-center justify-center text-white border-2 border-amber-100">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 019.07 4h5.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                </button>
               )}
             </div>
-          </div>
-          
-          {/* القسم الأيسر - معلومات المستخدم */}
-          <div className="flex-grow flex flex-col mt-3 sm:mt-0">
-            {/* معلومات المستخدم العلوية */}
-            <div className="bg-amber-50 rounded-lg p-3 border border-amber-200 mb-3">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center">
-                  <img src="/icons/id-card.png" alt="ID" className="w-5 h-5 ml-1" onError={(e) => e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNiNDVlMDkiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cmVjdCB3aWR0aD0iMTgiIGhlaWdodD0iMTgiIHg9IjMiIHk9IjMiIHJ4PSIyIiByeT0iMiI+PC9yZWN0PjxwYXRoIGQ9Ik0xMCA5aDR2NmgtNCIvPjwvc3ZnPg=='} />
-                  <span className="text-sm text-amber-900 ml-1">{currentUser.id}</span>
-                  <button 
-                    onClick={copyUserId}
-                    className="text-amber-600 hover:text-amber-800"
-                    aria-label="نسخ المعرف"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                    </svg>
-                  </button>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="flex items-center justify-center w-6 h-6 rounded-full bg-red-500 text-white text-xs">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                    </svg>
-                  </div>
-                  <div className="flex items-center justify-center w-6 h-6 rounded-full bg-green-500 text-white text-xs">
-                    ✓
-                  </div>
-                  <div className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-500 text-white text-xs">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-              <div className="text-amber-900 font-bold text-base mb-2">
-                {currentUser.username}
-                {editable && (
-                  <button 
-                    onClick={() => setShowTitleEditDialog(true)}
-                    className="text-amber-600 hover:text-amber-800 mr-2"
-                    aria-label="تعديل الاسم"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                    </svg>
-                  </button>
-                )}
-              </div>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-amber-800/80 text-xs">الحالة الخاصة: </span>
-                <span className="text-amber-800 text-xs">{currentUser.title || 'فليكسي برو'}</span>
-              </div>
-            </div>
             
-            {/* معلومات العملات والرصيد */}
-            <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-3">
-              <div className="flex items-center justify-between p-2 bg-amber-50 rounded-md border border-amber-200">
-                <img src="/icons/coin.png" alt="عملات" className="w-6 h-6" onError={(e) => e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmNTk2MWYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSI4Ii8+PHBhdGggZD0iTTEyIDZ2MTIiLz48cGF0aCBkPSJNNiAxMmgxMiIvPjwvc3ZnPg=='} />
-                <span className="text-amber-800 text-sm font-bold">{currentUser.chips.toLocaleString()}</span>
-              </div>
-              <div className="flex items-center justify-between p-2 bg-amber-50 rounded-md border border-amber-200">
-                <img src="/icons/diamond.png" alt="ماس" className="w-6 h-6" onError={(e) => e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMzYjgyZjYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMiA4aDIwTDEyIDIyIDIgOFoiLz48cGF0aCBkPSJNMTIgMmwtMyA2IDMgMTQgMy0xNC0zLTZaIi8+PHBhdGggZD0iTTIgOGwxMCAyLTEwIDItMyA2IDMtNloiLz48cGF0aCBkPSJNMjIgOGwtMTAgMiAxMCAyIDMgNi0zLTZaIi8+PHBhdGggZD0iTTcgOGwzIDE0IDUtMTQtNS00LTMgNFoiLz48cGF0aCBkPSJNMTcgOGwtMyAxNC01LTE0IDUtNCAzIDRaIi8+PC9zdmc+'} />
-                <span className="text-blue-600 text-sm font-bold">{currentUser.diamonds.toLocaleString()}</span>
-              </div>
-              <div className="flex items-center justify-between p-2 bg-amber-50 rounded-md border border-amber-200">
-                <img src="/icons/money.png" alt="فابي" className="w-6 h-6" onError={(e) => e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMxNmE1MzYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cmVjdCB4PSIyIiB5PSI0IiB3aWR0aD0iMjAiIGhlaWdodD0iMTYiIHJ4PSIyIi8+PGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMyIvPjxwYXRoIGQ9Ik04IDd2MTAiLz48cGF0aCBkPSJNMTYgN3YxMCIvPjwvc3ZnPg=='} />
-                <span className="text-green-600 text-sm font-bold">{currentUser.fabChips.toLocaleString()}</span>
-              </div>
-            </div>
-            
-            {/* إحصائيات اللاعب */}
-            <div className="bg-amber-50 rounded-lg border border-amber-200 p-2 mb-3 text-xs">
-              <div className="grid grid-cols-3 text-center py-1 border-b border-amber-100">
-                <div className="text-amber-800">مجموع نقاط الفوز</div>
-                <div className="text-amber-800">عدد المنافسات</div>
-                <div className="text-amber-800">معدل الانتصارات</div>
-              </div>
-              <div className="grid grid-cols-3 text-center py-1">
-                <div className="text-amber-700 font-medium">0</div>
-                <div className="text-amber-700 font-medium">1</div>
-                <div className="text-amber-700 font-medium">0%</div>
-              </div>
-            </div>
-            
-            {/* إحصائيات اللاعب 2 */}
-            <div className="bg-amber-50 rounded-lg border border-amber-200 p-2 mb-3 text-xs">
-              <div className="grid grid-cols-3 text-center py-1 border-b border-amber-100">
-                <div className="text-amber-800">مجموع نقاط الفوز</div>
-                <div className="text-amber-800">عدد المنافسات</div>
-                <div className="text-amber-800">معدل الانتصارات</div>
-              </div>
-              <div className="grid grid-cols-3 text-center py-1">
-                <div className="text-amber-700 font-medium">0</div>
-                <div className="text-amber-700 font-medium">0</div>
-                <div className="text-amber-700 font-medium">0%</div>
-              </div>
-            </div>
-            
-            {/* معلومات إضافية */}
-            {currentUser.agentBadgeUnlocked && currentUser.agentName && (
-              <div className="bg-blue-50 rounded-lg border border-blue-200 p-2 mb-2 text-xs">
-                <div className="text-blue-800 flex items-center">
-                  <span className="ml-1">💎</span>
-                  وكيلك: {currentUser.agentName}
-                </div>
+            {/* البادج على الصورة */}
+            {getHighestBadge() !== BadgeType.BASIC && (
+              <div className={`absolute -top-3 -right-3 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center bg-gradient-to-br ${getBadgeColor(getHighestBadge())} border-2 border-white shadow-lg`}>
+                <span className="text-white text-xs font-bold">
+                  {getHighestBadge() === BadgeType.ROYAL ? '👑' : 
+                   getHighestBadge() === BadgeType.GOLD ? '⭐' : '★'}
+                </span>
               </div>
             )}
             
-            {/* المستوى */}
-            <div className="mb-3">
-              <div className="flex justify-between items-center mb-1">
-                <span className="text-xs text-amber-800">المستوى: {currentUser.level}</span>
-                <span className="text-xs text-amber-700">{currentUser.experience} / {currentUser.level * 1000}</span>
-              </div>
-              <div className="w-full h-2 bg-amber-200 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-gradient-to-r from-amber-600 to-amber-400"
-                  style={{ width: `${experiencePercentage()}%` }}
-                ></div>
-              </div>
+            {/* شارة وكيل الشحن */}
+            <div className={`absolute -bottom-3 -left-3 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center border-2 border-white shadow-lg
+                           ${currentUser.agentBadgeUnlocked ? 'bg-gradient-to-br from-green-600 to-green-400' : 'bg-gradient-to-br from-gray-700 to-gray-500'}`}>
+              <span className="text-white text-xs">
+                {currentUser.agentBadgeUnlocked ? '✓' : '🔒'}
+              </span>
             </div>
+          </div>
+          
+          {/* زر فتح شارة الوكيل إذا كانت قابلة للتعديل */}
+          {editable && !currentUser.agentBadgeUnlocked && (
+            <button 
+              onClick={() => setShowAgentCodeDialog(true)}
+              className="mt-3 text-xs text-amber-400 hover:text-amber-300 underline"
+            >
+              فتح شارة وكيل الشحن
+            </button>
+          )}
+        </div>
+        
+        {/* القسم الأيسر - معلومات المستخدم */}
+        <div className="flex-grow flex flex-col mt-4 sm:mt-0">
+          {/* اسم المستخدم واللقب */}
+          <div className="flex flex-wrap items-center gap-2 mb-3">
+            <h2 className="text-xl sm:text-2xl font-bold text-amber-300">{currentUser.username}</h2>
+            {currentUser.title && (
+              <span className="text-xs sm:text-sm inline-block px-2 py-1 bg-gradient-to-r from-amber-700 to-amber-800 rounded-md text-amber-200">
+                {currentUser.title}
+              </span>
+            )}
+            {editable && (
+              <button 
+                onClick={() => setShowTitleEditDialog(true)}
+                className="text-amber-400 hover:text-amber-300"
+                aria-label="تعديل اللقب"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                </svg>
+              </button>
+            )}
+          </div>
+          
+          {/* معرف المستخدم */}
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-xs sm:text-sm text-amber-200/80">الملف الشخصي رقم:</span>
+            <span className="text-xs sm:text-sm text-amber-100">{currentUser.id}</span>
+            <button 
+              onClick={copyUserId}
+              className="text-amber-400 hover:text-amber-300"
+              aria-label="نسخ المعرف"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+            </button>
+          </div>
+          
+          {/* المستوى */}
+          <div className="mb-3">
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-xs sm:text-sm text-amber-200/80">المستوى: {currentUser.level}</span>
+              <span className="text-xs text-amber-100/70">{currentUser.experience} / {currentUser.level * 1000}</span>
+            </div>
+            <div className="w-full h-2 bg-amber-900/30 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-amber-600 to-amber-400"
+                style={{ width: `${experiencePercentage()}%` }}
+              ></div>
+            </div>
+          </div>
+          
+          {/* الرتبة والشارة المدفوعة */}
+          <div className="flex flex-wrap items-center gap-2 mb-3">
+            <span className="text-xs sm:text-sm text-amber-200/80">الرتبة:</span>
+            <span className={`inline-block px-2 py-1 rounded-md text-white text-xs font-medium bg-gradient-to-r ${getBadgeColor(BadgeType.BASIC)}`}>
+              {currentUser.rank}
+            </span>
+            
+            {/* الشارة المدفوعة */}
+            {currentUser.badges.some(b => b !== BadgeType.BASIC) && (
+              <span className={`inline-block px-2 py-1 rounded-md text-white text-xs font-medium bg-gradient-to-r ${getBadgeColor(getHighestBadge())}`}>
+                شاحن فابي {getBadgeRankName(getHighestBadge())}
+              </span>
+            )}
+          </div>
+          
+          {/* معلومات العملات والرصيد */}
+          <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-3 sm:mb-4">
+            <div className="p-2 bg-black/30 rounded-md text-center">
+              <div className="text-xs text-amber-200/80 mb-1">رقائق</div>
+              <div className="text-xs sm:text-sm text-amber-100 font-medium">{currentUser.chips.toLocaleString()}</div>
+            </div>
+            <div className="p-2 bg-black/30 rounded-md text-center">
+              <div className="text-xs text-amber-200/80 mb-1">فابي</div>
+              <div className="text-xs sm:text-sm text-amber-100 font-medium">{currentUser.fabChips.toLocaleString()}</div>
+            </div>
+            <div className="p-2 bg-black/30 rounded-md text-center">
+              <div className="text-xs text-amber-200/80 mb-1">ماس</div>
+              <div className="text-xs sm:text-sm text-amber-100 font-medium">{currentUser.diamonds.toLocaleString()}</div>
+            </div>
+          </div>
+          
+          {/* معلومات إضافية */}
+          <div className="text-xs sm:text-sm mb-3">
+            <div className="text-amber-100/70">
+              <span className="text-amber-300">✅</span> عدد مرات شحن الفابي: {currentUser.fabChargeCount}
+            </div>
+            
+            {currentUser.agentBadgeUnlocked && currentUser.agentName && (
+              <div className="text-amber-100/70 mt-1">
+                <span className="text-amber-300">🛡️</span> وكيلك: {currentUser.agentName}
+              </div>
+            )}
+          </div>
+          
+          {/* أزرار الإجراءات */}
+          <div className="flex flex-wrap gap-2 mt-2 sm:mt-auto">
+            {editable && (
+              <Button 
+                variant="outline" 
+                className="bg-amber-800/60 hover:bg-amber-700/80 border-amber-700 text-amber-100 text-xs sm:text-sm w-full sm:w-auto"
+                size="sm"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 019.07 4h5.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                تغيير الصورة
+              </Button>
+            )}
+            
+            <Button 
+              variant="outline" 
+              className="bg-amber-800/60 hover:bg-amber-700/80 border-amber-700 text-amber-100 text-xs sm:text-sm w-full sm:w-auto"
+              size="sm"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+              عرض الإحصائيات
+            </Button>
           </div>
         </div>
       </div>
@@ -418,37 +387,29 @@ const EgyptianProfile: React.FC<EgyptianProfileProps> = ({
       
       {/* نافذة حوار إدخال رمز الوكيل */}
       <Dialog open={showAgentCodeDialog} onOpenChange={setShowAgentCodeDialog}>
-        <DialogContent dir="rtl" className="bg-gradient-to-b from-amber-50 to-amber-100 border-amber-400 w-[90vw] max-w-md mx-auto">
-          <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-r from-amber-700/80 via-amber-600/90 to-amber-700/80 rounded-t-lg flex items-center justify-center">
-            <DialogTitle className="text-amber-100 font-bold text-lg">إدخال رمز وكيل الشحن</DialogTitle>
-            <button className="absolute left-2 text-amber-100 hover:text-white" onClick={() => setShowAgentCodeDialog(false)}>
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-          
-          <div className="pt-16 p-4">
-            <div className="bg-amber-50 rounded-lg p-3 border border-amber-200 mb-4">
-              <p className="text-amber-800 text-sm mb-4 text-center">
-                أدخل رمز وكيل الشحن الخاص بك لفتح البادج وتصبح وكيلاً معتمداً
-              </p>
-              <Input
-                type="text"
-                placeholder="أدخل الرمز هنا"
-                value={agentCode}
-                onChange={(e) => setAgentCode(e.target.value)}
-                className="mb-4 bg-white border-amber-300 text-amber-900 text-right"
-                dir="rtl"
-              />
-              <div className="flex justify-center">
-                <Button
-                  onClick={verifyAgentCode}
-                  className="bg-amber-600 hover:bg-amber-500 text-white font-bold w-full sm:w-auto"
-                >
-                  تحقق من الرمز
-                </Button>
-              </div>
+        <DialogContent dir="rtl" className="bg-gradient-to-b from-purple-950 to-black border-amber-600 w-[90vw] max-w-md mx-auto">
+          <DialogHeader>
+            <DialogTitle className="text-amber-300 text-center text-lg sm:text-xl">إدخال رمز وكيل الشحن</DialogTitle>
+          </DialogHeader>
+          <div className="p-3 sm:p-4">
+            <p className="text-amber-200 text-sm mb-4 text-center">
+              أدخل رمز وكيل الشحن الخاص بك لفتح الشارة
+            </p>
+            <Input
+              type="text"
+              placeholder="أدخل الرمز هنا"
+              value={agentCode}
+              onChange={(e) => setAgentCode(e.target.value)}
+              className="mb-4 bg-black/50 border-amber-700 text-amber-100 text-right"
+              dir="rtl"
+            />
+            <div className="flex justify-center">
+              <Button
+                onClick={verifyAgentCode}
+                className="bg-amber-700 hover:bg-amber-600 text-white w-full sm:w-auto"
+              >
+                تحقق من الرمز
+              </Button>
             </div>
           </div>
         </DialogContent>
@@ -456,37 +417,26 @@ const EgyptianProfile: React.FC<EgyptianProfileProps> = ({
       
       {/* نافذة حوار تغيير اللقب */}
       <Dialog open={showTitleEditDialog} onOpenChange={setShowTitleEditDialog}>
-        <DialogContent dir="rtl" className="bg-gradient-to-b from-amber-50 to-amber-100 border-amber-400 w-[90vw] max-w-md mx-auto">
-          <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-r from-amber-700/80 via-amber-600/90 to-amber-700/80 rounded-t-lg flex items-center justify-center">
-            <DialogTitle className="text-amber-100 font-bold text-lg">تعديل الحالة الخاصة</DialogTitle>
-            <button className="absolute left-2 text-amber-100 hover:text-white" onClick={() => setShowTitleEditDialog(false)}>
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-          
-          <div className="pt-16 p-4">
-            <div className="bg-amber-50 rounded-lg p-3 border border-amber-200 mb-4">
-              <p className="text-amber-800 text-sm mb-4 text-center">
-                أدخل الحالة الخاصة التي تريد إظهارها بجوار اسمك
-              </p>
-              <Input
-                type="text"
-                placeholder="أدخل الحالة الخاصة"
-                value={newTitle}
-                onChange={(e) => setNewTitle(e.target.value)}
-                className="mb-4 bg-white border-amber-300 text-amber-900 text-right"
-                dir="rtl"
-              />
-              <div className="flex justify-center">
-                <Button
-                  onClick={updateUserTitle}
-                  className="bg-amber-600 hover:bg-amber-500 text-white font-bold w-full sm:w-auto"
-                >
-                  حفظ التغييرات
-                </Button>
-              </div>
+        <DialogContent dir="rtl" className="bg-gradient-to-b from-purple-950 to-black border-amber-600 w-[90vw] max-w-md mx-auto">
+          <DialogHeader>
+            <DialogTitle className="text-amber-300 text-center text-lg sm:text-xl">تعديل اللقب</DialogTitle>
+          </DialogHeader>
+          <div className="p-3 sm:p-4">
+            <Input
+              type="text"
+              placeholder="أدخل اللقب الجديد"
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.target.value)}
+              className="mb-4 bg-black/50 border-amber-700 text-amber-100 text-right"
+              dir="rtl"
+            />
+            <div className="flex justify-center">
+              <Button
+                onClick={updateUserTitle}
+                className="bg-amber-700 hover:bg-amber-600 text-white w-full sm:w-auto"
+              >
+                حفظ اللقب
+              </Button>
             </div>
           </div>
         </DialogContent>
