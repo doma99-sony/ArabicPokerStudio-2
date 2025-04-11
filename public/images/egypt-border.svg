@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="600" height="600" viewBox="0 0 600 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- الإطار الخارجي -->
+  <rect x="10" y="10" width="580" height="580" rx="20" ry="20" stroke="#D4AF37" stroke-width="4" fill="none"/>
+  
+  <!-- زخارف الزوايا -->
+  <g id="corner-tl">
+    <path d="M30 30 L80 30 L80 40 L40 40 L40 80 L30 80 Z" fill="#D4AF37"/>
+    <path d="M30 60 L50 40" stroke="#D4AF37" stroke-width="2"/>
+  </g>
+  
+  <g id="corner-tr">
+    <path d="M570 30 L520 30 L520 40 L560 40 L560 80 L570 80 Z" fill="#D4AF37"/>
+    <path d="M570 60 L550 40" stroke="#D4AF37" stroke-width="2"/>
+  </g>
+  
+  <g id="corner-bl">
+    <path d="M30 570 L80 570 L80 560 L40 560 L40 520 L30 520 Z" fill="#D4AF37"/>
+    <path d="M30 540 L50 560" stroke="#D4AF37" stroke-width="2"/>
+  </g>
+  
+  <g id="corner-br">
+    <path d="M570 570 L520 570 L520 560 L560 560 L560 520 L570 520 Z" fill="#D4AF37"/>
+    <path d="M570 540 L550 560" stroke="#D4AF37" stroke-width="2"/>
+  </g>
+  
+  <!-- نقوش هيروغليفية -->
+  <g id="hieroglyphs" opacity="0.7">
+    <g transform="translate(50, 15)">
+      <!-- العين المصرية (عين حورس) -->
+      <path d="M10 5 C12 2 18 2 20 5 C25 7 30 7 35 5 L35 10 C30 12 25 12 20 10 C18 8 12 8 10 10 Z" fill="#D4AF37"/>
+      <path d="M15 7 L25 7" stroke="#D4AF37" stroke-width="0.8"/>
+    </g>
+    
+    <g transform="translate(500, 15)">
+      <!-- عنخ (مفتاح الحياة) -->
+      <path d="M15 5 A5 5 0 0 1 25 5 A5 5 0 0 1 15 5 M20 10 L20 20 L15 25 L25 25 Z" fill="#D4AF37"/>
+    </g>
+    
+    <g transform="translate(50, 570)">
+      <!-- جعران -->
+      <path d="M15 -5 A5 3 0 0 1 25 -5 L25 -10 L15 -10 Z" fill="#D4AF37"/>
+      <path d="M15 -5 A10 5 0 0 0 25 -5 Z" fill="#D4AF37"/>
+    </g>
+    
+    <g transform="translate(500, 570)">
+      <!-- سيسترم -->
+      <path d="M20 -10 L20 -5 L15 -3 L25 -3 Z" fill="#D4AF37"/>
+      <circle cx="20" cy="-15" r="3" stroke="#D4AF37" fill="none"/>
+    </g>
+  </g>
+  
+  <!-- أنماط زخرفية على طول الإطار -->
+  <g id="border-patterns" opacity="0.6">
+    <!-- نمط أعلى الإطار -->
+    <g id="top-pattern">
+      <path d="M120 10 L140 10 L130 25 Z" fill="#D4AF37"/>
+      <path d="M180 10 L200 10 L190 25 Z" fill="#D4AF37"/>
+      <path d="M240 10 L260 10 L250 25 Z" fill="#D4AF37"/>
+      <path d="M300 10 L320 10 L310 25 Z" fill="#D4AF37"/>
+      <path d="M360 10 L380 10 L370 25 Z" fill="#D4AF37"/>
+      <path d="M420 10 L440 10 L430 25 Z" fill="#D4AF37"/>
+      <path d="M480 10 L500 10 L490 25 Z" fill="#D4AF37"/>
+    </g>
+    
+    <!-- نمط أسفل الإطار -->
+    <g id="bottom-pattern">
+      <path d="M120 590 L140 590 L130 575 Z" fill="#D4AF37"/>
+      <path d="M180 590 L200 590 L190 575 Z" fill="#D4AF37"/>
+      <path d="M240 590 L260 590 L250 575 Z" fill="#D4AF37"/>
+      <path d="M300 590 L320 590 L310 575 Z" fill="#D4AF37"/>
+      <path d="M360 590 L380 590 L370 575 Z" fill="#D4AF37"/>
+      <path d="M420 590 L440 590 L430 575 Z" fill="#D4AF37"/>
+      <path d="M480 590 L500 590 L490 575 Z" fill="#D4AF37"/>
+    </g>
+    
+    <!-- نمط يسار الإطار -->
+    <g id="left-pattern">
+      <path d="M10 120 L10 140 L25 130 Z" fill="#D4AF37"/>
+      <path d="M10 180 L10 200 L25 190 Z" fill="#D4AF37"/>
+      <path d="M10 240 L10 260 L25 250 Z" fill="#D4AF37"/>
+      <path d="M10 300 L10 320 L25 310 Z" fill="#D4AF37"/>
+      <path d="M10 360 L10 380 L25 370 Z" fill="#D4AF37"/>
+      <path d="M10 420 L10 440 L25 430 Z" fill="#D4AF37"/>
+      <path d="M10 480 L10 500 L25 490 Z" fill="#D4AF37"/>
+    </g>
+    
+    <!-- نمط يمين الإطار -->
+    <g id="right-pattern">
+      <path d="M590 120 L590 140 L575 130 Z" fill="#D4AF37"/>
+      <path d="M590 180 L590 200 L575 190 Z" fill="#D4AF37"/>
+      <path d="M590 240 L590 260 L575 250 Z" fill="#D4AF37"/>
+      <path d="M590 300 L590 320 L575 310 Z" fill="#D4AF37"/>
+      <path d="M590 360 L590 380 L575 370 Z" fill="#D4AF37"/>
+      <path d="M590 420 L590 440 L575 430 Z" fill="#D4AF37"/>
+      <path d="M590 480 L590 500 L575 490 Z" fill="#D4AF37"/>
+    </g>
+  </g>
+  
+  <!-- توهجات ذهبية -->
+  <g id="golden-glow" opacity="0.3">
+    <radialGradient id="cornerGlow" cx="0" cy="0" r="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#D4AF37"/>
+      <stop offset="100%" stop-color="#D4AF37" stop-opacity="0"/>
+    </radialGradient>
+    
+    <circle cx="30" cy="30" r="30" fill="url(#cornerGlow)"/>
+    <circle cx="570" cy="30" r="30" fill="url(#cornerGlow)"/>
+    <circle cx="30" cy="570" r="30" fill="url(#cornerGlow)"/>
+    <circle cx="570" cy="570" r="30" fill="url(#cornerGlow)"/>
+  </g>
+</svg>
