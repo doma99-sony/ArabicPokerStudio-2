@@ -369,19 +369,21 @@ export default function LobbyPage() {
         {/* Chat Section - ظاهرة فقط في الصفحة الرئيسية (home) بالضبط كما في الصورة المرجعية */}
         {location === '/' && activeGameCategory === ("home" as any) && (
           <div 
-            className="fixed z-30 transition-all duration-300 shadow-xl"
+            className="fixed z-30 transition-all duration-300"
             id="chat-container"
             style={{ 
-              top: '200px',
-              left: '30%',
-              transform: isChatHidden ? 'translateX(-30%) translateY(-50px) scale(0.9)' : 'translateX(-30%) translateY(0) scale(1)',
+              top: '250px',
+              left: '20%',
+              transform: isChatHidden ? 'translateX(-20%) translateY(-50px) scale(0.9)' : 'translateX(-20%) translateY(0) scale(1)',
               width: '800px',
               height: '550px',
               opacity: isChatHidden ? 0 : 1,
               visibility: isChatHidden ? 'hidden' : 'visible',
-              borderRadius: '15px',
+              borderRadius: '20px',
               overflow: 'hidden',
-              boxShadow: '0 5px 20px rgba(0,0,0,0.5)'
+              boxShadow: '0 10px 30px rgba(0,0,0,0.6), inset 0 0 15px rgba(255,215,0,0.3)',
+              border: '4px solid #D4AF37',
+              animation: 'chatPulse 3s infinite alternate'
             }}
           >
             <NewChatBox onClose={toggleChat} />

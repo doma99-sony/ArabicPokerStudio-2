@@ -139,9 +139,11 @@ export function NewChatBox({ onClose }: { onClose?: () => void }) {
   return (
     <div className="w-full h-full flex overflow-hidden" 
       style={{ 
-        backgroundColor: '#FFDDB3',
-        borderRadius: '8px',
-        boxShadow: '0 1px 10px rgba(0,0,0,0.15)'
+        background: 'linear-gradient(to bottom, #FFEAC4, #FFDDB3)',
+        borderRadius: '18px',
+        boxShadow: '0 5px 20px rgba(0,0,0,0.25), inset 0 0 15px rgba(255,215,0,0.2)',
+        border: '3px solid #D4AF37',
+        animation: 'cartoonBorder 3s infinite alternate'
       }}
     >
       {/* القائمة الجانبية اليسرى - مطابقة للصورة */}
@@ -187,13 +189,33 @@ export function NewChatBox({ onClose }: { onClose?: () => void }) {
       
       {/* محتوى الدردشة */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* شريط العنوان - تصميم مطابق للصورة */}
-        <div className="bg-[#DC8E08] flex justify-between items-center px-3 py-2.5 relative">
+        {/* شريط العنوان - تصميم كرتوني مدهش */}
+        <div 
+          className="flex justify-between items-center px-3 py-2.5 relative"
+          style={{
+            background: 'linear-gradient(to right, #CF8800, #DC8E08, #CF8800)',
+            boxShadow: '0 2px 10px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.3)',
+            borderBottom: '2px solid #B27324'
+          }}
+        >
           <div className="flex items-center gap-2">
+            <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center shadow-md">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#A05B05" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+              </svg>
+            </div>
             <div>
-              <h3 className="text-white font-semibold text-base">الدردشة العامة</h3>
+              <h3 
+                className="text-white font-bold text-base drop-shadow-sm"
+                style={{ 
+                  textShadow: '0 1px 2px rgba(0,0,0,0.3)', 
+                  letterSpacing: '0.5px' 
+                }}
+              >
+                الدردشة العامة
+              </h3>
               <div className="flex items-center space-x-1 space-x-reverse">
-                <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
                 <span className="text-white/80 text-xs">متصل الآن</span>
               </div>
             </div>
@@ -201,11 +223,17 @@ export function NewChatBox({ onClose }: { onClose?: () => void }) {
           {onClose && (
             <button
               onClick={onClose}
-              className="text-white p-1 bg-red-600 rounded-full hover:bg-red-700 transition-colors flex items-center justify-center"
-              style={{ width: '32px', height: '32px' }}
+              className="text-white p-1 bg-red-600 hover:bg-red-700 transition-colors flex items-center justify-center shadow-lg"
+              style={{ 
+                width: '36px', 
+                height: '36px',
+                borderRadius: '50%',
+                border: '2px solid rgba(255,255,255,0.4)',
+                boxShadow: '0 3px 6px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.3)'
+              }}
               aria-label="إغلاق الدردشة"
             >
-              <X size={20} />
+              <X size={22} />
             </button>
           )}
         </div>
@@ -273,23 +301,39 @@ export function NewChatBox({ onClose }: { onClose?: () => void }) {
             </div>
           </ScrollArea>
 
-          {/* منطقة إدخال الرسائل - مطابقة للصورة */}
-          <div className="bg-[#FFDDB3] p-1.5 flex flex-col gap-1">
+          {/* منطقة إدخال الرسائل - بأسلوب كرتوني مدهش */}
+          <div 
+            className="p-2.5 flex flex-col gap-1"
+            style={{
+              background: 'linear-gradient(to top, #CF8800, #FDA82A)',
+              borderTop: '2px solid #B27324',
+              boxShadow: 'inset 0 2px 5px rgba(0,0,0,0.1)'
+            }}
+          >
             {showEmojiPicker && (
-              <div className="absolute bottom-16 left-2 z-10">
+              <div className="absolute bottom-16 left-2 z-10" style={{ filter: 'drop-shadow(0 5px 15px rgba(0,0,0,0.3))' }}>
                 <EmojiPicker onEmojiClick={onEmojiClick} width={300} height={350} />
               </div>
             )}
-            <div className="flex items-center gap-1 w-full">
+            <div className="flex items-center gap-2 w-full">
               <button
                 onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                 type="button"
-                className="flex items-center justify-center h-10 w-10 text-amber-600 hover:bg-amber-200 rounded-full transition-colors"
+                style={{ 
+                  width: '42px', 
+                  height: '42px',
+                  background: 'linear-gradient(145deg, #FFD596, #E69600)',
+                  boxShadow: '0 2px 5px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.5)',
+                  border: '2px solid #B27324',
+                  borderRadius: '50%',
+                  transition: 'all 0.2s ease'
+                }}
+                className="flex items-center justify-center text-amber-800 hover:scale-110"
               >
                 <span className="text-2xl">😊</span>
               </button>
               
-              <div className="relative flex-1 bg-white rounded-full">
+              <div className="relative flex-1" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }}>
                 <input
                   type="text"
                   value={newMessage}
@@ -297,16 +341,32 @@ export function NewChatBox({ onClose }: { onClose?: () => void }) {
                   onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                   placeholder="اضغط للدخول..."
                   disabled={!canSendMessage}
-                  className="w-full h-10 px-4 py-2 bg-white rounded-full placeholder-gray-500 text-gray-700 focus:outline-none"
+                  style={{
+                    borderRadius: '20px',
+                    border: '2px solid #B27324',
+                    boxShadow: 'inset 0 2px 5px rgba(0,0,0,0.05)',
+                    background: 'linear-gradient(to bottom, #F5F5F5, #FFFFFF)'
+                  }}
+                  className="w-full h-10 px-4 py-2 placeholder-gray-500 text-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400"
                 />
               </div>
 
               <button
                 onClick={handleSendMessage}
                 disabled={!canSendMessage || !newMessage.trim()}
-                className="h-10 w-10 flex items-center justify-center text-amber-600 hover:bg-amber-200 rounded-full transition-colors"
+                style={{ 
+                  width: '42px', 
+                  height: '42px',
+                  background: 'linear-gradient(145deg, #FFD596, #E69600)',
+                  boxShadow: '0 2px 5px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.5)',
+                  border: '2px solid #B27324',
+                  borderRadius: '50%',
+                  transition: 'all 0.2s ease',
+                  opacity: (!canSendMessage || !newMessage.trim()) ? 0.5 : 1
+                }}
+                className="flex items-center justify-center text-amber-800 hover:scale-110 disabled:hover:scale-100"
               >
-                <Send className="h-6 w-6" />
+                <Send className="h-5 w-5" />
               </button>
             </div>
           </div>
