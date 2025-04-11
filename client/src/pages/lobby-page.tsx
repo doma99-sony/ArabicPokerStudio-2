@@ -363,9 +363,9 @@ export default function LobbyPage() {
 
       {/* Main Content */}
       <main className="relative z-10 flex-1 overflow-hidden">
-        {/* قائمة أفضل 3 لاعبين - على الجانب الأيمن، حافظنا عليها في مكانها اليمين */}
-        <div className="fixed top-20 right-3 z-30 w-auto" style={{ direction: "rtl" }}>
-          <div id="top-players-bar" className="bg-gradient-to-r from-[#0A3A2A]/95 via-black/95 to-[#0A3A2A]/95 rounded-xl border border-[#D4AF37] p-3 shadow-lg backdrop-blur-sm flex flex-col items-center gap-2 w-[240px]">
+        {/* قائمة أفضل 3 لاعبين - على الجانب الأيمن بشكل طولي */}
+        <div className="fixed top-20 right-3 z-30 w-auto hidden md:block" style={{ direction: "rtl" }}>
+          <div id="top-players-sidebar" className="bg-gradient-to-r from-[#0A3A2A]/95 via-black/95 to-[#0A3A2A]/95 rounded-xl border border-[#D4AF37] p-3 shadow-lg backdrop-blur-sm flex flex-col items-center gap-2 w-[240px]">
             <div className="flex items-center justify-between w-full border-b border-[#D4AF37]/30 pb-2 mb-1">
               <div className="flex items-center">
                 <Trophy className="h-5 w-5 text-[#D4AF37] mr-2" />
@@ -528,7 +528,7 @@ export default function LobbyPage() {
             
             {/* Game cards section */}
             <div className="space-y-8">
-              {activeGameCategory === "home" && (
+              {activeGameCategory === ("home" as GameType) && (
                 <div className="space-y-6">
                   {/* عنوان القسم */}
                   <div className="flex items-center gap-2">
@@ -817,16 +817,8 @@ export default function LobbyPage() {
             <button 
               className="relative flex flex-col items-center justify-center p-2 min-w-[60px]"
               onClick={() => navigate("/rankings")}
-              onMouseEnter={() => {
-                // عند تحويم الماوس، تسليط الضوء على شريط الترتيب أعلى الصفحة
-                const topPlayersBar = document.getElementById("top-players-bar");
-                if (topPlayersBar) {
-                  topPlayersBar.classList.add("highlight-top-players");
-                  setTimeout(() => {
-                    topPlayersBar.classList.remove("highlight-top-players");
-                  }, 1500);
-                }
-              }}
+              // إزالة التأثير على عنصر غير موجود
+              onMouseEnter={() => {}}
             >
               <div className="bg-gradient-to-br from-[#FFD700]/80 to-[#ffa500]/80 rounded-full w-14 h-14 border-2 border-[#D4AF37] flex items-center justify-center relative shadow-lg hover:shadow-[#D4AF37]/20 transition-all duration-300 overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-r from-[#D4AF37]/0 via-[#D4AF37]/30 to-[#D4AF37]/0 animate-pulse-slow"></div>
