@@ -18,6 +18,7 @@ import { GameIconSet } from "@/games/queen-of-egypt-3d/assets/egyptian-icons";
 import { formatChips } from "@/lib/utils";
 import { HeavySnowEffect, GoldDustEffect } from "@/components/effects/snow-effect";
 import { HeavyPokerCardsEffect, SuitSymbolsEffect } from "@/components/effects/poker-cards-effect";
+import { TopPlayers } from "@/components/lobby/top-players";
 
 export default function LobbyPage() {
   const [location, navigate] = useLocation();
@@ -363,75 +364,7 @@ export default function LobbyPage() {
 
       {/* Main Content */}
       <main className="relative z-10 flex-1 overflow-hidden">
-        {/* قائمة أفضل 3 لاعبين - على الجانب الأيمن بشكل طولي */}
-        <div className="fixed top-20 right-3 z-30 w-auto hidden md:block" style={{ direction: "rtl" }}>
-          <div id="top-players-sidebar" className="bg-gradient-to-r from-[#0A3A2A]/95 via-black/95 to-[#0A3A2A]/95 rounded-xl border border-[#D4AF37] p-3 shadow-lg backdrop-blur-sm flex flex-col items-center gap-2 w-[240px]">
-            <div className="flex items-center justify-between w-full border-b border-[#D4AF37]/30 pb-2 mb-1">
-              <div className="flex items-center">
-                <Trophy className="h-5 w-5 text-[#D4AF37] mr-2" />
-                <h3 className="text-[#D4AF37] font-bold text-sm">قائمة أفضل اللاعبين</h3>
-              </div>
-              <div className="bg-[#0A3A2A] text-[10px] text-white px-2 py-0.5 rounded-full border border-[#D4AF37]/50">
-                TOP 3
-              </div>
-            </div>
-            
-            <div className="w-full space-y-2">
-              {topPlayers.map((player, index) => (
-                <div 
-                  key={player.id} 
-                  className={`flex items-center w-full justify-between p-2 rounded-lg ${
-                    index === 0 
-                      ? 'bg-gradient-to-r from-yellow-500/20 to-transparent border border-yellow-500/30' 
-                      : index === 1 
-                        ? 'bg-gradient-to-r from-gray-400/20 to-transparent border border-gray-400/30' 
-                        : 'bg-gradient-to-r from-yellow-700/20 to-transparent border border-yellow-700/30'
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <div className={`flex items-center justify-center w-6 h-6 rounded-full font-bold text-xs ${
-                      index === 0 ? 'bg-yellow-500 text-black' : index === 1 ? 'bg-gray-400 text-black' : 'bg-yellow-700 text-white'
-                    }`}>
-                      {index + 1}
-                    </div>
-                    <div className="w-8 h-8 rounded-full overflow-hidden border">
-                      <img src={player.avatar || "/assets/poker-icon-gold.png"} alt={player.username} className="w-full h-full object-cover" />
-                    </div>
-                    <div className="text-right">
-                      <p className="text-white text-sm font-medium truncate max-w-[80px]">{player.username}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center bg-black/40 px-2 py-1 rounded border border-[#D4AF37]/30">
-                    <Coins className="h-3 w-3 text-[#D4AF37] ml-1" />
-                    <span className="text-[#D4AF37] text-xs font-bold">{formatChips(player.chips)}</span>
-                  </div>
-                </div>
-              ))}
-              
-              {topPlayers.length === 0 && (
-                <div className="text-center py-4">
-                  <div className="text-gray-400 animate-pulse text-sm">جاري تحميل البيانات...</div>
-                </div>
-              )}
-            </div>
-            
-            <div className="flex justify-center w-full">
-              <button 
-                onClick={() => navigate('/rankings')}
-                className="w-full bg-gradient-to-r from-[#D4AF37]/80 to-[#8B6914]/80 hover:from-[#D4AF37] hover:to-[#8B6914] text-white font-medium py-1.5 rounded-md text-sm transition-all duration-300 border border-[#D4AF37]/50 flex items-center justify-center gap-1"
-              >
-                <Trophy className="h-4 w-4" />
-                عرض قائمة أفضل 100 لاعب
-              </button>
-            </div>
-            
-            <div className="flex items-center text-center w-full justify-center border-t border-[#D4AF37]/20 pt-1 mt-1">
-              <span className="text-gray-400 text-[9px] ml-1">آخر تحديث:</span>
-              <span className="text-gray-400 text-[9px]" dir="ltr">{lastUpdated.toLocaleTimeString()}</span>
-            </div>
-          </div>
-        </div>
+
         {/* Chat Section - Fixed to left - تصميم محسن بتأثيرات زجاجية وذهبية */}
         <div 
           className="fixed top-16 left-0 h-[calc(100%-8rem)] z-20 transition-all duration-500 shadow-2xl shadow-black/50" 
@@ -520,75 +453,76 @@ export default function LobbyPage() {
                     <h2 className="text-white text-xl font-bold">الصفحة الرئيسية</h2>
                   </div>
                   
-
-                  
                   {/* إضافة قائمة أفضل اللاعبين داخل الصفحة الرئيسية */}
-                  <div className="bg-gradient-to-r from-[#0A3A2A]/80 via-black/80 to-[#0A3A2A]/80 rounded-xl border border-[#D4AF37] p-4 shadow-lg backdrop-blur-sm">
-                    <div className="flex items-center justify-between w-full border-b border-[#D4AF37]/30 pb-2 mb-4">
-                      <div className="flex items-center">
-                        <Trophy className="h-5 w-5 text-[#D4AF37] mr-2" />
-                        <h3 className="text-[#D4AF37] font-bold text-lg">قائمة أفضل اللاعبين</h3>
-                      </div>
-                      <div className="bg-[#0A3A2A] text-xs text-white px-2 py-0.5 rounded-full border border-[#D4AF37]/50">
-                        TOP 3
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-                      {topPlayers.map((player, index) => (
-                        <div 
-                          key={player.id} 
-                          className={`flex items-center w-full justify-between p-3 rounded-lg ${
-                            index === 0 
-                              ? 'bg-gradient-to-r from-yellow-500/20 to-transparent border border-yellow-500/30' 
-                              : index === 1 
-                                ? 'bg-gradient-to-r from-gray-400/20 to-transparent border border-gray-400/30' 
-                                : 'bg-gradient-to-r from-yellow-700/20 to-transparent border border-yellow-700/30'
-                          }`}
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className={`flex items-center justify-center w-8 h-8 rounded-full font-bold text-xs ${
-                              index === 0 ? 'bg-yellow-500 text-black' : index === 1 ? 'bg-gray-400 text-black' : 'bg-yellow-700 text-white'
-                            }`}>
-                              {index + 1}
-                            </div>
-                            <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-[#D4AF37]/50">
-                              <img src={player.avatar || "/assets/poker-icon-gold.png"} alt={player.username} className="w-full h-full object-cover" />
-                            </div>
-                            <div className="text-right">
-                              <p className="text-white text-sm font-medium truncate max-w-[120px]">{player.username}</p>
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center bg-black/40 px-3 py-1.5 rounded-lg border border-[#D4AF37]/30">
-                            <Coins className="h-4 w-4 text-[#D4AF37] ml-1" />
-                            <span className="text-[#D4AF37] text-sm font-bold">{formatChips(player.chips)}</span>
-                          </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mt-4">
+                    <div className="bg-gradient-to-r from-[#0A3A2A]/80 via-black/80 to-[#0A3A2A]/80 rounded-xl border border-[#D4AF37] p-4 shadow-lg backdrop-blur-sm">
+                      <div className="flex items-center justify-between w-full border-b border-[#D4AF37]/30 pb-2 mb-4">
+                        <div className="flex items-center">
+                          <Trophy className="h-5 w-5 text-[#D4AF37] mr-2" />
+                          <h3 className="text-[#D4AF37] font-bold text-lg">قائمة أفضل اللاعبين</h3>
                         </div>
-                      ))}
+                        <div className="bg-[#0A3A2A] text-xs text-white px-2 py-0.5 rounded-full border border-[#D4AF37]/50">
+                          TOP 3
+                        </div>
+                      </div>
                       
-                      {topPlayers.length === 0 && (
-                        <div className="col-span-3 text-center py-6">
-                          <div className="text-gray-400 animate-pulse text-sm">جاري تحميل البيانات...</div>
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className="flex justify-center mt-4">
-                      <button 
-                        onClick={() => navigate('/rankings')}
-                        className="bg-gradient-to-r from-[#D4AF37]/80 to-[#8B6914]/80 hover:from-[#D4AF37] hover:to-[#8B6914] text-white font-medium py-2 px-4 rounded-md text-sm transition-all duration-300 border border-[#D4AF37]/50 flex items-center justify-center gap-1"
-                      >
-                        <Trophy className="h-4 w-4" />
-                        عرض قائمة أفضل 100 لاعب
-                      </button>
-                    </div>
-                    
-                    <div className="flex items-center text-center w-full justify-center border-t border-[#D4AF37]/20 pt-2 mt-2">
-                      <span className="text-gray-400 text-xs ml-1">آخر تحديث:</span>
-                      <span className="text-gray-400 text-xs" dir="ltr">{lastUpdated.toLocaleTimeString()}</span>
+                      <div className="grid grid-cols-1 gap-3">
+                        {topPlayers.map((player, index) => (
+                          <div 
+                            key={player.id} 
+                            className={`flex items-center w-full justify-between p-3 rounded-lg ${
+                              index === 0 
+                                ? 'bg-gradient-to-r from-yellow-500/20 to-transparent border border-yellow-500/30' 
+                                : index === 1 
+                                  ? 'bg-gradient-to-r from-gray-400/20 to-transparent border border-gray-400/30' 
+                                  : 'bg-gradient-to-r from-yellow-700/20 to-transparent border border-yellow-700/30'
+                            }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className={`flex items-center justify-center w-8 h-8 rounded-full font-bold text-xs ${
+                                index === 0 ? 'bg-yellow-500 text-black' : index === 1 ? 'bg-gray-400 text-black' : 'bg-yellow-700 text-white'
+                              }`}>
+                                {index + 1}
+                              </div>
+                              <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-[#D4AF37]/50">
+                                <img src={player.avatar || "/assets/poker-icon-gold.png"} alt={player.username} className="w-full h-full object-cover" />
+                              </div>
+                              <div className="text-right">
+                                <p className="text-white text-sm font-medium truncate max-w-[120px]">{player.username}</p>
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center bg-black/40 px-3 py-1.5 rounded-lg border border-[#D4AF37]/30">
+                              <Coins className="h-4 w-4 text-[#D4AF37] ml-1" />
+                              <span className="text-[#D4AF37] text-sm font-bold">{formatChips(player.chips)}</span>
+                            </div>
+                          </div>
+                        ))}
+                        
+                        {topPlayers.length === 0 && (
+                          <div className="col-span-3 text-center py-6">
+                            <div className="text-gray-400 animate-pulse text-sm">جاري تحميل البيانات...</div>
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="flex justify-center mt-4">
+                        <button 
+                          onClick={() => navigate('/rankings')}
+                          className="bg-gradient-to-r from-[#D4AF37]/80 to-[#8B6914]/80 hover:from-[#D4AF37] hover:to-[#8B6914] text-white font-medium py-2 px-4 rounded-md text-sm transition-all duration-300 border border-[#D4AF37]/50 flex items-center justify-center gap-1"
+                        >
+                          <Trophy className="h-4 w-4" />
+                          عرض قائمة أفضل 100 لاعب
+                        </button>
+                      </div>
+                      
+                      <div className="flex items-center text-center w-full justify-center border-t border-[#D4AF37]/20 pt-2 mt-2">
+                        <span className="text-gray-400 text-xs ml-1">آخر تحديث:</span>
+                        <span className="text-gray-400 text-xs" dir="ltr">{lastUpdated.toLocaleTimeString()}</span>
+                      </div>
                     </div>
                   </div>
+
                 </div>
               )}
               
