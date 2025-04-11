@@ -136,28 +136,14 @@ const DominoProfileCard: React.FC<{
           
           {/* معرف اللاعب */}
           <div className="text-center mb-6 bg-amber-50 p-3 rounded-lg border border-amber-300 w-full shadow-sm">
+            {/* رمز المستخدم (ID) */}
             <div className="flex items-center justify-center mb-2">
-              <span className="text-amber-800 text-base ml-2">ID:</span>
-              <span className="text-base text-amber-900">{user.id}</span>
+              <span className="text-amber-800 text-base ml-2">رقم العضوية:</span>
+              <span className="text-base text-amber-900">{user.userCode || '53639'}</span>
               <button 
                 onClick={() => {
-                  navigator.clipboard.writeText(user.id.toString());
-                  alert('تم نسخ معرف المستخدم');
-                }}
-                className="text-amber-600 hover:text-amber-800 ml-2"
-              >
-                <Copy className="h-4 w-4" />
-              </button>
-            </div>
-            
-            {/* رمز المستخدم الفريد (User Code) */}
-            <div className="flex items-center justify-center mb-2">
-              <span className="text-amber-800 text-base ml-2">كود مختصر:</span>
-              <span className="text-base text-amber-900">{user.userCode || '12345'}</span>
-              <button 
-                onClick={() => {
-                  navigator.clipboard.writeText(user.userCode?.toString() || '12345');
-                  alert('تم نسخ الكود المختصر');
+                  navigator.clipboard.writeText(user.userCode?.toString() || '53639');
+                  alert('تم نسخ رقم العضوية');
                 }}
                 className="text-amber-600 hover:text-amber-800 ml-2"
               >
@@ -245,7 +231,7 @@ const DominoProfileCard: React.FC<{
         {/* القسم الأيسر - البيانات والإحصائيات */}
         <div className="lg:w-2/3 p-6">
           {/* البادجات والرتب */}
-          <div className="grid grid-cols-3 gap-4 mb-6">
+          <div className="grid grid-cols-4 gap-4 mb-6">
             <div className="bg-gradient-to-b from-amber-50 to-amber-100 border border-amber-400 rounded-lg p-3 flex flex-col items-center shadow-sm">
               <div className="text-center mb-2 text-amber-800 text-sm">الرتبة</div>
               <div className="flex items-center justify-center">
@@ -268,6 +254,22 @@ const DominoProfileCard: React.FC<{
                 </div>
               </div>
               <div className="text-center mt-2 text-amber-900 text-sm font-bold">نشط</div>
+            </div>
+            
+            <div className="bg-gradient-to-b from-amber-50 to-amber-100 border border-amber-400 rounded-lg p-3 flex flex-col items-center shadow-sm">
+              <div className="text-center mb-2 text-amber-800 text-sm">لاعب رقم</div>
+              <div className="flex items-center justify-center">
+                <div className="w-16 h-16 relative">
+                  <div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-purple-700 rounded-lg flex items-center justify-center">
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="20" cy="20" r="18" fill="#9C27B0" stroke="#FFFFFF" strokeWidth="2"/>
+                      <text x="20" y="17" textAnchor="middle" fontFamily="Arial" fontWeight="bold" fontSize="10" fill="#FFFFFF">ID</text>
+                      <text x="20" y="27" textAnchor="middle" fontFamily="Arial" fontWeight="bold" fontSize="12" fill="#FFFFFF">{user.id || 2}</text>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              <div className="text-center mt-2 text-amber-900 text-sm font-bold">لاعب مبكر</div>
             </div>
             
             <div className="bg-gradient-to-b from-amber-50 to-amber-100 border-2 border-amber-500 rounded-lg p-3 flex flex-col items-center shadow-xl">
