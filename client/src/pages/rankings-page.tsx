@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
-import { Trophy, Medal, Clock, Search, X, Coins, Users, Lock, Unlock } from "lucide-react";
+import { Trophy, Medal, Clock, Search, X, Coins, Users, Lock, Unlock, Home, ArrowRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { formatChips } from "@/lib/format-utils";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useLocation } from "wouter";
 
 interface Player {
   id: number;
@@ -18,6 +19,7 @@ interface Player {
 export default function RankingsPage() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [, navigate] = useLocation();
   const [players, setPlayers] = useState<Player[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -90,10 +92,21 @@ export default function RankingsPage() {
       {/* Header */}
       <header className="bg-black/60 backdrop-blur-md border-b border-[#D4AF37]/30 p-4 fixed top-0 left-0 w-full z-30">
         <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-[#D4AF37] text-2xl font-bold flex items-center">
-            <Trophy className="h-6 w-6 mr-2 text-[#D4AF37]" />
-            ترتيب اللاعبين
-          </h1>
+          <div className="flex items-center">
+            <button 
+              onClick={() => navigate('/')}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-md text-sm font-medium transition-all mr-3
+                bg-gradient-to-r from-[#D4AF37] to-[#8B6914] text-white border border-[#D4AF37] hover:opacity-90"
+            >
+              <ArrowRight className="h-4 w-4" />
+              <span>العودة للوبي</span>
+            </button>
+            
+            <h1 className="text-[#D4AF37] text-2xl font-bold flex items-center">
+              <Trophy className="h-6 w-6 mr-2 text-[#D4AF37]" />
+              ترتيب اللاعبين
+            </h1>
+          </div>
           
           <div className="flex items-center space-x-4 rtl:space-x-reverse">
             <button 
