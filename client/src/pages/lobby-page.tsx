@@ -6,13 +6,14 @@ import { useGlobalWebSocket } from "@/hooks/use-global-websocket";
 import { GameType } from "@shared/types";
 import { ChatBox } from "@/components/lobby/chat-box";
 import { useQuery } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
 
 import { Button } from "@/components/ui/button";
 import { OnlineUsersCounter } from "@/components/ui/online-users-badge";
 import { ResetChipsButton } from "@/components/reset-chips-button";
 import { RemoveVirtualPlayersButton } from "@/components/remove-virtual-players-button";
 import { NotificationsButton, GameInstructionsButton } from "@/components/ui/notifications-system";
-import { LogOut, User, ChevronRight, Loader2, ChevronLeft, ChevronUp, Bell, ShoppingBag, ShoppingCart, Download, Smartphone, ExternalLink, Coins, Trophy, Crown, List, Home } from "lucide-react";
+import { LogOut, User, ChevronRight, Loader2, ChevronLeft, ChevronUp, Bell, ShoppingBag, ShoppingCart, Download, Smartphone, ExternalLink, Coins, Trophy, Crown, List, Home, LockIcon } from "lucide-react";
 import { GameIconSet } from "@/games/queen-of-egypt-3d/assets/egyptian-icons";
 import { formatChips } from "@/lib/utils";
 import { HeavySnowEffect, GoldDustEffect } from "@/components/effects/snow-effect";
@@ -21,6 +22,7 @@ import { HeavyPokerCardsEffect, SuitSymbolsEffect } from "@/components/effects/p
 export default function LobbyPage() {
   const [location, navigate] = useLocation();
   const { user, logoutMutation } = useAuth();
+  const { toast } = useToast();
   const [activeGameCategory, setActiveGameCategory] = useState<GameType>("poker");
   const [isChatHidden, setIsChatHidden] = useState(false);
   const [videoMuted, setVideoMuted] = useState(true);
@@ -363,46 +365,81 @@ export default function LobbyPage() {
       <main className="relative z-10 flex-1 overflow-hidden">
         {/* قائمة أفضل 3 لاعبين - على الجانب الأيمن */}
         <div className="fixed top-20 right-3 z-30 w-auto">
-          <div id="top-players-bar" className="bg-gradient-to-r from-[#0A3A2A]/80 via-black/80 to-[#0A3A2A]/80 rounded-xl border border-[#D4AF37] p-2 shadow-lg backdrop-blur-sm flex flex-col items-center gap-3">
-            <div className="flex items-center">
-              <div className="relative">
-                <Trophy className="h-6 w-6 text-[#D4AF37] animate-pulse-slow" />
-                <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full"></div>
+          <div id="top-players-bar" className="bg-gradient-to-r from-[#0A3A2A]/95 via-black/95 to-[#0A3A2A]/95 rounded-xl border border-[#D4AF37] p-3 shadow-lg backdrop-blur-sm flex flex-col items-center gap-2 w-[240px]">
+            <div className="flex items-center justify-between w-full border-b border-[#D4AF37]/30 pb-2 mb-1">
+              <div className="flex items-center">
+                <Trophy className="h-5 w-5 text-[#D4AF37] mr-2" />
+                <h3 className="text-[#D4AF37] font-bold text-sm">قائمة أفضل اللاعبين</h3>
               </div>
-              <span className="text-white text-xs mr-2 font-bold">أفضل اللاعبين:</span>
+              <div className="bg-[#0A3A2A] text-[10px] text-white px-2 py-0.5 rounded-full border border-[#D4AF37]/50">
+                TOP 3
+              </div>
             </div>
             
-            <div className="flex flex-col w-full gap-2">
+            <div className="w-full space-y-2">
               {topPlayers.map((player, index) => (
-                <div key={player.id} className="flex items-center w-full justify-between">
-                  <div className="flex items-center gap-2 border-b border-[#D4AF37]/20 pb-2 w-full">
-                    <div className="flex items-center gap-2">
-                      <div className="relative">
-                        <div className={`w-8 h-8 rounded-full overflow-hidden border-2 ${
-                          index === 0 ? 'border-yellow-500' : index === 1 ? 'border-gray-300' : 'border-yellow-700'
-                        }`}>
-                          <img src={player.avatar || "/assets/poker-icon-gold.png"} alt={player.username} className="w-full h-full object-cover" />
-                        </div>
-                        <div className={`absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold text-black ${
-                          index === 0 ? 'bg-yellow-500' : index === 1 ? 'bg-gray-300' : 'bg-yellow-700'
-                        }`}>
-                          {index + 1}
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className={`text-sm font-bold ${
-                          index === 0 ? 'text-yellow-500' : index === 1 ? 'text-gray-300' : 'text-yellow-700'
-                        }`}>{player.username}</p>
-                      </div>
+                <div 
+                  key={player.id} 
+                  className={`flex items-center w-full justify-between p-2 rounded-lg ${
+                    index === 0 
+                      ? 'bg-gradient-to-r from-yellow-500/20 to-transparent border border-yellow-500/30' 
+                      : index === 1 
+                        ? 'bg-gradient-to-r from-gray-400/20 to-transparent border border-gray-400/30' 
+                        : 'bg-gradient-to-r from-yellow-700/20 to-transparent border border-yellow-700/30'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <div className={`flex items-center justify-center w-6 h-6 rounded-full font-bold text-xs ${
+                      index === 0 ? 'bg-yellow-500 text-black' : index === 1 ? 'bg-gray-400 text-black' : 'bg-yellow-700 text-white'
+                    }`}>
+                      {index + 1}
                     </div>
-                    
-                    <div className="flex items-center mr-auto">
-                      <Coins className="h-3 w-3 text-[#D4AF37] ml-1" />
-                      <span className="text-[#D4AF37] text-xs font-bold">{formatChips(player.chips)}</span>
+                    <div className="w-8 h-8 rounded-full overflow-hidden border">
+                      <img src={player.avatar || "/assets/poker-icon-gold.png"} alt={player.username} className="w-full h-full object-cover" />
                     </div>
+                    <div className="text-right">
+                      <p className="text-white text-sm font-medium truncate max-w-[80px]">{player.username}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center bg-black/40 px-2 py-1 rounded border border-[#D4AF37]/30">
+                    <Coins className="h-3 w-3 text-[#D4AF37] ml-1" />
+                    <span className="text-[#D4AF37] text-xs font-bold">{formatChips(player.chips)}</span>
                   </div>
                 </div>
               ))}
+              
+              {topPlayers.length === 0 && (
+                <div className="text-center py-4">
+                  <div className="text-gray-400 animate-pulse text-sm">جاري تحميل البيانات...</div>
+                </div>
+              )}
+            </div>
+            
+            <div className="flex flex-col w-full gap-2">
+              <button 
+                onClick={() => navigate('/rankings')}
+                className="w-full bg-gradient-to-r from-[#D4AF37]/80 to-[#8B6914]/80 hover:from-[#D4AF37] hover:to-[#8B6914] text-white font-medium py-1.5 rounded-md text-sm transition-all duration-300 border border-[#D4AF37]/50 flex items-center justify-center gap-1"
+              >
+                <Trophy className="h-4 w-4" />
+                عرض قائمة أفضل 100 لاعب
+              </button>
+              
+              <button 
+                onClick={() => {
+                  // تخزين تفضيل المستخدم في localStorage
+                  localStorage.setItem('rankingsLocked', 'true');
+                  toast({
+                    title: "تم قفل صفحة الترتيب",
+                    description: "لن يتم تحديث الترتيب إلا عند فتح القفل",
+                    variant: "default",
+                  });
+                }}
+                className="w-full bg-gradient-to-r from-[#0A3A2A] to-[#062922] hover:from-[#0A3A2A]/90 hover:to-[#062922]/90 text-[#D4AF37] font-medium py-1.5 rounded-md text-sm transition-all duration-300 border border-[#D4AF37]/50 flex items-center justify-center gap-1"
+              >
+                <Lock className="h-4 w-4" />
+                قفل صفحة الترتيب
+              </button>
             </div>
             
             <div className="flex items-center text-center w-full justify-center border-t border-[#D4AF37]/20 pt-1 mt-1">
