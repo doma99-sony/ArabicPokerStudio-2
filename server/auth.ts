@@ -17,7 +17,7 @@ interface UserType {
   chips: number;
   avatar?: string | null;
   userCode: string; // معرف المستخدم الفريد (5 أرقام)
-  isGuest?: boolean; // هل المستخدم ضيف
+  isGuest: boolean; // هل المستخدم ضيف - ليس قابل لأن يكون null
   authType?: 'email' | 'facebook' | 'guest'; // نوع الحساب
 }
 

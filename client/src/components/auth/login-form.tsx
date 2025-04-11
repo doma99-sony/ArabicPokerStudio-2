@@ -39,8 +39,9 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
         if (user && user.id) {
           // تخزين معلومات آخر دخول في التخزين المحلي
           localStorage.setItem("lastAuthTimestamp", Date.now().toString());
-          // استخدام window.location.href لتجنب مشاكل التوجيه مع wouter
-          window.location.href = "/";
+          // دع عملية إعادة التوجيه تتم من خلال hook السياق المصادقة
+          console.log("تم تسجيل الدخول بنجاح من نموذج تسجيل الدخول العادي");
+          // التوجيه يتم تلقائياً من خلال use-auth.tsx
         }
       }
     });
@@ -53,8 +54,10 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
         if (user && user.id) {
           // تخزين معلومات آخر دخول
           localStorage.setItem("lastAuthTimestamp", Date.now().toString());
-          // استخدام window.location.href لتجنب مشاكل التوجيه
-          window.location.href = "/";
+          // دع عملية إعادة التوجيه تتم من خلال hook السياق المصادقة
+          // ليتم التوجيه إلى صفحة الملف الشخصي
+          console.log("تم تسجيل الدخول كضيف بنجاح من نموذج تسجيل الدخول");
+          // التوجيه يتم تلقائياً من خلال use-auth.tsx
         }
       }
     });
@@ -67,8 +70,9 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
         if (user && user.id) {
           // تخزين معلومات آخر دخول
           localStorage.setItem("lastAuthTimestamp", Date.now().toString());
-          // استخدام window.location.href لتجنب مشاكل التوجيه
-          window.location.href = "/";
+          // دع عملية إعادة التوجيه تتم من خلال hook السياق المصادقة
+          console.log("تم تسجيل الدخول عبر فيسبوك بنجاح من نموذج تسجيل الدخول");
+          // التوجيه يتم تلقائياً من خلال use-auth.tsx
         }
       }
     });

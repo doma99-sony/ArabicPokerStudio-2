@@ -21,20 +21,10 @@ export function ProtectedRoute({
     if (!user && !isLoading && location !== "/auth") {
       localStorage.setItem("redirectAfterLogin", location);
       
-      // تسجيل دخول تلقائي كضيف إذا لم يكن مسجل دخول
-      if (!loginGuestMutation.isPending) {
-        console.log("محاولة تسجيل دخول تلقائي كضيف...");
-        loginGuestMutation.mutate(undefined, {
-          onSuccess: (user) => {
-            console.log("تم تسجيل الدخول كضيف بنجاح:", user.username);
-          },
-          onError: (error) => {
-            console.error("فشل تسجيل الدخول كضيف:", error);
-          }
-        });
-      }
+      // تم تعطيل تسجيل الدخول التلقائي كضيف لمنع حلقة التكرار
+      // وتوجيه المستخدم للتفاعل المباشر مع واجهة تسجيل الدخول
     }
-  }, [user, isLoading, location, loginGuestMutation]);
+  }, [user, isLoading, location]);
   
   // ضمان استمرارية اتصال WebSocket بعد تسجيل الدخول وفي كل الصفحات المحمية
   useEffect(() => {
@@ -62,10 +52,20 @@ export function ProtectedRoute({
     <Route path={path}>
       {(params) => {
         if (!user) {
+          console.log("مستخدم غير موجود، إعادة توجيه إلى المصادقة...");
+          
+          // تخزين المسار الحالي للعودة إليه بعد تسجيل الدخول
+          const currentLocation = window.location.pathname;
+          if (currentLocation !== "/auth") {
+            localStorage.setItem("redirectAfterLogin", currentLocation);
+            console.log(`تم تخزين مسار التوجيه: ${currentLocation}`);
+          }
+          
           // إعادة توجيه إلى صفحة المصادقة عند عدم وجود مستخدم
           return <Redirect to="/auth" />;
         }
 
+        console.log(`المستخدم موجود، عرض صفحة: ${path} للمستخدم ${user.username}`);
         // المستخدم موجود، عرض الكومبوننت المطلوبة
         return <Component {...params} />;
       }}

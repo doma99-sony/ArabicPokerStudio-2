@@ -66,17 +66,19 @@ const ProfilePage: React.FC = () => {
   }, []);
   
   return (
-    <div className="fixed inset-0 bg-gradient-to-b from-purple-900 to-black w-full h-full flex items-start justify-center overflow-auto">
-      <div className="w-full h-full px-0 sm:px-4 py-4 flex items-start justify-center">
+    <div className="fixed inset-0 bg-gradient-to-b from-purple-900 to-black w-full h-full flex items-center justify-center overflow-auto">
+      <div className="w-full h-full flex flex-col items-center justify-center">
         {loading ? (
           <div className="flex justify-center items-center h-64 w-full">
             <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-amber-500"></div>
           </div>
         ) : (
-          <DominoProfileCard 
-            user={profileData}
-            onClose={() => navigate('/')}
-          />
+          <div className="w-full h-full flex items-center justify-center">
+            <DominoProfileCard 
+              user={profileData}
+              onClose={() => navigate('/')}
+            />
+          </div>
         )}
       </div>
     </div>

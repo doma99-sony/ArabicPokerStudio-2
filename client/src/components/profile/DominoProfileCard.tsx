@@ -231,7 +231,7 @@ const DominoProfileCard: React.FC<{
         {/* القسم الأيسر - البيانات والإحصائيات */}
         <div className="lg:w-2/3 p-6">
           {/* البادجات والرتب */}
-          <div className="grid grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-3 gap-3 mb-6">
             <div className="bg-gradient-to-b from-amber-50 to-amber-100 border border-amber-400 rounded-lg p-3 flex flex-col items-center shadow-sm">
               <div className="text-center mb-2 text-amber-800 text-sm">الرتبة</div>
               <div className="flex items-center justify-center">
@@ -263,8 +263,7 @@ const DominoProfileCard: React.FC<{
                   <div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-purple-700 rounded-lg flex items-center justify-center">
                     <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <circle cx="20" cy="20" r="18" fill="#9C27B0" stroke="#FFFFFF" strokeWidth="2"/>
-                      <text x="20" y="17" textAnchor="middle" fontFamily="Arial" fontWeight="bold" fontSize="10" fill="#FFFFFF">ID</text>
-                      <text x="20" y="27" textAnchor="middle" fontFamily="Arial" fontWeight="bold" fontSize="12" fill="#FFFFFF">{user.id || 2}</text>
+                      <text x="20" y="25" textAnchor="middle" fontFamily="Arial" fontWeight="bold" fontSize="16" fill="#FFFFFF">{user.id || 2}</text>
                     </svg>
                   </div>
                 </div>
@@ -272,6 +271,7 @@ const DominoProfileCard: React.FC<{
               <div className="text-center mt-2 text-amber-900 text-sm font-bold">لاعب مبكر</div>
             </div>
             
+            {/* صف جديد من البادجات */}
             <div className="bg-gradient-to-b from-amber-50 to-amber-100 border-2 border-amber-500 rounded-lg p-3 flex flex-col items-center shadow-xl">
               <div className="text-center mb-2 text-amber-800 text-sm font-medium">تاجر العملات</div>
               <div className="flex items-center justify-center">
@@ -297,6 +297,45 @@ const DominoProfileCard: React.FC<{
                 </div>
               </div>
               <div className="text-center mt-2 text-amber-900 text-sm font-bold">لاعب مميز</div>
+            </div>
+
+            {/* بادج التاج الملكي */}
+            <div className="bg-gradient-to-b from-amber-50 to-amber-100 border border-amber-400 rounded-lg p-3 flex flex-col items-center shadow-sm">
+              <div className="text-center mb-2 text-amber-800 text-sm">التاج الملكي</div>
+              <div className="flex items-center justify-center">
+                <div className="w-16 h-16 relative">
+                  <div className="absolute inset-0 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-lg flex items-center justify-center">
+                    <svg width="45" height="45" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M25 10L30 20L40 15L35 30H15L10 15L20 20L25 10Z" fill="#FFD700" stroke="#8B4513" strokeWidth="2"/>
+                      <path d="M15 33H35V36C35 37.1046 34.1046 38 33 38H17C15.8954 38 15 37.1046 15 36V33Z" fill="#FFD700" stroke="#8B4513" strokeWidth="2"/>
+                      <circle cx="10" cy="15" r="3" fill="#FF0000" stroke="#8B4513"/>
+                      <circle cx="25" cy="10" r="3" fill="#00FF00" stroke="#8B4513"/>
+                      <circle cx="40" cy="15" r="3" fill="#0000FF" stroke="#8B4513"/>
+                      <path d="M20 24L23 27H27L30 24" stroke="#8B4513" strokeWidth="1.5"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              <div className="text-center mt-2 text-amber-900 text-sm font-bold">لاعب ملكي</div>
+            </div>
+
+            {/* بادج الأجنحة */}
+            <div className="bg-gradient-to-b from-amber-50 to-amber-100 border border-amber-400 rounded-lg p-3 flex flex-col items-center shadow-sm">
+              <div className="text-center mb-2 text-amber-800 text-sm">أجنحة</div>
+              <div className="flex items-center justify-center">
+                <div className="w-16 h-16 relative">
+                  <div className="absolute inset-0 bg-gradient-to-br from-sky-400 to-indigo-600 rounded-lg flex items-center justify-center">
+                    <svg width="45" height="45" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M25 15C20 15 10 10 5 25C15 20 20 20 25 25C30 20 35 20 45 25C40 10 30 15 25 15Z" fill="white" stroke="#4F46E5" strokeWidth="1.5"/>
+                      <path d="M25 25C20 25 10 30 5 40C15 35 20 30 25 32C30 30 35 35 45 40C40 30 30 25 25 25Z" fill="white" stroke="#4F46E5" strokeWidth="1.5"/>
+                      <circle cx="25" cy="25" r="5" fill="#FFD700" stroke="#8B4513"/>
+                      <path d="M25 21V29" stroke="#8B4513" strokeWidth="1.5"/>
+                      <path d="M21 25H29" stroke="#8B4513" strokeWidth="1.5"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              <div className="text-center mt-2 text-amber-900 text-sm font-bold">ملاك اللعبة</div>
             </div>
           </div>
           

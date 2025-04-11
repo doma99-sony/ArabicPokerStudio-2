@@ -7,6 +7,7 @@ import {
 import { User as SelectUser, InsertUser } from "@shared/schema";
 import { getQueryFn, apiRequest, queryClient } from "../lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useLocation } from "wouter";
 
 type AuthContextType = {
   user: SelectUser | null;
@@ -18,6 +19,7 @@ type AuthContextType = {
   loginFacebookMutation: UseMutationResult<SelectUser, Error, void>; // تسجيل الدخول بالفيسبوك
   logoutMutation: UseMutationResult<void, Error, void>;
   registerMutation: UseMutationResult<SelectUser, Error, InsertUser>;
+  goToProfile: () => void;
 };
 
 type LoginData = Pick<InsertUser, "username" | "password">;
@@ -26,6 +28,7 @@ export const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
+  const [, navigate] = useLocation();
   const {
     data: user,
     error,
@@ -35,6 +38,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     queryFn: getQueryFn({ on401: "returnNull" }),
     retry: false,
   });
+  
+  // دالة للانتقال إلى صفحة الملف الشخصي
+  const goToProfile = () => {
+    // إعادة تحميل الصفحة عند الانتقال للملف الشخصي لضمان تحديث الجلسة بشكل كامل
+    window.location.href = '/profile';
+  };
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {
@@ -47,6 +56,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "تم تسجيل الدخول بنجاح",
         description: `مرحباً، ${user.username}!`,
       });
+      // توجيه المستخدم إلى صفحة الملف الشخصي بعد تسجيل الدخول
+      setTimeout(() => {
+        goToProfile();
+      }, 500);
     },
     onError: (error: Error) => {
       toast({
@@ -68,6 +81,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "تم إنشاء الحساب بنجاح",
         description: `مرحباً، ${user.username}!`,
       });
+      // توجيه المستخدم إلى صفحة الملف الشخصي بعد تسجيل الدخول
+      setTimeout(() => {
+        goToProfile();
+      }, 500);
     },
     onError: (error: Error) => {
       toast({
@@ -90,6 +107,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "تم تسجيل الدخول كضيف",
         description: `مرحباً، ${user.username}!`,
       });
+      // توجيه المستخدم إلى صفحة الملف الشخصي بعد تسجيل الدخول
+      setTimeout(() => {
+        goToProfile();
+      }, 500);
     },
     onError: (error: Error) => {
       toast({
@@ -112,6 +133,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "تم تسجيل الدخول بواسطة فيسبوك",
         description: `مرحباً، ${user.username}!`,
       });
+      // توجيه المستخدم إلى صفحة الملف الشخصي بعد تسجيل الدخول
+      setTimeout(() => {
+        goToProfile();
+      }, 500);
     },
     onError: (error: Error) => {
       toast({
@@ -179,6 +204,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loginFacebookMutation,
         logoutMutation,
         registerMutation,
+        goToProfile,
       }}
     >
       {children}
