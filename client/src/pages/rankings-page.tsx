@@ -1,321 +1,269 @@
-import { useState } from "react";
-import { useLocation } from "wouter";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
+import { Trophy, Medal, Clock, Search, X, Coins, Users } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { OnlineUsersCounter } from "@/components/ui/online-users-badge";
-import { ArrowRight, Trophy, Medal, Star, Award, Crown } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
+import { formatChips } from "@/lib/format-utils";
+import { Skeleton } from "@/components/ui/skeleton";
+
+interface Player {
+  id: number;
+  username: string;
+  chips: number;
+  avatar: string | null;
+}
 
 export default function RankingsPage() {
-  const [, navigate] = useLocation();
   const { user } = useAuth();
-  const [activeRankTab, setActiveRankTab] = useState("daily");
-
-  // بيانات افتراضية للاعبين المتصدرين (في تطبيق حقيقي، ستأتي هذه البيانات من API)
-  const topPlayers = [
-    { id: 1, username: "الملك_الذهبي", chips: 24500000, wins: 342, level: "الفاجر", avatar: null },
-    { id: 2, username: "الأسد_المصري", chips: 18300000, wins: 287, level: "الفاجر", avatar: null },
-    { id: 3, username: "بوكر_العرب", chips: 15200000, wins: 231, level: "الفاجر", avatar: null },
-    { id: 4, username: "ملك_الشدة", chips: 12800000, wins: 189, level: "محترف", avatar: null },
-    { id: 5, username: "بطل_الطاولة", chips: 10900000, wins: 173, level: "محترف", avatar: null },
-    { id: 6, username: "الفلوش_الملكي", chips: 9300000, wins: 167, level: "محترف", avatar: null },
-    { id: 7, username: "كينج_بوكر", chips: 8100000, wins: 142, level: "محترف", avatar: null },
-    { id: 8, username: "الجوكر_العظيم", chips: 7200000, wins: 136, level: "محترف", avatar: null },
-    { id: 9, username: "الورقة_الرابحة", chips: 6500000, wins: 121, level: "محترف", avatar: null },
-    { id: 10, username: "نجم_الطاولة", chips: 5800000, wins: 105, level: "محترف", avatar: null },
-  ];
-
-  // بيانات الرتب والمكافآت
-  const rankInfo = [
-    { 
-      id: 1, 
-      title: "المبتدئ", 
-      chips: "0 - 50,000", 
-      rewards: ["10,000 رقاقة يوميًا", "أفاتار خاص"],
-      icon: <Star className="h-6 w-6 text-gray-400" />
-    },
-    { 
-      id: 2, 
-      title: "النوب", 
-      chips: "50,000 - 200,000", 
-      rewards: ["15,000 رقاقة يوميًا", "طاولات خاصة", "أفاتار مميز"],
-      icon: <Star className="h-6 w-6 text-blue-400" />
-    },
-    { 
-      id: 3, 
-      title: "لسه بتعلم", 
-      chips: "200,000 - 1,000,000", 
-      rewards: ["25,000 رقاقة يوميًا", "دخول مسابقات أسبوعية", "هدايا خاصة"],
-      icon: <Medal className="h-6 w-6 text-yellow-400" />
-    },
-    { 
-      id: 4, 
-      title: "محترف", 
-      chips: "1,000,000 - 10,000,000", 
-      rewards: ["50,000 رقاقة يوميًا", "الدخول إلى البطولات الكبرى", "تصميم طاولات خاصة"],
-      icon: <Trophy className="h-6 w-6 text-orange-400" />
-    },
-    { 
-      id: 5, 
-      title: "الفاجر", 
-      chips: "10,000,000+", 
-      rewards: ["100,000 رقاقة يوميًا", "مقعد VIP في بطولات العالم", "تصميم خاص للملف الشخصي"],
-      icon: <Crown className="h-6 w-6 text-[#D4AF37]" />
-    },
-  ];
-
-  // حالة المستخدم الحالي من بين قائمة المتصدرين
-  const userRanking = user ? topPlayers.findIndex(player => player.username === user.username) + 1 : 0;
-
+  const { toast } = useToast();
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [lastUpdated, setLastUpdated] = useState(new Date());
+  
+  // جلب بيانات أفضل 100 لاعب
+  useEffect(() => {
+    const fetchTopPlayers = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch('/api/rankings/top100');
+        
+        if (!response.ok) {
+          throw new Error('فشل في جلب قائمة أفضل اللاعبين');
+        }
+        
+        const data = await response.json();
+        setPlayers(data);
+        setLastUpdated(new Date());
+      } catch (error) {
+        console.error('خطأ في جلب قائمة اللاعبين:', error);
+        toast({
+          title: "خطأ في التحميل",
+          description: "تعذر تحميل قائمة اللاعبين. يرجى المحاولة مرة أخرى لاحقاً.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchTopPlayers();
+    
+    // تحديث القائمة كل 5 دقائق
+    const interval = setInterval(fetchTopPlayers, 5 * 60 * 1000);
+    
+    return () => clearInterval(interval);
+  }, [toast]);
+  
+  // فلترة اللاعبين حسب البحث
+  const filteredPlayers = players.filter(player => 
+    player.username.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+  
+  // التحقق من وجود اللاعب الحالي في القائمة
+  const currentUserRank = user ? players.findIndex(player => player.id === user.id) + 1 : -1;
+  
   return (
-    <div className="min-h-screen bg-cover bg-center flex flex-col"
-         style={{ backgroundImage: "url('/images/egyptian-background.jpg')" }}>
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
-
-      {/* Header Bar */}
-      <header className="relative z-10 bg-black/80 text-white p-6 shadow-xl border-b border-[#D4AF37]/30">
+    <div className="min-h-screen bg-gradient-to-b from-black to-[#0A3A2A] text-white">
+      {/* Header */}
+      <header className="bg-black/60 backdrop-blur-md border-b border-[#D4AF37]/30 p-4 fixed top-0 left-0 w-full z-30">
         <div className="container mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            <h1 className="text-3xl font-bold text-[#D4AF37]">تصنيفات اللاعبين</h1>
-            {/* عداد المستخدمين المتصلين */}
-            <div className="absolute top-3 left-6">
-              <OnlineUsersCounter />
-            </div>
+          <h1 className="text-[#D4AF37] text-2xl font-bold flex items-center">
+            <Trophy className="h-6 w-6 mr-2 text-[#D4AF37]" />
+            ترتيب اللاعبين
+          </h1>
+          
+          <div className="flex items-center">
+            <span className="text-sm text-gray-400 ml-2">آخر تحديث:</span>
+            <span className="text-sm text-gray-300" dir="ltr">{lastUpdated.toLocaleTimeString()}</span>
           </div>
-
-          <Button 
-            variant="outline" 
-            className="border-[#D4AF37]/50 text-[#D4AF37] hover:bg-[#D4AF37]/10"
-            onClick={() => navigate("/")}
-          >
-            <ArrowRight size={18} className="ml-2" />
-            العودة إلى اللوبي
-          </Button>
         </div>
       </header>
-
+      
       {/* Main Content */}
-      <main className="relative z-10 container mx-auto flex-1 p-6 mt-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Main Rankings Area */}
-          <div className="lg:col-span-8 space-y-8">
-            <div className="bg-black/60 border border-[#D4AF37]/20 p-6 rounded-xl backdrop-blur-sm">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-[#D4AF37] flex items-center">
-                  <Trophy className="ml-2 h-6 w-6" /> 
-                  قائمة المتصدرين
-                </h2>
-                <div className="text-white/80 text-sm">
-                  {userRanking > 0 ? (
-                    <span>ترتيبك: <span className="text-[#D4AF37] font-bold">{userRanking}</span></span>
-                  ) : (
-                    <span>لم تدخل قائمة المتصدرين بعد</span>
-                  )}
+      <main className="container mx-auto pt-24 pb-20 px-4">
+        {/* User's current rank */}
+        {user && currentUserRank > 0 && (
+          <div className="mb-6">
+            <div className="bg-gradient-to-r from-[#0A3A2A]/80 via-black/80 to-[#0A3A2A]/80 rounded-xl border border-[#D4AF37] p-4 shadow-lg">
+              <h2 className="text-lg font-bold mb-2 text-[#D4AF37]">ترتيبك الحالي</h2>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-[#D4AF37]">
+                      <img 
+                        src={user.avatar || "/assets/poker-icon-gold.png"} 
+                        alt={user.username} 
+                        className="w-full h-full object-cover" 
+                      />
+                    </div>
+                    <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-black bg-[#D4AF37]">
+                      {currentUserRank}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-lg font-bold text-white">{user.username}</p>
+                    <div className="flex items-center mt-1">
+                      <Coins className="h-4 w-4 text-[#D4AF37] ml-1" />
+                      <span className="text-[#D4AF37] font-bold">{formatChips(user.chips)}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-black/30 px-4 py-2 rounded-lg">
+                  <p className="text-[#D4AF37] font-bold">المركز #{currentUserRank} من أصل {players.length}</p>
                 </div>
               </div>
-
-              {/* Tabs للتصنيفات المختلفة */}
-              <Tabs 
-                defaultValue="daily" 
-                value={activeRankTab}
-                onValueChange={setActiveRankTab}
-                className="w-full"
-              >
-                <TabsList className="grid w-full grid-cols-3 h-auto mb-6">
-                  <TabsTrigger value="daily">يومي</TabsTrigger>
-                  <TabsTrigger value="weekly">أسبوعي</TabsTrigger>
-                  <TabsTrigger value="allTime">الإجمالي</TabsTrigger>
-                </TabsList>
-
-                {/* محتوى التصنيف اليومي */}
-                <TabsContent value="daily">
-                  <div className="bg-black/30 rounded-lg p-4">
-                    <table className="w-full">
-                      <thead className="border-b border-[#D4AF37]/20">
-                        <tr className="text-[#D4AF37]">
-                          <th className="py-3 text-right">الترتيب</th>
-                          <th className="py-3 text-right">اللاعب</th>
-                          <th className="py-3 text-right">الرقائق</th>
-                          <th className="py-3 text-right">الرتبة</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {topPlayers.map((player, index) => (
-                          <tr key={player.id} className={`border-b border-white/10 ${player.username === user?.username ? 'bg-[#D4AF37]/10' : ''}`}>
-                            <td className="py-3 text-right">
-                              <div className="flex items-center">
-                                {index === 0 && <Crown className="h-5 w-5 ml-1 text-[#D4AF37]" />}
-                                {index === 1 && <Crown className="h-5 w-5 ml-1 text-[#C0C0C0]" />}
-                                {index === 2 && <Crown className="h-5 w-5 ml-1 text-[#CD7F32]" />}
-                                <span className={`
-                                  ${index === 0 ? 'text-[#D4AF37] font-bold' : ''}
-                                  ${index === 1 ? 'text-[#C0C0C0] font-bold' : ''}
-                                  ${index === 2 ? 'text-[#CD7F32] font-bold' : ''}
-                                `}>
-                                  {index + 1}
-                                </span>
-                              </div>
-                            </td>
-                            <td className="py-3 text-right font-semibold">{player.username}</td>
-                            <td className="py-3 text-right">{player.chips.toLocaleString()}</td>
-                            <td className="py-3 text-right">
-                              <span className={`
-                                rounded-full px-2 py-1 text-xs 
-                                ${player.level === 'الفاجر' ? 'bg-[#D4AF37]/20 text-[#D4AF37]' : ''}
-                                ${player.level === 'محترف' ? 'bg-orange-500/20 text-orange-400' : ''}
-                                ${player.level === 'لسه بتعلم' ? 'bg-blue-500/20 text-blue-400' : ''}
-                                ${player.level === 'النوب' ? 'bg-green-500/20 text-green-400' : ''}
-                              `}>
-                                {player.level}
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </TabsContent>
-
-                {/* محتوى التصنيف الأسبوعي - يمكن استخدام نفس البيانات للتوضيح */}
-                <TabsContent value="weekly">
-                  <div className="bg-black/30 rounded-lg p-4">
-                    <table className="w-full">
-                      <thead className="border-b border-[#D4AF37]/20">
-                        <tr className="text-[#D4AF37]">
-                          <th className="py-3 text-right">الترتيب</th>
-                          <th className="py-3 text-right">اللاعب</th>
-                          <th className="py-3 text-right">الرقائق</th>
-                          <th className="py-3 text-right">الرتبة</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {/* تظهر نفس البيانات بترتيب مختلف للتوضيح */}
-                        {[...topPlayers].sort((a, b) => b.wins - a.wins).map((player, index) => (
-                          <tr key={player.id} className={`border-b border-white/10 ${player.username === user?.username ? 'bg-[#D4AF37]/10' : ''}`}>
-                            <td className="py-3 text-right">
-                              <div className="flex items-center">
-                                {index === 0 && <Crown className="h-5 w-5 ml-1 text-[#D4AF37]" />}
-                                {index === 1 && <Crown className="h-5 w-5 ml-1 text-[#C0C0C0]" />}
-                                {index === 2 && <Crown className="h-5 w-5 ml-1 text-[#CD7F32]" />}
-                                <span className={`
-                                  ${index === 0 ? 'text-[#D4AF37] font-bold' : ''}
-                                  ${index === 1 ? 'text-[#C0C0C0] font-bold' : ''}
-                                  ${index === 2 ? 'text-[#CD7F32] font-bold' : ''}
-                                `}>
-                                  {index + 1}
-                                </span>
-                              </div>
-                            </td>
-                            <td className="py-3 text-right font-semibold">{player.username}</td>
-                            <td className="py-3 text-right">{player.chips.toLocaleString()}</td>
-                            <td className="py-3 text-right">
-                              <span className={`
-                                rounded-full px-2 py-1 text-xs 
-                                ${player.level === 'الفاجر' ? 'bg-[#D4AF37]/20 text-[#D4AF37]' : ''}
-                                ${player.level === 'محترف' ? 'bg-orange-500/20 text-orange-400' : ''}
-                                ${player.level === 'لسه بتعلم' ? 'bg-blue-500/20 text-blue-400' : ''}
-                                ${player.level === 'النوب' ? 'bg-green-500/20 text-green-400' : ''}
-                              `}>
-                                {player.level}
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </TabsContent>
-
-                {/* محتوى التصنيف الإجمالي */}
-                <TabsContent value="allTime">
-                  <div className="bg-black/30 rounded-lg p-4">
-                    <table className="w-full">
-                      <thead className="border-b border-[#D4AF37]/20">
-                        <tr className="text-[#D4AF37]">
-                          <th className="py-3 text-right">الترتيب</th>
-                          <th className="py-3 text-right">اللاعب</th>
-                          <th className="py-3 text-right">الرقائق</th>
-                          <th className="py-3 text-right">الرتبة</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {topPlayers.map((player, index) => (
-                          <tr key={player.id} className={`border-b border-white/10 ${player.username === user?.username ? 'bg-[#D4AF37]/10' : ''}`}>
-                            <td className="py-3 text-right">
-                              <div className="flex items-center">
-                                {index === 0 && <Crown className="h-5 w-5 ml-1 text-[#D4AF37]" />}
-                                {index === 1 && <Crown className="h-5 w-5 ml-1 text-[#C0C0C0]" />}
-                                {index === 2 && <Crown className="h-5 w-5 ml-1 text-[#CD7F32]" />}
-                                <span className={`
-                                  ${index === 0 ? 'text-[#D4AF37] font-bold' : ''}
-                                  ${index === 1 ? 'text-[#C0C0C0] font-bold' : ''}
-                                  ${index === 2 ? 'text-[#CD7F32] font-bold' : ''}
-                                `}>
-                                  {index + 1}
-                                </span>
-                              </div>
-                            </td>
-                            <td className="py-3 text-right font-semibold">{player.username}</td>
-                            <td className="py-3 text-right">{player.chips.toLocaleString()}</td>
-                            <td className="py-3 text-right">
-                              <span className={`
-                                rounded-full px-2 py-1 text-xs 
-                                ${player.level === 'الفاجر' ? 'bg-[#D4AF37]/20 text-[#D4AF37]' : ''}
-                                ${player.level === 'محترف' ? 'bg-orange-500/20 text-orange-400' : ''}
-                                ${player.level === 'لسه بتعلم' ? 'bg-blue-500/20 text-blue-400' : ''}
-                                ${player.level === 'النوب' ? 'bg-green-500/20 text-green-400' : ''}
-                              `}>
-                                {player.level}
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </TabsContent>
-              </Tabs>
             </div>
           </div>
-
-          {/* رتب اللاعبين والمكافآت */}
-          <div className="lg:col-span-4 space-y-8">
-            <div className="bg-black/60 border border-[#D4AF37]/20 p-6 rounded-xl backdrop-blur-sm">
-              <h2 className="text-xl font-bold text-[#D4AF37] flex items-center mb-6">
-                <Award className="ml-2 h-5 w-5" /> 
-                رتب اللاعبين والمكافآت
-              </h2>
-
-              <div className="space-y-5">
-                {rankInfo.map(rank => (
-                  <div key={rank.id} className="border border-[#D4AF37]/10 rounded-lg p-4 bg-black/30">
-                    <div className="flex items-center mb-2">
-                      {rank.icon}
-                      <h3 className="text-lg font-bold mr-2">{rank.title}</h3>
-                    </div>
-                    <p className="text-white/80 mb-2 text-sm">الرقائق: {rank.chips}</p>
-                    <div className="text-xs">
-                      <h4 className="text-[#D4AF37] font-semibold mb-1">المكافآت:</h4>
-                      <ul className="list-disc mr-5 space-y-1 text-white/90">
-                        {rank.rewards.map((reward, i) => (
-                          <li key={i}>{reward}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                ))}
-              </div>
+        )}
+        
+        {/* Search Box */}
+        <div className="mb-6 relative">
+          <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+            <Search className="h-5 w-5 text-gray-400" />
+          </div>
+          <Input
+            type="text"
+            placeholder="البحث عن لاعب..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="bg-black/50 border-[#D4AF37]/30 placeholder-gray-500 py-6 pr-10 text-white"
+          />
+          {searchQuery && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute inset-y-0 left-0 flex items-center pl-3"
+              onClick={() => setSearchQuery("")}
+            >
+              <X className="h-5 w-5 text-gray-400" />
+            </Button>
+          )}
+        </div>
+        
+        {/* Players List */}
+        <div className="bg-gradient-to-r from-[#0A3A2A]/80 via-black/80 to-[#0A3A2A]/80 rounded-xl border border-[#D4AF37]/30 overflow-hidden shadow-lg">
+          <div className="p-4 bg-black/30 border-b border-[#D4AF37]/20 flex justify-between items-center">
+            <h2 className="text-lg font-bold text-white flex items-center">
+              <Users className="h-5 w-5 ml-2 text-[#D4AF37]" />
+              أفضل اللاعبين
+            </h2>
+            <div className="text-sm text-gray-400">
+              {filteredPlayers.length} لاعب
             </div>
           </div>
+          
+          {isLoading ? (
+            // Skeleton loading state
+            <div className="divide-y divide-[#D4AF37]/10">
+              {[...Array(10)].map((_, index) => (
+                <div key={index} className="p-4 flex items-center gap-3">
+                  <Skeleton className="h-10 w-10 rounded-full" />
+                  <div className="space-y-2 flex-1">
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-3 w-24" />
+                  </div>
+                  <Skeleton className="h-5 w-20" />
+                </div>
+              ))}
+            </div>
+          ) : filteredPlayers.length > 0 ? (
+            <div className="divide-y divide-[#D4AF37]/10">
+              {filteredPlayers.map((player, index) => (
+                <div 
+                  key={player.id} 
+                  className={`p-4 hover:bg-black/40 transition-colors ${
+                    player.id === user?.id ? 'bg-[#D4AF37]/10' : ''
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <div className={`w-12 h-12 rounded-full overflow-hidden border-2 ${
+                        index === 0 ? 'border-yellow-500' : 
+                        index === 1 ? 'border-gray-300' : 
+                        index === 2 ? 'border-yellow-700' : 
+                        'border-[#D4AF37]/30'
+                      }`}>
+                        <img 
+                          src={player.avatar || "/assets/poker-icon-gold.png"} 
+                          alt={player.username} 
+                          className="w-full h-full object-cover" 
+                        />
+                      </div>
+                      <div className={`absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-black ${
+                        index === 0 ? 'bg-yellow-500' : 
+                        index === 1 ? 'bg-gray-300' : 
+                        index === 2 ? 'bg-yellow-700' : 
+                        'bg-[#D4AF37]/70'
+                      }`}>
+                        {index + 1}
+                      </div>
+                    </div>
+                    
+                    <div className="flex-1">
+                      <p className={`font-bold ${
+                        index === 0 ? 'text-yellow-500' : 
+                        index === 1 ? 'text-gray-300' : 
+                        index === 2 ? 'text-yellow-700' : 
+                        'text-white'
+                      }`}>
+                        {player.username}
+                        {player.id === user?.id && (
+                          <span className="text-[#D4AF37] text-xs mr-2">(أنت)</span>
+                        )}
+                      </p>
+                      <div className="flex items-center">
+                        <Coins className="h-3.5 w-3.5 text-[#D4AF37] ml-1" />
+                        <span className="text-[#D4AF37] text-sm font-medium">
+                          {formatChips(player.chips)}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    {index < 3 && (
+                      <div className={`flex items-center px-3 py-1 rounded-full ${
+                        index === 0 ? 'bg-yellow-500/20 text-yellow-500' : 
+                        index === 1 ? 'bg-gray-300/20 text-gray-300' : 
+                        'bg-yellow-700/20 text-yellow-700'
+                      }`}>
+                        {index === 0 ? (
+                          <>
+                            <Trophy className="h-4 w-4 ml-1" />
+                            <span className="text-sm font-medium">المركز الأول</span>
+                          </>
+                        ) : index === 1 ? (
+                          <>
+                            <Medal className="h-4 w-4 ml-1" />
+                            <span className="text-sm font-medium">المركز الثاني</span>
+                          </>
+                        ) : (
+                          <>
+                            <Medal className="h-4 w-4 ml-1" />
+                            <span className="text-sm font-medium">المركز الثالث</span>
+                          </>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="p-8 text-center">
+              <p className="text-gray-400">لا توجد نتائج للبحث عن "{searchQuery}"</p>
+            </div>
+          )}
+          
+          {!isLoading && filteredPlayers.length > 0 && (
+            <div className="p-3 bg-black/30 border-t border-[#D4AF37]/20 text-center text-gray-400 text-sm">
+              يتم تحديث القائمة تلقائياً كل 5 دقائق
+            </div>
+          )}
         </div>
       </main>
-
-      {/* Footer */}
-      <footer className="relative z-10 bg-black/80 text-white/60 text-center p-4 mt-8 border-t border-[#D4AF37]/20">
-        <div className="container mx-auto">
-          <p>&copy; {new Date().getFullYear()} بوكر تكساس عرباوي - جميع الحقوق محفوظة</p>
-        </div>
-      </footer>
     </div>
   );
 }

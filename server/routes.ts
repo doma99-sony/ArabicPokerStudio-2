@@ -44,7 +44,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(req.user);
   });
   
-  // مسار للحصول على أفضل 3 لاعبين مرتبين حسب عدد الرقائق
+  // مسار للحصول على أفضل 3 لاعبين مرتبين حسب عدد الرقائق (للشريط الجانبي)
   app.get("/api/rankings/top3", async (req, res) => {
     try {
       // الحصول على جميع المستخدمين من التخزين
@@ -67,6 +67,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("خطأ في الحصول على أفضل 3 لاعبين:", error);
       res.status(500).json({ error: "حدث خطأ أثناء جلب أفضل 3 لاعبين" });
+    }
+  });
+  
+  // مسار للحصول على أفضل 100 لاعب مرتبين حسب عدد الرقائق (لصفحة الترتيب)
+  app.get("/api/rankings/top100", async (req, res) => {
+    try {
+      // الحصول على جميع المستخدمين من التخزين
+      const allUsers = Array.from(storage.users.values());
+      
+      // ترتيب المستخدمين تنازلياً حسب عدد الرقائق
+      const sortedUsers = allUsers
+        .filter(user => user.chips > 0) // فقط المستخدمين الذين لديهم رقائق
+        .sort((a, b) => b.chips - a.chips); // ترتيب تنازلي
+      
+      // أخذ أفضل 100 لاعب
+      const topPlayers = sortedUsers.slice(0, 100).map(user => ({
+        id: user.id,
+        username: user.username,
+        chips: user.chips,
+        avatar: user.avatar || null
+      }));
+      
+      res.json(topPlayers);
+    } catch (error) {
+      console.error("خطأ في الحصول على أفضل 100 لاعب:", error);
+      res.status(500).json({ error: "حدث خطأ أثناء جلب أفضل 100 لاعب" });
     }
   });
   
