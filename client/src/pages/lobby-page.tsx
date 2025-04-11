@@ -366,41 +366,47 @@ export default function LobbyPage() {
       {/* Main Content */}
       <main className="relative z-10 flex-1 overflow-hidden">
 
-        {/* Chat Section - ظاهرة فقط في الصفحة الرئيسية ومتجاوبة مع الشاشة */}
-        {location === '/' && (
+        {/* Chat Section - ظاهرة فقط في الصفحة الرئيسية (home) بالضبط كما في الصورة المرجعية */}
+        {location === '/' && activeGameCategory === ("home" as any) && (
           <div 
-            className="fixed z-20 transition-all duration-500 shadow-xl md:top-16 md:left-0 md:h-[calc(100%-9rem)] bottom-20 left-2 h-[calc(100vh-14rem)] w-[calc(100%-1rem)]" 
+            className="fixed z-20 transition-all duration-300 shadow-xl"
             id="chat-container"
             style={{ 
-              transform: isChatHidden 
-                ? window.innerWidth >= 768 ? "translateX(-100%)" : "translateY(100%)" 
-                : "translate(0, 0)"
+              top: '50%',
+              left: '50%',
+              transform: isChatHidden ? 'translate(-50%, -50%) scale(0)' : 'translate(-50%, -50%) scale(1)',
+              width: '960px',
+              height: '550px',
+              opacity: isChatHidden ? 0 : 1,
+              visibility: isChatHidden ? 'hidden' : 'visible',
+              borderRadius: '15px',
+              overflow: 'hidden'
             }}
           >
-            <div className="h-full w-full md:w-[350px] max-h-[550px] md:max-h-none">
-              <NewChatBox onClose={toggleChat} />
-            </div>
+            <NewChatBox onClose={toggleChat} />
           </div>
         )}
         
         {/* Main game content area */}
         <div className="h-full overflow-auto">
-          {/* Toggle Chat Button - خارج حاوية الدردشة، ظاهر فقط عندما تكون الدردشة مخفية وفي الصفحة الرئيسية */}
-          {isChatHidden && location === '/' && (
+          {/* Toggle Chat Button - خارج حاوية الدردشة، ظاهر فقط في الصفحة الرئيسية (home) */}
+          {isChatHidden && location === '/' && activeGameCategory === ("home" as any) && (
             <button 
-              className="fixed z-20 transition-all md:top-[50%] md:left-0 md:transform-gpu md:-translate-y-1/2 bottom-20 left-2 p-0 rounded-full"
+              className="fixed z-20 transition-all"
               onClick={toggleChat}
               aria-label="فتح غرفة الدردشة"
               style={{
                 backgroundColor: '#FDA82A',
                 borderRadius: '50%',
-                width: '50px',
-                height: '50px',
+                width: '55px',
+                height: '55px',
                 border: '2px solid #B27324',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+                boxShadow: '0 3px 10px rgba(0,0,0,0.3)',
+                bottom: '120px',
+                right: '20px'
               }}
             >
               <div 

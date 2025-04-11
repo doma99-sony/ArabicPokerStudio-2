@@ -65,6 +65,7 @@ export function NewChatBox({ onClose }: { onClose?: () => void }) {
   const [messages, setMessages] = useState<ChatMessage[]>(systemMessages);
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [activeTab, setActiveTab] = useState<string>("players"); // "players" | "friends" | "chat"
 
   // تسجيل معالج الرسائل من الويب سوكيت
   useEffect(() => {
@@ -104,23 +105,15 @@ export function NewChatBox({ onClose }: { onClose?: () => void }) {
   // دالة مساعدة لإنشاء تاريخ بتنسيق مناسب
   const formatChatTime = (timestamp: number) => {
     const date = new Date(timestamp);
-    const today = new Date();
     
-    // إذا كان التاريخ اليوم، أظهر الساعة والدقيقة فقط
-    if (date.toDateString() === today.toDateString()) {
+    // الصورة تعرض التاريخ بصيغة YYYY/MM/DD
+    if (date.getDate() === new Date().getDate()) {
+      // اليوم عرض الساعة:الدقيقة فقط
       return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } else {
+      // للتواريخ الأخرى عرض تاريخ كامل
+      return `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`;
     }
-    
-    // إذا كان ضمن نطاق أسبوع، أظهر اليوم والوقت
-    const weekAgo = new Date();
-    weekAgo.setDate(weekAgo.getDate() - 7);
-    if (date > weekAgo) {
-      return date.toLocaleDateString([], { weekday: 'short' }) + ' ' + 
-             date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    }
-    
-    // خلاف ذلك، أظهر التاريخ
-    return date.toLocaleDateString('ar-EG').split('،')[0];
   };
 
   // دالة مساعدة للحصول على بيانات اللاعب
@@ -132,98 +125,119 @@ export function NewChatBox({ onClose }: { onClose?: () => void }) {
     };
   };
 
-  // رسم أيقونات الشارات
+  // رسم أيقونات الشارات - كما في الصورة المرجعية
   const renderBadges = (badges: string[]) => {
     return badges.map((badge, index) => {
-      let badgeIcon = '';
+      let badgeContent = null;
       
       if (badge === 'diamond') {
-        badgeIcon = '💎';
+        badgeContent = (
+          <img src="/assets/badges/diamond.png" alt="diamond" width={20} height={20} />
+        );
       } else if (badge === 'gold') {
-        badgeIcon = '🏆';
+        badgeContent = (
+          <img src="/assets/badges/trophy.png" alt="gold" width={20} height={20} />
+        );
       } else if (badge === 'vip') {
-        badgeIcon = '👑';
-      } else if (badge === 'regular') {
-        badgeIcon = '🎮';
+        badgeContent = (
+          <img src="/assets/badges/crown.png" alt="vip" width={20} height={20} />
+        );
+      } else {
+        badgeContent = (
+          <div className="w-5 h-5 flex items-center justify-center bg-yellow-600 rounded-full text-white text-[10px]">
+            VIP
+          </div>
+        );
       }
       
       return (
-        <span key={index} className="inline-block mx-0.5">
-          {badgeIcon}
-        </span>
+        <div key={index} className="inline-flex mx-0.5">
+          {badgeContent}
+        </div>
       );
     });
   };
 
   return (
-    <div className="w-full h-full flex flex-col overflow-hidden" style={{ backgroundColor: '#FDA82A', borderRadius: '15px' }}>
-      {/* شريط الجانب الأيسر */}
-      <div className="flex h-full">
-        <div className="w-[70px] bg-[#E88F19] flex flex-col items-center py-4 space-y-4 border-l border-[#B27324]">
-          <div className="flex flex-col items-center">
-            <div className="text-[#8B4513] text-center mb-1">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                <circle cx="9" cy="7" r="4"></circle>
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-              </svg>
+    <div className="w-full h-full flex flex-col overflow-hidden" 
+      style={{ 
+        backgroundColor: '#FDA82A',
+        borderRadius: '15px',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.25)'
+      }}
+    >
+      {/* شريط العنوان مع زر الإغلاق */}
+      <div className="bg-gradient-to-b from-[#FDA82A] to-[#E88F19] flex justify-between items-center px-4 py-2 border-b-2 border-[#B27324]">
+        <div className="flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+          </svg>
+          <h3 className="text-[#8B4513] font-bold text-lg">الدردشة</h3>
+        </div>
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="text-[#8B4513] hover:bg-[#E88F19] p-1 rounded-full flex items-center justify-center bg-[#FFECBC] border border-[#B27324] h-8 w-8"
+          >
+            <X size={20} />
+          </button>
+        )}
+      </div>
+
+      {/* الحاوية الرئيسية بتقسيم مربع */}
+      <div className="flex flex-1">
+        {/* قائمة اللاعبين الجانبية */}
+        <div className="w-[250px] bg-[#FFECBC] border-l border-[#B27324] overflow-y-auto">
+          <div className="sticky top-0 bg-[#FDA82A] p-2 border-b border-[#B27324] flex justify-between items-center">
+            <h4 className="text-[#8B4513] font-semibold">اللاعبين المتصلين</h4>
+            <div className="bg-[#FFECBC] text-xs text-[#8B4513] px-2 py-0.5 rounded border border-[#B27324]">
+              {predefinedPlayers.length}
             </div>
-            <span className="text-[#8B4513] text-xs font-medium">الأصدقاء</span>
           </div>
           
-          <div className="flex flex-col items-center">
-            <div className="text-[#8B4513] text-center mb-1 opacity-70">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
-              </svg>
-            </div>
-            <span className="text-[#8B4513] text-xs font-medium opacity-70">الشات العام</span>
-          </div>
-          
-          <div className="flex flex-col items-center bg-[#FDA82A] w-full py-3 relative">
-            <div className="absolute right-1 top-3 w-2 h-2 rounded-full bg-red-500"></div>
-            <div className="text-[#8B4513] text-center mb-1">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-                <circle cx="9" cy="7" r="4"></circle>
-                <line x1="16" y1="11" x2="22" y2="11"></line>
-                <line x1="19" y1="8" x2="19" y2="14"></line>
-              </svg>
-            </div>
-            <span className="text-[#8B4513] text-xs font-medium">اللاعبين</span>
+          {/* قائمة اللاعبين */}
+          <div className="p-2">
+            {predefinedPlayers.map((player) => (
+              <div key={player.id} className="flex items-center gap-2 p-2 hover:bg-[#FDA82A]/20 rounded-lg mb-2 border border-[#B27324]/20">
+                <div className="h-10 w-10 rounded-full overflow-hidden border-2 border-[#B27324]">
+                  {player.avatar ? (
+                    <img src={player.avatar} alt={player.username} className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="h-full w-full flex items-center justify-center bg-[#E88F19] text-[#8B4513] font-bold">
+                      {player.username.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                </div>
+                
+                <div className="flex flex-col">
+                  <div className="flex items-center">
+                    <span className="text-[#8B4513] font-medium text-sm">{player.username}</span>
+                    <div className="flex items-center mx-1">
+                      {renderBadges(player.badges || [])}
+                    </div>
+                  </div>
+                  <span className="text-[#8B4513]/70 text-xs">
+                    {Math.random() > 0.5 ? 'متصل الآن' : 'نشط منذ 5 دقائق'}
+                  </span>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
         {/* محتوى الدردشة الرئيسي */}
         <div className="flex-1 flex flex-col">
-          {/* رأس الدردشة */}
-          <div className="bg-[#FDA82A] flex justify-between items-center p-2 border-b border-[#B27324] h-10">
-            <div className="flex items-center gap-1">
-              <span className="text-[#8B4513] font-bold text-sm">Mohamed</span>
-              {renderBadges(['diamond', 'gold', 'vip'])}
-            </div>
-            {onClose && (
-              <button
-                onClick={onClose}
-                className="text-[#8B4513] hover:bg-[#E88F19] p-1 rounded-full"
-              >
-                <X size={18} />
-              </button>
-            )}
-          </div>
-
           {/* محتوى الدردشة */}
-          <ScrollArea className="flex-1 bg-[#FFDFA8] custom-scrollbar">
+          <ScrollArea className="flex-1 bg-white custom-scrollbar">
             <div className="py-2">
               {messages.map((msg, index) => {
                 const playerInfo = getPlayerInfo(msg.username);
                 const isCurrentUser = msg.username === user?.username;
                 
                 return (
-                  <div key={msg.id} className="mb-2">
+                  <div key={msg.id} className="mb-3">
                     {/* عرض صف المستخدم والشارات للمرسل */}
-                    <div className="flex items-center px-2 mb-1">
+                    <div className="flex items-center px-3 mb-1">
                       {!isCurrentUser && (
                         <div className="h-10 w-10 rounded-full overflow-hidden flex-shrink-0 border-2 border-[#B27324] mr-2">
                           {playerInfo.avatar ? (
@@ -245,12 +259,12 @@ export function NewChatBox({ onClose }: { onClose?: () => void }) {
                     </div>
                     
                     {/* فقاعة الرسالة */}
-                    <div className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'} px-2`}>
+                    <div className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'} px-3`}>
                       <div 
                         className={`relative px-3 py-2 max-w-[80%] rounded-lg ${
                           isCurrentUser 
-                            ? 'bg-white border border-[#B27324] mr-12'
-                            : 'bg-[#FFECBC] border border-[#B27324] ml-12'
+                            ? 'bg-[#FFECBC] border border-[#B27324] mr-12'
+                            : 'bg-white border border-[#B27324] ml-12'
                         }`}
                         style={{
                           boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
@@ -299,27 +313,19 @@ export function NewChatBox({ onClose }: { onClose?: () => void }) {
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                  placeholder="اضغط للدخول..."
+                  placeholder="اكتب رسالتك هنا..."
                   disabled={!canSendMessage}
-                  className="w-full h-10 px-4 py-2 bg-white/90 border border-[#B27324] rounded-xl placeholder-[#8B4513]/50 text-[#8B4513] focus:outline-none focus:ring-2 focus:ring-[#E88F19]"
+                  className="w-full h-10 px-4 py-2 bg-white border border-[#B27324] rounded-xl placeholder-[#8B4513]/50 text-[#8B4513] focus:outline-none focus:ring-2 focus:ring-[#E88F19]"
                 />
               </div>
-
-              {/* أيقونات إضافية */}
-              <button
-                type="button"
-                className="flex items-center justify-center h-10 w-10 rounded-full bg-[#FFECBC] border border-[#B27324] text-[#E88F19] hover:bg-[#FFDFA8]"
-              >
-                <span className="text-lg">🎁</span>
-              </button>
 
               <button
                 onClick={handleSendMessage}
                 disabled={!canSendMessage || !newMessage.trim()}
-                className="h-12 w-[250px] flex items-center justify-center bg-gradient-to-r from-[#4CAF50] to-[#388E3C] hover:from-[#45A049] hover:to-[#2E7D32] text-white rounded-xl border border-[#2E7D32]"
+                className="h-10 w-28 flex items-center justify-center bg-gradient-to-r from-[#4CAF50] to-[#388E3C] hover:from-[#45A049] hover:to-[#2E7D32] text-white rounded-xl border border-[#2E7D32]"
               >
-                <span className="mr-2 font-medium">إرسال</span>
-                <Send className="h-5 w-5" />
+                <span className="mr-1 font-medium">إرسال</span>
+                <Send className="h-4 w-4" />
               </button>
             </div>
           </div>
