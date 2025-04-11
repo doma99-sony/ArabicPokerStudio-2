@@ -215,20 +215,48 @@ const ProfilePopup: React.FC<ProfilePopupProps> = ({ onClose, isOpen }) => {
                       {currentUser.agentBadgeUnlocked ? (
                         <div className="text-center">
                           <div className="text-white text-base flex flex-col items-center justify-center relative">
-                            <div className="flex items-center">
-                              <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M3 7V5a2 2 0 0 1 2-2h2" />
-                                <path d="M17 3h2a2 2 0 0 1 2 2v2" />
-                                <path d="M21 17v2a2 2 0 0 1-2 2h-2" />
-                                <path d="M7 21H5a2 2 0 0 1-2-2v-2" />
-                                <path d="M8 14s1.5 2 4 2 4-2 4-2" />
-                                <path d="M9 9h.01" />
-                                <path d="M15 9h.01" />
-                              </svg>
-                            </div>
-                            <div className="absolute -top-1 -right-2 flex">
-                              <span className="text-amber-300 text-xs font-bold">●</span>
-                              <span className="text-amber-300 text-xs font-bold">●</span>
+                            <div className="relative">
+                              {/* Hand holding coins */}
+                              <div className="relative w-12 h-12">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ffb700" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                  <path d="M18 11v5a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-5" />
+                                  <path d="M14 9V5a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v4" />
+                                  <path d="M10 13V9" />
+                                  <path d="M3 9h18" />
+                                  <path d="M21 9a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-3" />
+                                </svg>
+                                
+                                {/* Gold coins */}
+                                <div className="absolute -top-1 -right-1 z-10">
+                                  <div className="relative w-7 h-7 bg-gradient-to-r from-amber-400 to-amber-600 rounded-full flex items-center justify-center border border-amber-800 shadow-lg shadow-amber-500/30">
+                                    <span className="text-white text-[10px] font-bold">$</span>
+                                    <div className="absolute inset-0 opacity-60 rounded-full animate-pulse-slow" 
+                                        style={{background: 'radial-gradient(circle, rgba(251,191,36,0.8) 0%, rgba(250,204,21,0) 70%)'}}>
+                                    </div>
+                                  </div>
+                                </div>
+                                
+                                <div className="absolute -bottom-1 right-1 z-10">
+                                  <div className="relative w-6 h-6 bg-gradient-to-r from-amber-500 to-amber-700 rounded-full flex items-center justify-center border border-amber-900 shadow-lg shadow-amber-600/30">
+                                    <span className="text-white text-[8px] font-bold">₿</span>
+                                    <div className="absolute inset-0 opacity-70 rounded-full animate-pulse-slow" 
+                                        style={{animationDelay: '0.3s', background: 'radial-gradient(circle, rgba(251,191,36,0.6) 0%, rgba(250,204,21,0) 70%)'}}>
+                                    </div>
+                                  </div>
+                                </div>
+                                
+                                <div className="absolute top-0 right-3 z-0">
+                                  <div className="relative w-5 h-5 bg-gradient-to-r from-amber-200 to-amber-400 rounded-full flex items-center justify-center border border-amber-600">
+                                    <span className="text-amber-900 text-[8px] font-bold">₵</span>
+                                    <div className="absolute inset-0 opacity-50 rounded-full animate-pulse-slow" 
+                                        style={{animationDelay: '0.6s', background: 'radial-gradient(circle, rgba(251,191,36,0.4) 0%, rgba(250,204,21,0) 70%)'}}>
+                                    </div>
+                                  </div>
+                                </div>
+                                
+                                {/* Glow effect */}
+                                <div className="absolute -inset-2 bg-amber-500/20 rounded-full blur-md animate-pulse-slow"></div>
+                              </div>
                             </div>
                           </div>
                           <div className="text-white text-xs mt-1">وكيل</div>
