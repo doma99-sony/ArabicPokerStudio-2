@@ -10,7 +10,8 @@ import { OnlineUsersCounter } from "@/components/ui/online-users-badge";
 import { ResetChipsButton } from "@/components/reset-chips-button";
 import { RemoveVirtualPlayersButton } from "@/components/remove-virtual-players-button";
 import { NotificationsButton, GameInstructionsButton } from "@/components/ui/notifications-system";
-import { LogOut, User, ChevronRight, Loader2, ChevronLeft, ChevronUp, Bell, ShoppingBag, ShoppingCart, Download, Smartphone, ExternalLink, Coins, Trophy, Crown } from "lucide-react";
+import { LogOut, User, ChevronRight, Loader2, ChevronLeft, ChevronUp, Bell, ShoppingBag, ShoppingCart, Download, Smartphone, ExternalLink, Coins, Trophy, Crown, List } from "lucide-react";
+import { GameIconSet } from "@/games/queen-of-egypt-3d/assets/egyptian-icons";
 import { formatChips } from "@/lib/utils";
 import { HeavySnowEffect, GoldDustEffect } from "@/components/effects/snow-effect";
 import { HeavyPokerCardsEffect, SuitSymbolsEffect } from "@/components/effects/poker-cards-effect";
@@ -695,6 +696,19 @@ export default function LobbyPage() {
           
           {/* تعليمات اللعب */}
           <GameInstructionsButton />
+          
+          {/* الترتيب */}
+          <div className="relative">
+            <button 
+              onClick={() => navigate("/sorting")}
+              className="flex flex-col items-center justify-center p-2 min-w-[48px]"
+            >
+              <div className="bg-black/60 rounded-full w-11 h-11 border border-[#D4AF37] flex items-center justify-center text-[#D4AF37]">
+                <GameIconSet.Pyramid width={20} height={20} />
+              </div>
+              <span className="text-[11px] text-white mt-1">الترتيب</span>
+            </button>
+          </div>
           
           {/* المهمات */}
           <div className="relative">
