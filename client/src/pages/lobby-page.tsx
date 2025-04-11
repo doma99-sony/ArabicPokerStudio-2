@@ -5,6 +5,7 @@ import { useWebSocket } from "@/hooks/use-websocket-simplified";
 import { useGlobalWebSocket } from "@/hooks/use-global-websocket";
 import { GameType } from "@shared/types";
 import { ChatBox } from "@/components/lobby/chat-box";
+import { NewChatBox } from "@/components/lobby/new-chat-box";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 
@@ -375,18 +376,8 @@ export default function LobbyPage() {
               : "translate(0, 0)"
           }}
         >
-          <div className="h-full md:w-72 lg:w-80 w-full bg-gradient-to-b from-[#0A3A2A]/90 to-black/90 backdrop-blur-md border-r border-t border-[#D4AF37]/30 overflow-hidden flex flex-col">
-            <div className="flex justify-between items-center p-3 border-b border-[#D4AF37]/30 bg-black/30">
-              <h2 className="text-[#D4AF37] font-bold text-lg">الدردشة المباشرة</h2>
-              <button 
-                className="text-[#D4AF37] hover:text-[#FFD700] bg-black/20 hover:bg-black/40 p-1.5 rounded-full transition-all"
-                onClick={toggleChat}
-              >
-                <ChevronLeft size={18} className="md:block hidden" />
-                <ChevronDown size={18} className="md:hidden block" />
-              </button>
-            </div>
-            <ChatBox />
+          <div className="h-full w-full md:w-72 lg:w-80">
+            <NewChatBox onClose={toggleChat} />
           </div>
         </div>
         
