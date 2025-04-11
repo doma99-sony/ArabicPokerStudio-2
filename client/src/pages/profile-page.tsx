@@ -10,31 +10,51 @@ const ProfilePage: React.FC = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   
-  // استخدام بيانات مستخدم تجريبية للعرض فقط
-  // يمكن تغيير هذه البيانات لرؤية الاختلافات بين أنواع المستخدمين المختلفة
-  const mockUser = {
-    id: 10392845,
-    username: "محمد المصري",
-    chips: 15000,
-    avatar: null,
-    level: 37,
-    experience: 36500,
-    rank: "متقدم",
-    fabChips: 950,
-    diamonds: 250,
-    badges: [BadgeType.BASIC, BadgeType.GOLD],
-    title: "المحارب",
-    agentBadgeUnlocked: true,
-    agentName: "سارة - الرياض",
-    fabChargeCount: 5,
+  // استخدام بيانات مستخدم حسب نوع حساب المستخدم
+  // توليد بيانات مناسبة لعرض الملف الشخصي والتعامل مع أنواع الاتصال المختلفة
+  const getProfileData = () => {
+    if (!user) {
+      // حالة عدم وجود مستخدم نشط (عرض بيانات افتراضية)
+      return {
+        id: 1000,
+        username: "زائر",
+        chips: 5000,
+        avatar: null,
+        level: 1,
+        experience: 0,
+        rank: "مبتدئ",
+        fabChips: 0,
+        diamonds: 0,
+        badges: [BadgeType.BASIC],
+        title: "لاعب جديد",
+        isGuest: true,
+        authType: 'guest' as 'email' | 'facebook' | 'guest',
+        userCode: '00000'
+      };
+    }
     
-    // تغيير هذه القيم لاختبار أنواع حسابات مختلفة:
-    // للحساب العادي: isGuest: false, authType: 'email'
-    // لحساب فيسبوك: isGuest: false, authType: 'facebook'
-    // لحساب زائر: isGuest: true, authType: 'guest'
-    isGuest: false,
-    authType: 'email' as 'email' | 'facebook' | 'guest'
+    // إعداد البيانات التي ستعرض في واجهة الملف الشخصي
+    const displayData = {
+      id: user.id,
+      username: user.username,
+      chips: user.chips || 0,
+      diamonds: user.diamonds || 0,
+      avatar: user.avatar || null,
+      level: user.vipLevel || 1,
+      experience: user.vipPoints || 0,
+      rank: user.isGuest ? "زائر" : (user.role === 'vip' ? "VIP" : "لاعب"),
+      fabChips: 0, // قيمة افتراضية حيث لا يوجد هذه الخاصية في النموذج الأصلي
+      badges: [BadgeType.BASIC],
+      title: "لاعب محترف",
+      isGuest: user.isGuest || false,
+      authType: user.authType as 'email' | 'facebook' | 'guest' || 'email',
+      userCode: user.userCode || '00000'
+    };
+    
+    return displayData;
   };
+  
+  const profileData = getProfileData();
   
   useEffect(() => {
     // محاكاة تحميل البيانات
@@ -54,7 +74,7 @@ const ProfilePage: React.FC = () => {
           </div>
         ) : (
           <DominoProfileCard 
-            user={mockUser}
+            user={profileData}
             onClose={() => navigate('/')}
           />
         )}

@@ -24,7 +24,7 @@ export const users = pgTable("users", {
   role: userRoleEnum("role").default('player').notNull(),
   avatar: text("avatar"),
   coverPhoto: text("cover_photo"),
-  userCode: text("user_code"), // معرف المستخدم المكون من 5 أرقام
+  userCode: text("user_code").notNull().unique(), // معرف المستخدم المكون من 5 أرقام، فريد لكل مستخدم
   totalDeposits: integer("total_deposits").default(0),
   isVerified: boolean("is_verified").default(false),
   lastLogin: timestamp("last_login"),
@@ -32,6 +32,7 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   facebookId: text("facebook_id"),
   isGuest: boolean("is_guest").default(false),
+  authType: text("auth_type"), // نوع المصادقة (email، facebook، guest)
   preferences: jsonb("preferences"), // إعدادات المستخدم وتفضيلاته
   status: text("status").default('online'), // حالة المستخدم (متصل، غير متصل، في لعبة)
   bio: text("bio"), // نبذة تعريفية
@@ -47,6 +48,8 @@ export const insertUserSchema = createInsertSchema(users).pick({
   diamonds: true,
   isGuest: true,
   role: true,
+  userCode: true, // إضافة حقل userCode للتأكد من إدخاله عند التسجيل
+  authType: true, // إضافة حقل authType لتحديد نوع المستخدم (guest/facebook/email)
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;

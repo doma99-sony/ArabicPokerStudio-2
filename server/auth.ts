@@ -16,6 +16,9 @@ interface UserType {
   password: string;
   chips: number;
   avatar?: string | null;
+  userCode: string; // معرف المستخدم الفريد (5 أرقام)
+  isGuest?: boolean; // هل المستخدم ضيف
+  authType?: 'email' | 'facebook' | 'guest'; // نوع الحساب
 }
 
 // تعريف واجهة المستخدم لجواز السفر
@@ -46,6 +49,12 @@ async function comparePasswords(supplied: string, stored: string) {
 function generateGuestUsername(): string {
   const guestId = Math.floor(100000 + Math.random() * 900000); // 6 أرقام عشوائية
   return `ضيف_${guestId}`;
+}
+
+// وظيفة لإنشاء معرف فريد للمستخدم (User Code)
+function generateUserCode(): string {
+  // إنشاء معرف فريد مكون من 5 أرقام يمكن للمستخدم استخدامه للتعريف بنفسه للآخرين
+  return Math.floor(10000 + Math.random() * 90000).toString();
 }
 
 export function setupAuth(app: Express) {
@@ -151,10 +160,13 @@ export function setupAuth(app: Express) {
         return res.status(400).send("اسم المستخدم موجود بالفعل");
       }
 
-      // Create user with hashed password and initial chips
+      // Create user with hashed password and initial chips and unique user code
       const user = await storage.createUser({
         ...req.body,
         password: await hashPassword(req.body.password),
+        userCode: generateUserCode(), // إضافة معرف فريد للمستخدم
+        isGuest: false,
+        authType: 'email'
       });
 
       // Login the new user
@@ -241,7 +253,10 @@ export function setupAuth(app: Express) {
       const guestUser = await storage.createUser({
         username: guestUsername,
         password: await hashPassword(guestPassword),
-        chips: 50000
+        chips: 50000,
+        userCode: generateUserCode(), // إضافة معرف فريد
+        isGuest: true,
+        authType: 'guest'
       });
       
       // تسجيل دخول الضيف تلقائياً
@@ -280,7 +295,10 @@ export function setupAuth(app: Express) {
       const fbUser = await storage.createUser({
         username: fbUsername,
         password: await hashPassword(fbPassword),
-        chips: 100000
+        chips: 100000,
+        userCode: generateUserCode(), // إضافة معرف فريد
+        isGuest: false,
+        authType: 'facebook'
       });
       
       // تسجيل دخول مستخدم الفيسبوك تلقائياً

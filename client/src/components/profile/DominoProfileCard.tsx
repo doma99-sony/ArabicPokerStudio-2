@@ -20,6 +20,7 @@ interface DominoUserProfile {
   fabChargeCount?: number;
   isGuest?: boolean;  // إضافة خاصية لتحديد ما إذا كان المستخدم ضيفاً
   authType?: 'facebook' | 'guest' | 'email'; // نوع التسجيل
+  userCode?: string; // رمز المستخدم المختصر المكون من 5 أرقام
 }
 
 // مكون بطاقة اللاعب (مثل دومينو كافيه)
@@ -33,8 +34,12 @@ const DominoProfileCard: React.FC<{
 
   // توليد اسم المستخدم بناءً على نوع التسجيل
   const displayName = user.isGuest 
-    ? `ضيف_${user.id}`
-    : (user.authType === 'facebook' ? user.username : (user.authType === 'email' ? user.username : user.username));
+    ? `ضيف_${user.userCode || user.id}`
+    : (user.authType === 'facebook' 
+        ? `${user.username} ⓕ` // إضافة رمز فيسبوك للتمييز
+        : (user.authType === 'email' 
+            ? user.username  // اسم مستخدم عادي للتسجيل بالبريد
+            : user.username));
 
   // حفظ الاسم الجديد
   const saveNewUsername = () => {
@@ -138,6 +143,21 @@ const DominoProfileCard: React.FC<{
                 onClick={() => {
                   navigator.clipboard.writeText(user.id.toString());
                   alert('تم نسخ معرف المستخدم');
+                }}
+                className="text-amber-600 hover:text-amber-800 ml-2"
+              >
+                <Copy className="h-4 w-4" />
+              </button>
+            </div>
+            
+            {/* رمز المستخدم الفريد (User Code) */}
+            <div className="flex items-center justify-center mb-2">
+              <span className="text-amber-800 text-base ml-2">كود مختصر:</span>
+              <span className="text-base text-amber-900">{user.userCode || '12345'}</span>
+              <button 
+                onClick={() => {
+                  navigator.clipboard.writeText(user.userCode?.toString() || '12345');
+                  alert('تم نسخ الكود المختصر');
                 }}
                 className="text-amber-600 hover:text-amber-800 ml-2"
               >
