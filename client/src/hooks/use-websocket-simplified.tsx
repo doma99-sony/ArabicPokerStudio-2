@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useRef } from "react";
+import { useEffect, useCallback } from "react";
 import { useAuth } from "./use-auth";
 import { useToast } from "./use-toast";
 import { useGlobalWebSocket, WebSocketMessageType } from "./use-global-websocket";
@@ -19,23 +19,10 @@ export function useWebSocket() {
   } = useGlobalWebSocket();
   
   // تأكد من وجود اتصال WebSocket عند تحميل المكون
-  // مع تعديلات لتحسين الأداء وتجنب الاتصالات المتكررة
-  const userIdRef = useRef<number | null>(null);
-  
   useEffect(() => {
-    // فقط محاولة الاتصال إذا كان هناك مستخدم وتغير معرف المستخدم
-    // أو لم يكن هناك اتصال نشط حالياً
-    if (user && (!isConnected || user.id !== userIdRef.current)) {
-      // تحديث المعرف المرجعي للمستخدم
-      userIdRef.current = user.id;
-      
-      // تأخير قصير لمنع المحاولات المتعددة المتزامنة
-      const timer = setTimeout(() => {
-        console.log("الاتصال بـ WebSocket عبر المخزن المركزي...");
-        connect(user.id);
-      }, 100);
-      
-      return () => clearTimeout(timer);
+    if (user && !isConnected) {
+      console.log("الاتصال بـ WebSocket عبر المخزن المركزي...");
+      connect(user.id);
     }
   }, [user, isConnected, connect]);
 

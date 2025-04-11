@@ -65,36 +65,28 @@ export function ChatBox() {
     messagesEndRef.current?.scrollIntoView();
   }, []);
 
-  // إضافة رسالة نظام عند تغير حالة الاتصال - مع استخدام useRef لتتبع الحالة السابقة
-  const prevStatusRef = useRef(status);
-  
+  // إضافة رسالة نظام عند تغير حالة الاتصال
   useEffect(() => {
-    // تنفيذ الكود فقط عند حدوث تغيير في الحالة - لمنع الحلقات اللانهائية
-    if (prevStatusRef.current !== status) {
-      if (status === 'open' && prevStatusRef.current !== 'open') {
-        // إضافة رسالة بأن المستخدم متصل - فقط عند الانتقال من حالة غير متصل إلى متصل
-        const connectionMsg: ChatMessage = {
-          id: `conn_${Date.now()}`,
-          username: 'النظام',
-          message: 'تم الاتصال بالخادم بنجاح ✅',
-          timestamp: Date.now(),
-          isSystem: true
-        };
-        setMessages(prev => [...prev, connectionMsg]);
-      } else if ((status === 'closed' || status === 'error') && prevStatusRef.current === 'open') {
-        // إضافة رسالة بأن المستخدم غير متصل - فقط عند الانتقال من حالة متصل إلى غير متصل
-        const disconnectionMsg: ChatMessage = {
-          id: `disconn_${Date.now()}`,
-          username: 'النظام',
-          message: 'انقطع الاتصال بالخادم ❌',
-          timestamp: Date.now(),
-          isSystem: true
-        };
-        setMessages(prev => [...prev, disconnectionMsg]);
-      }
-      
-      // تحديث القيمة المرجعية
-      prevStatusRef.current = status;
+    if (status === 'open') {
+      // إضافة رسالة بأن المستخدم متصل
+      const connectionMsg: ChatMessage = {
+        id: `conn_${Date.now()}`,
+        username: 'النظام',
+        message: 'تم الاتصال بالخادم بنجاح ✅',
+        timestamp: Date.now(),
+        isSystem: true
+      };
+      setMessages(prev => [...prev, connectionMsg]);
+    } else if (status === 'closed' || status === 'error') {
+      // إضافة رسالة بأن المستخدم غير متصل
+      const disconnectionMsg: ChatMessage = {
+        id: `disconn_${Date.now()}`,
+        username: 'النظام',
+        message: 'انقطع الاتصال بالخادم ❌',
+        timestamp: Date.now(),
+        isSystem: true
+      };
+      setMessages(prev => [...prev, disconnectionMsg]);
     }
   }, [status]);
 
