@@ -437,7 +437,7 @@ export default function LobbyPage() {
                 }}
                 className="w-full bg-gradient-to-r from-[#0A3A2A] to-[#062922] hover:from-[#0A3A2A]/90 hover:to-[#062922]/90 text-[#D4AF37] font-medium py-1.5 rounded-md text-sm transition-all duration-300 border border-[#D4AF37]/50 flex items-center justify-center gap-1"
               >
-                <Lock className="h-4 w-4" />
+                <LockIcon className="h-4 w-4" />
                 قفل صفحة الترتيب
               </button>
             </div>
