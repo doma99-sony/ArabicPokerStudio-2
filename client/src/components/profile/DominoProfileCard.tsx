@@ -107,6 +107,22 @@ const DominoProfileCard: React.FC<{
     setShowAvatarOptions(false);
     
     try {
+      // قم بتحديث الواجهة فوراً مع صورة مؤقتة من الملف المحلي
+      const localPreviewUrl = URL.createObjectURL(file);
+      
+      // تحديث البيانات محلياً أولاً لعرض مباشر دون انتظار الخادم
+      const tempUpdatedUser = { 
+        ...localUser, 
+        avatar: localPreviewUrl 
+      };
+      setLocalUser(tempUpdatedUser);
+      
+      // استدعاء وظيفة التحديث المؤقتة لتحديث الواجهة على الفور
+      if (onProfileUpdate) {
+        onProfileUpdate({ avatar: localPreviewUrl });
+      }
+      
+      // إعداد البيانات للإرسال
       const formData = new FormData();
       formData.append('avatar', file);
       
@@ -123,21 +139,35 @@ const DominoProfileCard: React.FC<{
       // استخراج عنوان URL للصورة الجديدة من الاستجابة
       const result = await response.json();
       if (result.avatarUrl) {
-        // تحديث البيانات محليًا
+        // تحديث البيانات محلياً بالصورة النهائية من الخادم
         const updatedUser = { 
           ...localUser, 
           avatar: result.avatarUrl 
         };
         setLocalUser(updatedUser);
         
-        // استدعاء وظيفة التحديث إذا كانت موجودة
+        // استدعاء وظيفة التحديث مرة أخرى مع الصورة النهائية
         if (onProfileUpdate) {
           onProfileUpdate({ avatar: result.avatarUrl });
         }
+        
+        // إلغاء URL المؤقت
+        URL.revokeObjectURL(localPreviewUrl);
       }
     } catch (error) {
       console.error('خطأ في تحميل الصورة:', error);
       setUpdateError(error instanceof Error ? error.message : 'حدث خطأ أثناء تحميل الصورة');
+      
+      // إلغاء التحديث المؤقت في حالة الخطأ
+      const revertedUser = { 
+        ...localUser, 
+        avatar: user.avatar 
+      };
+      setLocalUser(revertedUser);
+      
+      if (onProfileUpdate) {
+        onProfileUpdate({ avatar: user.avatar });
+      }
     } finally {
       setIsUpdating(false);
     }
@@ -435,13 +465,6 @@ const DominoProfileCard: React.FC<{
               <div className="text-amber-900 font-bold flex items-center justify-center text-xl">
                 {localUser.chips.toLocaleString()}
                 <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSI4IiBjeT0iOCIgcj0iNy41IiBmaWxsPSIjRkZEMTAwIiBzdHJva2U9IiNBMDgwMjkiLz48dGV4dCB4PSI4IiB5PSIxMSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXdlaWdodD0iYm9sZCIgZm9udC1zaXplPSI4IiBmaWxsPSIjQTg3OTFGIj4kPC90ZXh0PjwvY2lyY2xlPjwvc3ZnPg==" alt="عملة" className="ml-2 w-6 h-6" />
-                <button 
-                  onClick={() => addChips(1000)} 
-                  className="mr-2 bg-amber-600 hover:bg-amber-700 text-white text-xs px-2 py-1 rounded-full"
-                  title="إضافة 1000 رقاقة"
-                >
-                  +1000
-                </button>
               </div>
             </div>
             <div className="bg-gradient-to-b from-amber-50 to-amber-100 border border-amber-400 rounded-lg p-4 text-center shadow-md">
@@ -456,13 +479,6 @@ const DominoProfileCard: React.FC<{
               <div className="text-amber-900 font-bold flex items-center justify-center text-xl">
                 {localUser.diamonds.toLocaleString()}
                 <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNOCAxLjVMMTQuNSA4TDggMTQuNUwxLjUgOEw4IDEuNVoiIGZpbGw9IiM0M0M0RkYiIHN0cm9rZT0iIzAwN0RCNSIvPjwvc3ZnPg==" alt="ماس" className="ml-2 w-6 h-6" />
-                <button 
-                  onClick={() => addDiamonds(10)} 
-                  className="mr-2 bg-blue-600 hover:bg-blue-700 text-white text-xs px-2 py-1 rounded-full"
-                  title="إضافة 10 ماس"
-                >
-                  +10
-                </button>
               </div>
             </div>
           </div>

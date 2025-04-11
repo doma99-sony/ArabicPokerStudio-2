@@ -52,6 +52,7 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   updateUserChips(userId: number, newChips: number, type?: string, description?: string): Promise<User | undefined>;
   updateUsername(userId: number, username: string): Promise<User | undefined>;
+  updateUser(userId: number, updateData: Partial<User>): Promise<User | undefined>;
   uploadAvatar(userId: number, avatar: any): Promise<string>;
   uploadCoverPhoto(userId: number, coverPhoto: any): Promise<string>;
   
@@ -306,6 +307,31 @@ export class MemStorage implements IStorage {
     user.username = username;
     this.users.set(userId, user);
     return user;
+  }
+  
+  // دالة عامة لتحديث بيانات المستخدم
+  async updateUser(userId: number, updateData: Partial<User>): Promise<User | undefined> {
+    const user = this.users.get(userId);
+    if (!user) return undefined;
+    
+    // تطبيق جميع التحديثات المطلوبة
+    const updatedUser = { ...user, ...updateData };
+    
+    // تحديث بيانات المستخدم في المخزن
+    this.users.set(userId, updatedUser);
+    
+    // تحديث ملف تعريف اللاعب أيضاً إذا كان موجوداً
+    const profile = this.playerProfiles.get(userId);
+    if (profile) {
+      // تحديث الحقول المشتركة بين المستخدم وملف التعريف
+      if (updateData.username) profile.username = updateData.username;
+      if (updateData.avatar) profile.avatar = updateData.avatar;
+      
+      this.playerProfiles.set(userId, profile);
+    }
+    
+    console.log(`تم تحديث بيانات المستخدم ${userId} بنجاح`);
+    return updatedUser;
   }
 
   async uploadAvatar(userId: number, avatar: any): Promise<string> {

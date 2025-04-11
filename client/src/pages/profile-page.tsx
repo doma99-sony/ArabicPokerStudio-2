@@ -75,11 +75,23 @@ const ProfilePage: React.FC = () => {
     
     setProfileData(updatedProfileData);
     
-    // إذا كانت هناك دالة لتحديث البيانات في سياق المصادقة
+    // استخدام دالة updateUserData من سياق المصادقة لتحديث البيانات عبر الـ API
+    // هذه الدالة ستقوم بالتحديث المحلي والاتصال بالسيرفر واستلام النتائج وتحديث كاش البيانات
     if (updateUserData) {
       try {
-        await updateUserData(updatedData);
-        console.log('تم تحديث بيانات المستخدم بنجاح:', updatedData);
+        const result = await updateUserData(updatedData);
+        if (result) {
+          // تحديث البيانات المحلية بالقيم النهائية من السيرفر
+          setProfileData(prev => ({
+            ...prev,
+            ...result,
+            // نحتفظ ببعض الخصائص المضافة محلياً
+            badges: prev.badges,
+            fabChips: prev.fabChips,
+            rank: prev.rank,
+            title: prev.title
+          }));
+        }
       } catch (error) {
         console.error('حدث خطأ أثناء تحديث بيانات المستخدم:', error);
       }
@@ -88,7 +100,54 @@ const ProfilePage: React.FC = () => {
   
   // تحديث البيانات عند تغير المستخدم
   useEffect(() => {
-    setProfileData(getProfileData());
+    if (user) {
+      setProfileData(getProfileData());
+    }
+  }, [user]);
+  
+  // استخدام WebSocket لتحديث البيانات عند تلقي التحديثات الفورية
+  useEffect(() => {
+    if (!user) return;
+    
+    try {
+      // إعداد مستمع لتحديثات WebSocket
+      const ws = new WebSocket(`wss://${window.location.host}/ws`);
+      
+      ws.onopen = () => {
+        console.log('تم فتح اتصال WebSocket لتحديثات الملف الشخصي');
+      };
+      
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          
+          // إذا كان التحديث متعلق بتحديث الملف الشخصي للمستخدم الحالي
+          if (data.type === 'profile_update' && data.user_id === user.id) {
+            // تحديث البيانات في الواجهة
+            setProfileData(prev => ({
+              ...prev,
+              ...data.data
+            }));
+          }
+          
+          // وإذا كان هناك تحديث للرصيد من اللعبة
+          if (data.type === 'user_update' && data.updateType === 'chips_update' && data.user?.id === user.id) {
+            setProfileData(prev => ({
+              ...prev,
+              chips: data.user.chips
+            }));
+          }
+        } catch (error) {
+          console.error('خطأ في معالجة رسالة WebSocket:', error);
+        }
+      };
+      
+      return () => {
+        ws.close();
+      };
+    } catch (wsError) {
+      console.error('خطأ في إنشاء اتصال WebSocket:', wsError);
+    }
   }, [user]);
   
   useEffect(() => {
@@ -100,28 +159,14 @@ const ProfilePage: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
   
-  // إضافة رقائق للمستخدم
+  // إضافة رقائق للمستخدم - نستخدم دالة updateUserData مباشرة
   const handleAddChips = async (amount: number) => {
     try {
-      // استدعاء API لإضافة رقائق
-      const response = await fetch('/api/profile/add-chips', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ amount }),
-      });
-      
-      if (!response.ok) {
-        throw new Error('حدث خطأ أثناء إضافة الرقائق');
+      if (updateUserData) {
+        const result = await updateUserData({ chips: amount });
+        return !!result; // نرجع true إذا كان هناك نتيجة ناجحة
       }
-      
-      const result = await response.json();
-      
-      // تحديث البيانات محليًا بدلاً من إعادة تحميل الصفحة
-      handleProfileUpdate({ chips: result.newChipsAmount });
-      
-      return true;
+      return false;
     } catch (error) {
       console.error('خطأ في إضافة الرقائق:', error);
       return false;

@@ -206,9 +206,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!user) return null;
     
     try {
+      // تحديث فوري - نحدث البيانات محلياً أولاً قبل الاتصال بالسيرفر
+      const preliminaryUser = {
+        ...user,
+        ...(data.username && { username: data.username }),
+        ...(data.chips !== undefined && { chips: user.chips + data.chips }),
+        ...(data.diamonds !== undefined && { diamonds: user.diamonds + data.diamonds }),
+        ...(data.avatar && { avatar: data.avatar }),
+      };
+      
+      // تحديث البيانات في cache فوراً لتجنب الريفرش
+      queryClient.setQueryData(["/api/user"], preliminaryUser);
+      
+      // قم بإرسال البيانات إلى السيرفر
       let endpoint = '/api/profile/update';
       let method = 'POST';
-      let payload = data;
+      let payload: any = data;
       
       // نستخدم نقاط نهاية مختلفة لأنواع التحديثات المختلفة بدلاً من نقطة نهاية واحدة
       if (data.username) {
@@ -227,15 +240,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       // استدعاء API
       const res = await apiRequest(method, endpoint, payload);
+      
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || 'حدث خطأ أثناء تحديث البيانات');
+      }
+      
       const result = await res.json();
       
-      // تحديث البيانات في السياق
+      // تحديث البيانات بالقيم الفعلية من السيرفر
       const updatedUser = {
         ...user,
         ...(data.username && { username: data.username }),
         ...(data.chips !== undefined && { chips: result.newChipsAmount || user.chips + data.chips }),
         ...(data.diamonds !== undefined && { diamonds: result.newDiamondsAmount || user.diamonds + data.diamonds }),
-        ...(data.avatar && { avatar: data.avatar }),
+        ...(data.avatar && { avatar: data.avatar || result.avatarUrl }),
       };
       
       // تحديث البيانات في cache
@@ -247,9 +266,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: "تم تحديث بيانات الملف الشخصي بنجاح",
       });
       
+      // إرسال تحديث عبر WebSocket للعميل لتحديث الواجهات الأخرى
+      try {
+        const ws = new WebSocket(`wss://${window.location.host}/ws`);
+        ws.onopen = () => {
+          ws.send(JSON.stringify({
+            type: 'profile_update',
+            user_id: user.id,
+            data: data
+          }));
+          ws.close();
+        };
+      } catch (wsError) {
+        console.log('غير قادر على إرسال تحديث WebSocket:', wsError);
+      }
+      
       return updatedUser;
     } catch (error) {
       console.error('خطأ في تحديث بيانات المستخدم:', error);
+      
+      // إرجاع البيانات الأصلية في حالة الخطأ
+      queryClient.setQueryData(["/api/user"], user);
       
       // توست رسالة خطأ
       toast({

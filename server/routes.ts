@@ -435,9 +435,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const avatar = req.files.avatar;
       const avatarUrl = await storage.uploadAvatar(req.user.id, avatar);
-      res.json({ success: true, avatarUrl });
+      
+      // تحديث معلومات المستخدم في قاعدة البيانات
+      const updatedUser = await storage.updateUser(req.user.id, { avatar: avatarUrl });
+      
+      // تحديث الجلسة
+      if (req.user) {
+        req.user.avatar = avatarUrl;
+      }
+      
+      // إرسال تحديث WebSocket
+      try {
+        const message = {
+          type: "profile_update",
+          user_id: req.user.id,
+          data: { avatar: avatarUrl },
+          timestamp: new Date().toISOString()
+        };
+        
+        await sendRealtimeUpdate(req.user.id, message);
+      } catch (wsError) {
+        console.warn("خطأ في إرسال تحديث WebSocket:", wsError);
+      }
+      
+      console.log(`تم حفظ صورة الملف الشخصي بنجاح في: ${avatarUrl}`);
+      res.json({ success: true, avatarUrl, user: updatedUser });
     } catch (error) {
-      res.status(500).json({ message: "حدث خطأ أثناء تحديث الصورة" });
+      console.error("خطأ في تحديث صورة الملف الشخصي:", error);
+      res.status(500).json({ message: "حدث خطأ أثناء تحديث الصورة", error: String(error) });
     }
   });
   
@@ -460,6 +485,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // تحديث معلومات الملف الشخصي (عام)
+  app.post("/api/profile/update", ensureAuthenticated, async (req, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "غير مصرح" });
+      }
+      
+      const userId = req.user.id;
+      const updateData = req.body;
+      
+      // التحقق من البيانات المرسلة وتحديث الحقول المطلوبة فقط
+      const allowedFields = ['username', 'avatar', 'chips', 'diamonds'];
+      const updates: any = {};
+      
+      for (const field of allowedFields) {
+        if (field in updateData) {
+          updates[field] = updateData[field];
+        }
+      }
+      
+      if (Object.keys(updates).length === 0) {
+        return res.status(400).json({ message: "لم يتم تحديد أي حقول للتحديث" });
+      }
+      
+      // تنفيذ التحديث
+      const user = await storage.updateUser(userId, updates);
+      
+      if (!user) {
+        return res.status(404).json({ message: "لم يتم العثور على المستخدم" });
+      }
+      
+      // إعادة تعيين الجلسة لتعكس التغييرات
+      if (req.user) {
+        Object.assign(req.user, updates);
+      }
+      
+      // إرسال إشعار WebSocket إن أمكن
+      const message = {
+        type: "profile_update",
+        user_id: userId,
+        data: updates,
+        timestamp: new Date().toISOString()
+      };
+      
+      try {
+        await sendRealtimeUpdate(userId, message);
+      } catch (wsError) {
+        console.warn("خطأ في إرسال تحديث WebSocket:", wsError);
+      }
+      
+      res.json({ 
+        success: true,
+        message: "تم تحديث البيانات بنجاح", 
+        user,
+        updatedFields: Object.keys(updates)
+      });
+    } catch (error) {
+      console.error("خطأ في تحديث معلومات الملف الشخصي:", error);
+      res.status(500).json({ message: "خطأ في الخادم", error: String(error) });
+    }
+  });
+  
   // تحويل حساب الضيف إلى حساب دائم
   app.post("/api/profile/convert", ensureAuthenticated, async (req, res) => {
     try {
