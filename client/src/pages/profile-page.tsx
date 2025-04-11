@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from 'react';
+import { useLocation } from 'wouter';
 import { useAuth } from '@/hooks/use-auth';
-import EgyptianProfile from '@/components/profile/EgyptianProfile';
+import { Button } from "@/components/ui/button";
+import { X } from "lucide-react";
 import { BadgeType } from '@/components/profile/EgyptianProfile';
+import DominoProfileCard from '@/components/profile/DominoProfileCard';
 
 // صفحة الملف الشخصي المصري
 const ProfilePage: React.FC = () => {
+  const [, navigate] = useLocation();
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   
@@ -36,20 +40,26 @@ const ProfilePage: React.FC = () => {
   }, []);
   
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-900 to-black p-4">
-      <div className="container mx-auto py-8">
-        <h1 className="text-3xl font-bold text-center text-amber-300 mb-8" dir="rtl">
-          الملف الشخصي
-        </h1>
+    <div className="min-h-screen bg-gradient-to-b from-purple-900 to-black p-4 flex items-center justify-center">
+      <div className="relative w-full max-w-4xl mx-auto">
+        {/* زر العودة إلى اللوبي */}
+        <Button
+          variant="ghost"
+          onClick={() => navigate('/')}
+          className="absolute top-2 right-2 z-20 p-1 rounded-full bg-amber-700/90 hover:bg-amber-600 text-white"
+          aria-label="إغلاق"
+        >
+          <X className="h-5 w-5" />
+        </Button>
         
         {loading ? (
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-amber-500"></div>
           </div>
         ) : (
-          <EgyptianProfile 
-            user={mockUser} 
-            editable={true}
+          <DominoProfileCard 
+            user={mockUser}
+            onClose={() => navigate('/')}
           />
         )}
       </div>

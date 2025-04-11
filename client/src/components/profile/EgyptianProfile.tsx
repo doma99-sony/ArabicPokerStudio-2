@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import { useLocation } from 'wouter';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
+import { X, Copy, LogOut, Home } from "lucide-react";
 
 // استخدام الصور من المجلد العام
 // افتراض أن الصورة التي أنشأناها موجودة في المسار الصحيح
