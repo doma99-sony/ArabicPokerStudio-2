@@ -230,9 +230,11 @@ export function NewChatBox({ onClose }: { onClose?: () => void }) {
           {onClose && (
             <button
               onClick={onClose}
-              className="text-white p-1"
+              className="text-white p-1 bg-red-600 rounded-full hover:bg-red-700 transition-colors flex items-center justify-center"
+              style={{ width: '32px', height: '32px' }}
+              aria-label="إغلاق الدردشة"
             >
-              <X size={24} />
+              <X size={20} />
             </button>
           )}
         </div>

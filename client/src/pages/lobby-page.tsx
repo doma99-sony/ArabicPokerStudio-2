@@ -369,18 +369,19 @@ export default function LobbyPage() {
         {/* Chat Section - ظاهرة فقط في الصفحة الرئيسية (home) بالضبط كما في الصورة المرجعية */}
         {location === '/' && activeGameCategory === ("home" as any) && (
           <div 
-            className="fixed z-20 transition-all duration-300 shadow-xl"
+            className="fixed z-30 transition-all duration-300 shadow-xl"
             id="chat-container"
             style={{ 
-              bottom: '100px',
+              top: '85px',
               left: '50%',
-              transform: isChatHidden ? 'translateX(-50%) translateY(50px) scale(0.9)' : 'translateX(-50%) translateY(0) scale(1)',
-              width: '560px',
-              height: '450px',
+              transform: isChatHidden ? 'translateX(-50%) translateY(-50px) scale(0.9)' : 'translateX(-50%) translateY(0) scale(1)',
+              width: '800px',
+              height: '550px',
               opacity: isChatHidden ? 0 : 1,
               visibility: isChatHidden ? 'hidden' : 'visible',
               borderRadius: '15px',
-              overflow: 'hidden'
+              overflow: 'hidden',
+              boxShadow: '0 5px 20px rgba(0,0,0,0.5)'
             }}
           >
             <NewChatBox onClose={toggleChat} />
@@ -392,22 +393,21 @@ export default function LobbyPage() {
           {/* Toggle Chat Button - خارج حاوية الدردشة، ظاهر فقط في الصفحة الرئيسية (home) */}
           {isChatHidden && location === '/' && activeGameCategory === ("home" as any) && (
             <button 
-              className="fixed z-20 transition-all"
+              className="fixed z-40 transition-all"
               onClick={toggleChat}
               aria-label="فتح غرفة الدردشة"
               style={{
                 backgroundColor: '#FDA82A',
                 borderRadius: '50%',
-                width: '55px',
-                height: '55px',
+                width: '60px',
+                height: '60px',
                 border: '2px solid #B27324',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 3px 10px rgba(0,0,0,0.3)',
-                bottom: '20px',
-                left: '50%',
-                transform: 'translateX(-50%)'
+                boxShadow: '0 5px 15px rgba(0,0,0,0.4)',
+                top: '85px',
+                left: '20px'
               }}
             >
               <div 
@@ -418,7 +418,7 @@ export default function LobbyPage() {
                   color: '#8B4513'
                 }}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4c0-1.1.9-2 2-2h8a2 2 0 0 1 2 2v5Z" />
                   <path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1" />
                 </svg>
