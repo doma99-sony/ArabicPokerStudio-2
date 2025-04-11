@@ -25,7 +25,7 @@ export default function QueenOfEgypt3D({ onExit }: GameProps) {
   // متغيرات الحالة
   const [loading, setLoading] = useState<boolean>(true);
   const [gameInitialized, setGameInitialized] = useState<boolean>(false);
-  const [showIntro, setShowIntro] = useState<boolean>(false);
+  const [showIntro, setShowIntro] = useState<boolean>(true);
   const [introCompleted, setIntroCompleted] = useState<boolean>(false);
   const [gameStarted, setGameStarted] = useState<boolean>(false);
   const [betAmount, setBetAmount] = useState<number>(10);
@@ -56,8 +56,6 @@ export default function QueenOfEgypt3D({ onExit }: GameProps) {
       // محاكاة تحميل اللعبة
       const timer = setTimeout(() => {
         setLoading(false);
-        // تخطي المقدمة والذهاب للعبة مباشرة
-        setIntroCompleted(true);
         
         toast({
           title: "تم تحميل اللعبة",
