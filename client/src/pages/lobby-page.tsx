@@ -366,9 +366,9 @@ export default function LobbyPage() {
       {/* Main Content */}
       <main className="relative z-10 flex-1 overflow-hidden">
 
-        {/* Chat Section - متجاوب مع الشاشة - نقوم بتغيير الموضع على الأجهزة المختلفة */}
+        {/* Chat Section - ظاهرة فقط في الصفحة الرئيسية ومتجاوبة مع الشاشة */}
         <div 
-          className="fixed z-20 transition-all duration-500 shadow-2xl shadow-black/50 md:top-16 md:left-0 md:h-[calc(100%-8rem)] bottom-16 left-0 right-0 h-[60vh]" 
+          className="fixed z-20 transition-all duration-500 shadow-xl md:top-16 md:left-0 md:h-[calc(100%-9rem)] bottom-20 left-2 h-[calc(100vh-14rem)] w-[calc(100%-1rem)]" 
           id="chat-container"
           style={{ 
             transform: isChatHidden 
@@ -376,22 +376,44 @@ export default function LobbyPage() {
               : "translate(0, 0)"
           }}
         >
-          <div className="h-full w-full md:w-72 lg:w-80">
+          <div className="h-full w-full md:w-[350px] max-h-[550px] md:max-h-none">
             <NewChatBox onClose={toggleChat} />
           </div>
         </div>
         
         {/* Main game content area */}
         <div className="h-full overflow-auto">
-          {/* Toggle Chat Button - Outside the chat container, visible when chat is hidden */}
+          {/* Toggle Chat Button - خارج حاوية الدردشة، ظاهر فقط عندما تكون الدردشة مخفية */}
           {isChatHidden && (
             <button 
-              className="fixed z-20 bg-black/60 border-[#D4AF37]/30 text-[#D4AF37] hover:text-[#FFD700] hover:bg-black/80 transition-all md:top-[50%] md:left-0 md:transform-gpu md:-translate-y-1/2 md:py-10 md:px-1.5 md:border-r md:border-t md:border-b md:rounded-r-lg bottom-[70px] left-4 p-2 rounded-full border shadow-lg"
+              className="fixed z-20 transition-all md:top-[50%] md:left-0 md:transform-gpu md:-translate-y-1/2 bottom-20 left-2 p-2 rounded-full"
               onClick={toggleChat}
               aria-label="فتح غرفة الدردشة"
+              style={{
+                backgroundColor: '#FDA82A',
+                borderRadius: '50%',
+                width: '40px',
+                height: '40px',
+                border: '2px solid #B27324',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+              }}
             >
-              <ChevronRight size={18} className="md:block hidden" />
-              <MessageSquare size={18} className="md:hidden block" />
+              <div 
+                style={{
+                  display: 'flex',
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  color: '#8B4513'
+                }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4c0-1.1.9-2 2-2h8a2 2 0 0 1 2 2v5Z" />
+                  <path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1" />
+                </svg>
+              </div>
             </button>
           )}
           
