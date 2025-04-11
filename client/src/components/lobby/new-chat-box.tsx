@@ -50,7 +50,7 @@ const systemMessages: ChatMessage[] = [
 
 // معلومات اللاعبين المُعرّفة مسبقًا مع الأيقونات - مطابقة للصورة
 const predefinedPlayers = [
-  { id: '1', username: 'الدردشة العامة', avatar: '/assets/avatars/avatar-1.png', badges: ['diamond', 'gold', 'vip'] },
+  { id: '1', username: 'Mohamed', avatar: '/assets/avatars/avatar-1.png', badges: ['diamond', 'gold', 'vip'] },
   { id: '2', username: 'مريم محمد', avatar: '/assets/avatars/avatar-3.png', badges: ['gold', 'vip'] },
   { id: '3', username: 'أم علي', avatar: '/assets/avatars/avatar-4.png', badges: ['diamond', 'regular'] },
   { id: '4', username: 'guest_426', avatar: '/assets/avatars/avatar-5.png', badges: ['regular', 'vip'] },
@@ -243,12 +243,12 @@ export function NewChatBox({ onClose }: { onClose?: () => void }) {
           <ScrollArea className="flex-1" style={{ backgroundColor: '#ECE0C7', backgroundImage: 'url("/assets/chat-background.png")' }}>
             <div className="py-2 space-y-1 px-2">
               {messages.map((msg, index) => {
-                // لتحديد ما إذا كانت الرسالة من "الدردشة العامة" أو "أم مروان"
-                const isMohamedMessage = msg.username === 'الدردشة العامة';
+                // لتحديد ما إذا كانت الرسالة من "محمد" أو "أم مروان"
+                const isMohamedMessage = msg.username === 'Mohamed';
                 
                 return (
                   <div key={msg.id} className="mb-3">
-                    {/* عرض بيانات المرسل مع الصورة - فقط مع أول رسالة من "الدردشة العامة" في المجموعة */}
+                    {/* عرض بيانات المرسل مع الصورة - فقط مع أول رسالة من "محمد" في المجموعة */}
                     {index === 0 || messages[index-1]?.username !== msg.username ? (
                       <div className="flex items-center px-1 pb-0.5">
                         <div className="flex-1 flex items-center">
