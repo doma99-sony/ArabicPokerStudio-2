@@ -363,8 +363,8 @@ export default function LobbyPage() {
 
       {/* Main Content */}
       <main className="relative z-10 flex-1 overflow-hidden">
-        {/* قائمة أفضل 3 لاعبين - على الجانب الأيمن */}
-        <div className="fixed top-20 right-3 z-30 w-auto">
+        {/* قائمة أفضل 3 لاعبين - على الجانب الأيمن، حافظنا عليها في مكانها اليمين */}
+        <div className="fixed top-20 right-3 z-30 w-auto" style={{ direction: "rtl" }}>
           <div id="top-players-bar" className="bg-gradient-to-r from-[#0A3A2A]/95 via-black/95 to-[#0A3A2A]/95 rounded-xl border border-[#D4AF37] p-3 shadow-lg backdrop-blur-sm flex flex-col items-center gap-2 w-[240px]">
             <div className="flex items-center justify-between w-full border-b border-[#D4AF37]/30 pb-2 mb-1">
               <div className="flex items-center">
@@ -536,55 +536,40 @@ export default function LobbyPage() {
                     <h2 className="text-white text-xl font-bold">الصفحة الرئيسية</h2>
                   </div>
                   
-                  {/* قائمة أفضل 3 لاعبين */}
+                  {/* قسم الإعلان عن المحتويات */}
                   <div className="bg-gradient-to-r from-[#0A3A2A]/80 via-black/80 to-[#0A3A2A]/80 rounded-xl border border-[#D4AF37] p-4 shadow-lg backdrop-blur-sm">
                     <div className="flex items-center mb-4">
                       <div className="relative">
-                        <Trophy className="h-7 w-7 text-[#D4AF37] animate-pulse-slow" />
+                        <GameIconSet.Pyramid className="h-7 w-7 text-[#D4AF37] animate-pulse-slow" />
                         <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full"></div>
                       </div>
-                      <span className="text-white text-lg mr-2 font-bold">أفضل اللاعبين:</span>
+                      <span className="text-white text-lg mr-2 font-bold">أهلاً بك في بوكر تكساس عرباوي</span>
                     </div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      {topPlayers.map((player, index) => (
-                        <div key={player.id} className="bg-black/40 border border-[#D4AF37]/30 rounded-lg p-3 hover:bg-black/60 transition-all">
-                          <div className="flex items-center gap-3">
-                            <div className="relative">
-                              <div className={`w-14 h-14 rounded-full overflow-hidden border-2 ${
-                                index === 0 ? 'border-yellow-500' : index === 1 ? 'border-gray-300' : 'border-yellow-700'
-                              }`}>
-                                <img src={player.avatar || "/assets/poker-icon-gold.png"} alt={player.username} className="w-full h-full object-cover" />
-                              </div>
-                              <div className={`absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-black ${
-                                index === 0 ? 'bg-yellow-500' : index === 1 ? 'bg-gray-300' : 'bg-yellow-700'
-                              }`}>
-                                {index + 1}
-                              </div>
-                            </div>
-                            <div className="text-right flex-1">
-                              <p className={`text-lg font-bold ${
-                                index === 0 ? 'text-yellow-500' : index === 1 ? 'text-gray-300' : 'text-yellow-700'
-                              }`}>{player.username}</p>
-                              <div className="flex items-center mt-1">
-                                <Coins className="h-4 w-4 text-[#D4AF37] ml-1" />
-                                <span className="text-[#D4AF37] text-md font-bold">{formatChips(player.chips)}</span>
-                              </div>
-                            </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="bg-black/40 border border-[#D4AF37]/30 rounded-lg p-3 hover:bg-black/60 transition-all">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-[#D4AF37]">
+                            <ShoppingCart className="h-8 w-8 text-[#D4AF37] m-2" />
+                          </div>
+                          <div className="text-right flex-1">
+                            <p className="text-lg font-bold text-white">تسوق الآن</p>
+                            <p className="text-sm text-gray-300">احصل على عروض حصرية وشحن رصيدك</p>
                           </div>
                         </div>
-                      ))}
+                      </div>
                       
-                      {topPlayers.length === 0 && (
-                        <div className="col-span-3 text-center py-8">
-                          <div className="text-gray-400 animate-pulse">جاري تحميل أفضل اللاعبين...</div>
+                      <div className="bg-black/40 border border-[#D4AF37]/30 rounded-lg p-3 hover:bg-black/60 transition-all">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-[#D4AF37]">
+                            <Crown className="h-8 w-8 text-[#D4AF37] m-2" />
+                          </div>
+                          <div className="text-right flex-1">
+                            <p className="text-lg font-bold text-white">كن VIP</p>
+                            <p className="text-sm text-gray-300">احصل على مميزات حصرية وهدايا يومية</p>
+                          </div>
                         </div>
-                      )}
-                    </div>
-                    
-                    <div className="flex items-center justify-center mt-4 border-t border-[#D4AF37]/20 pt-2">
-                      <span className="text-gray-400 text-xs ml-1">آخر تحديث:</span>
-                      <span className="text-gray-400 text-xs" dir="ltr">{lastUpdated.toLocaleTimeString()}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
