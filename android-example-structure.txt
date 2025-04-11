@@ -1,0 +1,84 @@
+android/
+├── app/
+│   ├── build.gradle                    - تكوين بناء التطبيق
+│   ├── capacitor.build.gradle         - تكوين Capacitor
+│   ├── proguard-rules.pro             - قواعد تشويش الشيفرة
+│   ├── src/
+│   │   ├── main/
+│   │   │   ├── AndroidManifest.xml    - تكوين التطبيق وأذوناته
+│   │   │   ├── assets/               
+│   │   │   │   ├── capacitor.config.json - نسخة JSON من تكوين Capacitor
+│   │   │   │   └── public/             - ملفات الويب المبنية
+│   │   │   │       ├── index.html
+│   │   │   │       ├── assets/
+│   │   │   │       ├── js/
+│   │   │   │       └── css/
+│   │   │   ├── java/
+│   │   │   │   └── com/
+│   │   │   │       └── poker3arabawy/
+│   │   │   │           └── app/
+│   │   │   │               ├── MainActivity.java - النشاط الرئيسي للتطبيق
+│   │   │   │               └── security/          - صف الأمان المخصص
+│   │   │   └── res/
+│   │   │       ├── drawable/           - أيقونات ورسومات
+│   │   │       ├── layout/             - تخطيطات XML
+│   │   │       ├── mipmap/             - أيقونات التطبيق
+│   │   │       ├── values/             - سلاسل وألوان وأبعاد
+│   │   │       │   ├── colors.xml
+│   │   │       │   ├── strings.xml
+│   │   │       │   └── styles.xml
+│   │   │       └── xml/
+│   │   │           ├── config.xml      - تكوين Capacitor
+│   │   │           └── network_security_config.xml - تكوين أمان الشبكة
+│   │   └── debug/                      - تكوينات وموارد خاصة بوضع التصحيح
+│   │   └── release/                    - تكوينات وموارد خاصة بوضع الإصدار
+│   │
+│   └── libs/                          - مكتبات خارجية
+├── build.gradle                        - تكوين بناء المشروع
+├── capacitor.settings.gradle           - إعدادات Capacitor
+├── gradle/                             - ملفات تكوين Gradle
+│   └── wrapper/
+├── gradle.properties                   - خصائص Gradle
+├── gradlew                             - سكريبت تشغيل Gradle للينكس
+├── gradlew.bat                         - سكريبت تشغيل Gradle لويندوز
+└── settings.gradle                     - إعدادات مشروع Gradle
+
+iOS/
+├── App/
+│   ├── App/
+│   │   ├── AppDelegate.swift           - مفوض التطبيق الرئيسي
+│   │   ├── Base.lproj/                 - الملفات الأساسية
+│   │   ├── Entitlements.plist          - أذونات التطبيق
+│   │   ├── Info.plist                  - معلومات التطبيق الأساسية
+│   │   └── public/                     - ملفات الويب المبنية
+│   ├── Podfile                         - تبعيات CocoaPods
+│   └── App.xcodeproj/                  - مشروع Xcode
+│       └── project.pbxproj
+└── capacitor.config.json               - نسخة JSON من تكوين Capacitor
+
+المجلدات الرئيسية في المشروع:
+
+1. android/ - مشروع Android الكامل الذي يستضيف تطبيق الويب
+2. ios/ - مشروع iOS الكامل (يتطلب Mac للبناء)
+3. public/ - مجلد بناء الويب (مخرجات "npm run build")
+4. resources/ - الموارد الأصلية مثل الأيقونات وشاشات البداية
+
+ملاحظات حول ملفات التكوين الرئيسية:
+
+- capacitor.config.ts - التكوين الرئيسي لـ Capacitor
+- android/app/src/main/AndroidManifest.xml - يحدد أذونات وإعدادات تطبيق Android
+- android/app/proguard-rules.pro - قواعد تشويش الشيفرة لحماية الكود
+- android/app/src/main/res/xml/network_security_config.xml - تكوين أمان الشبكة
+- ios/App/App/Info.plist - معلومات التكوين الأساسية لتطبيق iOS
+
+مجلدات الموارد المهمة:
+
+- android/app/src/main/res/mipmap/ - يحتوي على أيقونات التطبيق لمختلف أحجام الشاشات
+- android/app/src/main/res/drawable/ - يحتوي على الصور والرسومات المستخدمة في التطبيق
+- ios/App/App/Assets.xcassets/ - موارد الصور والأيقونات لنظام iOS
+
+ملفات البناء الرئيسية:
+
+- android/app/build.gradle - يحدد إعدادات بناء تطبيق Android
+- android/build.gradle - يحدد إعدادات بناء مشروع Android
+- ios/App/Podfile - يحدد تبعيات iOS

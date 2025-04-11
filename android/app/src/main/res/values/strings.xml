@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Poker 3arabawy</string>
+    <string name="title_activity_main">Poker 3arabawy</string>
+    <string name="package_name">com.poker3arabawy.app</string>
+    <string name="custom_url_scheme">com.poker3arabawy.app</string>
+</resources>
