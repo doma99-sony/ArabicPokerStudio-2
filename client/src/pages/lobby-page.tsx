@@ -367,33 +367,35 @@ export default function LobbyPage() {
       <main className="relative z-10 flex-1 overflow-hidden">
 
         {/* Chat Section - ظاهرة فقط في الصفحة الرئيسية ومتجاوبة مع الشاشة */}
-        <div 
-          className="fixed z-20 transition-all duration-500 shadow-xl md:top-16 md:left-0 md:h-[calc(100%-9rem)] bottom-20 left-2 h-[calc(100vh-14rem)] w-[calc(100%-1rem)]" 
-          id="chat-container"
-          style={{ 
-            transform: isChatHidden 
-              ? window.innerWidth >= 768 ? "translateX(-100%)" : "translateY(100%)" 
-              : "translate(0, 0)"
-          }}
-        >
-          <div className="h-full w-full md:w-[350px] max-h-[550px] md:max-h-none">
-            <NewChatBox onClose={toggleChat} />
+        {location === '/' && (
+          <div 
+            className="fixed z-20 transition-all duration-500 shadow-xl md:top-16 md:left-0 md:h-[calc(100%-9rem)] bottom-20 left-2 h-[calc(100vh-14rem)] w-[calc(100%-1rem)]" 
+            id="chat-container"
+            style={{ 
+              transform: isChatHidden 
+                ? window.innerWidth >= 768 ? "translateX(-100%)" : "translateY(100%)" 
+                : "translate(0, 0)"
+            }}
+          >
+            <div className="h-full w-full md:w-[350px] max-h-[550px] md:max-h-none">
+              <NewChatBox onClose={toggleChat} />
+            </div>
           </div>
-        </div>
+        )}
         
         {/* Main game content area */}
         <div className="h-full overflow-auto">
-          {/* Toggle Chat Button - خارج حاوية الدردشة، ظاهر فقط عندما تكون الدردشة مخفية */}
-          {isChatHidden && (
+          {/* Toggle Chat Button - خارج حاوية الدردشة، ظاهر فقط عندما تكون الدردشة مخفية وفي الصفحة الرئيسية */}
+          {isChatHidden && location === '/' && (
             <button 
-              className="fixed z-20 transition-all md:top-[50%] md:left-0 md:transform-gpu md:-translate-y-1/2 bottom-20 left-2 p-2 rounded-full"
+              className="fixed z-20 transition-all md:top-[50%] md:left-0 md:transform-gpu md:-translate-y-1/2 bottom-20 left-2 p-0 rounded-full"
               onClick={toggleChat}
               aria-label="فتح غرفة الدردشة"
               style={{
                 backgroundColor: '#FDA82A',
                 borderRadius: '50%',
-                width: '40px',
-                height: '40px',
+                width: '50px',
+                height: '50px',
                 border: '2px solid #B27324',
                 display: 'flex',
                 alignItems: 'center',
@@ -409,7 +411,7 @@ export default function LobbyPage() {
                   color: '#8B4513'
                 }}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4c0-1.1.9-2 2-2h8a2 2 0 0 1 2 2v5Z" />
                   <path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1" />
                 </svg>
