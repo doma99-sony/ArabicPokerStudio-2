@@ -25,66 +25,42 @@ export function AnimatedChips({
   const [animating, setAnimating] = useState(false);
   const [increased, setIncreased] = useState(false); // هل زاد الرصيد أم نقص
   const prevValueRef = useRef(value);
-  const isInitialMount = useRef(true);
-  const animationTimerRef = useRef<NodeJS.Timeout | null>(null);
   
   useEffect(() => {
-    // تخطي أول تحديث للصفحة لتجنب ظهور تأثير الأنيميشن عند بدء التشغيل
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      prevValueRef.current = value;
-      setDisplayValue(value);
-      return;
-    }
-    
-    // تحقق إذا كانت القيمة قد تغيرت فعلاً
+    // تحقق إذا كانت القيمة قد تغيرت
     if (value !== prevValueRef.current) {
-      // تنظيف أي مؤقت سابق لتجنب التداخل
-      if (animationTimerRef.current) {
-        clearTimeout(animationTimerRef.current);
-      }
-      
       setIncreased(value > prevValueRef.current);
       setAnimating(true);
       
       // بعد 1 ثانية، إيقاف التحريك
-      animationTimerRef.current = setTimeout(() => {
+      const animationTimer = setTimeout(() => {
         setAnimating(false);
-        animationTimerRef.current = null;
       }, 1000);
       
       // تحديث القيمة المعروضة
       setDisplayValue(value);
       prevValueRef.current = value;
+      
+      return () => clearTimeout(animationTimer);
     }
-    
-    // تنظيف المؤقت عند إلغاء تحميل المكون
-    return () => {
-      if (animationTimerRef.current) {
-        clearTimeout(animationTimerRef.current);
-      }
-    };
   }, [value]);
-  
-  // قيمة الفرق بين الرصيد الحالي والسابق
-  const difference = Math.abs(value - (prevValueRef.current === value ? displayValue : prevValueRef.current));
   
   return (
     <div className="flex items-center relative">
-      {showIcon && <Coins className={`${iconClassName}`} style={{ width: `${iconSize}rem`, height: `${iconSize}rem` }} />}
+      {showIcon && <Coins className={`h-${iconSize} w-${iconSize} ${iconClassName}`} />}
       <span 
         className={`font-bold ${className} relative transition-colors`}
       >
         {formatChips(displayValue)}
         
         {/* تأثير الزيادة أو النقصان - يظهر عند تغير القيمة */}
-        {animating && difference > 0 && (
+        {animating && (
           <span 
             className={`absolute -top-4 right-0 text-xs font-bold transition-opacity duration-1000 ${
               increased ? "text-green-500" : "text-red-500"
             }`}
           >
-            {increased ? "+" : "-"}{formatChips(difference)}
+            {increased ? "+" : "-"}{Math.abs(value - (prevValueRef.current === value ? displayValue : prevValueRef.current))}
           </span>
         )}
       </span>
