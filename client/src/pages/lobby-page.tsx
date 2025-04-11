@@ -186,9 +186,13 @@ export default function LobbyPage() {
                 </div>
                 <div className="text-right">
                   <p className="text-[#D4AF37] text-base font-bold leading-tight mb-1">{user?.username}</p>
-                  <div className="flex items-center bg-[#0A3A2A]/80 px-2 py-0.5 rounded-full border border-[#D4AF37]/30">
-                    <Coins className="h-3.5 w-3.5 text-[#D4AF37] ml-1" />
-                    <span className="text-[#D4AF37] text-sm font-bold">{formatChips(user?.chips || 0)}</span>
+                  <div className="bg-[#0A3A2A]/80 px-2 py-0.5 rounded-full border border-[#D4AF37]/30">
+                    <AnimatedChips 
+                      value={user?.chips || 0} 
+                      className="text-[#D4AF37] text-sm font-bold" 
+                      iconSize={3.5} 
+                      iconClassName="text-[#D4AF37] ml-1" 
+                    />
                   </div>
                 </div>
               </div>
