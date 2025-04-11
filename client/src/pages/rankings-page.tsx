@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
-import { Trophy, Medal, Clock, Search, X, Coins, Users } from "lucide-react";
+import { Trophy, Medal, Clock, Search, X, Coins, Users, Lock, Unlock } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -22,6 +22,11 @@ export default function RankingsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [lastUpdated, setLastUpdated] = useState(new Date());
+  const [isLocked, setIsLocked] = useState<boolean>(() => {
+    // جلب حالة القفل من التخزين المحلي
+    const savedLockState = localStorage.getItem('rankingsLocked');
+    return savedLockState === 'true';
+  });
   
   // جلب بيانات أفضل 100 لاعب
   useEffect(() => {
@@ -65,6 +70,21 @@ export default function RankingsPage() {
   // التحقق من وجود اللاعب الحالي في القائمة
   const currentUserRank = user ? players.findIndex(player => player.id === user.id) + 1 : -1;
   
+  // دالة لتغيير حالة قفل صفحة الترتيب
+  const toggleLockRankings = () => {
+    const newLockedState = !isLocked;
+    setIsLocked(newLockedState);
+    localStorage.setItem('rankingsLocked', newLockedState ? 'true' : 'false');
+    
+    toast({
+      title: newLockedState ? "تم قفل صفحة الترتيب" : "تم فتح قفل صفحة الترتيب",
+      description: newLockedState 
+        ? "لن يتم تحديث الترتيب إلا عند فتح القفل" 
+        : "سيتم تحديث الترتيب تلقائياً كل 5 دقائق",
+      variant: "default",
+    });
+  };
+  
   return (
     <div className="min-h-screen bg-gradient-to-b from-black to-[#0A3A2A] text-white">
       {/* Header */}
@@ -75,9 +95,34 @@ export default function RankingsPage() {
             ترتيب اللاعبين
           </h1>
           
-          <div className="flex items-center">
-            <span className="text-sm text-gray-400 ml-2">آخر تحديث:</span>
-            <span className="text-sm text-gray-300" dir="ltr">{lastUpdated.toLocaleTimeString()}</span>
+          <div className="flex items-center space-x-4 rtl:space-x-reverse">
+            <button 
+              onClick={toggleLockRankings}
+              className={`
+                flex items-center gap-1 px-3 py-1.5 rounded-md text-sm font-medium transition-all
+                ${isLocked 
+                  ? 'bg-gradient-to-r from-[#D4AF37]/80 to-[#8B6914]/80 text-white border border-[#D4AF37]/50' 
+                  : 'bg-gradient-to-r from-[#0A3A2A] to-[#062922] text-[#D4AF37] border border-[#D4AF37]/50'
+                }
+              `}
+            >
+              {isLocked ? (
+                <>
+                  <Unlock className="h-4 w-4" />
+                  <span>فتح القفل</span>
+                </>
+              ) : (
+                <>
+                  <Lock className="h-4 w-4" />
+                  <span>قفل الترتيب</span>
+                </>
+              )}
+            </button>
+            
+            <div className="flex items-center">
+              <span className="text-sm text-gray-400 ml-2">آخر تحديث:</span>
+              <span className="text-sm text-gray-300" dir="ltr">{lastUpdated.toLocaleTimeString()}</span>
+            </div>
           </div>
         </div>
       </header>

@@ -416,29 +416,13 @@ export default function LobbyPage() {
               )}
             </div>
             
-            <div className="flex flex-col w-full gap-2">
+            <div className="flex justify-center w-full">
               <button 
                 onClick={() => navigate('/rankings')}
                 className="w-full bg-gradient-to-r from-[#D4AF37]/80 to-[#8B6914]/80 hover:from-[#D4AF37] hover:to-[#8B6914] text-white font-medium py-1.5 rounded-md text-sm transition-all duration-300 border border-[#D4AF37]/50 flex items-center justify-center gap-1"
               >
                 <Trophy className="h-4 w-4" />
                 عرض قائمة أفضل 100 لاعب
-              </button>
-              
-              <button 
-                onClick={() => {
-                  // تخزين تفضيل المستخدم في localStorage
-                  localStorage.setItem('rankingsLocked', 'true');
-                  toast({
-                    title: "تم قفل صفحة الترتيب",
-                    description: "لن يتم تحديث الترتيب إلا عند فتح القفل",
-                    variant: "default",
-                  });
-                }}
-                className="w-full bg-gradient-to-r from-[#0A3A2A] to-[#062922] hover:from-[#0A3A2A]/90 hover:to-[#062922]/90 text-[#D4AF37] font-medium py-1.5 rounded-md text-sm transition-all duration-300 border border-[#D4AF37]/50 flex items-center justify-center gap-1"
-              >
-                <LockIcon className="h-4 w-4" />
-                قفل صفحة الترتيب
               </button>
             </div>
             
@@ -590,28 +574,13 @@ export default function LobbyPage() {
                       )}
                     </div>
                     
-                    <div className="flex flex-col sm:flex-row w-full gap-2 mt-4 justify-center">
+                    <div className="flex justify-center mt-4">
                       <button 
                         onClick={() => navigate('/rankings')}
                         className="bg-gradient-to-r from-[#D4AF37]/80 to-[#8B6914]/80 hover:from-[#D4AF37] hover:to-[#8B6914] text-white font-medium py-2 px-4 rounded-md text-sm transition-all duration-300 border border-[#D4AF37]/50 flex items-center justify-center gap-1"
                       >
                         <Trophy className="h-4 w-4" />
                         عرض قائمة أفضل 100 لاعب
-                      </button>
-                      
-                      <button 
-                        onClick={() => {
-                          localStorage.setItem('rankingsLocked', 'true');
-                          toast({
-                            title: "تم قفل صفحة الترتيب",
-                            description: "لن يتم تحديث الترتيب إلا عند فتح القفل",
-                            variant: "default",
-                          });
-                        }}
-                        className="bg-gradient-to-r from-[#0A3A2A] to-[#062922] hover:from-[#0A3A2A]/90 hover:to-[#062922]/90 text-[#D4AF37] font-medium py-2 px-4 rounded-md text-sm transition-all duration-300 border border-[#D4AF37]/50 flex items-center justify-center gap-1"
-                      >
-                        <LockIcon className="h-4 w-4" />
-                        قفل صفحة الترتيب
                       </button>
                     </div>
                     
