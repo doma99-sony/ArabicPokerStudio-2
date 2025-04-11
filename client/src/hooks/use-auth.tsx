@@ -48,10 +48,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     retry: false,
   });
   
-  // دالة للانتقال إلى صفحة اللوبي الرئيسية
+  // دالة للانتقال إلى صفحة اللوبي الرئيسية بطريقة مباشرة للتجربة الأفضل
   const goToLobby = () => {
-    // إعادة تحميل الصفحة عند الانتقال للوبي الرئيسي لضمان تحديث الجلسة بشكل كامل
-    window.location.href = '/';
+    // استخدام الاتجاه المباشر للصفحة الرئيسية بدون تأثيرات أو مهلة زمنية
+    window.location.replace('/');
   };
 
   const loginMutation = useMutation({
