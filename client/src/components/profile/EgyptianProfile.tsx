@@ -282,7 +282,10 @@ const EgyptianProfile: React.FC<EgyptianProfileProps> = ({
             <div className="bg-amber-50 rounded-lg p-3 border border-amber-200 mb-3">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center">
-                  <img src="/icons/id-card.png" alt="ID" className="w-5 h-5 ml-1" onError={(e) => e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNiNDVlMDkiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cmVjdCB3aWR0aD0iMTgiIGhlaWdodD0iMTgiIHg9IjMiIHk9IjMiIHJ4PSIyIiByeT0iMiI+PC9yZWN0PjxwYXRoIGQ9Ik0xMCA5aDR2NmgtNCIvPjwvc3ZnPg=='} />
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 ml-1 text-amber-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect>
+                  <path d="M10 9h4v6h-4"/>
+                </svg>
                   <span className="text-sm text-amber-900 ml-1">{currentUser.id}</span>
                   <button 
                     onClick={copyUserId}
@@ -333,15 +336,27 @@ const EgyptianProfile: React.FC<EgyptianProfileProps> = ({
             {/* معلومات العملات والرصيد */}
             <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-3">
               <div className="flex items-center justify-between p-2 bg-amber-50 rounded-md border border-amber-200">
-                <img src="/icons/coin.png" alt="عملات" className="w-6 h-6" onError={(e) => e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmNTk2MWYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSI4Ii8+PHBhdGggZD0iTTEyIDZ2MTIiLz48cGF0aCBkPSJNNiAxMmgxMiIvPjwvc3ZnPg=='} />
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-amber-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="8"/>
+                  <path d="M12 6v12"/>
+                  <path d="M6 12h12"/>
+                </svg>
                 <span className="text-amber-800 text-sm font-bold">{currentUser.chips.toLocaleString()}</span>
               </div>
               <div className="flex items-center justify-between p-2 bg-amber-50 rounded-md border border-amber-200">
-                <img src="/icons/diamond.png" alt="ماس" className="w-6 h-6" onError={(e) => e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMzYjgyZjYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMiA4aDIwTDEyIDIyIDIgOFoiLz48cGF0aCBkPSJNMTIgMmwtMyA2IDMgMTQgMy0xNC0zLTZaIi8+PHBhdGggZD0iTTIgOGwxMCAyLTEwIDItMyA2IDMtNloiLz48cGF0aCBkPSJNMjIgOGwtMTAgMiAxMCAyIDMgNi0zLTZaIi8+PHBhdGggZD0iTTcgOGwzIDE0IDUtMTQtNS00LTMgNFoiLz48cGF0aCBkPSJNMTcgOGwtMyAxNC01LTE0IDUtNCAzIDRaIi8+PC9zdmc+'} />
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M2 8h20L12 22 2 8Z"/>
+                  <path d="M12 2l-3 6 3 14 3-14-3-6Z"/>
+                </svg>
                 <span className="text-blue-600 text-sm font-bold">{currentUser.diamonds.toLocaleString()}</span>
               </div>
               <div className="flex items-center justify-between p-2 bg-amber-50 rounded-md border border-amber-200">
-                <img src="/icons/money.png" alt="فابي" className="w-6 h-6" onError={(e) => e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMxNmE1MzYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cmVjdCB4PSIyIiB5PSI0IiB3aWR0aD0iMjAiIGhlaWdodD0iMTYiIHJ4PSIyIi8+PGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMyIvPjxwYXRoIGQ9Ik04IDd2MTAiLz48cGF0aCBkPSJNMTYgN3YxMCIvPjwvc3ZnPg=='} />
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2" y="4" width="20" height="16" rx="2"/>
+                  <circle cx="12" cy="12" r="3"/>
+                  <path d="M8 7v10"/>
+                  <path d="M16 7v10"/>
+                </svg>
                 <span className="text-green-600 text-sm font-bold">{currentUser.fabChips.toLocaleString()}</span>
               </div>
             </div>
