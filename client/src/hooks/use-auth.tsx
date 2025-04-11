@@ -9,9 +9,18 @@ import { getQueryFn, apiRequest, queryClient } from "../lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 
+// واجهة بيانات تحديث المستخدم
+interface UpdateUserData {
+  username?: string;
+  avatar?: string;
+  chips?: number;
+  diamonds?: number;
+}
+
 type AuthContextType = {
   user: SelectUser | null;
   setUser: (updater: SelectUser | ((prevUser: SelectUser | null) => SelectUser | null)) => void;
+  updateUserData: (data: UpdateUserData) => Promise<SelectUser | null>;
   isLoading: boolean;
   error: Error | null;
   loginMutation: UseMutationResult<SelectUser, Error, LoginData>;
@@ -192,11 +201,73 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   };
   
+  // دالة تحديث بيانات المستخدم عبر API
+  const updateUserData = async (data: UpdateUserData): Promise<SelectUser | null> => {
+    if (!user) return null;
+    
+    try {
+      let endpoint = '/api/profile/update';
+      let method = 'POST';
+      let payload = data;
+      
+      // نستخدم نقاط نهاية مختلفة لأنواع التحديثات المختلفة بدلاً من نقطة نهاية واحدة
+      if (data.username) {
+        endpoint = '/api/profile/username';
+        method = 'POST';
+        payload = { username: data.username };
+      } else if (data.chips !== undefined) {
+        endpoint = '/api/profile/add-chips';
+        method = 'POST';
+        payload = { amount: data.chips };
+      } else if (data.diamonds !== undefined) {
+        endpoint = '/api/profile/add-diamonds';
+        method = 'POST';
+        payload = { amount: data.diamonds };
+      }
+      
+      // استدعاء API
+      const res = await apiRequest(method, endpoint, payload);
+      const result = await res.json();
+      
+      // تحديث البيانات في السياق
+      const updatedUser = {
+        ...user,
+        ...(data.username && { username: data.username }),
+        ...(data.chips !== undefined && { chips: result.newChipsAmount || user.chips + data.chips }),
+        ...(data.diamonds !== undefined && { diamonds: result.newDiamondsAmount || user.diamonds + data.diamonds }),
+        ...(data.avatar && { avatar: data.avatar }),
+      };
+      
+      // تحديث البيانات في cache
+      queryClient.setQueryData(["/api/user"], updatedUser);
+      
+      // توست رسالة نجاح
+      toast({
+        title: "تم تحديث البيانات بنجاح",
+        description: "تم تحديث بيانات الملف الشخصي بنجاح",
+      });
+      
+      return updatedUser;
+    } catch (error) {
+      console.error('خطأ في تحديث بيانات المستخدم:', error);
+      
+      // توست رسالة خطأ
+      toast({
+        title: "فشل تحديث البيانات",
+        description: error instanceof Error ? error.message : "حدث خطأ أثناء تحديث البيانات",
+        variant: "destructive",
+      });
+      
+      return null;
+    }
+  };
+  
   return (
     <AuthContext.Provider
       value={{
         user: user ?? null,
         setUser,
+        updateUserData,
         isLoading,
         error,
         loginMutation,

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Copy, Home, Coins, PenSquare, Camera, Save, XCircle } from "lucide-react";
 import { BadgeType } from './EgyptianProfile';
 
@@ -27,7 +27,10 @@ interface DominoUserProfile {
 const DominoProfileCard: React.FC<{
   user: DominoUserProfile; 
   onClose: () => void;
-}> = ({ user, onClose }) => {
+  onProfileUpdate?: (updatedUser: Partial<DominoUserProfile>) => void;
+}> = ({ user, onClose, onProfileUpdate }) => {
+  // نسخة محلية من بيانات المستخدم للتعديل عليها
+  const [localUser, setLocalUser] = useState<DominoUserProfile>({ ...user });
   const [editingUsername, setEditingUsername] = useState(false);
   const [newUsername, setNewUsername] = useState(user.username);
   const [showAvatarOptions, setShowAvatarOptions] = useState(false);
@@ -41,29 +44,247 @@ const DominoProfileCard: React.FC<{
             ? user.username  // اسم مستخدم عادي للتسجيل بالبريد
             : user.username));
 
+  // تحديث حالة التحميل
+  const [isUpdating, setIsUpdating] = useState<boolean>(false);
+  const [updateError, setUpdateError] = useState<string | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
   // حفظ الاسم الجديد
-  const saveNewUsername = () => {
-    // هنا يمكن إضافة رمز إرسال البيانات إلى الخادم
-    alert(`تم تغيير الاسم إلى: ${newUsername}`);
-    setEditingUsername(false);
-    // في الوضع الحقيقي، سنحتاج لتحديث قيمة user.username
+  const saveNewUsername = async () => {
+    if (newUsername.trim().length < 3) {
+      setUpdateError("اسم المستخدم يجب أن يكون 3 أحرف على الأقل");
+      return;
+    }
+
+    setIsUpdating(true);
+    setUpdateError(null);
+    
+    try {
+      const response = await fetch('/api/profile/username', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username: newUsername.trim() }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'حدث خطأ أثناء تحديث اسم المستخدم');
+      }
+      
+      // تحديث اسم المستخدم بنجاح
+      setEditingUsername(false);
+      
+      // تحديث البيانات محليًا
+      const updatedUser = { ...localUser, username: newUsername.trim() };
+      setLocalUser(updatedUser);
+      
+      // استدعاء وظيفة التحديث إذا كانت موجودة
+      if (onProfileUpdate) {
+        onProfileUpdate({ username: newUsername.trim() });
+      }
+    } catch (error) {
+      console.error('خطأ في تحديث الاسم:', error);
+      setUpdateError(error instanceof Error ? error.message : 'حدث خطأ أثناء تحديث اسم المستخدم');
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
-  // تحميل صورة جديدة
+  // فتح نافذة اختيار الملف
   const handleAvatarUpload = () => {
-    // هنا يمكن فتح مربع حوار لتحميل الصورة
-    alert('مربع حوار تحميل الصورة سيظهر هنا');
+    // استخدام مرجع للنقر على input ملف مخفي
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+  
+  // معالجة تحميل الصورة إلى الخادم
+  const uploadAvatar = async (file: File) => {
+    setIsUpdating(true);
+    setUpdateError(null);
     setShowAvatarOptions(false);
+    
+    try {
+      const formData = new FormData();
+      formData.append('avatar', file);
+      
+      const response = await fetch('/api/profile/avatar', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'حدث خطأ أثناء تحميل الصورة');
+      }
+      
+      // استخراج عنوان URL للصورة الجديدة من الاستجابة
+      const result = await response.json();
+      if (result.avatarUrl) {
+        // تحديث البيانات محليًا
+        const updatedUser = { 
+          ...localUser, 
+          avatar: result.avatarUrl 
+        };
+        setLocalUser(updatedUser);
+        
+        // استدعاء وظيفة التحديث إذا كانت موجودة
+        if (onProfileUpdate) {
+          onProfileUpdate({ avatar: result.avatarUrl });
+        }
+      }
+    } catch (error) {
+      console.error('خطأ في تحميل الصورة:', error);
+      setUpdateError(error instanceof Error ? error.message : 'حدث خطأ أثناء تحميل الصورة');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+  
+  // إضافة وظيفة إضافة رصيد
+  const addChips = async (amount: number) => {
+    setIsUpdating(true);
+    setUpdateError(null);
+    
+    try {
+      const response = await fetch('/api/profile/add-chips', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ amount }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'حدث خطأ أثناء إضافة الرصيد');
+      }
+      
+      const result = await response.json();
+      
+      // تحديث البيانات محليًا
+      const updatedUser = { 
+        ...localUser, 
+        chips: result.newChipsAmount || localUser.chips + amount 
+      };
+      setLocalUser(updatedUser);
+      
+      // استدعاء وظيفة التحديث إذا كانت موجودة
+      if (onProfileUpdate) {
+        onProfileUpdate({ chips: updatedUser.chips });
+      }
+    } catch (error) {
+      console.error('خطأ في إضافة الرصيد:', error);
+      setUpdateError(error instanceof Error ? error.message : 'حدث خطأ أثناء إضافة الرصيد');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+  
+  // إضافة وظيفة إضافة ماس
+  const addDiamonds = async (amount: number) => {
+    setIsUpdating(true);
+    setUpdateError(null);
+    
+    try {
+      const response = await fetch('/api/profile/add-diamonds', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ amount }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'حدث خطأ أثناء إضافة الماس');
+      }
+      
+      const result = await response.json();
+      
+      // تحديث البيانات محليًا
+      const updatedUser = { 
+        ...localUser, 
+        diamonds: result.newDiamondsAmount || localUser.diamonds + amount 
+      };
+      setLocalUser(updatedUser);
+      
+      // استدعاء وظيفة التحديث إذا كانت موجودة
+      if (onProfileUpdate) {
+        onProfileUpdate({ diamonds: updatedUser.diamonds });
+      }
+    } catch (error) {
+      console.error('خطأ في إضافة الماس:', error);
+      setUpdateError(error instanceof Error ? error.message : 'حدث خطأ أثناء إضافة الماس');
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   // اختيار أفاتار افتراضي
   const selectDefaultAvatar = (index: number) => {
-    alert(`تم اختيار الأفاتار رقم: ${index}`);
-    setShowAvatarOptions(false);
+    // استخدام صورة افتراضية من مجلد الصور العامة
+    const defaultAvatarPaths = [
+      '/assets/avatars/default-1.png',
+      '/assets/avatars/default-2.png',
+      '/assets/avatars/default-3.png',
+      '/assets/avatars/default-4.png',
+      '/assets/avatars/default-5.png',
+      '/assets/avatars/default-6.png'
+    ];
+    
+    // تحويل مسار الصورة إلى ملف لتحميله
+    fetch(defaultAvatarPaths[index - 1])
+      .then(res => res.blob())
+      .then(blob => {
+        const file = new File([blob], `default-avatar-${index}.png`, { type: 'image/png' });
+        uploadAvatar(file);
+      })
+      .catch(err => {
+        console.error('خطأ في تحميل الصورة الافتراضية:', err);
+        setUpdateError('حدث خطأ في اختيار الصورة الافتراضية');
+      });
+  };
+
+  // تحميل الملف عند تغييره
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      uploadAvatar(e.target.files[0]);
+    }
   };
 
   return (
     <div className="w-full max-w-7xl mx-auto bg-gradient-to-br from-amber-100 to-amber-200 rounded-lg overflow-hidden shadow-2xl border-2 border-amber-500" dir="rtl">
+      {/* عنصر input مخفي لتحميل الصور */}
+      <input 
+        type="file" 
+        ref={fileInputRef}
+        className="hidden"
+        accept="image/jpeg,image/png,image/gif"
+        onChange={handleFileChange}
+      />
+      
+      {/* رسائل التحديث والأخطاء */}
+      {isUpdating && (
+        <div className="absolute top-0 left-0 right-0 bg-amber-600 text-white py-2 px-4 text-center">
+          جاري تحديث البيانات...
+        </div>
+      )}
+      
+      {updateError && (
+        <div className="absolute top-0 left-0 right-0 bg-red-600 text-white py-2 px-4 text-center">
+          {updateError}
+          <button 
+            className="absolute right-2 top-2" 
+            onClick={() => setUpdateError(null)}
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+      
       {/* شريط العنوان */}
       <div className="bg-gradient-to-r from-amber-600 to-amber-800 p-4 text-center relative">
         <h2 className="text-amber-100 text-2xl font-bold">بطاقة اللاعب</h2>
@@ -81,12 +302,17 @@ const DominoProfileCard: React.FC<{
         <div className="lg:w-1/3 p-6 flex flex-col items-center border-l border-amber-300/50">
           {/* صورة اللاعب */}
           <div className="relative w-36 h-36 mb-6">
-            <div className="absolute inset-0 rounded-full overflow-hidden bg-amber-800/20 border-3 border-amber-600 shadow-xl">
+            <div className={`absolute inset-0 rounded-full overflow-hidden bg-amber-800/20 border-3 ${isUpdating ? 'border-blue-400 animate-pulse' : 'border-amber-600'} shadow-xl`}>
               {user.avatar ? (
                 <img src={user.avatar} alt={displayName} className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-gradient-to-b from-amber-700/50 to-amber-900/50">
                   <span className="text-6xl font-bold text-amber-200">{displayName.charAt(0)}</span>
+                </div>
+              )}
+              {isUpdating && (
+                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-yellow-300"></div>
                 </div>
               )}
             </div>
@@ -207,8 +433,15 @@ const DominoProfileCard: React.FC<{
             <div className="bg-gradient-to-b from-amber-50 to-amber-100 border border-amber-400 rounded-lg p-4 text-center shadow-md">
               <div className="text-amber-800 text-sm mb-2 font-medium">الرقائق</div>
               <div className="text-amber-900 font-bold flex items-center justify-center text-xl">
-                {user.chips.toLocaleString()}
+                {localUser.chips.toLocaleString()}
                 <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSI4IiBjeT0iOCIgcj0iNy41IiBmaWxsPSIjRkZEMTAwIiBzdHJva2U9IiNBMDgwMjkiLz48dGV4dCB4PSI4IiB5PSIxMSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXdlaWdodD0iYm9sZCIgZm9udC1zaXplPSI4IiBmaWxsPSIjQTg3OTFGIj4kPC90ZXh0PjwvY2lyY2xlPjwvc3ZnPg==" alt="عملة" className="ml-2 w-6 h-6" />
+                <button 
+                  onClick={() => addChips(1000)} 
+                  className="mr-2 bg-amber-600 hover:bg-amber-700 text-white text-xs px-2 py-1 rounded-full"
+                  title="إضافة 1000 رقاقة"
+                >
+                  +1000
+                </button>
               </div>
             </div>
             <div className="bg-gradient-to-b from-amber-50 to-amber-100 border border-amber-400 rounded-lg p-4 text-center shadow-md">
@@ -221,8 +454,15 @@ const DominoProfileCard: React.FC<{
             <div className="bg-gradient-to-b from-amber-50 to-amber-100 border border-amber-400 rounded-lg p-4 text-center shadow-md">
               <div className="text-amber-800 text-sm mb-2 font-medium">الماس</div>
               <div className="text-amber-900 font-bold flex items-center justify-center text-xl">
-                {user.diamonds.toLocaleString()}
+                {localUser.diamonds.toLocaleString()}
                 <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNOCAxLjVMMTQuNSA4TDggMTQuNUwxLjUgOEw4IDEuNVoiIGZpbGw9IiM0M0M0RkYiIHN0cm9rZT0iIzAwN0RCNSIvPjwvc3ZnPg==" alt="ماس" className="ml-2 w-6 h-6" />
+                <button 
+                  onClick={() => addDiamonds(10)} 
+                  className="mr-2 bg-blue-600 hover:bg-blue-700 text-white text-xs px-2 py-1 rounded-full"
+                  title="إضافة 10 ماس"
+                >
+                  +10
+                </button>
               </div>
             </div>
           </div>
