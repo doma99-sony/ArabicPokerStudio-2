@@ -372,15 +372,15 @@ export default function LobbyPage() {
             className="fixed z-20 transition-all duration-300 shadow-xl"
             id="chat-container"
             style={{ 
-              top: '50%',
-              left: '50%',
-              transform: isChatHidden ? 'translate(-50%, -50%) scale(0)' : 'translate(-50%, -50%) scale(1)',
+              bottom: '100px',
+              left: '30px',
               width: '960px',
               height: '550px',
               opacity: isChatHidden ? 0 : 1,
               visibility: isChatHidden ? 'hidden' : 'visible',
               borderRadius: '15px',
-              overflow: 'hidden'
+              overflow: 'hidden',
+              transform: isChatHidden ? 'translateY(50px) scale(0.9)' : 'translateY(0) scale(1)'
             }}
           >
             <NewChatBox onClose={toggleChat} />

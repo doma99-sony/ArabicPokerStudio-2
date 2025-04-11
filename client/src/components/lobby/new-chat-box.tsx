@@ -166,20 +166,26 @@ export function NewChatBox({ onClose }: { onClose?: () => void }) {
         boxShadow: '0 4px 20px rgba(0,0,0,0.25)'
       }}
     >
-      {/* شريط العنوان مع زر الإغلاق */}
-      <div className="bg-gradient-to-b from-[#FDA82A] to-[#E88F19] flex justify-between items-center px-4 py-2 border-b-2 border-[#B27324]">
-        <div className="flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
-          </svg>
-          <h3 className="text-[#8B4513] font-bold text-lg">الدردشة</h3>
+      {/* شريط العنوان الرئيسي مع زر الإغلاق */}
+      <div className="bg-gradient-to-b from-[#D4AF37] to-[#B27324] flex justify-between items-center px-4 py-3 border-b-2 border-[#8B4513]/50">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-[#FFECBC] border-2 border-[#8B4513] flex items-center justify-center shadow-md">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8B4513" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+            </svg>
+          </div>
+          <div>
+            <h3 className="text-white font-bold text-lg drop-shadow-md">الدردشة العامة</h3>
+            <p className="text-white/80 text-xs">المتصلين الآن: {predefinedPlayers.length}</p>
+          </div>
         </div>
         {onClose && (
           <button
             onClick={onClose}
-            className="text-[#8B4513] hover:bg-[#E88F19] p-1 rounded-full flex items-center justify-center bg-[#FFECBC] border border-[#B27324] h-8 w-8"
+            className="flex items-center gap-1 bg-gradient-to-r from-[#B22424] to-[#8B1A1A] hover:from-[#CC3030] hover:to-[#AA2424] text-white py-1.5 px-3 rounded-lg border border-[#FFA0A0]/50 shadow-lg"
           >
-            <X size={20} />
+            <X size={16} />
+            <span className="font-medium">إغلاق</span>
           </button>
         )}
       </div>
