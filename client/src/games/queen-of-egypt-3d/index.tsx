@@ -56,7 +56,8 @@ export default function QueenOfEgypt3D({ onExit }: GameProps) {
       // محاكاة تحميل اللعبة
       const timer = setTimeout(() => {
         setLoading(false);
-        setShowIntro(true); // عرض المقدمة السينمائية بعد التحميل
+        // تخطي المقدمة والذهاب للعبة مباشرة
+        setIntroCompleted(true);
         
         toast({
           title: "تم تحميل اللعبة",

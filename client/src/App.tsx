@@ -112,16 +112,22 @@ function Router() {
               </div>
             </div>
             <div className="mt-12 text-center">
-              <p className="text-amber-300 text-xl mb-4">جرّب الآن معرض مكونات ملكة مصر</p>
-              <a href="/queen-of-egypt-3d-showcase" className="inline-block px-6 py-3 bg-amber-600 text-white rounded-lg hover:bg-amber-500 transition-colors">
-                استعراض المكونات
-              </a>
+              <p className="text-amber-300 text-xl mb-4">جرّب الآن لعبة ملكة مصر أو استعرض مكوناتها</p>
+              <div className="flex gap-4 justify-center">
+                <a href="/queen-of-egypt-3d-page" className="inline-block px-6 py-3 bg-amber-800 text-white rounded-lg hover:bg-amber-700 transition-colors">
+                  ابدأ اللعب مباشرة
+                </a>
+                <a href="/queen-of-egypt-3d-showcase" className="inline-block px-6 py-3 bg-amber-600 text-white rounded-lg hover:bg-amber-500 transition-colors">
+                  استعراض المكونات
+                </a>
+              </div>
             </div>
           </div>
         </div>
       </Route>
       <ProtectedRoute path="/egypt-rocket" component={EgyptRocketPage} />
       <ProtectedRoute path="/fishing-slots" component={FishingSlotsPage} />
+      <ProtectedRoute path="/queen-of-egypt-3d-page" component={QueenOfEgypt3DPage} />
       <ProtectedRoute path="/poker-lobby/poker-masr" component={PokerMasrLobby} />
       <ProtectedRoute path="/poker-lobby/poker-masr/texas-holdem" component={TexasHoldemPoker} />
       <ProtectedRoute path="/poker-lobby/poker-masr/mecca-poker" component={MeccaPoker} />
