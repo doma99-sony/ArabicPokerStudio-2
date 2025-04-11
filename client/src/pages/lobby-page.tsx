@@ -405,7 +405,7 @@ export default function LobbyPage() {
                 alignItems: 'center',
                 justifyContent: 'center',
                 boxShadow: '0 3px 10px rgba(0,0,0,0.3)',
-                bottom: '100px',
+                bottom: '20px',
                 left: '50%',
                 transform: 'translateX(-50%)'
               }}
