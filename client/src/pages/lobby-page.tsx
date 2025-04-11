@@ -453,9 +453,9 @@ export default function LobbyPage() {
                     <h2 className="text-white text-xl font-bold">الصفحة الرئيسية</h2>
                   </div>
                   
-                  {/* إضافة قائمة أفضل اللاعبين داخل الصفحة الرئيسية */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mt-4">
-                    <div className="bg-gradient-to-r from-[#0A3A2A]/80 via-black/80 to-[#0A3A2A]/80 rounded-xl border border-[#D4AF37] p-4 shadow-lg backdrop-blur-sm">
+                  {/* إضافة قائمة أفضل اللاعبين داخل الصفحة الرئيسية - في أقصى اليمين مع عرض أقل */}
+                  <div className="flex flex-col md:flex-row justify-end mt-4">
+                    <div className="w-full md:w-64 lg:w-72 ml-auto bg-gradient-to-r from-[#0A3A2A]/80 via-black/80 to-[#0A3A2A]/80 rounded-xl border border-[#D4AF37] p-4 shadow-lg backdrop-blur-sm">
                       <div className="flex items-center justify-between w-full border-b border-[#D4AF37]/30 pb-2 mb-4">
                         <div className="flex items-center">
                           <Trophy className="h-5 w-5 text-[#D4AF37] mr-2" />
