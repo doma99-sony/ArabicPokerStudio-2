@@ -88,14 +88,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onSuccess: (user: SelectUser) => {
       queryClient.setQueryData(["/api/user"], user);
+      // تحديث استعلام المستخدم للتأكد من أن البيانات محدثة
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      
       toast({
         title: "تم تسجيل الدخول بنجاح",
         description: `مرحباً، ${user.username}!`,
       });
-      // توجيه المستخدم إلى صفحة اللوبي الرئيسية بعد تسجيل الدخول
+      
+      // توجيه المستخدم إلى صفحة اللوبي الرئيسية بعد تسجيل الدخول - مع تأخير أطول لضمان تحميل البيانات
       setTimeout(() => {
+        // تسجيل معلومات التصحيح
+        console.log("المستخدم موجود، عرض صفحة: / للمستخدم " + user.username);
         goToLobby();
-      }, 500);
+      }, 800);
     },
     onError: (error: Error) => {
       toast({
@@ -113,14 +119,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onSuccess: (user: SelectUser) => {
       queryClient.setQueryData(["/api/user"], user);
+      // تحديث استعلام المستخدم للتأكد من أن البيانات محدثة
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      
       toast({
         title: "تم إنشاء الحساب بنجاح",
         description: `مرحباً، ${user.username}!`,
       });
-      // توجيه المستخدم إلى صفحة اللوبي الرئيسية بعد تسجيل الدخول
+      
+      // توجيه المستخدم إلى صفحة اللوبي الرئيسية بعد تسجيل الدخول - مع تأخير أطول لضمان تحميل البيانات
       setTimeout(() => {
+        // تسجيل معلومات التصحيح
+        console.log("المستخدم موجود، عرض صفحة: / للمستخدم " + user.username);
         goToLobby();
-      }, 500);
+      }, 800);
     },
     onError: (error: Error) => {
       toast({
@@ -139,14 +151,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onSuccess: (user: SelectUser) => {
       queryClient.setQueryData(["/api/user"], user);
+      // تحديث استعلام المستخدم للتأكد من أن البيانات محدثة
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      
       toast({
         title: "تم تسجيل الدخول كضيف",
         description: `مرحباً، ${user.username}!`,
       });
-      // توجيه المستخدم إلى صفحة اللوبي الرئيسية بعد تسجيل الدخول
+      
+      // توجيه المستخدم إلى صفحة اللوبي الرئيسية بعد تسجيل الدخول - مع تأخير أطول لضمان تحميل البيانات
       setTimeout(() => {
+        // تسجيل معلومات التصحيح
+        console.log("المستخدم موجود، عرض صفحة: / للمستخدم " + user.username);
         goToLobby();
-      }, 500);
+      }, 800);
     },
     onError: (error: Error) => {
       toast({
@@ -165,14 +183,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onSuccess: (user: SelectUser) => {
       queryClient.setQueryData(["/api/user"], user);
+      // تحديث استعلام المستخدم للتأكد من أن البيانات محدثة
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      
       toast({
         title: "تم تسجيل الدخول بواسطة فيسبوك",
         description: `مرحباً، ${user.username}!`,
       });
-      // توجيه المستخدم إلى صفحة اللوبي الرئيسية بعد تسجيل الدخول
+      
+      // توجيه المستخدم إلى صفحة اللوبي الرئيسية بعد تسجيل الدخول - مع تأخير أطول لضمان تحميل البيانات
       setTimeout(() => {
+        // تسجيل معلومات التصحيح
+        console.log("المستخدم موجود، عرض صفحة: / للمستخدم " + user.username);
         goToLobby();
-      }, 500);
+      }, 800);
     },
     onError: (error: Error) => {
       toast({
