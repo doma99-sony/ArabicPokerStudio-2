@@ -37,6 +37,14 @@ export default function LobbyPage() {
   const globalWs = useGlobalWebSocket();
   
   // استعلام لجلب أفضل 3 لاعبين
+  // البيانات الافتراضية للاعبين
+  const defaultTopPlayers = [
+    { id: 1, username: "فرعون مصر", chips: 9850000, avatar: "/assets/users/gold-player.png" },
+    { id: 2, username: "ملك البوكر", chips: 7650000, avatar: "/assets/users/silver-player.png" },
+    { id: 3, username: "صقر العرب", chips: 6430000, avatar: "/assets/users/bronze-player.png" }
+  ];
+  
+  // وظيفة جلب أفضل اللاعبين من الخادم
   const fetchTopPlayers = async () => {
     try {
       const response = await fetch('/api/rankings/top3');
@@ -47,21 +55,13 @@ export default function LobbyPage() {
         console.log('تم تحديث قائمة أفضل اللاعبين:', data);
       } else {
         console.error('فشل في جلب أفضل اللاعبين');
-        // استخدام بيانات مزيفة للعرض التجريبي فقط
-        setTopPlayers([
-          { id: 1, username: "فرعون مصر", chips: 9850000, avatar: "/assets/users/gold-player.png" },
-          { id: 2, username: "ملك البوكر", chips: 7650000, avatar: "/assets/users/silver-player.png" },
-          { id: 3, username: "صقر العرب", chips: 6430000, avatar: "/assets/users/bronze-player.png" }
-        ]);
+        // استخدام البيانات الافتراضية
+        setTopPlayers(defaultTopPlayers);
       }
     } catch (error) {
       console.error('خطأ في جلب أفضل اللاعبين:', error);
-      // استخدام بيانات مزيفة للعرض التجريبي فقط
-      setTopPlayers([
-        { id: 1, username: "فرعون مصر", chips: 9850000, avatar: "/assets/users/gold-player.png" },
-        { id: 2, username: "ملك البوكر", chips: 7650000, avatar: "/assets/users/silver-player.png" },
-        { id: 3, username: "صقر العرب", chips: 6430000, avatar: "/assets/users/bronze-player.png" }
-      ]);
+      // استخدام البيانات الافتراضية
+      setTopPlayers(defaultTopPlayers);
     }
   };
 

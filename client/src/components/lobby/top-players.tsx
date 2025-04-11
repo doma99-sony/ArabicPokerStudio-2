@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { formatChips } from "@/lib/utils";
 import { Trophy, Medal, Crown } from "lucide-react";
-import { useWebSocket } from "@/hooks/use-websocket-simplified";
 
 // نوع بيانات اللاعب
 interface Player {
@@ -12,52 +10,52 @@ interface Player {
   avatar?: string;
 }
 
+// بيانات اللاعبين الافتراضية للعرض
+const defaultTopPlayers: Player[] = [
+  { id: 1, username: "فرعون مصر", chips: 9850000, avatar: "/assets/users/gold-player.png" },
+  { id: 2, username: "ملك البوكر", chips: 7650000, avatar: "/assets/users/silver-player.png" },
+  { id: 3, username: "صقر العرب", chips: 6430000, avatar: "/assets/users/bronze-player.png" }
+];
+
 export function TopPlayers() {
-  const [topPlayers, setTopPlayers] = useState<Player[]>([]);
-  const ws = useWebSocket();
+  const [topPlayers, setTopPlayers] = useState<Player[]>(defaultTopPlayers);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
 
-  // استخدام React Query للحصول على أفضل اللاعبين
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["/api/players/top"],
-    queryFn: async () => {
-      // في الإنتاج، نستدعي API للحصول على البيانات
-      const res = await fetch("/api/players/top");
-      if (!res.ok) {
-        throw new Error("فشل في الحصول على قائمة أفضل اللاعبين");
+  // جلب أفضل اللاعبين عند تحميل المكون
+  useEffect(() => {
+    const fetchTopPlayers = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch("/api/players/top");
+        if (response.ok) {
+          const data = await response.json();
+          setTopPlayers(data.slice(0, 3)); // أخذ أفضل 3 لاعبين فقط
+        } else {
+          console.error("فشل في الحصول على قائمة أفضل اللاعبين");
+          setError(new Error("فشل في الحصول على قائمة أفضل اللاعبين"));
+          // استخدام البيانات الافتراضية في حالة الفشل
+          setTopPlayers(defaultTopPlayers);
+        }
+      } catch (err) {
+        console.error("خطأ أثناء جلب قائمة أفضل اللاعبين", err);
+        setError(err instanceof Error ? err : new Error("خطأ غير معروف"));
+        // استخدام البيانات الافتراضية في حالة حدوث خطأ
+        setTopPlayers(defaultTopPlayers);
+      } finally {
+        setIsLoading(false);
       }
-      return res.json();
-    },
-    // استخدام بيانات وهمية في حالة عدم وجود API حقيقي
-    initialData: [
-      { id: 1, username: "أحمد", chips: 100000, avatar: "/images/avatars/user1.jpg" },
-      { id: 2, username: "محمد", chips: 75000, avatar: "/images/avatars/user2.jpg" },
-      { id: 3, username: "سارة", chips: 50000, avatar: "/images/avatars/user3.jpg" }
-    ],
-    staleTime: 60000 // تحديث كل دقيقة
-  });
-
-  // تحديث القائمة عند استلام البيانات
-  useEffect(() => {
-    if (data) {
-      setTopPlayers(data.slice(0, 3)); // أخذ أفضل 3 لاعبين فقط
-    }
-  }, [data]);
-
-  // الاستماع إلى تحديثات WebSocket
-  useEffect(() => {
-    // تحديث قائمة اللاعبين عند استلام تحديث
-    const handleTopPlayersUpdate = (data: { players: Player[] }) => {
-      setTopPlayers(data.players.slice(0, 3));
     };
 
-    // إضافة مستمع لتحديثات قائمة اللاعبين
-    const unsubscribe = ws.registerMessageHandler("top_players_update", handleTopPlayersUpdate);
+    // جلب البيانات عند تحميل المكون
+    fetchTopPlayers();
 
-    // إزالة المستمع عند تفكيك المكون
-    return () => {
-      unsubscribe();
-    };
-  }, [ws]);
+    // إعادة تحميل البيانات كل 5 دقائق
+    const intervalId = setInterval(fetchTopPlayers, 5 * 60 * 1000);
+    
+    // تنظيف المؤقت عند تفكيك المكون
+    return () => clearInterval(intervalId);
+  }, []);
 
   // تصميم أيقونات المراكز
   const renderRankIcon = (index: number) => {
