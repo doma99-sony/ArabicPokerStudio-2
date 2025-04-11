@@ -44,6 +44,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(req.user);
   });
   
+  // مسار للحصول على أفضل 3 لاعبين مرتبين حسب عدد الرقائق
+  app.get("/api/rankings/top3", async (req, res) => {
+    try {
+      // الحصول على جميع المستخدمين من التخزين
+      const allUsers = Array.from(storage.users.values());
+      
+      // ترتيب المستخدمين تنازلياً حسب عدد الرقائق
+      const sortedUsers = allUsers
+        .filter(user => user.chips > 0) // فقط المستخدمين الذين لديهم رقائق
+        .sort((a, b) => b.chips - a.chips); // ترتيب تنازلي
+      
+      // أخذ أفضل 3 مستخدمين
+      const topPlayers = sortedUsers.slice(0, 3).map(user => ({
+        id: user.id,
+        username: user.username,
+        chips: user.chips,
+        avatar: user.avatar || null
+      }));
+      
+      res.json(topPlayers);
+    } catch (error) {
+      console.error("خطأ في الحصول على أفضل 3 لاعبين:", error);
+      res.status(500).json({ error: "حدث خطأ أثناء جلب أفضل 3 لاعبين" });
+    }
+  });
+  
   // البحث عن مستخدم بواسطة المعرف
   app.get("/api/users/:userId", ensureAuthenticated, async (req, res) => {
     try {

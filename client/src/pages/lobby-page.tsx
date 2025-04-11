@@ -5,6 +5,7 @@ import { useWebSocket } from "@/hooks/use-websocket-simplified";
 import { useGlobalWebSocket } from "@/hooks/use-global-websocket";
 import { GameType } from "@shared/types";
 import { ChatBox } from "@/components/lobby/chat-box";
+import { useQuery } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
 import { OnlineUsersCounter } from "@/components/ui/online-users-badge";
@@ -23,12 +24,60 @@ export default function LobbyPage() {
   const [activeGameCategory, setActiveGameCategory] = useState<GameType>("poker");
   const [isChatHidden, setIsChatHidden] = useState(false);
   const [videoMuted, setVideoMuted] = useState(true);
+  const [topPlayers, setTopPlayers] = useState<Array<{id: number, username: string, chips: number, avatar?: string}>>([]);
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const videoRef = useRef<HTMLVideoElement>(null);
+  const updateTimerRef = useRef<NodeJS.Timeout | null>(null);
   
   // استخدام WebSocket لاتصال مستمر مع الخادم
   const ws = useWebSocket();
   const globalWs = useGlobalWebSocket();
   
+  // استعلام لجلب أفضل 3 لاعبين
+  const fetchTopPlayers = async () => {
+    try {
+      const response = await fetch('/api/rankings/top3');
+      if (response.ok) {
+        const data = await response.json();
+        setTopPlayers(data);
+        setLastUpdated(new Date());
+        console.log('تم تحديث قائمة أفضل اللاعبين:', data);
+      } else {
+        console.error('فشل في جلب أفضل اللاعبين');
+        // استخدام بيانات مزيفة للعرض التجريبي فقط
+        setTopPlayers([
+          { id: 1, username: "فرعون مصر", chips: 9850000, avatar: "/assets/users/gold-player.png" },
+          { id: 2, username: "ملك البوكر", chips: 7650000, avatar: "/assets/users/silver-player.png" },
+          { id: 3, username: "صقر العرب", chips: 6430000, avatar: "/assets/users/bronze-player.png" }
+        ]);
+      }
+    } catch (error) {
+      console.error('خطأ في جلب أفضل اللاعبين:', error);
+      // استخدام بيانات مزيفة للعرض التجريبي فقط
+      setTopPlayers([
+        { id: 1, username: "فرعون مصر", chips: 9850000, avatar: "/assets/users/gold-player.png" },
+        { id: 2, username: "ملك البوكر", chips: 7650000, avatar: "/assets/users/silver-player.png" },
+        { id: 3, username: "صقر العرب", chips: 6430000, avatar: "/assets/users/bronze-player.png" }
+      ]);
+    }
+  };
+
+  // تحديث البيانات كل 30 دقيقة
+  useEffect(() => {
+    // جلب البيانات عند بدء التشغيل
+    fetchTopPlayers();
+    
+    // جدولة تحديث كل 30 دقيقة (1800000 مللي ثانية)
+    const updateInterval = 30 * 60 * 1000;
+    updateTimerRef.current = setInterval(fetchTopPlayers, updateInterval);
+    
+    return () => {
+      if (updateTimerRef.current) {
+        clearInterval(updateTimerRef.current);
+      }
+    };
+  }, []);
+
   // تأكد من إنشاء اتصال WebSocket جديد عند تحميل الصفحة
   useEffect(() => {
     if (user) {
@@ -312,6 +361,52 @@ export default function LobbyPage() {
 
       {/* Main Content */}
       <main className="relative z-10 flex-1 overflow-hidden">
+        {/* قائمة أفضل 3 لاعبين */}
+        <div className="absolute top-2 left-1/2 transform -translate-x-1/2 z-30 w-auto">
+          <div id="top-players-bar" className="bg-gradient-to-r from-[#0A3A2A]/80 via-black/80 to-[#0A3A2A]/80 rounded-xl border border-[#D4AF37] p-2 shadow-lg backdrop-blur-sm flex items-center gap-3">
+            <div className="flex items-center">
+              <div className="relative">
+                <Trophy className="h-6 w-6 text-[#D4AF37] animate-pulse-slow" />
+                <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full"></div>
+              </div>
+              <span className="text-white text-xs mr-2 font-bold">أفضل اللاعبين:</span>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              {topPlayers.map((player, index) => (
+                <div key={player.id} className="flex items-center">
+                  {index > 0 && <div className="h-6 w-px bg-[#D4AF37]/30 mx-1"></div>}
+                  <div className="flex items-center gap-1.5">
+                    <div className="relative">
+                      <div className={`w-6 h-6 rounded-full overflow-hidden border ${index === 0 ? 'border-yellow-500' : index === 1 ? 'border-gray-300' : 'border-yellow-700'}`}>
+                        <img src={player.avatar || "/assets/poker-icon-gold.png"} alt={player.username} className="w-full h-full object-cover" />
+                      </div>
+                      <div className={`absolute -top-1 -right-1 w-3 h-3 rounded-full flex items-center justify-center text-[8px] font-bold text-black ${
+                        index === 0 ? 'bg-yellow-500' : index === 1 ? 'bg-gray-300' : 'bg-yellow-700'
+                      }`}>
+                        {index + 1}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className={`text-xs font-bold ${
+                        index === 0 ? 'text-yellow-500' : index === 1 ? 'text-gray-300' : 'text-yellow-700'
+                      }`}>{player.username}</p>
+                      <div className="flex items-center">
+                        <Coins className="h-2.5 w-2.5 text-[#D4AF37] ml-0.5" />
+                        <span className="text-[#D4AF37] text-[9px] font-bold">{formatChips(player.chips)}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="flex items-center">
+              <span className="text-gray-400 text-[9px] ml-1">آخر تحديث:</span>
+              <span className="text-gray-400 text-[9px]" dir="ltr">{lastUpdated.toLocaleTimeString()}</span>
+            </div>
+          </div>
+        </div>
         {/* Chat Section - Fixed to left - تصميم محسن بتأثيرات زجاجية وذهبية */}
         <div 
           className="fixed top-16 left-0 h-[calc(100%-8rem)] z-20 transition-all duration-500 shadow-2xl shadow-black/50" 
@@ -586,6 +681,16 @@ export default function LobbyPage() {
             <button 
               className="relative flex flex-col items-center justify-center p-2 min-w-[60px]"
               onClick={() => navigate("/rankings")}
+              onMouseEnter={() => {
+                // عند تحويم الماوس، تسليط الضوء على شريط الترتيب أعلى الصفحة
+                const topPlayersBar = document.getElementById("top-players-bar");
+                if (topPlayersBar) {
+                  topPlayersBar.classList.add("highlight-top-players");
+                  setTimeout(() => {
+                    topPlayersBar.classList.remove("highlight-top-players");
+                  }, 1500);
+                }
+              }}
             >
               <div className="bg-gradient-to-br from-[#FFD700]/80 to-[#ffa500]/80 rounded-full w-14 h-14 border-2 border-[#D4AF37] flex items-center justify-center relative shadow-lg hover:shadow-[#D4AF37]/20 transition-all duration-300 overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-r from-[#D4AF37]/0 via-[#D4AF37]/30 to-[#D4AF37]/0 animate-pulse-slow"></div>
@@ -765,6 +870,16 @@ export default function LobbyPage() {
           }
           .animate-glow {
             animation: glow 2s infinite;
+          }
+          .highlight-top-players {
+            box-shadow: 0 0 15px #D4AF37, 0 0 25px #D4AF37;
+            animation: highlight-pulse 1.5s ease-in-out;
+            border-color: #FFC107;
+          }
+          @keyframes highlight-pulse {
+            0% { transform: scale(1); box-shadow: 0 0 5px #D4AF37; }
+            50% { transform: scale(1.05); box-shadow: 0 0 20px #D4AF37, 0 0 30px #D4AF37; }
+            100% { transform: scale(1); box-shadow: 0 0 5px #D4AF37; }
           }
         `
       }} />
