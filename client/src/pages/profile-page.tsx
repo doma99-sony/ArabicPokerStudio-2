@@ -11,6 +11,7 @@ const ProfilePage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   
   // استخدام بيانات مستخدم تجريبية للعرض فقط
+  // يمكن تغيير هذه البيانات لرؤية الاختلافات بين أنواع المستخدمين المختلفة
   const mockUser = {
     id: 10392845,
     username: "محمد المصري",
@@ -25,7 +26,14 @@ const ProfilePage: React.FC = () => {
     title: "المحارب",
     agentBadgeUnlocked: true,
     agentName: "سارة - الرياض",
-    fabChargeCount: 5
+    fabChargeCount: 5,
+    
+    // تغيير هذه القيم لاختبار أنواع حسابات مختلفة:
+    // للحساب العادي: isGuest: false, authType: 'email'
+    // لحساب فيسبوك: isGuest: false, authType: 'facebook'
+    // لحساب زائر: isGuest: true, authType: 'guest'
+    isGuest: false,
+    authType: 'email' as 'email' | 'facebook' | 'guest'
   };
   
   useEffect(() => {

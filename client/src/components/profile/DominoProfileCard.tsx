@@ -1,5 +1,5 @@
-import React from 'react';
-import { X, Copy, Home, Coins } from "lucide-react";
+import React, { useState } from 'react';
+import { X, Copy, Home, Coins, PenSquare, Camera, Save, XCircle } from "lucide-react";
 import { BadgeType } from './EgyptianProfile';
 
 // واجهة بيانات المستخدم الممتدة
@@ -18,6 +18,8 @@ interface DominoUserProfile {
   agentBadgeUnlocked?: boolean;
   agentName?: string;
   fabChargeCount?: number;
+  isGuest?: boolean;  // إضافة خاصية لتحديد ما إذا كان المستخدم ضيفاً
+  authType?: 'facebook' | 'guest' | 'email'; // نوع التسجيل
 }
 
 // مكون بطاقة اللاعب (مثل دومينو كافيه)
@@ -25,6 +27,36 @@ const DominoProfileCard: React.FC<{
   user: DominoUserProfile; 
   onClose: () => void;
 }> = ({ user, onClose }) => {
+  const [editingUsername, setEditingUsername] = useState(false);
+  const [newUsername, setNewUsername] = useState(user.username);
+  const [showAvatarOptions, setShowAvatarOptions] = useState(false);
+
+  // توليد اسم المستخدم بناءً على نوع التسجيل
+  const displayName = user.isGuest 
+    ? `ضيف_${user.id}`
+    : (user.authType === 'facebook' ? user.username : (user.authType === 'email' ? user.username : user.username));
+
+  // حفظ الاسم الجديد
+  const saveNewUsername = () => {
+    // هنا يمكن إضافة رمز إرسال البيانات إلى الخادم
+    alert(`تم تغيير الاسم إلى: ${newUsername}`);
+    setEditingUsername(false);
+    // في الوضع الحقيقي، سنحتاج لتحديث قيمة user.username
+  };
+
+  // تحميل صورة جديدة
+  const handleAvatarUpload = () => {
+    // هنا يمكن فتح مربع حوار لتحميل الصورة
+    alert('مربع حوار تحميل الصورة سيظهر هنا');
+    setShowAvatarOptions(false);
+  };
+
+  // اختيار أفاتار افتراضي
+  const selectDefaultAvatar = (index: number) => {
+    alert(`تم اختيار الأفاتار رقم: ${index}`);
+    setShowAvatarOptions(false);
+  };
+
   return (
     <div className="w-full max-w-7xl mx-auto bg-gradient-to-br from-amber-100 to-amber-200 rounded-lg overflow-hidden shadow-2xl border-2 border-amber-500" dir="rtl">
       {/* شريط العنوان */}
@@ -46,13 +78,51 @@ const DominoProfileCard: React.FC<{
           <div className="relative w-36 h-36 mb-6">
             <div className="absolute inset-0 rounded-full overflow-hidden bg-amber-800/20 border-3 border-amber-600 shadow-xl">
               {user.avatar ? (
-                <img src={user.avatar} alt={user.username} className="w-full h-full object-cover" />
+                <img src={user.avatar} alt={displayName} className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-gradient-to-b from-amber-700/50 to-amber-900/50">
-                  <span className="text-6xl font-bold text-amber-200">{user.username.charAt(0)}</span>
+                  <span className="text-6xl font-bold text-amber-200">{displayName.charAt(0)}</span>
                 </div>
               )}
             </div>
+            {/* زر تغيير الصورة */}
+            <button 
+              onClick={() => setShowAvatarOptions(!showAvatarOptions)} 
+              className="absolute -left-2 bottom-5 bg-amber-500 text-white p-2 rounded-full hover:bg-amber-600 shadow-lg"
+              title="تغيير الصورة"
+            >
+              <Camera className="h-5 w-5" />
+            </button>
+            {showAvatarOptions && (
+              <div className="absolute -left-40 -bottom-2 bg-amber-50 border border-amber-300 rounded-lg p-3 shadow-lg z-10 w-36">
+                <div className="text-amber-800 font-bold text-sm mb-2">اختر صورة</div>
+                <button 
+                  onClick={handleAvatarUpload} 
+                  className="w-full mb-2 text-sm bg-amber-500 text-white p-1 rounded hover:bg-amber-600 flex items-center justify-center"
+                >
+                  <Camera className="h-4 w-4 ml-1" />
+                  تحميل صورة
+                </button>
+                <div className="grid grid-cols-3 gap-1 mb-1">
+                  {[1, 2, 3, 4, 5, 6].map(i => (
+                    <div 
+                      key={i} 
+                      onClick={() => selectDefaultAvatar(i)}
+                      className="w-8 h-8 bg-amber-200 rounded-full cursor-pointer hover:bg-amber-300 flex items-center justify-center text-amber-800"
+                    >
+                      {i}
+                    </div>
+                  ))}
+                </div>
+                <button 
+                  onClick={() => setShowAvatarOptions(false)} 
+                  className="w-full mt-1 text-xs text-amber-700 p-1 rounded hover:bg-amber-200 flex items-center justify-center"
+                >
+                  <XCircle className="h-3 w-3 ml-1" />
+                  إلغاء
+                </button>
+              </div>
+            )}
             {/* شارة مستوى اللاعب */}
             <div className="absolute -bottom-3 -right-3 bg-gradient-to-r from-amber-600 to-amber-800 text-white text-sm rounded-full w-10 h-10 flex items-center justify-center border-2 border-amber-200 shadow-lg">
               {user.level}
@@ -74,7 +144,56 @@ const DominoProfileCard: React.FC<{
                 <Copy className="h-4 w-4" />
               </button>
             </div>
-            <div className="text-xl font-bold text-amber-800">{user.username}</div>
+            
+            {/* تحرير اسم المستخدم */}
+            <div className="relative">
+              {editingUsername ? (
+                <div className="flex items-center justify-center">
+                  <input 
+                    type="text" 
+                    value={newUsername} 
+                    onChange={(e) => setNewUsername(e.target.value)}
+                    className="border border-amber-300 rounded py-1 px-2 text-lg text-amber-900 text-center w-full"
+                    autoFocus
+                  />
+                  <div className="absolute left-0 flex">
+                    <button 
+                      onClick={saveNewUsername} 
+                      className="bg-green-500 text-white p-1 rounded-full mr-1 hover:bg-green-600"
+                      title="حفظ"
+                    >
+                      <Save className="h-4 w-4" />
+                    </button>
+                    <button 
+                      onClick={() => {
+                        setEditingUsername(false);
+                        setNewUsername(user.username);
+                      }} 
+                      className="bg-red-500 text-white p-1 rounded-full hover:bg-red-600"
+                      title="إلغاء"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="text-xl font-bold text-amber-800">{displayName}</div>
+                  <button 
+                    onClick={() => setEditingUsername(true)} 
+                    className="absolute -left-4 top-1 text-amber-600 hover:text-amber-800"
+                    title="تعديل الاسم"
+                  >
+                    <PenSquare className="h-4 w-4" />
+                  </button>
+                </>
+              )}
+            </div>
+            
+            {/* نوع الحساب */}
+            <div className="mt-1 text-xs text-amber-700">
+              {user.isGuest ? 'حساب زائر' : user.authType === 'facebook' ? 'متصل عبر فيسبوك' : user.authType === 'email' ? 'حساب مسجل بالبريد الإلكتروني' : 'حساب عادي'}
+            </div>
           </div>
           
           {/* البادجات */}
