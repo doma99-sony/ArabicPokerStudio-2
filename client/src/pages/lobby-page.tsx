@@ -361,54 +361,9 @@ export default function LobbyPage() {
 
       {/* Main Content */}
       <main className="relative z-10 flex-1 overflow-hidden">
-        {/* قائمة أفضل 3 لاعبين - على الجانب الأيمن */}
-        <div className="fixed top-20 right-3 z-30 w-auto">
+        {/* قائمة أفضل 3 لاعبين غير مرئية ولكن قابلة للتسليط */}
+        <div className="fixed top-20 right-3 z-30 w-auto hidden">
           <div id="top-players-bar" className="bg-gradient-to-r from-[#0A3A2A]/80 via-black/80 to-[#0A3A2A]/80 rounded-xl border border-[#D4AF37] p-2 shadow-lg backdrop-blur-sm flex flex-col items-center gap-3">
-            <div className="flex items-center">
-              <div className="relative">
-                <Trophy className="h-6 w-6 text-[#D4AF37] animate-pulse-slow" />
-                <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full"></div>
-              </div>
-              <span className="text-white text-xs mr-2 font-bold">أفضل اللاعبين:</span>
-            </div>
-            
-            <div className="flex flex-col w-full gap-2">
-              {topPlayers.map((player, index) => (
-                <div key={player.id} className="flex items-center w-full justify-between">
-                  <div className="flex items-center gap-2 border-b border-[#D4AF37]/20 pb-2 w-full">
-                    <div className="flex items-center gap-2">
-                      <div className="relative">
-                        <div className={`w-8 h-8 rounded-full overflow-hidden border-2 ${
-                          index === 0 ? 'border-yellow-500' : index === 1 ? 'border-gray-300' : 'border-yellow-700'
-                        }`}>
-                          <img src={player.avatar || "/assets/poker-icon-gold.png"} alt={player.username} className="w-full h-full object-cover" />
-                        </div>
-                        <div className={`absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold text-black ${
-                          index === 0 ? 'bg-yellow-500' : index === 1 ? 'bg-gray-300' : 'bg-yellow-700'
-                        }`}>
-                          {index + 1}
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className={`text-sm font-bold ${
-                          index === 0 ? 'text-yellow-500' : index === 1 ? 'text-gray-300' : 'text-yellow-700'
-                        }`}>{player.username}</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center mr-auto">
-                      <Coins className="h-3 w-3 text-[#D4AF37] ml-1" />
-                      <span className="text-[#D4AF37] text-xs font-bold">{formatChips(player.chips)}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            
-            <div className="flex items-center text-center w-full justify-center border-t border-[#D4AF37]/20 pt-1 mt-1">
-              <span className="text-gray-400 text-[9px] ml-1">آخر تحديث:</span>
-              <span className="text-gray-400 text-[9px]" dir="ltr">{lastUpdated.toLocaleTimeString()}</span>
-            </div>
           </div>
         </div>
         {/* Chat Section - Fixed to left - تصميم محسن بتأثيرات زجاجية وذهبية */}
@@ -457,7 +412,7 @@ export default function LobbyPage() {
                   />
                   <GameCategoryButton
                     active={activeGameCategory === "home" as any}
-                    onClick={() => navigate("/")}
+                    onClick={() => setActiveGameCategory("home" as any)}
                     icon="🏠"
                     label="الرئيسية"
                   />
@@ -491,6 +446,68 @@ export default function LobbyPage() {
             
             {/* Game cards section */}
             <div className="space-y-8">
+              {activeGameCategory === "home" && (
+                <div className="space-y-6">
+                  {/* عنوان القسم */}
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">🏠</span>
+                    <h2 className="text-white text-xl font-bold">الصفحة الرئيسية</h2>
+                  </div>
+                  
+                  {/* قائمة أفضل 3 لاعبين */}
+                  <div className="bg-gradient-to-r from-[#0A3A2A]/80 via-black/80 to-[#0A3A2A]/80 rounded-xl border border-[#D4AF37] p-4 shadow-lg backdrop-blur-sm">
+                    <div className="flex items-center mb-4">
+                      <div className="relative">
+                        <Trophy className="h-7 w-7 text-[#D4AF37] animate-pulse-slow" />
+                        <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full"></div>
+                      </div>
+                      <span className="text-white text-lg mr-2 font-bold">أفضل اللاعبين:</span>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {topPlayers.map((player, index) => (
+                        <div key={player.id} className="bg-black/40 border border-[#D4AF37]/30 rounded-lg p-3 hover:bg-black/60 transition-all">
+                          <div className="flex items-center gap-3">
+                            <div className="relative">
+                              <div className={`w-14 h-14 rounded-full overflow-hidden border-2 ${
+                                index === 0 ? 'border-yellow-500' : index === 1 ? 'border-gray-300' : 'border-yellow-700'
+                              }`}>
+                                <img src={player.avatar || "/assets/poker-icon-gold.png"} alt={player.username} className="w-full h-full object-cover" />
+                              </div>
+                              <div className={`absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-black ${
+                                index === 0 ? 'bg-yellow-500' : index === 1 ? 'bg-gray-300' : 'bg-yellow-700'
+                              }`}>
+                                {index + 1}
+                              </div>
+                            </div>
+                            <div className="text-right flex-1">
+                              <p className={`text-lg font-bold ${
+                                index === 0 ? 'text-yellow-500' : index === 1 ? 'text-gray-300' : 'text-yellow-700'
+                              }`}>{player.username}</p>
+                              <div className="flex items-center mt-1">
+                                <Coins className="h-4 w-4 text-[#D4AF37] ml-1" />
+                                <span className="text-[#D4AF37] text-md font-bold">{formatChips(player.chips)}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                      
+                      {topPlayers.length === 0 && (
+                        <div className="col-span-3 text-center py-8">
+                          <div className="text-gray-400 animate-pulse">جاري تحميل أفضل اللاعبين...</div>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex items-center justify-center mt-4 border-t border-[#D4AF37]/20 pt-2">
+                      <span className="text-gray-400 text-xs ml-1">آخر تحديث:</span>
+                      <span className="text-gray-400 text-xs" dir="ltr">{lastUpdated.toLocaleTimeString()}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
               {activeGameCategory === "poker" && (
                 <GameSection 
                   title="ألعاب البوكر" 
