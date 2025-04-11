@@ -14,6 +14,7 @@ import { LogOut, User, ChevronRight, Loader2, ChevronLeft, ChevronUp, Bell, Shop
 import { formatChips } from "@/lib/utils";
 import { HeavySnowEffect, GoldDustEffect } from "@/components/effects/snow-effect";
 import { HeavyPokerCardsEffect, SuitSymbolsEffect } from "@/components/effects/poker-cards-effect";
+import ProfilePopup from "@/components/profile/ProfilePopup";
 
 export default function LobbyPage() {
   const [location, navigate] = useLocation();
@@ -21,6 +22,7 @@ export default function LobbyPage() {
   const [activeGameCategory, setActiveGameCategory] = useState<GameType>("poker");
   const [isChatHidden, setIsChatHidden] = useState(false);
   const [videoMuted, setVideoMuted] = useState(true);
+  const [showProfile, setShowProfile] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   
   // استخدام WebSocket لاتصال مستمر مع الخادم
@@ -112,8 +114,9 @@ export default function LobbyPage() {
   };
 
   return (
-    <div className="h-screen overflow-hidden bg-cover bg-center flex flex-col"
-         style={{ backgroundImage: "url('/images/egyptian-background.jpg')" }}>
+    <>
+      <div className="h-screen overflow-hidden bg-cover bg-center flex flex-col"
+          style={{ backgroundImage: "url('/images/egyptian-background.jpg')" }}>
       
       {/* تم حذف تأثير تساقط بطاقات البوكر بناءً على طلب المستخدم */}
       
@@ -289,7 +292,7 @@ export default function LobbyPage() {
               <Button 
                 variant="outline" 
                 className="border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37]/10 h-9 py-0 px-2.5 text-xs bg-black/50 backdrop-blur-sm transition-all duration-300 shadow-md hover:shadow-[#D4AF37]/20"
-                onClick={navigateToProfile}
+                onClick={() => setShowProfile(true)}
               >
                 <User size={16} className="ml-1" />
                 <span className="hidden md:inline">الملف</span>
@@ -862,5 +865,10 @@ function GameSection({ title, icon, games }: {
         ))}
       </div>
     </div>
+      </div>
+      {showProfile && (
+        <ProfilePopup onClose={() => setShowProfile(false)} isOpen={showProfile} />
+      )}
+    </>
   );
 }
