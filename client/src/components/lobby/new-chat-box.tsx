@@ -20,21 +20,21 @@ interface ChatMessage {
 const systemMessages: ChatMessage[] = [
   {
     id: 'msg_1',
-    username: 'Mohamed',
+    username: 'الدردشة العامة',
     message: 'لو هاخد كمية هخسسيبها كام',
     timestamp: new Date('2024/04/04').getTime(),
     avatar: '/assets/avatars/avatar-1.png'
   },
   {
     id: 'msg_2',
-    username: 'Mohamed',
+    username: 'الدردشة العامة',
     message: 'تعالى يا بنت الحلال',
     timestamp: new Date('2024/04/05').getTime(),
     avatar: '/assets/avatars/avatar-1.png'
   },
   {
     id: 'msg_3',
-    username: 'Mohamed',
+    username: 'الدردشة العامة',
     message: 'أنا انصب عليك منك',
     timestamp: new Date().setHours(1, 7, 36),
     avatar: '/assets/avatars/avatar-1.png'
@@ -220,7 +220,7 @@ export function NewChatBox({ onClose }: { onClose?: () => void }) {
         <div className="bg-[#DC8E08] flex justify-between items-center px-3 py-2.5 relative">
           <div className="flex items-center gap-2">
             <div>
-              <h3 className="text-white font-semibold text-base">محمد</h3>
+              <h3 className="text-white font-semibold text-base">الدردشة العامة</h3>
               <div className="flex items-center space-x-1 space-x-reverse">
                 <div className="w-2 h-2 rounded-full bg-green-500"></div>
                 <span className="text-white/80 text-xs">متصل الآن</span>
