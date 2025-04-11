@@ -50,7 +50,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   
   // دالة للانتقال إلى صفحة اللوبي الرئيسية بطريقة مباشرة للتجربة الأفضل
   const goToLobby = () => {
-    // استخدام الاتجاه المباشر للصفحة الرئيسية بدون تأثيرات أو مهلة زمنية
+    // حذف أي توجيهات سابقة
+    localStorage.removeItem("redirectAfterLogin");
+    
+    // استخدام الانتقال المباشر للصفحة الرئيسية دون أي تأثيرات أو انتظار
     window.location.replace('/');
   };
 
@@ -65,10 +68,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "تم تسجيل الدخول بنجاح",
         description: `مرحباً، ${user.username}!`,
       });
-      // توجيه المستخدم إلى صفحة اللوبي الرئيسية بعد تسجيل الدخول
-      setTimeout(() => {
-        goToLobby();
-      }, 500);
+      // توجيه المستخدم إلى اللوبي مباشرة
+      goToLobby();
     },
     onError: (error: Error) => {
       toast({
@@ -90,10 +91,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "تم إنشاء الحساب بنجاح",
         description: `مرحباً، ${user.username}!`,
       });
-      // توجيه المستخدم إلى صفحة اللوبي الرئيسية بعد تسجيل الدخول
-      setTimeout(() => {
-        goToLobby();
-      }, 500);
+      // توجيه المستخدم إلى اللوبي مباشرة
+      goToLobby();
     },
     onError: (error: Error) => {
       toast({
@@ -116,10 +115,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "تم تسجيل الدخول كضيف",
         description: `مرحباً، ${user.username}!`,
       });
-      // توجيه المستخدم إلى صفحة اللوبي الرئيسية بعد تسجيل الدخول
-      setTimeout(() => {
-        goToLobby();
-      }, 500);
+      // توجيه المستخدم إلى اللوبي مباشرة
+      goToLobby();
     },
     onError: (error: Error) => {
       toast({
@@ -142,10 +139,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "تم تسجيل الدخول بواسطة فيسبوك",
         description: `مرحباً، ${user.username}!`,
       });
-      // توجيه المستخدم إلى صفحة اللوبي الرئيسية بعد تسجيل الدخول
-      setTimeout(() => {
-        goToLobby();
-      }, 500);
+      // توجيه المستخدم إلى اللوبي مباشرة
+      goToLobby();
     },
     onError: (error: Error) => {
       toast({
@@ -175,9 +170,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       
       // إعادة تحميل الصفحة بعد تسجيل الخروج لإظهار شاشة البداية
-      setTimeout(() => {
-        window.location.reload();
-      }, 800); // انتظار قليلاً للتأكد من ظهور رسالة النجاح
+      window.location.reload();
     },
     onError: (error: Error) => {
       toast({
