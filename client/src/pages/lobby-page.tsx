@@ -372,10 +372,10 @@ export default function LobbyPage() {
             className="fixed z-20 transition-all duration-300 shadow-xl"
             id="chat-container"
             style={{ 
-              bottom: '100px',
+              bottom: '30px',
               left: '30px',
-              width: '960px',
-              height: '550px',
+              width: '800px',
+              height: '480px',
               opacity: isChatHidden ? 0 : 1,
               visibility: isChatHidden ? 'hidden' : 'visible',
               borderRadius: '15px',
@@ -396,16 +396,16 @@ export default function LobbyPage() {
               onClick={toggleChat}
               aria-label="فتح غرفة الدردشة"
               style={{
-                backgroundColor: '#FDA82A',
+                backgroundColor: '#25D366',
                 borderRadius: '50%',
-                width: '55px',
-                height: '55px',
-                border: '2px solid #B27324',
+                width: '50px',
+                height: '50px',
+                border: '2px solid #128C7E',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 boxShadow: '0 3px 10px rgba(0,0,0,0.3)',
-                bottom: '120px',
+                bottom: '20px',
                 right: '20px'
               }}
             >
@@ -414,10 +414,10 @@ export default function LobbyPage() {
                   display: 'flex',
                   alignItems: 'center', 
                   justifyContent: 'center',
-                  color: '#8B4513'
+                  color: 'white'
                 }}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4c0-1.1.9-2 2-2h8a2 2 0 0 1 2 2v5Z" />
                   <path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1" />
                 </svg>
