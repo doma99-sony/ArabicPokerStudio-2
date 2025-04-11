@@ -16,39 +16,39 @@ interface ChatMessage {
   isSystem?: boolean;
 }
 
-// رسائل النظام الافتراضية - نستخدمها كمجموعة افتراضية من الرسائل
+// رسائل الدردشة المطابقة للصورة
 const systemMessages: ChatMessage[] = [
   {
-    id: 'welcome_msg_1',
+    id: 'msg_1',
     username: 'Mohamed',
     message: 'لو هاخد كمية هخسسيبها كام',
     timestamp: new Date('2024/04/04').getTime(),
     avatar: '/assets/avatars/avatar-1.png'
   },
   {
-    id: 'welcome_msg_2',
+    id: 'msg_2',
     username: 'Mohamed',
     message: 'تعالى يا بنت الحلال',
     timestamp: new Date('2024/04/05').getTime(),
     avatar: '/assets/avatars/avatar-1.png'
   },
   {
-    id: 'welcome_msg_3',
+    id: 'msg_3',
     username: 'Mohamed',
     message: 'أنا انصب عليك منك',
-    timestamp: Date.now() - 3600000,
+    timestamp: new Date().setHours(1, 7, 36),
     avatar: '/assets/avatars/avatar-1.png'
   },
   {
-    id: 'welcome_msg_4',
+    id: 'msg_4',
     username: 'أم مروان',
     message: 'ايه كداب',
-    timestamp: Date.now() - 1800000,
+    timestamp: new Date().setHours(1, 12, 53),
     avatar: '/assets/avatars/avatar-2.png'
   }
 ];
 
-// معلومات اللاعبين المُعرّفة مسبقًا مع الأيقونات
+// معلومات اللاعبين المُعرّفة مسبقًا مع الأيقونات - مطابقة للصورة
 const predefinedPlayers = [
   { id: '1', username: 'Mohamed', avatar: '/assets/avatars/avatar-1.png', badges: ['diamond', 'gold', 'vip'] },
   { id: '2', username: 'مريم محمد', avatar: '/assets/avatars/avatar-3.png', badges: ['gold', 'vip'] },
@@ -56,6 +56,13 @@ const predefinedPlayers = [
   { id: '4', username: 'guest_426', avatar: '/assets/avatars/avatar-5.png', badges: ['regular', 'vip'] },
   { id: '5', username: 'guest_959', avatar: '/assets/avatars/avatar-6.png', badges: ['diamond', 'vip'] },
   { id: '6', username: 'أم مروان', avatar: '/assets/avatars/avatar-2.png', badges: ['vip', 'gold', 'diamond'] }
+];
+
+// القائمة الجانبية كما في الصورة المرجعية
+const sidebarItems = [
+  { id: 'friends', name: 'الأصدقاء', icon: 'الأصدقاء' },
+  { id: 'chat', name: 'الشات العام', icon: 'الشات العام', active: true },
+  { id: 'players', name: 'اللاعبين', icon: 'اللاعبين' }
 ];
 
 export function NewChatBox({ onClose }: { onClose?: () => void }) {
@@ -159,129 +166,127 @@ export function NewChatBox({ onClose }: { onClose?: () => void }) {
   };
 
   return (
-    <div className="w-full h-full flex flex-col overflow-hidden" 
+    <div className="w-full h-full flex overflow-hidden" 
       style={{ 
-        backgroundColor: '#FDA82A',
-        borderRadius: '15px',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.25)'
+        backgroundColor: '#FFDDB3',
+        borderRadius: '8px',
+        boxShadow: '0 1px 10px rgba(0,0,0,0.15)'
       }}
     >
-      {/* شريط العنوان الرئيسي مع زر الإغلاق */}
-      <div className="bg-gradient-to-b from-[#D4AF37] to-[#B27324] flex justify-between items-center px-4 py-3 border-b-2 border-[#8B4513]/50">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-[#FFECBC] border-2 border-[#8B4513] flex items-center justify-center shadow-md">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8B4513" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
-            </svg>
-          </div>
-          <div>
-            <h3 className="text-white font-bold text-lg drop-shadow-md">الدردشة العامة</h3>
-            <p className="text-white/80 text-xs">المتصلين الآن: {predefinedPlayers.length}</p>
-          </div>
-        </div>
-        {onClose && (
-          <button
-            onClick={onClose}
-            className="flex items-center gap-1 bg-gradient-to-r from-[#B22424] to-[#8B1A1A] hover:from-[#CC3030] hover:to-[#AA2424] text-white py-1.5 px-3 rounded-lg border border-[#FFA0A0]/50 shadow-lg"
-          >
-            <X size={16} />
-            <span className="font-medium">إغلاق</span>
-          </button>
-        )}
-      </div>
-
-      {/* الحاوية الرئيسية بتقسيم مربع */}
-      <div className="flex flex-1">
-        {/* قائمة اللاعبين الجانبية */}
-        <div className="w-[250px] bg-[#FFECBC] border-l border-[#B27324] overflow-y-auto">
-          <div className="sticky top-0 bg-[#FDA82A] p-2 border-b border-[#B27324] flex justify-between items-center">
-            <h4 className="text-[#8B4513] font-semibold">اللاعبين المتصلين</h4>
-            <div className="bg-[#FFECBC] text-xs text-[#8B4513] px-2 py-0.5 rounded border border-[#B27324]">
-              {predefinedPlayers.length}
+      {/* القائمة الجانبية اليسرى - مطابقة للصورة */}
+      <div className="w-20 bg-[#CF8800] flex flex-col border-l border-[#B27324]">
+        <div className="p-2 flex flex-col items-center space-y-3">
+          {/* رمز الأصدقاء */}
+          <div className="p-2 flex flex-col items-center justify-center rounded-lg cursor-pointer">
+            <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#A05B05" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
             </div>
+            <span className="text-white text-xs mt-1">الأصدقاء</span>
           </div>
           
-          {/* قائمة اللاعبين */}
-          <div className="p-2">
-            {predefinedPlayers.map((player) => (
-              <div key={player.id} className="flex items-center gap-2 p-2 hover:bg-[#FDA82A]/20 rounded-lg mb-2 border border-[#B27324]/20">
-                <div className="h-10 w-10 rounded-full overflow-hidden border-2 border-[#B27324]">
-                  {player.avatar ? (
-                    <img src={player.avatar} alt={player.username} className="h-full w-full object-cover" />
-                  ) : (
-                    <div className="h-full w-full flex items-center justify-center bg-[#E88F19] text-[#8B4513] font-bold">
-                      {player.username.charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                </div>
-                
-                <div className="flex flex-col">
-                  <div className="flex items-center">
-                    <span className="text-[#8B4513] font-medium text-sm">{player.username}</span>
-                    <div className="flex items-center mx-1">
-                      {renderBadges(player.badges || [])}
-                    </div>
-                  </div>
-                  <span className="text-[#8B4513]/70 text-xs">
-                    {Math.random() > 0.5 ? 'متصل الآن' : 'نشط منذ 5 دقائق'}
-                  </span>
-                </div>
-              </div>
-            ))}
+          {/* رمز الشات العام - نشط */}
+          <div className="p-2 flex flex-col items-center justify-center bg-amber-500/40 rounded-lg cursor-pointer">
+            <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#A05B05" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+              </svg>
+            </div>
+            <span className="text-white text-xs mt-1">الشات</span>
+          </div>
+          
+          {/* رمز اللاعبين */}
+          <div className="p-2 flex flex-col items-center justify-center rounded-lg cursor-pointer">
+            <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#A05B05" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+            </div>
+            <span className="text-white text-xs mt-1">اللاعبين</span>
           </div>
         </div>
+      </div>
+      
+      {/* محتوى الدردشة */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* شريط العنوان - تصميم مطابق للصورة */}
+        <div className="bg-[#DC8E08] flex justify-between items-center px-3 py-2.5 relative">
+          <div className="flex items-center gap-2">
+            <div>
+              <h3 className="text-white font-semibold text-base">محمد</h3>
+              <div className="flex items-center space-x-1 space-x-reverse">
+                <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                <span className="text-white/80 text-xs">متصل الآن</span>
+              </div>
+            </div>
+          </div>
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="text-white p-1"
+            >
+              <X size={24} />
+            </button>
+          )}
+        </div>
 
-        {/* محتوى الدردشة الرئيسي */}
+        {/* محتوى الدردشة الرئيسي - مطابق للصورة */}
         <div className="flex-1 flex flex-col">
           {/* محتوى الدردشة */}
-          <ScrollArea className="flex-1 bg-white custom-scrollbar">
-            <div className="py-2">
+          <ScrollArea className="flex-1" style={{ backgroundColor: '#ECE0C7', backgroundImage: 'url("/assets/chat-background.png")' }}>
+            <div className="py-2 space-y-1 px-2">
               {messages.map((msg, index) => {
-                const playerInfo = getPlayerInfo(msg.username);
-                const isCurrentUser = msg.username === user?.username;
+                // لتحديد ما إذا كانت الرسالة من "محمد" أو "أم مروان"
+                const isMohamedMessage = msg.username === 'Mohamed';
                 
                 return (
                   <div key={msg.id} className="mb-3">
-                    {/* عرض صف المستخدم والشارات للمرسل */}
-                    <div className="flex items-center px-3 mb-1">
-                      {!isCurrentUser && (
-                        <div className="h-10 w-10 rounded-full overflow-hidden flex-shrink-0 border-2 border-[#B27324] mr-2">
-                          {playerInfo.avatar ? (
-                            <img src={playerInfo.avatar} alt={msg.username} className="h-full w-full object-cover" />
-                          ) : (
-                            <div className="h-full w-full flex items-center justify-center bg-[#E88F19] text-[#8B4513] font-bold">
-                              {msg.username.charAt(0).toUpperCase()}
+                    {/* عرض بيانات المرسل مع الصورة - فقط مع أول رسالة من "محمد" في المجموعة */}
+                    {index === 0 || messages[index-1]?.username !== msg.username ? (
+                      <div className="flex items-center px-1 pb-0.5">
+                        <div className="flex-1 flex items-center">
+                          <img 
+                            src={isMohamedMessage ? '/assets/avatars/avatar-1.png' : '/assets/avatars/avatar-2.png'} 
+                            alt={msg.username} 
+                            className="h-7 w-7 rounded-full border border-amber-600/30"
+                          />
+                          <span className="text-xs font-medium mr-2 text-amber-900">{msg.username}</span>
+                          
+                          {/* رموز مثل في الصورة */}
+                          {isMohamedMessage && (
+                            <div className="flex items-center space-x-1 space-x-reverse">
+                              <img src="/assets/badges/diamond.png" alt="icon" className="h-4 w-4" />
+                              <img src="/assets/badges/trophy.png" alt="icon" className="h-4 w-4" />
+                              <img src="/assets/badges/crown.png" alt="icon" className="h-4 w-4" />
                             </div>
                           )}
                         </div>
-                      )}
-                      
-                      <div className="flex items-center">
-                        <span className="text-[#8B4513] font-medium text-sm">{msg.username}</span>
-                        <div className="flex items-center mx-1">
-                          {renderBadges(playerInfo.badges || [])}
-                        </div>
                       </div>
-                    </div>
+                    ) : null}
                     
-                    {/* فقاعة الرسالة */}
-                    <div className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'} px-3`}>
-                      <div 
-                        className={`relative px-3 py-2 max-w-[80%] rounded-lg ${
-                          isCurrentUser 
-                            ? 'bg-[#FFECBC] border border-[#B27324] mr-12'
-                            : 'bg-white border border-[#B27324] ml-12'
-                        }`}
-                        style={{
-                          boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
-                        }}
-                      >
-                        <div className="text-[#8B4513] text-sm">
+                    {/* فقاعة الرسالة - تصميم مطابق للصورة */}
+                    <div className="flex">
+                      <div className={`relative max-w-[85%] p-2 px-3 rounded-lg mb-1 ${
+                        isMohamedMessage 
+                          ? 'bg-[#EDDBB4] border border-[#D4B67B]/30 mr-10 ml-auto'
+                          : 'bg-white border border-gray-200/50 ml-10'
+                      }`}>
+                        {/* محتوى الرسالة */}
+                        <div className="text-[#664B29] text-sm">
                           {msg.message}
                         </div>
+                        
+                        {/* التوقيت */}
                         {msg.timestamp && (
-                          <div className="text-right mt-1">
-                            <span className="text-[10px] text-[#8B4513]/60" dir="ltr">
+                          <div className="text-left mt-0.5">
+                            <span className="text-[10px] text-[#A1A1AA]" dir="ltr">
                               {formatChatTime(msg.timestamp)}
                             </span>
                           </div>
@@ -295,43 +300,35 @@ export function NewChatBox({ onClose }: { onClose?: () => void }) {
             </div>
           </ScrollArea>
 
-          {/* منطقة إدخال الرسائل */}
-          <div className="p-3 bg-[#FDA82A] border-t border-[#B27324] flex items-center">
-            <div className="flex w-full items-center gap-2">
-              <div className="relative">
-                <button
-                  onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                  type="button"
-                  className="flex items-center justify-center h-10 w-10 rounded-full bg-[#FFECBC] border border-[#B27324] text-[#E88F19] hover:bg-[#FFDFA8]"
-                >
-                  <span className="text-lg">😊</span>
-                </button>
-                {showEmojiPicker && (
-                  <div className="absolute bottom-12 left-0 z-50">
-                    <EmojiPicker onEmojiClick={onEmojiClick} width={300} height={350} />
-                  </div>
-                )}
-              </div>
-
-              <div className="relative flex-1">
+          {/* منطقة إدخال الرسائل - مطابقة للصورة */}
+          <div className="bg-[#FFDDB3] p-1.5 flex items-center gap-1">
+            <div className="flex items-center gap-1 w-full">
+              <button
+                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                type="button"
+                className="flex items-center justify-center h-10 w-10 text-amber-600"
+              >
+                <span className="text-2xl">😊</span>
+              </button>
+              
+              <div className="relative flex-1 bg-white rounded-full">
                 <input
                   type="text"
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                  placeholder="اكتب رسالتك هنا..."
+                  placeholder="اضغط للدخول..."
                   disabled={!canSendMessage}
-                  className="w-full h-10 px-4 py-2 bg-white border border-[#B27324] rounded-xl placeholder-[#8B4513]/50 text-[#8B4513] focus:outline-none focus:ring-2 focus:ring-[#E88F19]"
+                  className="w-full h-10 px-4 py-2 bg-white rounded-full placeholder-gray-500 text-gray-700 focus:outline-none"
                 />
               </div>
 
               <button
                 onClick={handleSendMessage}
                 disabled={!canSendMessage || !newMessage.trim()}
-                className="h-10 w-28 flex items-center justify-center bg-gradient-to-r from-[#4CAF50] to-[#388E3C] hover:from-[#45A049] hover:to-[#2E7D32] text-white rounded-xl border border-[#2E7D32]"
+                className="h-10 w-10 flex items-center justify-center text-amber-600"
               >
-                <span className="mr-1 font-medium">إرسال</span>
-                <Send className="h-4 w-4" />
+                <Send className="h-6 w-6" />
               </button>
             </div>
           </div>
