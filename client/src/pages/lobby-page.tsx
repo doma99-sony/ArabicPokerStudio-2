@@ -372,9 +372,9 @@ export default function LobbyPage() {
             className="fixed z-30 transition-all duration-300 shadow-xl"
             id="chat-container"
             style={{ 
-              top: '85px',
-              left: '50%',
-              transform: isChatHidden ? 'translateX(-50%) translateY(-50px) scale(0.9)' : 'translateX(-50%) translateY(0) scale(1)',
+              top: '120px',
+              left: '30%',
+              transform: isChatHidden ? 'translateX(-30%) translateY(-50px) scale(0.9)' : 'translateX(-30%) translateY(0) scale(1)',
               width: '800px',
               height: '550px',
               opacity: isChatHidden ? 0 : 1,
@@ -399,15 +399,16 @@ export default function LobbyPage() {
               style={{
                 backgroundColor: '#FDA82A',
                 borderRadius: '50%',
-                width: '60px',
-                height: '60px',
+                width: '65px',
+                height: '65px',
                 border: '2px solid #B27324',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 boxShadow: '0 5px 15px rgba(0,0,0,0.4)',
-                top: '85px',
-                left: '20px'
+                top: '50%',
+                left: '20px',
+                transform: 'translateY(-50%)'
               }}
             >
               <div 
