@@ -372,10 +372,10 @@ export default function LobbyPage() {
             className="fixed z-20 transition-all duration-300 shadow-xl"
             id="chat-container"
             style={{ 
-              bottom: '30px',
-              left: '30px',
-              width: '800px',
-              height: '480px',
+              bottom: '20px',
+              right: '20px',
+              width: '400px',
+              height: '500px',
               opacity: isChatHidden ? 0 : 1,
               visibility: isChatHidden ? 'hidden' : 'visible',
               borderRadius: '15px',
