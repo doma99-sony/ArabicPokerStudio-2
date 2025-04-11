@@ -365,20 +365,25 @@ export default function LobbyPage() {
       {/* Main Content */}
       <main className="relative z-10 flex-1 overflow-hidden">
 
-        {/* Chat Section - Fixed to left - تصميم محسن بتأثيرات زجاجية وذهبية */}
+        {/* Chat Section - متجاوب مع الشاشة - نقوم بتغيير الموضع على الأجهزة المختلفة */}
         <div 
-          className="fixed top-16 left-0 h-[calc(100%-8rem)] z-20 transition-all duration-500 shadow-2xl shadow-black/50" 
+          className="fixed z-20 transition-all duration-500 shadow-2xl shadow-black/50 md:top-16 md:left-0 md:h-[calc(100%-8rem)] bottom-16 left-0 right-0 h-[60vh]" 
           id="chat-container"
-          style={{ transform: isChatHidden ? "translateX(-100%)" : "translateX(0)" }}
+          style={{ 
+            transform: isChatHidden 
+              ? window.innerWidth >= 768 ? "translateX(-100%)" : "translateY(100%)" 
+              : "translate(0, 0)"
+          }}
         >
-          <div className="h-full w-72 sm:w-80 bg-gradient-to-b from-[#0A3A2A]/90 to-black/90 backdrop-blur-md border-r border-t border-[#D4AF37]/30 overflow-hidden flex flex-col">
+          <div className="h-full md:w-72 lg:w-80 w-full bg-gradient-to-b from-[#0A3A2A]/90 to-black/90 backdrop-blur-md border-r border-t border-[#D4AF37]/30 overflow-hidden flex flex-col">
             <div className="flex justify-between items-center p-3 border-b border-[#D4AF37]/30 bg-black/30">
               <h2 className="text-[#D4AF37] font-bold text-lg">الدردشة المباشرة</h2>
               <button 
                 className="text-[#D4AF37] hover:text-[#FFD700] bg-black/20 hover:bg-black/40 p-1.5 rounded-full transition-all"
                 onClick={toggleChat}
               >
-                <ChevronLeft size={18} />
+                <ChevronLeft size={18} className="md:block hidden" />
+                <ChevronDown size={18} className="md:hidden block" />
               </button>
             </div>
             <ChatBox />
@@ -390,14 +395,16 @@ export default function LobbyPage() {
           {/* Toggle Chat Button - Outside the chat container, visible when chat is hidden */}
           {isChatHidden && (
             <button 
-              className="fixed top-[50%] left-0 transform -translate-y-1/2 z-20 bg-black/60 border-r border-t border-b border-[#D4AF37]/30 py-10 px-1.5 text-[#D4AF37] hover:text-[#FFD700] hover:bg-black/80 transition-all rounded-r-lg"
+              className="fixed z-20 bg-black/60 border-[#D4AF37]/30 text-[#D4AF37] hover:text-[#FFD700] hover:bg-black/80 transition-all md:top-[50%] md:left-0 md:transform-gpu md:-translate-y-1/2 md:py-10 md:px-1.5 md:border-r md:border-t md:border-b md:rounded-r-lg bottom-[70px] left-4 p-2 rounded-full border shadow-lg"
               onClick={toggleChat}
+              aria-label="فتح غرفة الدردشة"
             >
-              <ChevronRight size={18} />
+              <ChevronRight size={18} className="md:block hidden" />
+              <MessageCircle size={18} className="md:hidden block" />
             </button>
           )}
           
-          <div className="container mx-auto px-4 py-5">
+          <div className="container mx-auto px-2 xs:px-3 sm:px-4 py-3 sm:py-5">
             {/* Category menu - تصميم ذهبي مع تأثيرات محسنة */}
             <div className="mb-6 relative">
               <div className="absolute inset-0 bg-gradient-to-r from-[#0A3A2A]/30 via-[#D4AF37]/10 to-[#0A3A2A]/30 rounded-xl blur-md"></div>
