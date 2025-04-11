@@ -1,0 +1,439 @@
+/*
+* قواعد CSS المتجاوبة للتطبيق
+* تحتوي على تعديلات تضمن تجربة مستخدم متجاوبة على جميع أحجام الشاشات
+*/
+
+/* قواعد عامة متجاوبة */
+:root {
+  /* متغيرات CSS لتخزين نقاط الفصل */
+  --breakpoint-xs: 480px;  /* الهواتف الصغيرة */
+  --breakpoint-sm: 640px;  /* الهواتف */
+  --breakpoint-md: 768px;  /* الأجهزة اللوحية */
+  --breakpoint-lg: 1024px; /* الشاشات الصغيرة */
+  --breakpoint-xl: 1280px; /* الشاشات المتوسطة */
+  --breakpoint-2xl: 1536px; /* الشاشات الكبيرة */
+  
+  /* متغيرات أساسية للعناصر المرنة */
+  --header-height: 4rem;
+  --footer-height: 4rem;
+  --sidebar-width: 16rem;
+  --sidebar-collapsed-width: 4.5rem;
+  --chat-width: 20rem;
+  --chat-collapsed-width: 0rem;
+  
+  /* حجم الخط المرن */
+  font-size: 16px;
+}
+
+/* تعديلات الخط المستجيب للشاشات المختلفة */
+@media (max-width: 768px) {
+  :root {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    font-size: 12px;
+  }
+}
+
+/* قواعد لجعل الصور والفيديو متجاوبة */
+img, video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ضمان أن جميع العناصر تستخدم box-sizing: border-box */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* تعديلات عامة للهيكل المتجاوب */
+body {
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* التخطيط المرن */
+.responsive-container {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* تعديلات على القوائم العلوية والتنقل */
+@media (max-width: 768px) {
+  .nav-links {
+    display: none;
+  }
+  
+  .mobile-nav {
+    display: flex;
+  }
+}
+
+/* تخطيط شبكي متجاوب للبطاقات */
+.responsive-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .responsive-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* العناصر المتجاوبة مع الأجهزة المحمولة */
+@media (max-width: 768px) {
+  .mobile-stack {
+    flex-direction: column !important;
+  }
+  
+  .mobile-full-width {
+    width: 100% !important;
+  }
+  
+  .hide-on-mobile {
+    display: none !important;
+  }
+  
+  .show-on-mobile {
+    display: block !important;
+  }
+}
+
+/* تعديلات لنوافذ الحوار والبوبر على الأجهزة المحمولة */
+@media (max-width: 640px) {
+  .responsive-dialog {
+    width: 90vw !important;
+    margin: 1rem auto !important;
+  }
+}
+
+/* تعديلات للأزرار على الأجهزة المحمولة */
+@media (max-width: 640px) {
+  .responsive-button {
+    padding: 0.5rem 1rem !important;
+    font-size: 0.875rem !important;
+  }
+  
+  .button-group {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+}
+
+/* تعديلات على شكل الجدول للأجهزة المحمولة */
+@media (max-width: 768px) {
+  .responsive-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}
+
+/* تعديلات عناصر الألعاب والبطاقات */
+@media (max-width: 768px) {
+  .game-card {
+    min-width: 140px !important;
+  }
+}
+
+/* تخطيط اللوبي متجاوب */
+@media (max-width: 1024px) {
+  .lobby-layout {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .sidebar-layout {
+    position: fixed;
+    z-index: 50;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+  
+  .sidebar-layout.open {
+    transform: translateX(0);
+  }
+}
+
+/* متغيرات للطاولة الدوارة */
+.rotate-for-player {
+  --player-rotation: 0deg;
+  transform: rotate(var(--player-rotation));
+}
+
+/* تعديلات شاشة اللعب */
+@media (max-width: 768px) {
+  .game-controls {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .game-chat {
+    height: 200px !important;
+    width: 100% !important;
+  }
+}
+
+/* تعديلات للاعب البوكر */
+@media (max-width: 640px) {
+  .poker-player {
+    scale: 0.8;
+  }
+  
+  .player-cards {
+    scale: 0.7;
+  }
+}
+
+/* تعديلات على تصميم الشات */
+@media (max-width: 768px) {
+  .chat-container {
+    width: 100% !important;
+    height: 300px !important;
+  }
+}
+
+/* تعديلات على لعبة السلوتس */
+@media (max-width: 768px) {
+  .slots-reel {
+    height: 70vh !important;
+  }
+  
+  .slots-controls {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
+/* تعديلات على لعبة الكراش */
+@media (max-width: 768px) {
+  .crash-graph {
+    height: 50vh !important;
+  }
+  
+  .bet-controls {
+    flex-direction: column;
+  }
+}
+
+/* تعديلات على الملف الشخصي */
+@media (max-width: 768px) {
+  .profile-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* تعديلات على القائمة الجانبية في الصفحة الرئيسية */
+@media (max-width: 1024px) {
+  .main-sidebar {
+    display: none !important;
+  }
+  
+  .main-content {
+    margin-right: 0 !important;
+    width: 100% !important;
+  }
+  
+  .toggle-sidebar-button {
+    display: flex !important;
+  }
+}
+
+/* توجيه راديو جروب */
+@media (max-width: 640px) {
+  .responsive-radio-group {
+    flex-direction: column !important;
+  }
+}
+
+/* تعديلات على أزرار الإجراءات السريعة */
+@media (max-width: 640px) {
+  .quick-actions {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    background: rgba(0, 0, 0, 0.8) !important;
+    padding: 0.5rem !important;
+    display: flex !important;
+    justify-content: space-around !important;
+    z-index: 100 !important;
+  }
+}
+
+/* تعديلات على قوائم التصنيف */
+@media (max-width: 768px) {
+  .ranking-table th, 
+  .ranking-table td {
+    padding: 0.5rem 0.25rem !important;
+    font-size: 0.875rem !important;
+  }
+}
+
+/* تعديلات على أشكال الصفحة الرئيسية */
+.home-layout {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+@media (max-width: 1024px) {
+  .home-sidebar {
+    width: 100% !important;
+    position: relative !important;
+    min-height: unset !important;
+  }
+  
+  .home-main {
+    width: 100% !important;
+  }
+}
+
+/* تعديلات مخصصة للنافذة المنبثقة */
+.responsive-modal {
+  width: 90%;
+  max-width: 500px;
+}
+
+@media (max-width: 640px) {
+  .responsive-modal {
+    width: 95%;
+    padding: 1rem !important;
+  }
+}
+
+/* تعديلات على أزرار فئات الألعاب */
+@media (max-width: 640px) {
+  .game-categories {
+    overflow-x: auto;
+    flex-wrap: nowrap !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+  
+  .game-categories::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+  
+  .category-button {
+    min-width: 80px !important;
+    white-space: nowrap;
+  }
+}
+
+/* تعديلات على حجم الخط حسب الشاشة */
+@media (max-width: 768px) {
+  h1, .h1 {
+    font-size: 1.75rem !important;
+  }
+  
+  h2, .h2 {
+    font-size: 1.5rem !important;
+  }
+  
+  h3, .h3 {
+    font-size: 1.25rem !important;
+  }
+  
+  h4, .h4 {
+    font-size: 1.125rem !important;
+  }
+}
+
+/* تخطيط شريط الشات في الصفحة الرئيسية */
+@media (max-width: 768px) {
+  #chat-container {
+    width: 100% !important;
+    height: auto !important;
+    position: fixed !important;
+    bottom: 4rem !important; /* فوق شريط التنقل السفلي */
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 30 !important;
+    transform: translateY(100%) !important;
+    transition: transform 0.3s ease !important;
+  }
+  
+  #chat-container.open {
+    transform: translateY(0) !important;
+  }
+  
+  .chat-toggle-button {
+    position: fixed !important;
+    bottom: 5rem !important;
+    left: 1rem !important;
+    z-index: 31 !important;
+    display: flex !important;
+  }
+}
+
+/* تعديلات على شريط التنقل السفلي */
+.bottom-nav {
+  display: flex;
+  justify-content: space-around;
+}
+
+@media (max-width: 480px) {
+  .bottom-nav {
+    padding: 0.25rem !important;
+  }
+  
+  .bottom-nav-button {
+    padding: 0.25rem !important;
+  }
+  
+  .bottom-nav-icon {
+    width: 1.5rem !important;
+    height: 1.5rem !important;
+  }
+  
+  .bottom-nav-text {
+    font-size: 0.65rem !important;
+  }
+}
+
+/* تأثيرات متجاوبة للبطاقات والخلفيات */
+@media (max-width: 768px) {
+  .responsive-bg {
+    background-attachment: scroll !important;
+  }
+  
+  .card-hover-effect {
+    transform: none !important;
+  }
+}
+
+/* تعديل حجم فيديو الخلفية على الأجهزة المحمولة */
+@media (max-width: 768px) {
+  .background-video {
+    height: 100%;
+    width: auto;
+    object-fit: cover;
+  }
+}
+
+/* تعديلات للرسوم البيانية */
+@media (max-width: 768px) {
+  .chart-container {
+    height: 200px !important;
+  }
+}
+
+/* دعم للرسوم المتحركة البسيطة على الأجهزة المحمولة */
+@media (prefers-reduced-motion) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

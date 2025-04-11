@@ -1,4 +1,5 @@
 @import url('./pages/poker-lobby/poker-masr/styles/poker-styles.css');
+@import url('./styles/responsive.css');
 
 @tailwind base;
 @tailwind components;

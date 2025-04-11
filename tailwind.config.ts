@@ -4,7 +4,39 @@ export default {
   darkMode: ["class"],
   content: ["./client/index.html", "./client/src/**/*.{js,jsx,ts,tsx}"],
   theme: {
+    // تخصيص نقاط الفصل للتصميم المتجاوب
+    screens: {
+      'xs': '480px',    // هواتف صغيرة
+      'sm': '640px',    // هواتف
+      'md': '768px',    // أجهزة لوحية
+      'lg': '1024px',   // أجهزة كمبيوتر محمولة
+      'xl': '1280px',   // أجهزة كمبيوتر مكتبية
+      '2xl': '1536px',  // شاشات عريضة
+    },
     extend: {
+      // إضافة متغيرات CSS للتحكم في استخدام وحدات مرنة
+      spacing: {
+        '1vh': '1vh',
+        '2vh': '2vh',
+        '5vh': '5vh',
+        '10vh': '10vh',
+        '20vh': '20vh',
+        '30vh': '30vh',
+        '40vh': '40vh',
+        '50vh': '50vh',
+        '60vh': '60vh',
+        '70vh': '70vh',
+        '80vh': '80vh',
+        '90vh': '90vh',
+        '1vw': '1vw',
+        '2vw': '2vw',
+        '5vw': '5vw',
+        '10vw': '10vw',
+        '20vw': '20vw',
+        '30vw': '30vw',
+        '40vw': '40vw',
+        '50vw': '50vw',
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
