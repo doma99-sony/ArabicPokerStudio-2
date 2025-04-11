@@ -77,7 +77,7 @@ const DominoProfileCard: React.FC<{
       </div>
       
       <div className="flex flex-col lg:flex-row">
-        {/* القسم الأيمن - البادجات والصورة */}
+        {/* القسم الأيمن - الصورة والمعلومات الشخصية */}
         <div className="lg:w-1/3 p-6 flex flex-col items-center border-l border-amber-300/50">
           {/* صورة اللاعب */}
           <div className="relative w-36 h-36 mb-6">
@@ -216,65 +216,8 @@ const DominoProfileCard: React.FC<{
             </div>
           </div>
           
-          {/* البادجات */}
-          <div className="grid grid-cols-2 gap-4 w-full mb-6">
-            <div className="bg-gradient-to-b from-amber-50 to-amber-100 border border-amber-400 rounded-lg p-3 flex flex-col items-center shadow-sm">
-              <div className="text-center mb-2 text-amber-800 text-sm">الرتبة</div>
-              <div className="flex items-center justify-center">
-                <div className="w-16 h-16 relative">
-                  <div className="absolute inset-0 bg-gradient-to-br from-red-500 to-red-700 rounded-lg flex items-center justify-center">
-                    <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTYgMkw0IDhWMTZDNCAxOS43MzkgNi4xMDcxNSAyMy4xNzE1IDkuNjU2ODUgMjUuNjU2OUwxNiAzMEwyMi4zNDMxIDI1LjY1NjlDMjUuODkyOSAyMy4xNzE1IDI4IDE5LjczOSAyOCAxNlY4TDE2IDJaIiBmaWxsPSIjRkZENzAwIiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iMiIvPjx0ZXh0IHg9IjE2IiB5PSIxOSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXdlaWdodD0iYm9sZCIgZm9udC1zaXplPSIxMCIgZmlsbD0iI0ZGRkZGRiI+UjwvdGV4dD48L3N2Zz4=" alt="رتبة" width="38" height="38" />
-                  </div>
-                </div>
-              </div>
-              <div className="text-center mt-2 text-amber-900 text-sm font-bold">{user.rank}</div>
-            </div>
-            <div className="bg-gradient-to-b from-amber-50 to-amber-100 border border-amber-400 rounded-lg p-3 flex flex-col items-center shadow-sm">
-              <div className="text-center mb-2 text-amber-800 text-sm">الحالة</div>
-              <div className="flex items-center justify-center">
-                <div className="w-16 h-16 relative">
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg flex items-center justify-center">
-                    <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTYgMkwzMCAyMkgyTDE2IDJaIiBmaWxsPSIjOEM3REZGIiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iMiIvPjx0ZXh0IHg9IjE2IiB5PSIxOSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXdlaWdodD0iYm9sZCIgZm9udC1zaXplPSIxMCIgZmlsbD0iI0ZGRkZGRiI+VklQPC90ZXh0PjwvdGV4dD48L3N2Zz4=" alt="VIP" width="38" height="38" />
-                  </div>
-                </div>
-              </div>
-              <div className="text-center mt-2 text-amber-900 text-sm font-bold">نشط</div>
-            </div>
-          </div>
-          
-          {/* بادج تاجر العملات الذهبية */}
-          <div className="bg-gradient-to-b from-amber-50 to-amber-100 border-2 border-amber-500 rounded-lg p-4 flex flex-col items-center shadow-xl w-full mb-4">
-            <div className="text-center mb-2 text-amber-800 text-base font-medium">تاجر العملات الذهبية</div>
-            <div className="flex items-center justify-center">
-              <div className="w-20 h-20 relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-yellow-500 to-amber-700 rounded-lg flex items-center justify-center p-1">
-                  <svg width="60" height="60" viewBox="0 0 45 45" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M22.5 4C12.835 4 5 11.835 5 21.5C5 31.165 12.835 39 22.5 39C32.165 39 40 31.165 40 21.5C40 11.835 32.165 4 22.5 4Z" fill="#FFD700" stroke="#8B4513" strokeWidth="1.5"/>
-                    <path d="M22.5 14L26 18H19L22.5 14Z" fill="#FFFFFF"/>
-                    <path d="M22.5 8L26 12H19L22.5 8Z" fill="#FFFFFF"/>
-                    <path d="M22.5 20L26 24H19L22.5 20Z" fill="#FFFFFF"/>
-                    <path d="M28 22C28 24.7614 25.7614 27 23 27C20.2386 27 18 24.7614 18 22" stroke="#8B4513" strokeWidth="1.5"/>
-                    <path d="M12 21H15V28H12V21Z" fill="#8B4513"/>
-                    <path d="M10 29H17L15 33H12L10 29Z" fill="#8B4513"/>
-                    <path d="M12 15C12 14.4477 12.4477 14 13 14H15C15.5523 14 16 14.4477 16 15V21H12V15Z" fill="#8B4513"/>
-                    <path d="M31 20H33C33.5523 20 34 20.4477 34 21V28C34 28.5523 33.5523 29 33 29H31C30.4477 29 30 28.5523 30 28V21C30 20.4477 30.4477 20 31 20Z" fill="#8B4513"/>
-                    <path d="M29 17L33 13L36 17H29Z" fill="#FFFFFF"/>
-                    <path d="M31 13C31 12.4477 31.4477 12 32 12H34C34.5523 12 35 12.4477 35 13V17H31V13Z" fill="#8B4513"/>
-                    <circle cx="22.5" cy="21.5" r="7.5" fill="#FFC700" stroke="#8B4513"/>
-                    <path d="M22.5 25V18" stroke="#8B4513" strokeWidth="1.5"/>
-                    <path d="M19 21.5H26" stroke="#8B4513" strokeWidth="1.5"/>
-                  </svg>
-                </div>
-              </div>
-            </div>
-            <div className="text-center mt-2 text-amber-900 text-sm font-bold">لاعب مميز</div>
-          </div>
-        </div>
-        
-        {/* القسم الأيسر - البيانات والإحصائيات */}
-        <div className="lg:w-2/3 p-6">
           {/* الرصيد والعملات */}
-          <div className="grid grid-cols-3 gap-4 mb-6">
+          <div className="grid grid-cols-1 gap-4 w-full mb-6">
             <div className="bg-gradient-to-b from-amber-50 to-amber-100 border border-amber-400 rounded-lg p-4 text-center shadow-md">
               <div className="text-amber-800 text-sm mb-2 font-medium">الرقائق</div>
               <div className="text-amber-900 font-bold flex items-center justify-center text-xl">
@@ -295,6 +238,63 @@ const DominoProfileCard: React.FC<{
                 {user.diamonds.toLocaleString()}
                 <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNOCAxLjVMMTQuNSA4TDggMTQuNUwxLjUgOEw4IDEuNVoiIGZpbGw9IiM0M0M0RkYiIHN0cm9rZT0iIzAwN0RCNSIvPjwvc3ZnPg==" alt="ماس" className="ml-2 w-6 h-6" />
               </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* القسم الأيسر - البيانات والإحصائيات */}
+        <div className="lg:w-2/3 p-6">
+          {/* البادجات والرتب */}
+          <div className="grid grid-cols-3 gap-4 mb-6">
+            <div className="bg-gradient-to-b from-amber-50 to-amber-100 border border-amber-400 rounded-lg p-3 flex flex-col items-center shadow-sm">
+              <div className="text-center mb-2 text-amber-800 text-sm">الرتبة</div>
+              <div className="flex items-center justify-center">
+                <div className="w-16 h-16 relative">
+                  <div className="absolute inset-0 bg-gradient-to-br from-red-500 to-red-700 rounded-lg flex items-center justify-center">
+                    <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTYgMkw0IDhWMTZDNCAxOS43MzkgNi4xMDcxNSAyMy4xNzE1IDkuNjU2ODUgMjUuNjU2OUwxNiAzMEwyMi4zNDMxIDI1LjY1NjlDMjUuODkyOSAyMy4xNzE1IDI4IDE5LjczOSAyOCAxNlY4TDE2IDJaIiBmaWxsPSIjRkZENzAwIiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iMiIvPjx0ZXh0IHg9IjE2IiB5PSIxOSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXdlaWdodD0iYm9sZCIgZm9udC1zaXplPSIxMCIgZmlsbD0iI0ZGRkZGRiI+UjwvdGV4dD48L3N2Zz4=" alt="رتبة" width="38" height="38" />
+                  </div>
+                </div>
+              </div>
+              <div className="text-center mt-2 text-amber-900 text-sm font-bold">{user.rank}</div>
+            </div>
+            
+            <div className="bg-gradient-to-b from-amber-50 to-amber-100 border border-amber-400 rounded-lg p-3 flex flex-col items-center shadow-sm">
+              <div className="text-center mb-2 text-amber-800 text-sm">الحالة</div>
+              <div className="flex items-center justify-center">
+                <div className="w-16 h-16 relative">
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg flex items-center justify-center">
+                    <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTYgMkwzMCAyMkgyTDE2IDJaIiBmaWxsPSIjOEM3REZGIiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iMiIvPjx0ZXh0IHg9IjE2IiB5PSIxOSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXdlaWdodD0iYm9sZCIgZm9udC1zaXplPSIxMCIgZmlsbD0iI0ZGRkZGRiI+VklQPC90ZXh0PjwvdGV4dD48L3N2Zz4=" alt="VIP" width="38" height="38" />
+                  </div>
+                </div>
+              </div>
+              <div className="text-center mt-2 text-amber-900 text-sm font-bold">نشط</div>
+            </div>
+            
+            <div className="bg-gradient-to-b from-amber-50 to-amber-100 border-2 border-amber-500 rounded-lg p-3 flex flex-col items-center shadow-xl">
+              <div className="text-center mb-2 text-amber-800 text-sm font-medium">تاجر العملات</div>
+              <div className="flex items-center justify-center">
+                <div className="w-16 h-16 relative">
+                  <div className="absolute inset-0 bg-gradient-to-br from-yellow-500 to-amber-700 rounded-lg flex items-center justify-center p-1">
+                    <svg width="50" height="50" viewBox="0 0 45 45" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M22.5 4C12.835 4 5 11.835 5 21.5C5 31.165 12.835 39 22.5 39C32.165 39 40 31.165 40 21.5C40 11.835 32.165 4 22.5 4Z" fill="#FFD700" stroke="#8B4513" strokeWidth="1.5"/>
+                      <path d="M22.5 14L26 18H19L22.5 14Z" fill="#FFFFFF"/>
+                      <path d="M22.5 8L26 12H19L22.5 8Z" fill="#FFFFFF"/>
+                      <path d="M22.5 20L26 24H19L22.5 20Z" fill="#FFFFFF"/>
+                      <path d="M28 22C28 24.7614 25.7614 27 23 27C20.2386 27 18 24.7614 18 22" stroke="#8B4513" strokeWidth="1.5"/>
+                      <path d="M12 21H15V28H12V21Z" fill="#8B4513"/>
+                      <path d="M10 29H17L15 33H12L10 29Z" fill="#8B4513"/>
+                      <path d="M12 15C12 14.4477 12.4477 14 13 14H15C15.5523 14 16 14.4477 16 15V21H12V15Z" fill="#8B4513"/>
+                      <path d="M31 20H33C33.5523 20 34 20.4477 34 21V28C34 28.5523 33.5523 29 33 29H31C30.4477 29 30 28.5523 30 28V21C30 20.4477 30.4477 20 31 20Z" fill="#8B4513"/>
+                      <path d="M29 17L33 13L36 17H29Z" fill="#FFFFFF"/>
+                      <path d="M31 13C31 12.4477 31.4477 12 32 12H34C34.5523 12 35 12.4477 35 13V17H31V13Z" fill="#8B4513"/>
+                      <circle cx="22.5" cy="21.5" r="7.5" fill="#FFC700" stroke="#8B4513"/>
+                      <path d="M22.5 25V18" stroke="#8B4513" strokeWidth="1.5"/>
+                      <path d="M19 21.5H26" stroke="#8B4513" strokeWidth="1.5"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              <div className="text-center mt-2 text-amber-900 text-sm font-bold">لاعب مميز</div>
             </div>
           </div>
           
