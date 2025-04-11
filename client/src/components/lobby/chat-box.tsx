@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, memo } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useWebSocket } from "@/hooks/use-websocket-simplified";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,7 @@ interface ChatMessage {
   isSystem?: boolean;
 }
 
-// رسائل النظام الافتراضية - منقولة خارج الدالة لمنع إعادة إنشائها مع كل تحديث
+// رسائل النظام الافتراضية
 const systemMessages: ChatMessage[] = [
   {
     id: 'welcome_msg_1',
@@ -34,8 +34,7 @@ const systemMessages: ChatMessage[] = [
   }
 ];
 
-// استخدام memo لتحسين الأداء ومنع الرسم المتكرر غير الضروري
-export const ChatBox = memo(function ChatBox() {
+export function ChatBox() {
   const { user } = useAuth();
   const { registerMessageHandler: registerHandler, sendMessage, status } = useWebSocket();
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -45,74 +44,53 @@ export const ChatBox = memo(function ChatBox() {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const emojiPickerRef = useRef<HTMLDivElement>(null);
-  const prevStatusRef = useRef(status);
-  const isInitialMountRef = useRef(true);
-
-  // استخدام useCallback لمنع إعادة إنشاء الدالة مع كل تحديث
-  const handleNewMessage = useCallback((message: ChatMessage) => {
-    setMessages(prev => [...prev, message]);
-    
-    // قم بالتمرير إلى أسفل عند استلام رسالة جديدة
-    setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
-  }, []);
 
   // تسجيل معالج الرسائل من الويب سوكيت
   useEffect(() => {
-    const unregister = registerHandler("chat_message", handleNewMessage);
+    const unregister = registerHandler("chat_message", (message: ChatMessage) => {
+      // إضافة رسالة جديدة تلقائيًا
+      setMessages(prev => [...prev, message]);
+      
+      // قم بالتمرير إلى أسفل عند استلام رسالة جديدة
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    });
+
     return () => unregister();
-  }, [registerHandler, handleNewMessage]);
+  }, [registerHandler]);
 
   // التمرير للأسفل عند تحميل المكون
   useEffect(() => {
-    if (isInitialMountRef.current) {
-      messagesEndRef.current?.scrollIntoView();
-      isInitialMountRef.current = false;
-    }
+    messagesEndRef.current?.scrollIntoView();
   }, []);
 
-  // إضافة رسالة نظام عند تغير حالة الاتصال - بطريقة آمنة لمنع التحديثات المتكررة
+  // إضافة رسالة نظام عند تغير حالة الاتصال
   useEffect(() => {
-    // تخطي التحديث الأول عند التحميل الأولي
-    if (isInitialMountRef.current) {
-      prevStatusRef.current = status;
-      return;
-    }
-    
-    // تنفيذ الكود فقط عند حدوث تغيير فعلي في الحالة - لمنع الحلقات اللانهائية
-    if (prevStatusRef.current !== status) {
-      const timestamp = Date.now();
-      
-      if (status === 'open' && prevStatusRef.current !== 'open') {
-        // إضافة رسالة بأن المستخدم متصل - فقط عند الانتقال من حالة غير متصل إلى متصل
-        const connectionMsg: ChatMessage = {
-          id: `conn_${timestamp}`,
-          username: 'النظام',
-          message: 'تم الاتصال بالخادم بنجاح ✅',
-          timestamp: timestamp,
-          isSystem: true
-        };
-        setMessages(prev => [...prev, connectionMsg]);
-      } else if ((status === 'closed' || status === 'error') && prevStatusRef.current === 'open') {
-        // إضافة رسالة بأن المستخدم غير متصل - فقط عند الانتقال من حالة متصل إلى غير متصل
-        const disconnectionMsg: ChatMessage = {
-          id: `disconn_${timestamp}`,
-          username: 'النظام',
-          message: 'انقطع الاتصال بالخادم ❌',
-          timestamp: timestamp,
-          isSystem: true
-        };
-        setMessages(prev => [...prev, disconnectionMsg]);
-      }
-      
-      // تحديث القيمة المرجعية
-      prevStatusRef.current = status;
+    if (status === 'open') {
+      // إضافة رسالة بأن المستخدم متصل
+      const connectionMsg: ChatMessage = {
+        id: `conn_${Date.now()}`,
+        username: 'النظام',
+        message: 'تم الاتصال بالخادم بنجاح ✅',
+        timestamp: Date.now(),
+        isSystem: true
+      };
+      setMessages(prev => [...prev, connectionMsg]);
+    } else if (status === 'closed' || status === 'error') {
+      // إضافة رسالة بأن المستخدم غير متصل
+      const disconnectionMsg: ChatMessage = {
+        id: `disconn_${Date.now()}`,
+        username: 'النظام',
+        message: 'انقطع الاتصال بالخادم ❌',
+        timestamp: Date.now(),
+        isSystem: true
+      };
+      setMessages(prev => [...prev, disconnectionMsg]);
     }
   }, [status]);
 
-  // استخدام useCallback لمنع إعادة إنشاء دالة معالجة الإرسال مع كل تحديث
-  const handleSendMessage = useCallback(() => {
+  const handleSendMessage = () => {
     if (!newMessage.trim() || !user) return;
 
     sendMessage("chat_message", {
@@ -121,19 +99,17 @@ export const ChatBox = memo(function ChatBox() {
 
     setNewMessage("");
     setShowEmojiPicker(false);
-  }, [newMessage, user, sendMessage]);
+  };
 
-  // استخدام useCallback لمنع إعادة إنشاء دالة معالجة اختيار الإيموجي مع كل تحديث
-  const onEmojiClick = useCallback((emojiData: EmojiClickData) => {
+  const onEmojiClick = (emojiData: EmojiClickData) => {
     setNewMessage(prev => prev + emojiData.emoji);
-  }, []);
+  };
 
-  // استخدام useCallback لمنع إعادة إنشاء دالة التوسيع والطي مع كل تحديث
-  const toggleExpanded = useCallback(() => {
-    setIsExpanded(prev => !prev);
-  }, []);
+  const toggleExpanded = () => {
+    setIsExpanded(!isExpanded);
+  };
 
-  // تحديد إذا كان المستخدم متصل ويمكنه إرسال رسائل - محسوبة مرة واحدة
+  // تحديد إذا كان المستخدم متصل ويمكنه إرسال رسائل
   const canSendMessage = status === 'open' && !!user;
 
   return (
