@@ -16,6 +16,7 @@ import { GameIconSet } from "@/games/queen-of-egypt-3d/assets/egyptian-icons";
 import { formatChips } from "@/lib/utils";
 import { HeavySnowEffect, GoldDustEffect } from "@/components/effects/snow-effect";
 import { HeavyPokerCardsEffect, SuitSymbolsEffect } from "@/components/effects/poker-cards-effect";
+import { AnimatedChips } from "@/components/ui/animated-chips";
 
 export default function LobbyPage() {
   const [location, navigate] = useLocation();

@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useContext } from "react";
+import { createContext, ReactNode, useContext, useEffect, useRef } from "react";
 import {
   useQuery,
   useMutation,
@@ -38,15 +38,42 @@ export const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
   const [, navigate] = useLocation();
+  const timerRef = useRef<number | null>(null);
+  
   const {
     data: user,
     error,
     isLoading,
+    refetch
   } = useQuery<SelectUser | undefined, Error>({
     queryKey: ["/api/user"],
     queryFn: getQueryFn({ on401: "returnNull" }),
     retry: false,
   });
+  
+  // وظيفة لتحديث بيانات المستخدم تلقائياً كل 3 ثواني
+  useEffect(() => {
+    // فقط إذا كان المستخدم مسجل الدخول
+    if (user) {
+      // تنظيف أي مؤقت سابق
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+      
+      // إنشاء مؤقت جديد لتحديث البيانات كل 3 ثواني
+      timerRef.current = window.setInterval(() => {
+        refetch();
+      }, 3000);
+      
+      // تنظيف المؤقت عند إلغاء تحميل المكون
+      return () => {
+        if (timerRef.current) {
+          clearInterval(timerRef.current);
+          timerRef.current = null;
+        }
+      };
+    }
+  }, [user, refetch]);
   
   // دالة للانتقال إلى صفحة اللوبي الرئيسية
   const goToLobby = () => {
