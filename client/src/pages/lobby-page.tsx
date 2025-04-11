@@ -353,8 +353,14 @@ export default function LobbyPage() {
                   <GameCategoryButton
                     active={activeGameCategory === "poker"}
                     onClick={() => setActiveGameCategory("poker" as GameType)}
-                    icon="♠🏠"
+                    icon="♠"
                     label="بوكر"
+                  />
+                  <GameCategoryButton
+                    active={activeGameCategory === "home" as any}
+                    onClick={() => navigate("/")}
+                    icon="🏠"
+                    label="الرئيسية"
                   />
                   <GameCategoryButton
                     active={activeGameCategory === "slots" as any}
