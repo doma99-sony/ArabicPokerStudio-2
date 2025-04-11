@@ -14,7 +14,6 @@ import { LogOut, User, ChevronRight, Loader2, ChevronLeft, ChevronUp, Bell, Shop
 import { formatChips } from "@/lib/utils";
 import { HeavySnowEffect, GoldDustEffect } from "@/components/effects/snow-effect";
 import { HeavyPokerCardsEffect, SuitSymbolsEffect } from "@/components/effects/poker-cards-effect";
-import ProfilePopup from "@/components/profile/ProfilePopup";
 
 export default function LobbyPage() {
   const [location, navigate] = useLocation();
@@ -22,7 +21,6 @@ export default function LobbyPage() {
   const [activeGameCategory, setActiveGameCategory] = useState<GameType>("poker");
   const [isChatHidden, setIsChatHidden] = useState(false);
   const [videoMuted, setVideoMuted] = useState(true);
-  const [profilePopupOpen, setProfilePopupOpen] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   
   // استخدام WebSocket لاتصال مستمر مع الخادم
@@ -89,7 +87,7 @@ export default function LobbyPage() {
   };
 
   const navigateToProfile = () => {
-    setProfilePopupOpen(true);
+    navigate("/profile");
   };
 
   // وظيفة للانتقال إلى صفحة الطاولات بناءً على نوع اللعبة
@@ -104,8 +102,9 @@ export default function LobbyPage() {
       navigate("/arabic-rocket");
     } else if (gameType === "zeus_king") {
       navigate("/zeus-king");
-    } else if (gameType === "egypt_queen") {
-      navigate("/egypt-queen");
+
+    } else if (gameType === "egypt_rocket") {
+      navigate("/egypt-rocket");
     } else if (gameType === "arab_poker") {
       navigate("/arab-poker");
     }
@@ -175,7 +174,7 @@ export default function LobbyPage() {
                   {/* زر تعديل الصورة */}
                   <button 
                     className="absolute inset-0 w-full h-full bg-black/50 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-300"
-                    onClick={() => setProfilePopupOpen(true)}
+                    onClick={() => navigate("/profile")}
                   >
                     <span className="text-white text-xs">تغيير</span>
                   </button>
@@ -351,31 +350,31 @@ export default function LobbyPage() {
                 <div className="flex justify-center space-x-2 rtl:space-x-reverse overflow-x-auto scrollbar-hide">
                   <GameCategoryButton
                     active={activeGameCategory === "poker"}
-                    onClick={() => setActiveGameCategory("poker")}
+                    onClick={() => setActiveGameCategory("poker" as GameType)}
                     icon="♠"
                     label="بوكر"
                   />
                   <GameCategoryButton
-                    active={activeGameCategory === "slots"}
-                    onClick={() => setActiveGameCategory("slots")}
+                    active={activeGameCategory === "slots" as any}
+                    onClick={() => setActiveGameCategory("slots" as any)}
                     icon="🎰"
                     label="سلوتس"
                   />
                   <GameCategoryButton
-                    active={activeGameCategory === "crash"}
-                    onClick={() => setActiveGameCategory("crash")}
+                    active={activeGameCategory === "crash" as any}
+                    onClick={() => setActiveGameCategory("crash" as any)}
                     icon="🚀"
                     label="كراش"
                   />
                   <GameCategoryButton
                     active={activeGameCategory === "domino"}
-                    onClick={() => setActiveGameCategory("domino")}
+                    onClick={() => setActiveGameCategory("domino" as GameType)}
                     icon="🁑"
                     label="دومينو"
                   />
                   <GameCategoryButton
                     active={activeGameCategory === "naruto"}
-                    onClick={() => setActiveGameCategory("naruto")}
+                    onClick={() => setActiveGameCategory("naruto" as GameType)}
                     icon="👑"
                     label="ناروتو"
                   />
@@ -401,17 +400,7 @@ export default function LobbyPage() {
                       isNew: true,
                       onClick: () => navigate("/arab-poker")
                     },
-                    {
-                      id: "egypt-queen",
-                      title: "ملكة مصر",
-                      image: "/images/egypt-queen-bg.jpg",
-                      playerCount: 845,
-                      tableCount: 37,
-                      minBet: 100,
-                      maxBet: 250000,
-                      isHot: true,
-                      onClick: () => navigate("/egypt-queen")
-                    },
+
                     {
                       id: "zeus-king",
                       title: "زيوس كينغ",
@@ -422,12 +411,24 @@ export default function LobbyPage() {
                       maxBet: 500000,
                       isVIP: true,
                       onClick: () => navigate("/zeus-king")
+                    },
+                    {
+                      id: "poker-masr",
+                      title: "بوكر مصر",
+                      image: "/images/egyptian-poker-bg.jpg",
+                      playerCount: 1820,
+                      tableCount: 45,
+                      minBet: 100,
+                      maxBet: 150000,
+                      isNew: true,
+                      isHot: true,
+                      onClick: () => navigate("/poker-lobby/poker-masr")
                     }
                   ]}
                 />
               )}
               
-              {activeGameCategory === "slots" && (
+              {activeGameCategory === ("slots" as GameType) && (
                 <GameSection 
                   title="ألعاب السلوتس" 
                   icon="🎰"
@@ -453,26 +454,61 @@ export default function LobbyPage() {
                       maxBet: 25000,
                       isHot: true,
                       onClick: () => navigate("/slots/arabian-legends")
+                    },
+                    {
+                      id: "fishing-slots",
+                      title: "صياد السمك",
+                      image: "/attached_assets/image_1743814147037.png",
+                      playerCount: 389,
+                      tableCount: 0,
+                      minBet: 1,
+                      maxBet: 50000,
+                      isNew: true,
+                      onClick: () => navigate("/fishing-slots")
+                    },
+                    {
+                      id: "pharaohs-book",
+                      title: "كتاب الفرعون",
+                      image: "/attached_assets/freepik__background__73483.png",
+                      playerCount: 275,
+                      tableCount: 0,
+                      minBet: 5,
+                      maxBet: 50000,
+                      isNew: true,
+                      isHot: true,
+                      onClick: () => navigate("/slots/pharaohs-book")
+                    },
+                    {
+                      id: "queen-of-egypt-3d",
+                      title: "ملكة مصر 3D",
+                      image: "/games/queen-of-egypt-3d/assets/logo.svg",
+                      playerCount: 348,
+                      tableCount: 0,
+                      minBet: 10,
+                      maxBet: 100000,
+                      isNew: true,
+                      isHot: true,
+                      onClick: () => navigate("/queen-of-egypt-3d")
                     }
                   ]}
                 />
               )}
               
-              {activeGameCategory === "crash" && (
+              {activeGameCategory === ("crash" as GameType) && (
                 <GameSection 
                   title="ألعاب الكراش" 
                   icon="🚀"
                   games={[
                     {
-                      id: "arabic-rocket",
-                      title: "الصاروخ العربي",
-                      image: "/images/rocket-crash-bg.jpg",
-                      playerCount: 982,
+                      id: "egypt-rocket",
+                      title: "صاروخ مصر",
+                      image: "/attached_assets/image_1743971608301.png",
+                      playerCount: 346,
                       tableCount: 0,
                       minBet: 10,
                       maxBet: 100000,
-                      isHot: true,
-                      onClick: () => navigate("/arabic-rocket")
+                      isNew: true,
+                      onClick: () => navigate("/egypt-rocket")
                     }
                   ]}
                 />
@@ -540,26 +576,62 @@ export default function LobbyPage() {
           {/* الرانك */}
           <div className="relative group">
             <button 
-              className="flex flex-col items-center justify-center px-3 py-1 transition-all duration-300"
-              onClick={() => navigate("/rankings")}  
+              className="relative flex flex-col items-center justify-center p-2 min-w-[60px]"
+              onClick={() => navigate("/rankings")}
             >
-              <div className="text-white/90 group-hover:text-[#D4AF37] w-6 h-6 flex items-center justify-center mb-1">
-                <Trophy size={24} className="group-hover:scale-110 transition-transform" />
+              <div className="bg-gradient-to-br from-[#FFD700]/80 to-[#ffa500]/80 rounded-full w-14 h-14 border-2 border-[#D4AF37] flex items-center justify-center relative shadow-lg hover:shadow-[#D4AF37]/20 transition-all duration-300 overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-[#D4AF37]/0 via-[#D4AF37]/30 to-[#D4AF37]/0 animate-pulse-slow"></div>
+                <div className="relative w-11 h-11 overflow-hidden">
+                  <img 
+                    src="/assets/rankings/rank-trophy.png" 
+                    alt="Rank" 
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border border-white shadow-md animate-pulse"></span>
               </div>
-              <span className="text-[10px] text-white/80 group-hover:text-[#D4AF37]">الرانك</span>
+              <span className="text-[11px] text-white mt-1 font-bold text-[#D4AF37]">الرانك</span>
             </button>
           </div>
           
-          {/* الهدايا */}
+          {/* المتجر */}
           <div className="relative group">
             <button 
-              className="flex flex-col items-center justify-center px-3 py-1 transition-all duration-300"
-              onClick={() => navigate("/send-chips")}  
+              className="relative flex flex-col items-center justify-center p-2 min-w-[60px]"
+              onClick={() => navigate("/shop")}
             >
-              <div className="text-white/90 group-hover:text-[#D4AF37] w-6 h-6 flex items-center justify-center mb-1">
-                <Coins size={24} className="group-hover:scale-110 transition-transform" />
+              <div className="bg-gradient-to-br from-[#1B4D3E] to-[#0A3A2A] rounded-full w-12 h-12 border-2 border-[#D4AF37] flex items-center justify-center relative shadow-lg hover:shadow-[#D4AF37]/20 transition-all duration-300">
+                <ShoppingCart className="h-6 w-6 text-[#D4AF37]" />
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border border-white animate-pulse"></span>
               </div>
-              <span className="text-[10px] text-white/80 group-hover:text-[#D4AF37]">الهدايا</span>
+              <span className="text-[11px] text-white mt-1">المتجر</span>
+            </button>
+          </div>
+          
+          {/* الحقيبة */}
+          <div className="relative group">
+            <button 
+              className="relative flex flex-col items-center justify-center p-2 min-w-[60px]"
+              onClick={() => navigate("/inventory")}
+            >
+              <div className="bg-gradient-to-br from-[#1B4D3E] to-[#0A3A2A] rounded-full w-12 h-12 border-2 border-[#D4AF37] flex items-center justify-center relative shadow-lg hover:shadow-[#D4AF37]/20 transition-all duration-300">
+                <ShoppingBag className="h-6 w-6 text-[#D4AF37]" />
+              </div>
+              <span className="text-[11px] text-white mt-1">الحقيبة</span>
+            </button>
+          </div>
+          
+          {/* VIP */}
+          <div className="relative group">
+            <button 
+              className="relative flex flex-col items-center justify-center p-2 min-w-[60px]"
+              onClick={() => navigate("/vip")}
+            >
+              <div className="bg-gradient-to-br from-[#D4AF37]/80 to-[#FFC800]/90 rounded-full w-12 h-12 border-2 border-[#D4AF37] flex items-center justify-center relative shadow-lg hover:shadow-[#D4AF37]/20 transition-all duration-300 overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-[#D4AF37]/10 via-[#D4AF37]/30 to-[#D4AF37]/10 animate-pulse-slow"></div>
+                <Crown className="h-6 w-6 text-black" />
+              </div>
+              <span className="text-[11px] text-white mt-1 font-bold text-[#D4AF37]">VIP</span>
             </button>
           </div>
           
@@ -567,10 +639,7 @@ export default function LobbyPage() {
           <div className="relative group -mt-3 z-10">
             <button 
               className="flex flex-col items-center justify-center px-1 py-1 transition-all duration-300"
-              onClick={() => {
-                // الانتقال إلى صفحة اللعب
-                navigateToGameTables('poker');
-              }}
+              onClick={() => navigateToGameTables('poker')}
             >
               <div className="bg-white rounded-full w-12 h-12 border-2 border-[#D4AF37] flex items-center justify-center relative overflow-hidden">
                 <span className="text-sm font-bold text-[#0A3A2A]">العبها</span>
@@ -578,6 +647,67 @@ export default function LobbyPage() {
               </div>
               <span className="text-[11px] text-white mt-1">العبها الآن</span>
             </button>
+          </div>
+          
+          {/* الأحداث */}
+          <div className="relative group">
+            <button 
+              className="relative flex flex-col items-center justify-center p-2 min-w-[60px]"
+              onClick={() => {
+                // إظهار صفحة الأحداث
+                alert("سيتم فتح صفحة الأحداث");
+              }}
+            >
+              <div className="bg-gradient-to-br from-white to-[#f0f0f0] rounded-full w-12 h-12 border-2 border-[#D4AF37] flex items-center justify-center relative shadow-lg hover:shadow-[#D4AF37]/20 transition-all duration-300">
+                <span className="text-sm font-bold text-[#0A3A2A]">الأحداث</span>
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border border-white animate-pulse"></span>
+              </div>
+              <span className="text-[11px] text-white mt-1">الأحداث</span>
+            </button>
+          </div>
+          
+          {/* الإعدادات */}
+          <div className="relative">
+            <button 
+              onClick={() => navigate("/settings")}
+              className="flex flex-col items-center justify-center p-2 min-w-[48px]"
+            >
+              <div className="bg-black/60 rounded-full w-11 h-11 border border-[#D4AF37] flex items-center justify-center text-[#D4AF37]">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+              </div>
+              <span className="text-[11px] text-white mt-1">الإعدادات</span>
+            </button>
+          </div>
+          
+          {/* الرسائل */}
+          <div className="relative">
+            <button 
+              onClick={() => alert("سيتم فتح الرسائل")}
+              className="flex flex-col items-center justify-center p-2 min-w-[48px]"
+            >
+              <div className="bg-black/60 rounded-full w-11 h-11 border border-[#D4AF37] flex items-center justify-center text-yellow-300">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+              </div>
+              <span className="text-[11px] text-white mt-1">الرسائل</span>
+            </button>
+            <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-[10px] text-white flex items-center justify-center border border-black">2</span>
+          </div>
+          
+          {/* تعليمات اللعب */}
+          <GameInstructionsButton />
+          
+          {/* المهمات */}
+          <div className="relative">
+            <button 
+              onClick={() => navigate("/missions")}
+              className="flex flex-col items-center justify-center p-2 min-w-[48px]"
+            >
+              <div className="bg-black/60 rounded-full w-11 h-11 border border-[#D4AF37] flex items-center justify-center text-[#D4AF37]">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+              </div>
+              <span className="text-[11px] text-white mt-1">المهمات</span>
+            </button>
+            <span className="absolute -top-1 -right-1 w-5 h-5 bg-amber-500 rounded-full text-[10px] text-white flex items-center justify-center border border-black">3</span>
           </div>
         </div>
       </div>
@@ -731,12 +861,6 @@ function GameSection({ title, icon, games }: {
           </div>
         ))}
       </div>
-      
-      {/* مكون ProfilePopup */}
-      <ProfilePopup 
-        isOpen={profilePopupOpen} 
-        onClose={() => setProfilePopupOpen(false)} 
-      />
     </div>
   );
 }
