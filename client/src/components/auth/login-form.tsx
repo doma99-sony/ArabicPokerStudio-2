@@ -33,46 +33,63 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
   });
   
   const onSubmit = (data: LoginFormValues) => {
+    // تخزين توقيت بدء محاولة تسجيل الدخول
+    const loginStartTime = Date.now();
+    
     loginMutation.mutate(data, {
       onSuccess: (user) => {
         // تأكيد بأننا حصلنا على معلومات المستخدم بشكل صحيح
         if (user && user.id) {
           // تخزين معلومات آخر دخول في التخزين المحلي
           localStorage.setItem("lastAuthTimestamp", Date.now().toString());
-          // دع عملية إعادة التوجيه تتم من خلال hook السياق المصادقة
-          console.log("تم تسجيل الدخول بنجاح من نموذج تسجيل الدخول العادي");
-          // التوجيه يتم تلقائياً من خلال use-auth.tsx
+          
+          // حساب زمن الاستجابة
+          const responseTime = Date.now() - loginStartTime;
+          console.log(`تم تسجيل الدخول بنجاح من نموذج تسجيل الدخول العادي (${responseTime}ms)`);
+          
+          // التوجيه يتم فوراً من خلال use-auth.tsx
         }
       }
     });
   };
   
   const handleGuestLogin = () => {
+    // تخزين توقيت بدء محاولة تسجيل الدخول
+    const loginStartTime = Date.now();
+    
     loginGuestMutation.mutate(undefined, {
       onSuccess: (user) => {
         // تأكيد بأننا حصلنا على معلومات المستخدم بشكل صحيح
         if (user && user.id) {
           // تخزين معلومات آخر دخول
           localStorage.setItem("lastAuthTimestamp", Date.now().toString());
-          // دع عملية إعادة التوجيه تتم من خلال hook السياق المصادقة
-          // ليتم التوجيه إلى صفحة الملف الشخصي
-          console.log("تم تسجيل الدخول كضيف بنجاح من نموذج تسجيل الدخول");
-          // التوجيه يتم تلقائياً من خلال use-auth.tsx
+          
+          // حساب زمن الاستجابة
+          const responseTime = Date.now() - loginStartTime;
+          console.log(`تم تسجيل الدخول كضيف بنجاح من نموذج تسجيل الدخول (${responseTime}ms)`);
+          
+          // التوجيه يتم فوراً من خلال use-auth.tsx
         }
       }
     });
   };
   
   const handleFacebookLogin = () => {
+    // تخزين توقيت بدء محاولة تسجيل الدخول
+    const loginStartTime = Date.now();
+    
     loginFacebookMutation.mutate(undefined, {
       onSuccess: (user) => {
         // تأكيد بأننا حصلنا على معلومات المستخدم بشكل صحيح
         if (user && user.id) {
           // تخزين معلومات آخر دخول
           localStorage.setItem("lastAuthTimestamp", Date.now().toString());
-          // دع عملية إعادة التوجيه تتم من خلال hook السياق المصادقة
-          console.log("تم تسجيل الدخول عبر فيسبوك بنجاح من نموذج تسجيل الدخول");
-          // التوجيه يتم تلقائياً من خلال use-auth.tsx
+          
+          // حساب زمن الاستجابة
+          const responseTime = Date.now() - loginStartTime;
+          console.log(`تم تسجيل الدخول عبر فيسبوك بنجاح من نموذج تسجيل الدخول (${responseTime}ms)`);
+          
+          // التوجيه يتم فوراً من خلال use-auth.tsx
         }
       }
     });
