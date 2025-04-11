@@ -16,37 +16,8 @@ interface ChatMessage {
   isSystem?: boolean;
 }
 
-// رسائل الدردشة المطابقة للصورة
-const systemMessages: ChatMessage[] = [
-  {
-    id: 'msg_1',
-    username: 'Mohamed',
-    message: 'لو هاخد كمية هخسسيبها كام',
-    timestamp: new Date('2024/04/04').getTime(),
-    avatar: '/assets/avatars/avatar-1.png'
-  },
-  {
-    id: 'msg_2',
-    username: 'Mohamed',
-    message: 'تعالى يا بنت الحلال',
-    timestamp: new Date('2024/04/05').getTime(),
-    avatar: '/assets/avatars/avatar-1.png'
-  },
-  {
-    id: 'msg_3',
-    username: 'Mohamed',
-    message: 'أنا انصب عليك منك',
-    timestamp: new Date().setHours(1, 7, 36),
-    avatar: '/assets/avatars/avatar-1.png'
-  },
-  {
-    id: 'msg_4',
-    username: 'أم مروان',
-    message: 'ايه كداب',
-    timestamp: new Date().setHours(1, 12, 53),
-    avatar: '/assets/avatars/avatar-2.png'
-  }
-];
+// رسائل الدردشة - فارغة كما طلب المستخدم
+const systemMessages: ChatMessage[] = [];
 
 // معلومات اللاعبين المُعرّفة مسبقًا مع الأيقونات - مطابقة للصورة
 const predefinedPlayers = [
@@ -220,7 +191,7 @@ export function NewChatBox({ onClose }: { onClose?: () => void }) {
         <div className="bg-[#DC8E08] flex justify-between items-center px-3 py-2.5 relative">
           <div className="flex items-center gap-2">
             <div>
-              <h3 className="text-white font-semibold text-base">محمد</h3>
+              <h3 className="text-white font-semibold text-base">الدردشة العامة</h3>
               <div className="flex items-center space-x-1 space-x-reverse">
                 <div className="w-2 h-2 rounded-full bg-green-500"></div>
                 <span className="text-white/80 text-xs">متصل الآن</span>
@@ -303,12 +274,17 @@ export function NewChatBox({ onClose }: { onClose?: () => void }) {
           </ScrollArea>
 
           {/* منطقة إدخال الرسائل - مطابقة للصورة */}
-          <div className="bg-[#FFDDB3] p-1.5 flex items-center gap-1">
+          <div className="bg-[#FFDDB3] p-1.5 flex flex-col gap-1">
+            {showEmojiPicker && (
+              <div className="absolute bottom-16 left-2 z-10">
+                <EmojiPicker onEmojiClick={onEmojiClick} width={300} height={350} />
+              </div>
+            )}
             <div className="flex items-center gap-1 w-full">
               <button
                 onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                 type="button"
-                className="flex items-center justify-center h-10 w-10 text-amber-600"
+                className="flex items-center justify-center h-10 w-10 text-amber-600 hover:bg-amber-200 rounded-full transition-colors"
               >
                 <span className="text-2xl">😊</span>
               </button>
@@ -328,7 +304,7 @@ export function NewChatBox({ onClose }: { onClose?: () => void }) {
               <button
                 onClick={handleSendMessage}
                 disabled={!canSendMessage || !newMessage.trim()}
-                className="h-10 w-10 flex items-center justify-center text-amber-600"
+                className="h-10 w-10 flex items-center justify-center text-amber-600 hover:bg-amber-200 rounded-full transition-colors"
               >
                 <Send className="h-6 w-6" />
               </button>
