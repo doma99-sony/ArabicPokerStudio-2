@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
     <domain-config cleartextTrafficPermitted="true">
-        <domain includeSubdomains="true">husseinabdo2302--arabicpokerstudio-2.repl.co</domain>
+        <domain includeSubdomains="true">69260161-c3a6-4ce1-b1e6-169da57a46ff-00-16veyohwhpch4.janeway.replit.dev</domain>
         <domain includeSubdomains="true">replit.com</domain>
         <domain includeSubdomains="true">repl.co</domain>
         <domain includeSubdomains="true">replit.dev</domain>
+        <domain includeSubdomains="true">janeway.replit.dev</domain>
     </domain-config>
 </network-security-config>

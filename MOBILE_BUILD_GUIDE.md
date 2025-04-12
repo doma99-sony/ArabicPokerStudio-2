@@ -39,7 +39,7 @@ npx cap open android
 
 ```typescript
 server: {
-  url: 'https://husseinabdo2302--arabicpokerstudio-2.repl.co',
+  url: 'https://69260161-c3a6-4ce1-b1e6-169da57a46ff-00-16veyohwhpch4.janeway.replit.dev/auth',
   cleartext: true
 }
 ```

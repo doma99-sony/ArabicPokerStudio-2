@@ -1,19 +1,12 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.poker3arabawy.app',
-  appName: 'Poker 3arabawy',
-  webDir: 'dist', // مجلد build الذي يحتوي على ملفات الإنتاج
-  // تكوين لتحميل التطبيق من URL عبر الإنترنت
+  appId: 'com.yourcompany.app',
+  appName: 'ArabicPokerStudio',
+  webDir: 'dist',
   server: {
-    url: 'https://husseinabdo2302--arabicpokerstudio-2.repl.co',
+    url: 'https://69260161-c3a6-4ce1-b1e6-169da57a46ff-00-16veyohwhpch4.janeway.replit.dev/auth',
     cleartext: true
-  },
-  android: {
-    buildOptions: {
-      keystorePath: 'android.keystore',
-      keystoreAlias: 'poker3arabawy',
-    }
   },
   plugins: {
     SplashScreen: {
