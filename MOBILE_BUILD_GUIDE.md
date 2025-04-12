@@ -1,156 +1,123 @@
-# دليل بناء تطبيق بوكر عرباوي للأندرويد
+# دليل بناء تطبيق بوكر عرباوي للأجهزة المحمولة
+# Poker 3arabawy Mobile App Build Guide
 
-هذا الدليل يشرح كيفية بناء وتشغيل تطبيق بوكر عرباوي على أجهزة الأندرويد باستخدام Capacitor.
+## نظرة عامة
+هذا الدليل يشرح كيفية بناء ونشر تطبيق بوكر عرباوي (Poker 3arabawy) على أجهزة أندرويد باستخدام Capacitor. 
+التطبيق مصمم للعمل بدون إنترنت (offline) عن طريق تخزين الملفات محليًا وتشغيلها باستخدام مخطط `file://`.
 
 ## المتطلبات الأساسية
+- Node.js (اصدار 16 أو أعلى)
+- npm (أحدث إصدار)
+- Android Studio (للبناء والتشغيل على أندرويد)
+- Xcode (للبناء والتشغيل على iOS - اختياري)
 
-قبل البدء، تأكد من توفر المتطلبات التالية:
+## تسلسل البناء
 
-1. **Node.js و npm** (الإصدار 14 أو أحدث)
-2. **Android Studio** (أحدث إصدار)
-3. **JDK** (Java Development Kit) الإصدار 11 أو أحدث
-4. **Android SDK** مثبت ومكون بشكل صحيح مع أدوات سطر الأوامر
-
-## خطوات البناء
-
-### 1. بناء تطبيق الويب للإنتاج
-
-أولاً، نحتاج إلى بناء نسخة الإنتاج من التطبيق:
-
+### 1. بناء نسخة الإنتاج من التطبيق
 ```bash
 npm run build
 ```
+ستقوم هذه الخطوة بإنشاء مجلد `dist` يحتوي على ملفات التطبيق المُحسنة للإنتاج.
 
-هذا سينشئ مجلد `dist` يحتوي على النسخة النهائية من تطبيق الويب.
-
-### 2. نسخ الملفات إلى مشروع Capacitor
-
-بعد بناء المشروع، نحتاج إلى نسخ ملفات الويب إلى مشروع Capacitor:
-
+### 2. نسخ ملفات التحسينات المتعلقة بالموبايل (إذا لم تكن موجودة)
 ```bash
-npx cap copy
+cp mobile-enhancements.js dist/public/
+cp mobile-styles.css dist/public/
 ```
 
-### 3. تحديث مشروع الأندرويد
-
-قد تحتاج إلى تحديث مشروع الأندرويد ليعكس أي تغييرات في التكوين:
-
+### 3. مزامنة البنية مع Capacitor (أندرويد/iOS)
 ```bash
-npx cap update android
+npx cap sync android
 ```
+هذا الأمر سينسخ الملفات من مجلد `dist` إلى مشروع أندرويد وسيقوم بتحديث التبعيات.
 
-### 4. فتح المشروع في Android Studio
-
-الآن نحتاج إلى فتح المشروع في Android Studio:
-
+### 4. فتح مشروع أندرويد في Android Studio
 ```bash
 npx cap open android
 ```
+سيتم فتح مشروع أندرويد في Android Studio، حيث يمكنك بناء وتشغيل التطبيق على جهاز أو محاكي.
 
-هذا سيفتح مشروع الأندرويد في Android Studio.
+## ملاحظات هامة لوضع البناء المحلي (Offline Mode)
 
-### 5. تكوين توقيع التطبيق
-
-لنشر التطبيق على متجر Google Play أو لتوزيعه، نحتاج إلى توقيع التطبيق:
-
-1. في Android Studio، اذهب إلى `Build` > `Generate Signed Bundle/APK`.
-2. اختر `APK` لإنشاء ملف APK قابل للتثبيت أو `Android App Bundle` للنشر على متجر Google Play.
-3. إنشاء أو اختيار keystore موجود.
-4. إكمال عملية التوقيع.
-
-### 6. بناء ملف APK للتنصيب المباشر
-
-لإنشاء ملف APK بسيط للتوزيع المباشر:
-
-1. في Android Studio، اذهب إلى `Build` > `Build Bundle(s) / APK(s)` > `Build APK(s)`.
-2. انتظر حتى اكتمال عملية البناء.
-3. سيتم إنشاء ملف APK في `android/app/build/outputs/apk/debug/` أو `android/app/build/outputs/apk/release/`.
-
-## توزيع التطبيق
-
-### التوزيع المباشر
-
-بعد بناء ملف APK، يمكنك توزيعه مباشرة عبر:
-- البريد الإلكتروني
-- خدمات التخزين السحابي
-- مواقع الويب الخاصة بك
-
-### النشر على متجر Google Play
-
-لنشر التطبيق على متجر Google Play:
-
-1. قم بإنشاء حساب مطور على Google Play Console.
-2. أنشئ تطبيقًا جديدًا وأكمل معلومات التطبيق.
-3. قم بتحميل ملف AAB الموقّع الذي تم إنشاؤه من Android Studio.
-4. أكمل معلومات القائمة والتسعير والتوافق.
-5. قم بنشر التطبيق للمراجعة.
-
-## تكوين ملف capacitor.config.ts
-
-يحتوي ملفنا الحالي `capacitor.config.ts` على الإعدادات التالية:
+### ضبط تهيئة Capacitor
+تم ضبط الملف `capacitor.config.ts` لتمكين وضع التشغيل المحلي باستخدام مخطط `file://`:
 
 ```typescript
-{
-  appId: 'com.poker3arabawy.app',
-  appName: 'Poker 3arabawy',
-  webDir: 'dist',
-  server: {
-    hostname: '',
-    androidScheme: 'https',
-    iosScheme: 'https',
-    allowNavigation: ['*.replit.app', 'localhost:*']
-  },
-  android: {
-    buildOptions: {
-      keystorePath: 'android.keystore',
-      keystoreAlias: 'poker3arabawy',
-    }
-  },
-  plugins: {
-    SplashScreen: {
-      launchShowDuration: 3000,
-      launchAutoHide: true,
-      backgroundColor: "#006400",
-      androidSplashResourceName: "splash",
-      androidScaleType: "CENTER_CROP",
-      showSpinner: true,
-      androidSpinnerStyle: "large",
-      iosSpinnerStyle: "large",
-      spinnerColor: "#D4AF37",
-      splashFullScreen: true,
-      splashImmersive: true,
-    },
-    StatusBar: {
-      style: "dark",
-      backgroundColor: "#006400",
-      overlaysWebView: false
-    }
+server: {
+  hostname: '',
+  androidScheme: 'file',
+  iosScheme: 'file',
+}
+```
+
+هذا التكوين ضروري لضمان تحميل الموارد بشكل صحيح عندما يكون التطبيق غير متصل بالإنترنت.
+
+### العمل بدون خادم خلفي
+في وضع التشغيل المحلي، قد لا تعمل بعض ميزات التطبيق التي تعتمد على الخادم الخلفي. يجب أن يكون التطبيق مصممًا للتعامل مع هذه الحالة بأمان.
+
+### اختبار التوافق
+تأكد من اختبار التطبيق في وضع الطيران أو بدون اتصال بالإنترنت للتأكد من أن جميع الأصول (CSS، JS، الصور) تُحمل بشكل صحيح.
+
+## حل المشكلات الشائعة
+
+### مشاكل تحميل الأصول
+إذا واجهت مشاكل في تحميل الأصول (CSS، JS، الصور)، تأكد من:
+1. أن مسارات جميع الأصول نسبية وليست مطلقة
+2. أن الأصول موجودة في المجلد الصحيح (`dist/public`)
+3. أن `androidScheme` مضبوط على `file` في `capacitor.config.ts`
+
+### مشاكل التحميل الأولي
+إذا كان التطبيق يواجه مشاكل أثناء التحميل الأولي، يمكن تضمين شاشة البداية (splash screen) لفترة أطول:
+
+```typescript
+plugins: {
+  SplashScreen: {
+    launchShowDuration: 3000,
+    launchAutoHide: true,
   }
 }
 ```
 
-## تحديث الموارد
+### أخطاء CORS
+في وضع التشغيل المحلي، قد تواجه أخطاء CORS عند محاولة الوصول إلى أصول خارجية. تأكد من تضمين جميع الأصول المطلوبة محليًا.
 
-للحصول على تجربة استخدام أفضل، يُنصح بتحديث الموارد التالية:
+## توقيع التطبيق للنشر
 
-- **أيقونة التطبيق**: قم بتحديث الأيقونات في مجلد `resources` وقم بتشغيل أمر `npx cap update`
-- **شاشة البداية**: قم بتحديث شاشة البداية في مجلد `resources` ثم قم بتشغيل أمر `npx cap update`
+للنشر على متاجر التطبيقات، ستحتاج إلى توقيع حزمة APK:
 
-## استكشاف الأخطاء وإصلاحها
+1. قم بإنشاء مفتاح التوقيع (إذا لم يكن موجودًا):
+```bash
+keytool -genkey -v -keystore android.keystore -alias poker3arabawy -keyalg RSA -keysize 2048 -validity 10000
+```
 
-### التطبيق لا يعمل على الجهاز
+2. تكوين التوقيع في Gradle (ملف `android/app/build.gradle`):
+```gradle
+signingConfigs {
+    release {
+        storeFile file("../../android.keystore")
+        storePassword System.getenv("KEYSTORE_PASSWORD")
+        keyAlias "poker3arabawy"
+        keyPassword System.getenv("KEY_PASSWORD")
+    }
+}
 
-- تأكد من تفعيل وضع المطور USB على الجهاز
-- تأكد من تثبيت التطبيق بشكل صحيح
-- افحص سجلات Android Studio لمعرفة سبب المشكلة
+buildTypes {
+    release {
+        signingConfig signingConfigs.release
+        // ...
+    }
+}
+```
 
-### مشاكل الاتصال بالخادم
+3. بناء APK للنشر:
+من Android Studio، اختر Build > Generate Signed Bundle/APK
 
-- تأكد من إمكانية الوصول للخادم من الجهاز المحمول
-- افحص قواعد الجدار الناري وإعدادات CORS
+## التطوير المستمر
 
-## المراجع
+عند إجراء تغييرات على التطبيق، يجب تكرار تسلسل البناء:
+1. `npm run build`
+2. `npx cap sync android`
+3. `npx cap open android`
 
-- [توثيق Capacitor](https://capacitorjs.com/docs)
-- [دليل Android Studio](https://developer.android.com/studio/intro)
-- [نشر تطبيقات على Google Play](https://developer.android.com/distribute/best-practices/launch)
+## خاتمة
+باتباع هذه الخطوات، يمكنك بناء ونشر تطبيق بوكر عرباوي بنجاح على أجهزة أندرويد بطريقة تعمل بدون اتصال بالإنترنت.
