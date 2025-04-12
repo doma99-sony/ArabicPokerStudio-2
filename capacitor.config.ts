@@ -4,13 +4,10 @@ const config: CapacitorConfig = {
   appId: 'com.poker3arabawy.app',
   appName: 'Poker 3arabawy',
   webDir: 'dist', // مجلد build الذي يحتوي على ملفات الإنتاج
-  // تكوين للتشغيل المحلي (Bundled Mode) بدون الاتصال بالإنترنت
+  // تكوين لتحميل التطبيق من URL عبر الإنترنت
   server: {
-    // حذف hostname يجعل التطبيق يعمل بشكل محلي تمامًا
-    hostname: '',
-    // لا يستخدم أي مخطط URL خارجي
-    androidScheme: 'file',
-    iosScheme: 'file',
+    url: 'https://husseinabdo2302--arabicpokerstudio-2.repl.co',
+    cleartext: true
   },
   android: {
     buildOptions: {
