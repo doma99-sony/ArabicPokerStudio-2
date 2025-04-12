@@ -4,6 +4,8 @@ import { queryClient } from "./lib/queryClient";
 import App from "./App";
 import "./index.css";
 import { AuthProvider } from "@/hooks/use-auth";
+import { SplashScreen } from '@capacitor/splash-screen';
+import CapacitorBridge from '../../capacitor-bridge';
 
 // معالجة الأخطاء وقت التشغيل
 const handleError = (event: ErrorEvent) => {
@@ -34,12 +36,58 @@ const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
 window.addEventListener("error", handleError);
 window.addEventListener("unhandledrejection", handleUnhandledRejection);
 
-// Create and render the app
-const root = createRoot(document.getElementById("root")!);
-root.render(
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <App />
-    </AuthProvider>
-  </QueryClientProvider>
-);
+// تحسينات الموبايل والتهيئة
+const initializeApp = async () => {
+  try {
+    // كشف ما إذا كان التطبيق يعمل على منصة أصلية
+    const isNative = CapacitorBridge.isNativePlatform();
+    
+    if (isNative) {
+      console.log("تشغيل التطبيق على منصة أصلية:", CapacitorBridge.getPlatform());
+      
+      // تخصيص شريط الحالة
+      await CapacitorBridge.statusBar.setColor("#006400");
+      await CapacitorBridge.statusBar.setStyle("dark");
+      
+      // تفعيل وضع تجربة المستخدم المحمول
+      document.body.classList.add('is-mobile-app');
+      
+      // إخفاء شاشة البداية بعد التحميل الكامل
+      window.addEventListener('load', () => {
+        // إخفاء شاشة البداية بعد تأخير قصير للتأكد من تحميل التطبيق
+        setTimeout(() => {
+          SplashScreen.hide();
+        }, 1000);
+      });
+    } else {
+      console.log("تشغيل التطبيق على متصفح ويب");
+    }
+    
+    // تفعيل تحسينات الموبايل بغض النظر عن المنصة (يتكيف تلقائياً)
+    if (typeof window !== 'undefined') {
+      // التحقق من وجود سكريبت التحسينات
+      const enhancementsScript = document.querySelector('script[src="/mobile-enhancements.js"]');
+      if (enhancementsScript) {
+        console.log("تم تحميل سكريبت تحسينات الموبايل");
+      } else {
+        console.warn("لم يتم العثور على سكريبت تحسينات الموبايل");
+      }
+    }
+    
+  } catch (error) {
+    console.error("خطأ في تهيئة التطبيق:", error);
+  }
+  
+  // إنشاء وعرض التطبيق
+  const root = createRoot(document.getElementById("root")!);
+  root.render(
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+};
+
+// بدء تشغيل التطبيق
+initializeApp();

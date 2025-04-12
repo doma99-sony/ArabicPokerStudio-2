@@ -3,14 +3,14 @@ import { CapacitorConfig } from '@capacitor/cli';
 const config: CapacitorConfig = {
   appId: 'com.poker3arabawy.app',
   appName: 'Poker 3arabawy',
-  webDir: 'public',
+  webDir: 'dist', // مجلد build الذي يحتوي على ملفات الإنتاج
+  // تكوين للتشغيل المحلي (Bundled Mode) بدون الاتصال بالإنترنت
   server: {
-    // This setting is needed for running on different hosts
-    // for production, we'll set this to the domain of your Replit app
-    hostname: 'localhost',
-    androidScheme: 'https',
-    iosScheme: 'https',
-    allowNavigation: ['*.replit.app', 'localhost:*']
+    // حذف hostname يجعل التطبيق يعمل بشكل محلي تمامًا
+    hostname: '',
+    // لا يستخدم أي مخطط URL خارجي
+    androidScheme: 'file',
+    iosScheme: 'file',
   },
   android: {
     buildOptions: {
@@ -22,19 +22,20 @@ const config: CapacitorConfig = {
     SplashScreen: {
       launchShowDuration: 3000,
       launchAutoHide: true,
-      backgroundColor: "#006400", // Dark green background to match app theme
+      backgroundColor: "#006400", // خلفية خضراء داكنة تتماشى مع سمة التطبيق
       androidSplashResourceName: "splash",
       androidScaleType: "CENTER_CROP",
       showSpinner: true,
       androidSpinnerStyle: "large",
       iosSpinnerStyle: "large",
-      spinnerColor: "#D4AF37", // Gold color for spinner
+      spinnerColor: "#D4AF37", // لون ذهبي للمؤشر الدوار
       splashFullScreen: true,
       splashImmersive: true,
     },
     StatusBar: {
       style: "dark",
-      backgroundColor: "#006400", // Dark green status bar
+      backgroundColor: "#006400", // شريط حالة أخضر داكن
+      overlaysWebView: false
     }
   }
 };

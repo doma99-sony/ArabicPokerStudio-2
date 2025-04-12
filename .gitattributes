@@ -1,0 +1,52 @@
+# Set default behavior to automatically normalize line endings
+* text=auto
+
+# Documents
+*.md text diff=markdown
+*.txt text
+*.json text
+
+# Scripts
+*.js text
+*.jsx text
+*.ts text
+*.tsx text
+
+# Serialization
+*.json text
+*.toml text
+*.xml text
+*.yaml text
+*.yml text
+
+# Graphics
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg text
+
+# RC files
+*.rc text
+.* text
+
+# Exclude files from archive
+.gitattributes export-ignore
+.gitignore export-ignore
+
+# Audio files
+*.mp3 binary
+*.wav binary
+*.ogg binary
+
+# Android specific
+*.keystore binary
+*.jks binary
+*.so binary
+*.apk binary
+*.aab binary
+
+# Handle line endings automatically for files detected as text
+# and leave all files detected as binary untouched
+*.resource binary
