@@ -2,7 +2,7 @@ import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.yourcompany.app',
-  appName: 'ArabicPokerStudio',
+  appName: 'Arabic Poker Online',
   webDir: 'dist',
   server: {
     url: 'https://69260161-c3a6-4ce1-b1e6-169da57a46ff-00-16veyohwhpch4.janeway.replit.dev/auth',
